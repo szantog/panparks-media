@@ -1,0 +1,55 @@
+Index: upload.module
+===================================================================
+RCS file: /cvs/drupal/drupal/modules/upload.module,v
+retrieving revision 1.28
+diff -u -r1.28 upload.module
+--- upload.module	8 Feb 2005 19:43:02 -0000	1.28
++++ upload.module	19 Feb 2005 09:02:45 -0000
+@@ -263,7 +263,7 @@
+         foreach ($node->files as $file) {
+           if ($file->list) {
+             $files[] = $file;
+-          }
++  }
+         }
+         if (count($files) > 0) {
+           // RSS only allows one enclosure per item
+@@ -300,8 +300,10 @@
+       // Insert new files:
+       if ($file = file_save_upload($file, $file->filename)) {
+         $fid = db_next_id('{files}_fid');
++        $file->fid = $fid;
+         db_query("INSERT INTO {files} (fid, nid, filename, filepath, filemime, filesize, list) VALUES (%d, %d, '%s', '%s', '%s', %d, %d)",
+                  $fid, $node->nid, $file->filename, $file->filepath, $file->filemime, $file->filesize, $node->list[$key]);
++        module_invoke_all('fileapi', 'insert', $file);
+       }
+     }
+     else {
+@@ -309,9 +311,11 @@
+       if ($node->remove[$key]) {
+         file_delete($file->filepath);
+         db_query("DELETE FROM {files} WHERE fid = %d", $key);
++        module_invoke_all('fileapi', 'delete', $file);        
+       }
+       if ($file->list != $node->list[$key]) {
+         db_query("UPDATE {files} SET list = %d WHERE fid = %d", $node->list[$key], $key);
++        module_invoke_all('fileapi', 'update', $file);
+       }
+     }
+   }
+@@ -324,6 +328,7 @@
+     file_delete($file->filepath);
+   }
+   db_query("DELETE FROM {files} WHERE nid = %d", $node->nid);
++  module_invoke_all('fileapi', 'delete', $file);  
+ }
+ 
+ function upload_form($node) {
+@@ -359,6 +364,7 @@
+     $result = db_query("SELECT * FROM {files} WHERE nid = %d", $node->nid);
+     while ($file = db_fetch_object($result)) {
+       $files[$file->fid] = $file;
++      module_invoke_all('fileapi', 'load', $file);
+     }
+   }
+ 
