@@ -15,23 +15,27 @@ Sponsored by Webs4.com
 INSTALLATION:
 
      
-1. Copy the entire media folder to your drupal/modules directory.
+1. Copy the media folder and the file media/media.module to your druapl/modules directory.
 
-   The entire folder "getid3" may be moved to a location of your choice, as you can change the path in the admin settings later on.
+   Download the project getId3 version 1.7.2 from sourceforge.net (http://sourceforge.net/project/showfiles.php?group_id=55859&package_id=50965)
 
-2. Patch the upload.module file in modules/ using the file upload.module.patch.txt
+   Place the getid3 folder in modules/media (default location) or a location of your choice.
+   
+   If running Drupal on Windows you will also need supporting .exe files http://sourceforge.net/project/showfiles.php?group_id=55859&package_id=105260
 
-2. Create the database tables using the media.module.mysql.sql file.  This module has only been tested with MySQL.
+2. Patch the modules/upload.module file using the file upload.module.patch.txt
 
-3. From your Drupal site, enable the media module in "administer > modules".
+3. Create the database tables using the media.module.mysql.sql file.  This module has only been tested with MySQL.
+
+4. From your Drupal site, enable the media module in "administer > modules".
 
    You will also need to enable the upload module to be able to attach files to nodes.
 
    It is also recommended that you have menu module enabled, to have the option of enabling optional menu items provided by media module
 
 
-4. On your Drupal site, go to "administer > settings > media".  If you want to have the getId4 library in a differnt location, input the path to the getid3.php FILE (not the folder) and click "Update".  Drupal will check the location of the library and if it succeeds, will show a list of supported types.  Check the boxes of media types you wish to have media module handle and click update.  The other setting on this page allows you to set the number of items that will be shown in the summaries of playlists that appear on the homepage.
+5. On your Drupal site, go to "administer > settings > media".  If you want to have the getId3 library in a differnt location, input the path to the getid3.php FILE (not the folder) and click "Update".  Drupal will check the location of the library and if it succeeds, will show a list of supported types.  Check the boxes of media types you wish to have media module handle and click update.  The other setting on this page allows you to set the number of items that will be shown in the summaries of playlists that appear on the homepage.
 
-5. You may at this point want to make the media module's link visible in the main menu.  To do so, go to "administer > menus" and click the "enable" link for "multi-media", setting up the details for the menu item on the page that follows.
+6. You may at this point want to make the media module's link visible in the main menu.  To do so, go to "administer > menus" and click the "enable" link for "multi-media", setting up the details for the menu item on the page that follows.
 
-6. Don't forget to set up the appropriate permissions, which on the current version of Drupal is located under "administer > access control"
+7. Don't forget to set up the appropriate permissions, which on the current version of Drupal is located under "administer > access control"
