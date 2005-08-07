@@ -23,7 +23,7 @@ INSTALLATION:
    
    If running Drupal on Windows you will also need supporting .exe files http://sourceforge.net/project/showfiles.php?group_id=55859&package_id=105260
 
-2. Patch the modules/upload.module file using the file upload.module.patch.txt
+2. If needed, patch the modules/upload.module file using the most recent attachment to http://drupal.org/node/18934. If that issue is marked FIXED, and you are using HEAD or Drupal 4.7, then you need not patch at all.
 
 3. Create the database tables using the media.module.mysql.sql file.  This module has only been tested with MySQL.
 

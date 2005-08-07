@@ -1,4 +1,5 @@
-<?PHP
+<?php
+
 /**
 * Implementation of hook_node_name().
 */
@@ -39,12 +40,11 @@ function media_help($section) {
  * For the media module, update and insert both depend on the external getID3
  * library to read the metadata from audio and video files. 
  */
-function media_fileapi($op, &$file) {
+function media_file($op, &$file) {
 	switch ($op) {
 		
 		case 'update':
 		case 'insert':
-			
 		  if (media_is_supported_type($file->filemime)) {
 		
 		    media_include_library();
@@ -987,7 +987,7 @@ function media_array_to_columns($prefix = NULL, $array) {
       } else {
         $new_prefix = $name;
       }
-      $result = array_merge($result, media_array_to_columns($new_prefix, $value));
+      $result = array_merge((array) $result, media_array_to_columns($new_prefix, $value));
     } else {
       if ($prefix) {
         $result[$prefix.'_'.$name] = $value;
