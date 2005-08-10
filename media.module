@@ -1,4 +1,5 @@
 <?php
+// $Id:
 
 /**
 * Implementation of hook_node_name().
@@ -41,198 +42,198 @@ function media_help($section) {
  * library to read the metadata from audio and video files. 
  */
 function media_file($op, &$file) {
-	switch ($op) {
-		
-		case 'update':
-		case 'insert':
-		  if (media_is_supported_type($file->filemime)) {
-		
-		    media_include_library();
-		
-		    // initialize library and get file information
-		    $getID3 = new getID3;
-		    $audioinfo = $getID3->analyze($file->_filename);
-		    $audioinfo = media_array_to_columns(NULL, $audioinfo);
-		    $audioinfo = array2object($audioinfo);
-		
-		    // add the meta-data to the $file object. Uses ? : syntax to only add the variable if it is present.
-		    $audioinfo->fileformat ? $file->fileformat = $audioinfo->fileformat : $audioinfo->fileformat;
-		    $audioinfo->audio_dataformat ? $file->audio_dataformat = $audioinfo->audio_dataformat : $audioinfo->audio_dataformat;
-		    $audioinfo->audio_channels ? $file->audio_channels = $audioinfo->audio_channels : $audioinfo->audio_channels;
-		    $audioinfo->audio_sample_rate ? $file->audio_sample_rate = $audioinfo->audio_sample_rate : $audioinfo->audio_sample_rate;
-		    $audioinfo->audio_bitrate ? $file->audio_bitrate = $audioinfo->audio_bitrate : $audioinfo->audio_bitrate;
-		    $audioinfo->audio_channelmode ? $file->audio_channelmode = $audioinfo->audio_channelmode : $audioinfo->audio_channelmode;
-		    $audioinfo->audio_compression ? $file->audio_compression = $audioinfo->audio_compression : $audioinfo->audio_compression;
-		    $audioinfo->audio_codec ? $file->audio_codec = $audioinfo->audio_codec : $audioinfo->audio_codec;
-		    $audioinfo->audio_encoder ? $file->audio_encoder = $audioinfo->audio_encoder : $audioinfo->audio_encoder;
-		    $audioinfo->video_bitrate ? $file->video_bitrate = $audioinfo->video_bitrate : $audioinfo->video_bitrate;
-		    $audioinfo->video_resolution_x ? $file->video_resolution_x = $audioinfo->video_resolution_x : $audioinfo->video_resolution_x;
-		    $audioinfo->video_resolution_y ? $file->video_resolution_y = $audioinfo->video_resolution_y : $audioinfo->video_resolution_y;
-		    $audioinfo->video_frame_rate ? $file->video_frame_rate = $audioinfo->video_frame_rate : $audioinfo->video_frame_rate;
-		    $audioinfo->video_pixel_aspect_ratio ? $file->video_pixel_aspect_ratio = $audioinfo->video_pixel_aspect_ratio : $audioinfo->video_pixel_aspect_ratio;
-		    $audioinfo->video_bits_per_sample ? $file->video_bits_per_sample = $audioinfo->video_bits_per_sample : $audioinfo->video_bits_per_sample;
-		    $audioinfo->video_codec ? $file->video_codec = $audioinfo->video_codec : $audioinfo->video_codec;
-		    $audioinfo->video_compression_ratio ? $file->video_compression_ratio = $audioinfo->video_compression_ratio : $audioinfo->video_compression_ratio;
-		    $audioinfo->encoding ? $file->encoding = $audioinfo->encoding : $audioinfo->encoding;
-		    $audioinfo->playtime_seconds ? $file->playtime_seconds = $audioinfo->playtime_seconds : $audioinfo->playtime_seconds;
-		    $audioinfo->playtime_string ? $file->playtime_string = $audioinfo->playtime_string : $audioinfo->playtime_string;
-		
-		    $title = '/id3v[1-9]_title/';
-		    $artist = '/id3v[1-9]_artist/';
-		    $album = '/id3v[1-9]_album/';
-		    $year = '/id3v[1-9]_year/';
-		    $comment = '/id3v[1-9]_comment/';
-		    $track = '/id3v[1-9]_track/';
-		    $genre = '/id3v[1-9]_genre/';
-		
-		    foreach ($audioinfo as $name => $value) {
-		      if (preg_match($title, $name)) {
-		        $file->id3_title = $value;
-		      } else
-		        $file->id3_title = $file->filename;
-		      if (preg_match($artist, $name)) {
-		        $file->id3_artist = $value;
-		      }
-		      if (preg_match($album, $name)) {
-		        $file->id3_album = $value;
-		      }
-		      if (preg_match($year, $name)) {
-		        $file->id3_year = $value;
-		      } else
-		        $file->id3_year = date('Y');
-		      if (preg_match($comment, $name)) {
-		        $file->id3_comment = $value;
-		      }
-		      if (preg_match($track, $name)) {
-		        $file->id3_track = $value;
-		      }
-		      if (preg_match($genre, $name)) {
-		        $file->id3_genre = $value;
-		      }
-		    }
-		if ($file->video_bitrate > 0) { 		    
-			db_query('INSERT INTO {video_metadata} (fid, fileformat, video_bitrate, video_resolution_x, video_resolution_y,'.
-				'video_frame_rate, video_pixel_aspect_ratio, video_bits_per_sample,'. 
-				'video_codec, video_compression_ratio, encoding, playtime_seconds,'.
-				'playtime_string) '. 
-				'VALUES ('.
-					"%d,". // fid
-					"'%s',". // fileformat
-					"%d,". // video_bitrate
-					"%d,". // video_resolution_x
-					"'%s',". // video_resolution_y
-					"'%s',". // video_frame_rate
-					"%d,". // video_pixel_aspect_ratio
-					"%d,". // video_bits_per_sample
-					"'%s',". // video_codec
-					"'%s',". // video_compression_ratio
-					"'%s',". // encoding
-					"'%s',". //playtime_seconds
-					"'%s'". // playtime_string
-				")", 
-			$file->fid, $file->fileformat, $file->audio_dataformat, $file->audio_channels, $file->audio_sample_rate, $file->audio_bitrate, $file->audio_channelmode, $file->audio_compression_ratio, $file->audio_codec, $file->audio_encoder, $file->video_bitrate, $file->video_resolution_x, $file->video_resolution_y, $file->video_frame_rate, $file->video_pixel_aspect_ratio, $file->video_bits_per_sample, $file->video_codec, $file->video_compression_ratio, $file->id3_title, $file->id3_artist, $file->id3_album, $file->id3_comment, $file->id3_track, $file->id3_genre, $file->id3_year, $file->encoding, $file->playtime_seconds, $file->playtime_string);
-		}
-		else {
-			db_query('INSERT INTO {audio_metadata} (fid, fileformat, audio_dataformat, '.
-			  'audio_channels, audio_sample_rate, audio_bitrate, audio_channelmode, '.
-			  'audio_compression_ratio, audio_codec, audio_encoder, id3_title, id3_artist, '.
-			  'id3_album, id3_comment, id3_track, id3_genre, id3_year, '.
-			  'encoding, playtime_seconds, playtime_string) '.
-		    'VALUES ('.
-		      '%d, '. // fid
-		      "'%s', ". // fileformat
-		      "'%s', ". // audio_dataformat
-		      '%d, '. // audio_channels
-		      '%d, '. // audio_sample_rate
-		      '%d, '. // audio_bitrate
-		      "'%s', ". // audio_channelmode
-		      "'%s', ". // audio_compression_ratio
-		      "'%s', ". // audio_codec
-		      "'%s', ". //audio_encoder
-		      "'%s', ". // id3_title
-		      "'%s', ". // id3_artist
-		      "'%s', ". // id3_album
-		      "'%s', ". // id3_comment
-		      "'%s', ". // id3_track
-		      "'%s', ". // id3_genre
-		      "'%s', ". // id3_year
-		      "'%s', ". // encoding
-		      "'%s', ". // playtime_seconds
-		      "'%s' )",// playtime_string
-		    $file->fid, $file->fileformat, $file->audio_dataformat, $file->audio_channels, 
-		    $file->audio_sample_rate, $file->audio_bitrate, $file->audio_channelmode, 
-		    $file->audio_compression_ratio, $file->audio_codec, $file->audio_encoder, 
-		    $file->id3_title, $file->id3_artist, $file->id3_album, $file->id3_comment, 
-		    $file->id3_track, $file->id3_genre, $file->id3_year, $file->encoding, 
-		    $file->playtime_seconds, $file->playtime_string);
-		   
-			}
-		}
-		break;
-		
-		case 'delete':
-		  if (media_is_supported_type($file->filemime)) {
-		    if ($file->video_bitrate) { 		    
-					db_query("DELETE FROM {video_metadata} WHERE fid=%d", $file->fid);
-		    }
-				else {
-					db_query("DELETE FROM {audio_metadata} WHERE fid=%d", $file->fid);
-				}
-		    //  code for automatic removal of individual items from playlists on deletion of a file
-		    // get current playlists containing the deleted file
-		    $result = db_query("SELECT * FROM {av_playlist} WHERE fid = %d OR next_fid = %d", $file->fid, $file->fid);
-		
-		    $playlists = array();
-		    while ($data_row = db_fetch_array($result)) {
-		       $playlists[$row['nid']][] = $row;
-		    }
-		    
-		    foreach ($playlists as $node_id => $data) {
-		      // if only one item within the playlist contains this fid, then it's the first
-		      // item on the list - just delete it.
-		      if (1 == count($data)) {
-		        unset ($playlists[$node_id]);
-		      }
-		      // otherwise get its predecessor, insert the new next_fid (taken from the item to be
-		      // deleted) and delete the entry containing the file.
-		      else {
-		        if ($data[0]['fid'] == $file->fid) {
-		          $playlists[$node_id][1]['next_fid'] = $playlists[$node_id][0]['next_fid'];
-		          unset ($playlists[$node_id][0]);
-		        } else {
-		          $playlists[$node_id][0]['next_fid'] = $playlists[$node_id][1]['next_fid'];
-		          unset ($playlists[$node_id][1]);
-		        }
-		      }
-		    }
-		
-		    // save changes to the database
-		    db_query('DELETE FROM {av_playlist} WHERE fid = %d OR next_fid = %d', $file->fid, $file->fid);
-		    foreach ($playlists as $data) {
-		      foreach ($data as $playlist_item) {
-		        db_query('INSERT INTO {av_playlist} (nid, fid, next_fid) VALUES (%d, %d, %d)', $playlist_item['nid'], $playlist_item['fid'], $playlist_item['next_fid']);
-		      }
-		    }
-		  }
-			
-		break;
-		
-		case 'load':
- 		 if (media_is_supported_type($file->filemime)) {
-		    if ($file->video_bitrate) {
-		      $fileinfo = db_fetch_array(db_query("SELECT * FROM {video_metadata} WHERE fid = %d", $file->fid));
-		    } else {
-		      $fileinfo = db_fetch_array(db_query("SELECT * FROM {video_metadata} WHERE fid = %d", $file->fid));
-		    }	
-		    if (is_array($fileinfo)) {
-		      foreach ($fileinfo as $name => $value) {
-		        $file->$name = $value;
-		      }
-		    }
-		  }		
-		break;
-		
-	}
+  switch ($op) {
+    
+    case 'update':
+    case 'insert':
+      if (media_is_supported_type($file->filemime)) {
+    
+        media_include_library();
+    
+        // initialize library and get file information
+        $getID3 = new getID3;
+        $audioinfo = $getID3->analyze($file->_filename);
+        $audioinfo = media_array_to_columns(NULL, $audioinfo);
+        $audioinfo = array2object($audioinfo);
+    
+        // add the meta-data to the $file object. Uses ? : syntax to only add the variable if it is present.
+        $audioinfo->fileformat ? $file->fileformat = $audioinfo->fileformat : $audioinfo->fileformat;
+        $audioinfo->audio_dataformat ? $file->audio_dataformat = $audioinfo->audio_dataformat : $audioinfo->audio_dataformat;
+        $audioinfo->audio_channels ? $file->audio_channels = $audioinfo->audio_channels : $audioinfo->audio_channels;
+        $audioinfo->audio_sample_rate ? $file->audio_sample_rate = $audioinfo->audio_sample_rate : $audioinfo->audio_sample_rate;
+        $audioinfo->audio_bitrate ? $file->audio_bitrate = $audioinfo->audio_bitrate : $audioinfo->audio_bitrate;
+        $audioinfo->audio_channelmode ? $file->audio_channelmode = $audioinfo->audio_channelmode : $audioinfo->audio_channelmode;
+        $audioinfo->audio_compression ? $file->audio_compression = $audioinfo->audio_compression : $audioinfo->audio_compression;
+        $audioinfo->audio_codec ? $file->audio_codec = $audioinfo->audio_codec : $audioinfo->audio_codec;
+        $audioinfo->audio_encoder ? $file->audio_encoder = $audioinfo->audio_encoder : $audioinfo->audio_encoder;
+        $audioinfo->video_bitrate ? $file->video_bitrate = $audioinfo->video_bitrate : $audioinfo->video_bitrate;
+        $audioinfo->video_resolution_x ? $file->video_resolution_x = $audioinfo->video_resolution_x : $audioinfo->video_resolution_x;
+        $audioinfo->video_resolution_y ? $file->video_resolution_y = $audioinfo->video_resolution_y : $audioinfo->video_resolution_y;
+        $audioinfo->video_frame_rate ? $file->video_frame_rate = $audioinfo->video_frame_rate : $audioinfo->video_frame_rate;
+        $audioinfo->video_pixel_aspect_ratio ? $file->video_pixel_aspect_ratio = $audioinfo->video_pixel_aspect_ratio : $audioinfo->video_pixel_aspect_ratio;
+        $audioinfo->video_bits_per_sample ? $file->video_bits_per_sample = $audioinfo->video_bits_per_sample : $audioinfo->video_bits_per_sample;
+        $audioinfo->video_codec ? $file->video_codec = $audioinfo->video_codec : $audioinfo->video_codec;
+        $audioinfo->video_compression_ratio ? $file->video_compression_ratio = $audioinfo->video_compression_ratio : $audioinfo->video_compression_ratio;
+        $audioinfo->encoding ? $file->encoding = $audioinfo->encoding : $audioinfo->encoding;
+        $audioinfo->playtime_seconds ? $file->playtime_seconds = $audioinfo->playtime_seconds : $audioinfo->playtime_seconds;
+        $audioinfo->playtime_string ? $file->playtime_string = $audioinfo->playtime_string : $audioinfo->playtime_string;
+    
+        $title = '/id3v[1-9]_title/';
+        $artist = '/id3v[1-9]_artist/';
+        $album = '/id3v[1-9]_album/';
+        $year = '/id3v[1-9]_year/';
+        $comment = '/id3v[1-9]_comment/';
+        $track = '/id3v[1-9]_track/';
+        $genre = '/id3v[1-9]_genre/';
+    
+        foreach ($audioinfo as $name => $value) {
+          if (preg_match($title, $name)) {
+            $file->id3_title = $value;
+          } else
+            $file->id3_title = $file->filename;
+          if (preg_match($artist, $name)) {
+            $file->id3_artist = $value;
+          }
+          if (preg_match($album, $name)) {
+            $file->id3_album = $value;
+          }
+          if (preg_match($year, $name)) {
+            $file->id3_year = $value;
+          } else
+            $file->id3_year = date('Y');
+          if (preg_match($comment, $name)) {
+            $file->id3_comment = $value;
+          }
+          if (preg_match($track, $name)) {
+            $file->id3_track = $value;
+          }
+          if (preg_match($genre, $name)) {
+            $file->id3_genre = $value;
+          }
+        }
+    if ($file->video_bitrate > 0) {         
+      db_query('INSERT INTO {video_metadata} (fid, fileformat, video_bitrate, video_resolution_x, video_resolution_y,'.
+        'video_frame_rate, video_pixel_aspect_ratio, video_bits_per_sample,'. 
+        'video_codec, video_compression_ratio, encoding, playtime_seconds,'.
+        'playtime_string) '. 
+        'VALUES ('.
+          "%d,". // fid
+          "'%s',". // fileformat
+          "%d,". // video_bitrate
+          "%d,". // video_resolution_x
+          "'%s',". // video_resolution_y
+          "'%s',". // video_frame_rate
+          "%d,". // video_pixel_aspect_ratio
+          "%d,". // video_bits_per_sample
+          "'%s',". // video_codec
+          "'%s',". // video_compression_ratio
+          "'%s',". // encoding
+          "'%s',". //playtime_seconds
+          "'%s'". // playtime_string
+        ")", 
+      $file->fid, $file->fileformat, $file->audio_dataformat, $file->audio_channels, $file->audio_sample_rate, $file->audio_bitrate, $file->audio_channelmode, $file->audio_compression_ratio, $file->audio_codec, $file->audio_encoder, $file->video_bitrate, $file->video_resolution_x, $file->video_resolution_y, $file->video_frame_rate, $file->video_pixel_aspect_ratio, $file->video_bits_per_sample, $file->video_codec, $file->video_compression_ratio, $file->id3_title, $file->id3_artist, $file->id3_album, $file->id3_comment, $file->id3_track, $file->id3_genre, $file->id3_year, $file->encoding, $file->playtime_seconds, $file->playtime_string);
+    }
+    else {
+      db_query('INSERT INTO {audio_metadata} (fid, fileformat, audio_dataformat, '.
+        'audio_channels, audio_sample_rate, audio_bitrate, audio_channelmode, '.
+        'audio_compression_ratio, audio_codec, audio_encoder, id3_title, id3_artist, '.
+        'id3_album, id3_comment, id3_track, id3_genre, id3_year, '.
+        'encoding, playtime_seconds, playtime_string) '.
+        'VALUES ('.
+          '%d, '. // fid
+          "'%s', ". // fileformat
+          "'%s', ". // audio_dataformat
+          '%d, '. // audio_channels
+          '%d, '. // audio_sample_rate
+          '%d, '. // audio_bitrate
+          "'%s', ". // audio_channelmode
+          "'%s', ". // audio_compression_ratio
+          "'%s', ". // audio_codec
+          "'%s', ". //audio_encoder
+          "'%s', ". // id3_title
+          "'%s', ". // id3_artist
+          "'%s', ". // id3_album
+          "'%s', ". // id3_comment
+          "'%s', ". // id3_track
+          "'%s', ". // id3_genre
+          "'%s', ". // id3_year
+          "'%s', ". // encoding
+          "'%s', ". // playtime_seconds
+          "'%s' )",// playtime_string
+        $file->fid, $file->fileformat, $file->audio_dataformat, $file->audio_channels, 
+        $file->audio_sample_rate, $file->audio_bitrate, $file->audio_channelmode, 
+        $file->audio_compression_ratio, $file->audio_codec, $file->audio_encoder, 
+        $file->id3_title, $file->id3_artist, $file->id3_album, $file->id3_comment, 
+        $file->id3_track, $file->id3_genre, $file->id3_year, $file->encoding, 
+        $file->playtime_seconds, $file->playtime_string);
+       
+      }
+    }
+    break;
+    
+    case 'delete':
+      if (media_is_supported_type($file->filemime)) {
+        if ($file->video_bitrate) {         
+          db_query("DELETE FROM {video_metadata} WHERE fid=%d", $file->fid);
+        }
+        else {
+          db_query("DELETE FROM {audio_metadata} WHERE fid=%d", $file->fid);
+        }
+        //  code for automatic removal of individual items from playlists on deletion of a file
+        // get current playlists containing the deleted file
+        $result = db_query("SELECT * FROM {av_playlist} WHERE fid = %d OR next_fid = %d", $file->fid, $file->fid);
+    
+        $playlists = array();
+        while ($data_row = db_fetch_array($result)) {
+           $playlists[$row['nid']][] = $row;
+        }
+        
+        foreach ($playlists as $node_id => $data) {
+          // if only one item within the playlist contains this fid, then it's the first
+          // item on the list - just delete it.
+          if (1 == count($data)) {
+            unset ($playlists[$node_id]);
+          }
+          // otherwise get its predecessor, insert the new next_fid (taken from the item to be
+          // deleted) and delete the entry containing the file.
+          else {
+            if ($data[0]['fid'] == $file->fid) {
+              $playlists[$node_id][1]['next_fid'] = $playlists[$node_id][0]['next_fid'];
+              unset ($playlists[$node_id][0]);
+            } else {
+              $playlists[$node_id][0]['next_fid'] = $playlists[$node_id][1]['next_fid'];
+              unset ($playlists[$node_id][1]);
+            }
+          }
+        }
+    
+        // save changes to the database
+        db_query('DELETE FROM {av_playlist} WHERE fid = %d OR next_fid = %d', $file->fid, $file->fid);
+        foreach ($playlists as $data) {
+          foreach ($data as $playlist_item) {
+            db_query('INSERT INTO {av_playlist} (nid, fid, next_fid) VALUES (%d, %d, %d)', $playlist_item['nid'], $playlist_item['fid'], $playlist_item['next_fid']);
+          }
+        }
+      }
+      
+    break;
+    
+    case 'load':
+      if (media_is_supported_type($file->filemime)) {
+        if ($file->video_bitrate) {
+          $fileinfo = db_fetch_array(db_query("SELECT * FROM {video_metadata} WHERE fid = %d", $file->fid));
+        } else {
+          $fileinfo = db_fetch_array(db_query("SELECT * FROM {video_metadata} WHERE fid = %d", $file->fid));
+        }  
+        if (is_array($fileinfo)) {
+          foreach ($fileinfo as $name => $value) {
+            $file->$name = $value;
+          }
+        }
+      }    
+    break;
+    
+  }
 }
 
 /**
@@ -287,17 +288,17 @@ function media_load($node) {
       }
       $playlist_db = media_playlist_sort_init($playlist_db);
       foreach ($playlist_db as $row) {
-      	$fid = $row['fid'];
+        $fid = $row['fid'];
         if (!empty($fid)) {
-        	$file = db_fetch_object(db_query("SELECT * FROM {files} WHERE fid = %d", $fid));
+          $file = db_fetch_object(db_query("SELECT * FROM {files} WHERE fid = %d", $fid));
 
           // add metadata
           media_fileapi('load', $file);
           $playlist[] = array ('fid' => $fid, 'title' => ($file->id3_title) ? $file->id3_title : $file->filename);
           $playlist_data[] = $fid;
         }
-			}
-		} else {
+      }
+    } else {
       $playlist_data = unserialize($_SESSION['playlist']);
 
       if (is_array($playlist_data)) {
@@ -364,7 +365,7 @@ function media_form(&$node, &$param) {
     if (('node' == arg(0)) && 
         ('add' == arg(1)) && 
         (!isset ($_GET['plsave']))) {
-     		unset($_SESSION['playlist']);
+         unset($_SESSION['playlist']);
     }
     else if (is_numeric(arg(1))) {
       $playlist_data = array ();
@@ -378,7 +379,7 @@ function media_form(&$node, &$param) {
         foreach ($playlist as $file) {
           $playlist_data[] = $file['fid'];  
         }
-				$_SESSION['playlist'] = serialize($playlist_data);
+        $_SESSION['playlist'] = serialize($playlist_data);
       }
     }
   }
@@ -395,75 +396,71 @@ function media_menu($may_cache) {
   $items = array ();
 
   if ($may_cache) {
-    $items[] = array ('path' => 'admin/settings/media', 
-			'title' => t('media'), 
-			'callback' => 'media_admin', 
-			'access' => user_access('administer media nodes'));
     $items[] = array ('path' => 'media', 
-			'title' => t('multi-media'), 
-			'callback' => 'media_page', 
-			'access' => user_access('access content'), 
-			'type' => MENU_SUGGESTED_ITEM);
+      'title' => t('multi-media'), 
+      'callback' => 'media_page', 
+      'access' => user_access('access content'), 
+      'type' => MENU_SUGGESTED_ITEM);
     $items[] = array ('path' => 'node/add/media-playlist', 
-			'title' => t('media-playlist'), 
-			'access' => user_access('create media nodes'));
+      'title' => t('media-playlist'), 
+      'access' => user_access('create media nodes'));
     $items[] = array ('path' => 'media/audio', 
-			'title' => t('audio'), 
-			'type' => MENU_DEFAULT_LOCAL_TASK, 
-			'weight' => -10);
+      'title' => t('audio'), 
+      'type' => MENU_DEFAULT_LOCAL_TASK, 
+      'weight' => -10);
     $items[] = array ('path' => 'media/audio/browse', 
-			'title' => t('browse'), 
-			'callback arguments' => array ('audio', FALSE), 
-			'type' => MENU_DEFAULT_LOCAL_TASK, 
-			'weight' => -10);
+      'title' => t('browse'), 
+      'callback arguments' => array ('audio', FALSE), 
+      'type' => MENU_DEFAULT_LOCAL_TASK, 
+      'weight' => -10);
     $items[] = array ('path' => 'media/audio/playlist', 
-			'title' => t('create playlist'), 
-			'callback arguments' => array ('audio', TRUE), 
-			'access' => user_access('create playlists'), 
-			'type' => MENU_LOCAL_TASK, 
-			'weight' => -5,);
+      'title' => t('create playlist'), 
+      'callback arguments' => array ('audio', TRUE), 
+      'access' => user_access('create playlists'), 
+      'type' => MENU_LOCAL_TASK, 
+      'weight' => -5,);
     $items[] = array ('path' => 'media/video', 
-			'title' => t('video'), 
-			'callback' => 'media_page', 
-			'callback arguments' => array ('video'), 
-			'type' => MENU_LOCAL_TASK);
+      'title' => t('video'), 
+      'callback' => 'media_page', 
+      'callback arguments' => array ('video'), 
+      'type' => MENU_LOCAL_TASK);
     $items[] = array ('path' => 'media/video/browse', 
-			'title' => t('browse'), 
-			'callback arguments' => array ('video', FALSE), 
-			'type' => MENU_DEFAULT_LOCAL_TASK, 
-			'weight' => -10);
+      'title' => t('browse'), 
+      'callback arguments' => array ('video', FALSE), 
+      'type' => MENU_DEFAULT_LOCAL_TASK, 
+      'weight' => -10);
     $items[] = array ('path' => 'media/video/playlist', 
-			'title' => t('create playlist'), 
-			'callback arguments' => array ('video', 'playlist_create' => TRUE), 
-			'access' => user_access('create playlists'), 
-			'type' => MENU_LOCAL_TASK, 
-			'weight' => -5,);
+      'title' => t('create playlist'), 
+      'callback arguments' => array ('video', 'playlist_create' => TRUE), 
+      'access' => user_access('create playlists'), 
+      'type' => MENU_LOCAL_TASK, 
+      'weight' => -5,);
   } else 
     if (arg(0) == 'node' && is_numeric(arg(1))) {
       $node = node_load(array ('nid' => arg(1)));
       if ('media-playlist' == $node->type) {
         $items[] = array ('path' => 'node/'.arg(1).'/content', 
-					'title' => t('add/change content'), 
-					'callback' => 'media_page', 
-					'callback arguments' => array ('audio', 'playlist_create' => TRUE, arg(1)), 
-					'access' => (user_access('edit own playlists')), 
-					'weight' => 5, 
-					'type' => MENU_LOCAL_TASK);
+          'title' => t('add/change content'), 
+          'callback' => 'media_page', 
+          'callback arguments' => array ('audio', 'playlist_create' => TRUE, arg(1)), 
+          'access' => (user_access('edit own playlists')), 
+          'weight' => 5, 
+          'type' => MENU_LOCAL_TASK);
         $items[] = array ('path' => 'node/'.arg(1).'/content/audio', 
-					'title' => t('audio'), 
-					'callback' => 'media_page', 
-					'callback arguments' => array ('audio', 'playlist_create' => TRUE, arg(1)), 
-					'access' => (user_access('edit own playlists')), 
-					'weight' => 5, 
-					'type' => MENU_DEFAULT_LOCAL_TASK);
+          'title' => t('audio'), 
+          'callback' => 'media_page', 
+          'callback arguments' => array ('audio', 'playlist_create' => TRUE, arg(1)), 
+          'access' => (user_access('edit own playlists')), 
+          'weight' => 5, 
+          'type' => MENU_DEFAULT_LOCAL_TASK);
         $items[] = array ('path' => 'node/'.arg(1).'/content/video', 
-					'title' => t('video'), 
-					'callback' => 'media_page', 
-					'callback arguments' => array ('video', 
-					'playlist_create' => TRUE, arg(1)), 
-					'access' => (user_access('edit own playlists')), 
-					'weight' => 5, 
-					'type' => MENU_LOCAL_TASK);
+          'title' => t('video'), 
+          'callback' => 'media_page', 
+          'callback arguments' => array ('video', 
+          'playlist_create' => TRUE, arg(1)), 
+          'access' => (user_access('edit own playlists')), 
+          'weight' => 5, 
+          'type' => MENU_LOCAL_TASK);
       }
     }
 
@@ -525,14 +522,14 @@ function media_page($medium = 'audio', $playlist_create = FALSE, $playlist_edit 
  * override this in your theme to change the instructions on the media page.
  */
 function theme_media_page_instructions($text) {
-	return '<div id="media_instructions">'.$text.'</div>';
+  return '<div id="media_instructions">'.$text.'</div>';
 }
 
 /**
  * override this in your theme to change the layout of the media page
  */
 function theme_media_table_page($instructions, $table, $form) {
-	return $instructions.$table.'<div class="form">'.$form.'</div>';
+  return $instructions.$table.'<div class="form">'.$form.'</div>';
 }
 
 /**
@@ -599,7 +596,7 @@ function media_event_handler($playlist_edit = NULL) {
   if ($_GET['pl_add'] && !$_POST['playlist_play'] && !$_POST['playlist_clear']) {
     if (!is_array($playlist_data) || !in_array($_GET['pl_add'], $playlist_data)) {
       $playlist_data[] = $_GET['pl_add'];
-			$_SESSION['playlist'] = serialize($playlist_data);
+      $_SESSION['playlist'] = serialize($playlist_data);
     }
   }
 
@@ -663,7 +660,7 @@ function media_link($type, $node = 0, $main) {
  * Implementation of hood_perm.
  * 
  * TODO: The two permissions dealing with media nodes are an artifact of the
- * past and need to be removed. Thier removal needs to be coordinated with
+ * past and need to be removed. Their removal needs to be coordinated with
  * changes to the media_access hook as well as a code audit to make sure there
  * are no more dependencies on the two permissions.
  */
@@ -696,70 +693,39 @@ function media_access($op, $node) {
 }
 
 /**
-* page for the administration of the media module
+* settings for the administration of the media module
 * lets the user define a path to the ID3 library
 * 
 * Lets administrator determine which file types are valid media files.
 * 
-* TODO: The table for determining valid media files needs to be immediately
-* visible or in a local task.
-* 
 * TODO: Administrator should be able to decide which columns of the various
 * tables are to be displayed.
 */
-function media_admin($param = '') {
-
-  if ($edit = $_POST['edit']) {
-    // path_to_id3
-    $id3_path = $edit['path_to_id3'];
-    if ($id3_path) {
-      if (file_exists($id3_path)) {
-        variable_set('media_path_to_id3', $id3_path);
-        drupal_set_message(t('Your changes have been saved.'));
-        $supported_types = media_get_supported_types();
-      } else {
-        form_set_error('path_to_id3', t('The the file %file does not exist.', array ('%file' => "<em>$id3_path</em>")));
-      }
-    }
-
-    // supported types
-    if (is_array($supported_types)) {
-      foreach ($supported_types as $mime_type => $supported) {
-        if ($edit[$mime_type]) {
-          $supported_types[$mime_type] = $edit[$mime_type];
-        }
-      }
-      variable_set('media_supported_types', serialize($supported_types));
-      variable_set('media_playlist_teaser_max_no_items', $edit['teaser_max_no_items']);
-    }
+function media_settings() {
+         
+  $id3_path = $edit['path_to_id3'] ? $edit['path_to_id3'] : variable_get('media_path_to_id3', 'modules/media/getid3/getid3.php');
+  if (!file_exists($id3_path)) {
+    form_set_error('path_to_id3', t('The the file %file does not exist.', array ('%file' => "<em>$id3_path</em>")));
   }
-
-  $form = '';
-  $form .= form_textfield(t('Path to getid3.php'), 'path_to_id3', variable_get('media_path_to_id3', 'modules/media/getid3/getid3.php'), 30, t('In order to set up the media module\'s supported types, please supply the full correct path to the file getid3.php.'));
+  $form = form_textfield(t('Path to getid3.php'), 'path_to_id3', variable_get('media_path_to_id3', 'modules/media/getid3/getid3.php'), 30, t('In order to set up the media module\'s supported types, please supply the full correct path to the file getid3.php.'));
 
   foreach (range(1, 20) as $number) {
     $select_options[$number] = $number;
   }
-
   $form .= form_select(t('Maximum number of items in a playlist \'teaser\''), 'teaser_max_no_items', variable_get('media_playlist_teaser_max_no_items', 5), $select_options, $description = NULL);
 
   $header = array (t('Mime type'), t('Save this type\'s attributes'));
-
-  if (is_array($supported_types)) {
-    foreach ($supported_types as $type => $supported) {
-      $checkbox = form_checkbox('', $type, 1, $supported);
-      $rows[] = array ($type, $checkbox);
-    }
+  $supported_types = variable_get('media_supported_types', media_get_supported_types());
+  ksort($supported_types);
+  foreach ($supported_types as $type => $supported) {
+    $checkbox = form_checkbox('', "media_supported_types][$type", 1, $supported);
+    $rows[] = array ($type, $checkbox);
   }
 
   if (is_array($rows)) {
     $form .= theme_table($header, $rows);
   }
-  $form .= form_submit(t('Update'));
-  $output .= form_group(t('media settings'), form($form));
-
-  print theme('page', $output, t('Media nodes configuration'));
-
+  return $form;
 }
 
 
@@ -798,8 +764,9 @@ function media_is_supported_type($mime_type) {
  */
 function media_get_supported_types() {
   if ($supported_types = variable_get('media_supported_types', FALSE)) {
-    $supported_types = unserialize($supported_types);
-  } else {
+    // do nothing
+  }
+  else {
     media_include_library();
     $getID3 = new getID3;
     $supported_types = $getID3->GetFileFormatArray();
@@ -812,13 +779,12 @@ function media_get_supported_types() {
     $types['video/x-msvideo'] = FALSE;
     $types['video/wmv'] = FALSE;
     $types['video/avi'] = FALSE;
-    //		$types['application/x-zip-compressed'] = FALSE;
+    //    $types['application/x-zip-compressed'] = FALSE;
     $types['application/vnd.rn-realmedia'] = FALSE;
 
-    variable_set('media_supported_types', serialize($types));
     $supported_types = $types;
   }
-  return $supported_types;
+  return $supported_types ? $supported_types : array();
 }
 
 /**
@@ -831,8 +797,8 @@ function media_get_supported_types() {
 function media_playlist_play($track) {
   if(is_array($track)){
     foreach ($track as $fid) {
-	    $file = media_get_file_by_id($fid);
-	    $url = file_create_url($file->filepath);   	
+      $file = media_get_file_by_id($fid);
+      $url = file_create_url($file->filepath);     
       $m3u_data .= str_replace(' ', '%20', $url)."\r\n";
     }
     header("Pragma: no-cache"); // HTTP/1.0
@@ -849,8 +815,8 @@ function media_playlist_play($track) {
  * Plays a dynamically generated mp3 file. See media_playlist_play 
  */
 function media_stream_track($fid) {
-	$file = media_get_file_by_id($fid);
-	$url = file_create_url($file->filepath);
+  $file = media_get_file_by_id($fid);
+  $url = file_create_url($file->filepath);
   $m3u_data = str_replace(' ', '%20', $url)."\r\n";
   $m3u_filename = preg_replace('/\..*$/', '.m3u', urlencode($file->filename));
   header("Expires: ".gmdate("D, d M Y H:i:s")." GMT", TRUE);
@@ -946,7 +912,7 @@ function media_video_table($enable_playlist = FALSE) {
     }
     $stream_link = (user_access('stream media')) ? l(t('stream'), 'media', NULL, $query = 'stream='.$data_row['fid']) : '';
     $file = media_get_file_by_id($fid);
- 		// TODO: replace $link with themed link
+     // TODO: replace $link with themed link
     $link = media_get_link($file);
     // TODO: replace $downloa_link with themed link
     $download_link = (user_access('download media')) ? $link : '';
@@ -964,7 +930,7 @@ function media_video_table($enable_playlist = FALSE) {
 
 // TODO: after completing TODOs in media_video_table, remove this function
 function media_get_link($file) {
-	$link = '<a href="'.  file_create_url($file->filepath) . '">'. $file->filename .'</a>';
+  $link = '<a href="'.  file_create_url($file->filepath) . '">'. $file->filename .'</a>';
   return $link;  
 }
 
@@ -972,8 +938,8 @@ function media_get_link($file) {
  * Helper method. Loads a file object from $fid.
  */
 function media_get_file_by_id($fid) {
-	$file = db_fetch_object(db_query("SELECT * from {files} WHERE fid = %d", $fid));
-	return $file;
+  $file = db_fetch_object(db_query("SELECT * from {files} WHERE fid = %d", $fid));
+  return $file;
 }
 
 /**
@@ -1005,15 +971,15 @@ function media_array_to_columns($prefix = NULL, $array) {
 function media_playlist_sort_init($source){   
   $target = array();
   if (is_array($source)) {
-	  foreach ($source as $key => $value) {
-	    if ($value['next_fid'] == -1) {
-	      array_unshift($target, $value);
-	      unset($source[$key]);
-	      break;  
-	    } 
-	  }
-	  
-	  media_playlist_sort($source, $target);
+    foreach ($source as $key => $value) {
+      if ($value['next_fid'] == -1) {
+        array_unshift($target, $value);
+        unset($source[$key]);
+        break;  
+      } 
+    }
+    
+    media_playlist_sort($source, $target);
   }
   return $target ;  
 }
@@ -1043,7 +1009,7 @@ function media_playlist_sort (&$source, &$target){
  * Override this in your theme to control how the download link is rendered
  */
 function theme_download_link($path) {
-	 $link = '<a href="'.  file_create_url($path) . '">'. t('download') .'</a>';
+   $link = '<a href="'.  file_create_url($path) . '">'. t('download') .'</a>';
    return (user_access('download media')) ? $link : '';
 }
 
@@ -1051,6 +1017,6 @@ function theme_download_link($path) {
  * Override this in your theme to control how the streaming link is rendered.
  */
 function theme_stream_link($fid) {
-	return (user_access('stream media')) ? l(t('stream'), 'media', NULL, $query = 'stream='.$fid) : '';
+  return (user_access('stream media')) ? l(t('stream'), 'media', NULL, $query = 'stream='.$fid) : '';
 }
 ?>
