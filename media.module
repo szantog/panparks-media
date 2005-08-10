@@ -707,7 +707,7 @@ function media_settings() {
   if (!file_exists($id3_path)) {
     form_set_error('path_to_id3', t('The the file %file does not exist.', array ('%file' => "<em>$id3_path</em>")));
   }
-  $form = form_textfield(t('Path to getid3.php'), 'path_to_id3', variable_get('media_path_to_id3', 'modules/media/getid3/getid3.php'), 30, t('In order to set up the media module\'s supported types, please supply the full correct path to the file getid3.php.'));
+  $form = form_textfield(t('Path to getid3.php'), 'path_to_id3', variable_get('media_path_to_id3', 'modules/media/getid3/getid3.php'), 50, t('In order to set up the media module\'s supported types, please supply the full correct path to the file getid3.php.'));
 
   foreach (range(1, 20) as $number) {
     $select_options[$number] = $number;
