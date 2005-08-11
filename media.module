@@ -279,7 +279,7 @@ function media_insert($node) {
  * Implementation of the hook_load. Loads a media-playlist.
  */
 function media_load($node) {
-  if ('media-playlist' == $node->type) {
+  if ($node->type == 'media-playlist') {
     if ($node->nid) {
       $result = db_query('SELECT * FROM {av_playlist} WHERE nid = %s', $node->nid);
       $playlist = array();
@@ -644,18 +644,6 @@ function media_event_handler($playlist_edit = NULL) {
   return $playlist_data;
 }
 
-
-/**
-* Implementation of hook_link().
-*/
-function media_link($type, $node = 0, $main) {
-  $links = array ();
-  if ($type == 'page' && user_access('access content')) {
-    $links[] = l(t('multimedia'), 'media', array ('title' => t('View all available multimedia content')));
-  }
-  return $links;
-}
-
 /**
  * Implementation of hood_perm.
  * 
@@ -751,7 +739,7 @@ function media_is_supported_type($mime_type) {
   static $supported_types = NULL;
 
   if ($supported_types == NULL) {
-    $supported_types = media_get_supported_types();
+    $supported_types = variable_get('media_supported_types', media_get_supported_types());
   }
   if (in_array($mime_type, array_keys($supported_types))) {
     return TRUE;
@@ -763,28 +751,22 @@ function media_is_supported_type($mime_type) {
  * asking which types are supported.
  */
 function media_get_supported_types() {
-  if ($supported_types = variable_get('media_supported_types', FALSE)) {
-    // do nothing
+  media_include_library();
+  $getID3 = new getID3;
+  $supported_types = $getID3->GetFileFormatArray();
+  foreach ($supported_types as $type) {
+    $types[$type['mime_type']] = FALSE;
   }
-  else {
-    media_include_library();
-    $getID3 = new getID3;
-    $supported_types = $getID3->GetFileFormatArray();
-    foreach ($supported_types as $type) {
-      $types[$type['mime_type']] = FALSE;
-    }
 
-    // Add some extra mime types which are supported but don't get recognized
-    $types['video/x-ms-wmv'] = FALSE;
-    $types['video/x-msvideo'] = FALSE;
-    $types['video/wmv'] = FALSE;
-    $types['video/avi'] = FALSE;
-    //    $types['application/x-zip-compressed'] = FALSE;
-    $types['application/vnd.rn-realmedia'] = FALSE;
+  // Add some extra mime types which are supported but don't get recognized
+  $types['video/x-ms-wmv'] = FALSE;
+  $types['video/x-msvideo'] = FALSE;
+  $types['video/wmv'] = FALSE;
+  $types['video/avi'] = FALSE;
+  //    $types['application/x-zip-compressed'] = FALSE;
+  $types['application/vnd.rn-realmedia'] = FALSE;
 
-    $supported_types = $types;
-  }
-  return $supported_types ? $supported_types : array();
+  return $types;
 }
 
 /**
