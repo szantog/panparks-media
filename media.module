@@ -1001,4 +1001,5 @@ function theme_download_link($path) {
 function theme_stream_link($fid) {
   return (user_access('stream media')) ? l(t('stream'), 'media', NULL, $query = 'stream='.$fid) : '';
 }
+
 ?>
