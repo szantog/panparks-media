@@ -1,0 +1,6 @@
+; $Id$
+
+name = Media Drupal Upload Module
+description = Provides integration with the Drupal Upload Module
+package = "Media"
+core = 6.x

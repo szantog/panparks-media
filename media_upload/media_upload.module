@@ -1,0 +1,57 @@
+<?php
+
+// $Id$
+
+
+/**
+ * @file 
+ * This module provides integration for Drupal's upload module
+ * with the remig module
+ */
+
+
+ /**
+  * Implementation of hook_media_register
+  * @return 
+  *   array
+  */
+function media_upload_media_register() {
+  return array(
+    'media_upload_container' => array(
+      // human readable name
+      'name' => t('Media Upload container'),
+      'uri' => 'file',
+      // kind of item, one of     
+      // container, format, insert, post_format
+      'kind' => array(
+        'container' => array(
+          'types' => '*',
+          'description' => t('Drupal uploaded files'), 
+        )
+      ),
+      // human readable description
+      'description' => t('Provides integration with Drupal\'s Upload module'),
+      // fields
+      'fields' => array('attachments'),
+     ),
+     
+    // display the file
+    'media_upload_display' => array(
+      // human readable name
+      'name' => 'Media Upload display'),
+      'uri' => 'file',
+      // kind of item, one of     
+      // container, format, insert, post_format
+      'kind' => array(
+        'formater' => array(
+          'types' => '*',
+          'description' => t('Drupal uploaded files display'), 
+        )
+      ),
+      // human readable description
+      'description' => t('Provides integration with Drupal\'s Upload module'),
+      // fields
+      'fields' => array(),
+     ),
+  );
+}
