@@ -1,1 +1,0 @@
-as of this writing, upload.module in core must be patched in order to use this module. Use the most recent patch posted to http://drupal.org/node/18934. If that issue is marked 'fixed' or 'closed' you may proceed without patching provided you are using Drupal HEAD or Drupal 4.7. For Drupal 4.6, you do have to patch.
