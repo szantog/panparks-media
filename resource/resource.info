@@ -1,0 +1,6 @@
+; $Id$
+name = Resource
+description = A stream wrapper enabled replacement for core filehandling.
+package = Media
+core = 7.x
+files[] = resource.module
