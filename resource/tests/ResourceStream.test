@@ -177,3 +177,55 @@ class ResourceStreamTestCase extends DrupalWebTestCase {
 
 }
 
+
+class ResourceStreamPrivateTestCase extends ResourceStreamTestCase {
+  public $scheme = 'private://localhost/';
+
+  function getInfo() {
+    return array(
+      'name' => t('ResourceStreamPrivate Filesystem functions'),
+      'description' => t('Tests basic php stream functions for private://.'),
+      'group' => t('Resource'),
+    );
+  }
+}
+
+class ResourceStreamCrossingTestCase extends DrupalWebTestCase {
+
+  public $schemeA = 'public://localhost/';
+  public $schemeB = 'private://localhost/';
+  
+  public $urlA;
+  public $urlB;
+  public $data;
+
+  function getInfo() {
+    return array(
+      'name' => t('Cross Scheme public:// and private://'),
+      'description' => t('Tests basic php stream functions fori moving files between public:// and private://.'),
+      'group' => t('Resource'),
+    );
+  }
+
+  function setUp() {
+    $this->urlA = $this->schemeA . __CLASS__ . 'A' . uniqid();
+    $this->urlB = $this->schemeB . __CLASS__ . 'B' . uniqid();
+    $this->data = '1234567890';
+  }
+
+  function testCopyAtoB() {
+    $this->assertTrue(file_put_contents($this->urlA, $this->data), "file_put_contents($this->urlA, $this->data)");
+    $this->assertTrue(copy($this->urlA, $this->urlB), "copy($this->urlA, $this->urlB)");
+    $this->assertTrue($this->data == file_get_contents($this->urlB), "Verify content of $this->urlA matches $this->urlB($this->data)");
+    unlink($this->urlA);
+    unlink($this->urlB);
+  }
+
+  function testCopyBtoA() {
+    $this->asserttrue(file_put_contents($this->urlB, $this->data), "file_put_contents($this->urlB, $this->data)");
+    $this->asserttrue(copy($this->urlB, $this->urlA), "copy($this->urlB, $this->urlA)");
+    $this->asserttrue($this->data == file_get_contents($this->urlA), "verify content of $this->urlA($this->data) matches $this->urlB");
+    unlink($this->urlA);
+    unlink($this->urlB);
+  }
+}
