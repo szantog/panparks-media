@@ -19,15 +19,25 @@
  */
 
 /**
+ * @todo:
+ * interface PHP stream wrapper
+ * interface DrupalStreamWrapperExtends PHP stream wrapper {
+ *    function htmlUrl();
+ *    function mime();
+ *
+ *    
+ */
+ 
+/**
  * Implementation of hook_boot
  * 
  * Registers core stream handlers for public and private files.
  */
 
 function resource_boot() {
-  $manager = DrupalResourceStreamWrapperManager::singleton();
-  $manager->register('public',   'DrupalStreamWrapperPublic',  'DrupalResourcePublic');
-  $manager->register('private',  'DrupalStreamWrapperPrivate', 'DrupalResourcePrivate');
+  $manager = ResourceStreamWrapperManager::singleton();
+  $manager->register('public',   'ResourcePublicStreamWrapper');
+  $manager->register('private',  'ResourcePrivateStreamWrapper');
 }
 
 function resource_perm() {
@@ -143,85 +153,90 @@ function resource_debug($message) {
  *
  */ 
 
-class Resource {
+class Resource  {
 
   // @see drupal_file::load()
   protected static $files = array();
+  protected static $streamWrapper;
+  protected static $streamManager;
 
-  public $fid = 0;
-  public $uid = 1;
-  public $filename = '';
-  public $filepath = '';
-  public $filemime = 'application/octet-stream';
-  public $filesize = 0;  
-  public $status = 0;
-  public $timestamp = 0;
+  protected $rid = 0;
+  protected $uid = 1;
+  protected $name = '';
+  protected $url = '';
+  protected $mime = 'application/octet-stream';
+  protected $size = 0;  
+  protected $status = 0;
+  protected $timestamp = 0;
+  protected $htmlUrl = '';
 
   /**
    * drupal_file constructor.
    *
    * @param object $file (optional) stdClass object to initialize self with.
    */
-  function __construct($file = FALSE) {
-    if (!$file || !is_object($file)) return;
-    // assign all initialized properties to self.
-    foreach ($file as $key => $value) {
-      $this->$key = $value;
-    }
+  protected function __construct($resource) {
+    $this->streamManager = ResourceStreamWrapperManager::singleton();
+    $class = $this->streamManager->class(parse_url($url, PHP_URL_SCHEME));
+    $this->streamWrapper = new $class;
+
+    $this->rid = isset($resource->rid) ? $resource->rid : 0;
+    $this->url = $resource->url;
+    $this->mime = $resoruce->mime;
+    $this->size = $resource->size;
+    $this->name = $resource->name;
+    $this->htmlUrl = $this->streamWrapper->htmlUrl($this->url);  
   }
 
-  function _exists_rename($destination) {
-    if (file_exists($destination)) { 
-      $parts = parse_url($destination);
-      $streamdir = $parts['scheme'] . dirname($parts['path']);
-      $basename = basename($parts['path']);
+  /**
+   * Create a new name for a resource by appending a number if a resource
+   * exists at $destination.
+   */
 
-      // Destination file already exists, generate an alternative.
-      $pos = strrpos($basename, '.');
-      if ($pos !== FALSE) {
-        $name = substr($basename, 0, $pos);
-        $ext = substr($basename, $pos);
-      }
-      else {
-        $name = $basename;
-        $ext = '';
-      }
-  
-      $counter = 0;
-      do {
-        $destination = $directory . '/' . $name . '_' . $counter++ . $ext;
-      } while (file_exists($destination));
+  function _destination($destination, $replace = FILE_EXISTS_RENAME) {
+    if ($replace & FILE_EXISTS_REPLACE) return true;
+    if (!file_exists($destination))  return $destination;
+    if ($replace & FILE_EXISTS_ERROR)  return FALSE;
+ 
+    $streamdir = dirname($destination);
+    $basename = basename($destination);
+
+    // Destination file already exists, generate an alternative.
+    $pos = strrpos($basename, '.');
+    if ($pos !== FALSE) {
+      $name = substr($basename, 0, $pos);
+      $ext = substr($basename, $pos);
+    }
+    else {
+      $name = $basename;
+      $ext = '';
     }
   
+    $counter = 0;
+    do {
+      $destination = $streamdir . '/' . $name . '_' . $counter++ . $ext;
+    } while (file_exists($destination));
+
     return $destination;
   }
 
   /**
-   * Create a copy a drupal_file.
+   * Create a copy a Resource.
    *
    * @param  string $destination (optional) @see file_copy.
    * @param int $replace (optional) @see file_destination
    * @return object|bool  drupal_file if the copy is successful, or FALSE
-   * @see file_copy()
    */
   function copy($destination, $replace = FILE_EXISTS_RENAME) {
-    if (file_exists($destination)) {
-      if ($replace & FILE_EXISTS_ERROR) {
-        return FALSE;
-      }
-      if ($replace & FILE_EXISTS_RENAME) {
-        $destination = $this->_exists_rename($destination); 
-      }
-    }
-       
-    if (copy($this->filepath, $destination, $replace)) {
-      $file = clone $this;
-      $file->fid      = null;
-      $file->filename = basename($result);
-      $file->filepath = $destination;
-      if ($file->save()) {
-        module_invoke_all('file_copy', $this, $file);
-        return $file;
+    $destination = $this->_destination($destination, $replace);
+      
+    if (copy($this->url, $destination)) {
+      $copy = clone $this;
+      $copy->rid = NULL;
+      $copy->url = $destination;
+      if ($copy->save()) {
+        module_invoke_all('resource_copy', $this, $copy);
+        return ResourceFactory::loadId($copy->rid);
       }
     }
     return FALSE; 
@@ -244,75 +259,28 @@ class Resource {
     // If any module returns a value from the reference hook, the 
     // file will not be deleted from Drupal, but file_delete will
     // return a populated array that tests as TRUE.
-    if (!$force && ($references = module_invoke_all('file_references', $this))) {
+    if (!$force && ($references = module_invoke_all('resource', $this))) {
       return $references;
     }
 
     // Let other modules clean up on delete.
-    module_invoke_all('file_delete', $this);
+    module_invoke_all('resource_delete', $this);
  
     // Make sure the file is deleted before removing its row from the 
     // database, so UIs can still find the file in the database.
-    if (unlink($this->filepath)) {
-      db_query('DELETE FROM {files} WHERE fid = %d', $this->fid);
+    if (unlink($this->url)) {
+      db_query('DELETE FROM {resource} WHERE rid = %d', $this->rid);
       // remove internally used static cache entries.
-      $this->reset_cache('fid::'. $this->fid);
-      $this->reset_cache('filepath::'. $this->filepath);
+      $this->reset_cache('rid::'. $this->rid);
+      $this->reset_cache('url::'. $this->url);
       return TRUE;
     }
     return FALSE;
   }
 
-  /**
-   * Return the first matching file in the files table. This is a simple single
-   * object loader it in combination with the static $files variable allows all
-   * drupal file objects to also act as factories and share the same static cache.
-   *
-   * @param string key (required) database column to use in where condition.
-   * @param int|string value (required) the value of the column to use in the where condition.
-   * @return object|bool A Drupal file object or FALSE if a file was not found.
-   * @see drupal_file::load(), drupal_file::load_path()
-   */
-  final function _load($column, $value) {
-    // set a cache id based on key and value so we can statically cache 
-    // all simple loads.
-    $cid = $column . '::' . $value; 
-    if (empty(self::$files[$cid])) {
-      $file = db_fetch_object(db_query('SELECT f.* FROM {files} f WHERE f.%s = %d', $column, $value));
-      $scheme = parse_url($file, PHP_URL_PATH);
-      $class = ResourceSchemeManager::get_classname($scheme);
-      $file = new $class($file);
-    }
-    module_invoke_all('file_load', $file);
-    self::$files[$cid] = $file; 
-    // Files are not cloned, because there is in fact only one.
-    return self::$files[$cid];
-  }
  
   /**
-   * Load a file object from the database by id.
-   *
-   * @param int   $id     A file id. (required)
-   * @return object|bool A Drupal file object or FALSE if a file was not found.
-   * @see: drupal_file::load()
-   */
-  final function load_id($id) {
-    return $this->_load('fid', $id);
-  }
-
-  /**
-   * Load a file object from the database by path.
-   *
-   * @param string  $path   A path to a file. (required)
-   * @return object|bool A Drupal file object or FALSE if a file was not found.
-   * @see: drupal_file::load()
-   */
-  final function load_path($path) {
-    return $this->_load('filepath', $path);
-  }
-
-  /**
-   * Move a drupal_file.
+   * Move a Resource.
    *
    * @param  string $destination (optional) @see file_copy.
    * @param int $replace (optional) @see file_destination
@@ -320,40 +288,20 @@ class Resource {
    * @see file_copy()
    */
   function move($destination, $replace = FILE_EXISTS_RENAME) {
-    if (file_exists($destination)) {
-      if ($replace & FILE_EXISTS_ERROR) {
-        return FALSE;
-      }
-      if ($replace & FILE_EXISTS_RENAME) {
-        $destination = $this->_exists_rename($destination); 
-      }
-    }
- 
-    if (copy($this->filepath, $destination)) {
-      unlink($this->filepath);
+    $destination = $this->_destination($destination, $rename); 
+
+    if (copy($this->url, $destination)) {
+      unlink($this->url);
       $orig = clone $this;
-      $this->filename = basename($destination);
-      $this->filepath = $result;
+      $this->url = $destination;
       if ($this->save()) {
-        module_invoke_all('file_move', $this, $orig);
-        return TRUE;
+        module_invoke_all('resource_move', $this, $orig);
+        return ResourceFactory::loadId($this->rid);
       }
     }
     return FALSE;
   }
 
-  /**
-   * Reset the shared static cache.
-   */
-  public function reset_cache($cid = FALSE) {
-    // no cache id, reset the entire cache.
-    if (!$cid) {
-      self::$files = array();
-    }
-    elseif (isset(self::$files[$cid])) {
-      unset(self::$files[$cid]);
-    }
-  }
 
   /**
    * Save the current state of a drupal_file in the database.
@@ -363,15 +311,23 @@ class Resource {
    */
   function save() {
     $this->timestamp = time();
-    $this->filesize = filesize($this->filepath);
+    $manager = DrupalStreamWrapperManager::singleton();
+    $class = $manager->streamWrapperClass(parse_url($this->url, PHP_URL_SCHEME));
+
+    if ($class != get_class($this->streamWrapperManager())) {
+      $this->streamWrapperHandler = new $class();
+    }
+    
+    $this->size = $this->streamWrapperHandler->size($this->url);
+    $this->mime = $this->streamWrapperHandler->mime($this->url);
   
     if (empty($this->fid)) {
-      $result = drupal_write_record('files', $this);
-      module_invoke_all('file_insert', $this);
+      $result = drupal_write_record('resource', $this);
+      module_invoke_all('resource_insert', $this);
     }
     else {
-      $result = drupal_write_record('files', $this, 'fid');
-      module_invoke_all('file_update', $this);
+      $result = drupal_write_record('resource', $this, 'rid');
+      module_invoke_all('resource_update', $this);
     }
     return $result;
   }
@@ -392,12 +348,12 @@ class Resource {
     }
     return FALSE;
   }
-
-  /**
-   * Create a URL to the file.
-   */
-  function url() {
-    return '';
+  
+  function refresh() {
+    $this->htmlUrl = $this->streamWrapper->htmlUrl($this->url);
+    $this->size = $this->streamWrapper->size($this->url);
+    $this->mime = $this->streamWrapper->mime($this->url);
+    return $this;
   }
 }
 
@@ -556,3 +512,106 @@ class ResourceUpload extends Resource {
 }
   
 
+
+class ResourceFactory {
+  static $resources;
+
+  function __construct() {
+  }
+
+
+  /**
+   * Return the first matching file in the files table. This is a simple single
+   * object loader it in combination with the static $files variable allows all
+   * drupal file objects to also act as factories and share the same static cache.
+   *
+   * @param string key (required) database column to use in where condition.
+   * @param int|string value (required) the value of the column to use in the where condition.
+   * @return object|bool A Drupal file object or FALSE if a file was not found.
+   * @see drupal_file::load(), drupal_file::load_path()
+   */
+  public function _load($column, $value) {
+    // set a cache id based on key and value so we can statically cache 
+    // all simple loads.
+    $cid = $column . '::' . $value; 
+    if (empty(self::$files[$cid])) {
+      $resource = db_fetch_object(db_query('SELECT f.* FROM {resource} r WHERE r.%s = %d', $column, $value));
+      $resource = new Resource($r);
+    }
+    module_invoke_all('resource_load', $r);
+    self::$resources[$cid] = $r; 
+    // Files are not cloned, because there is in fact only one.
+    return self::$resources[$cid];
+  }
+ 
+  /**
+   * Load a file object from the database by id.
+   *
+   * @param int   $id     A file id. (required)
+   * @return object|bool A Drupal file object or FALSE if a file was not found.
+   * @see: drupal_file::load()
+   */
+  public function loadId($id) {
+    return $this->_load('rid', $id);
+  }
+
+  /**
+   * Load a file object from the database by path.
+   *
+   * @param string  $path   A path to a file. (required)
+   * @return object|bool A Drupal file object or FALSE if a file was not found.
+   * @see: drupal_file::load()
+   */
+  public function loadUrl($url) {
+    return $this->_load('url', $url);
+  }
+
+  public function loadUpload($key) { } 
+
+  /**
+   * Reset the shared static cache.
+   */
+  public function resetCache($cid = FALSE) {
+    // no cache id, reset the entire cache.
+    if (!$cid) {
+      self::$resources = array();
+    }
+    elseif (isset(self::$resources[$cid])) {
+      unset(self::$resources[$cid]);
+    }
+  }
+
+  // table relationship
+  // relationship_id
+  // left, (resource_id)
+  // relationship ( parent_of, member_of, friend_of, ... ) 
+  // right, (resource_id)
+ 
+  // table resource_formatter
+  // relationship_id 
+  // display_context(node_full, node_teaser, comment, block, profile, default)  
+  // media(screen, print), 
+  // formatter
+  // formatter_arguments
+  function loadChildren($rid, $context = NULL, $media = NULL) {
+    // select * from {resource_relationships} where parent = $resource->id;
+    // foreach child { $children[] = $this->loadId($child->rid)->context($context); }
+    // return $children;
+  }
+  function loadParents($rid, $context = NULL, $media = NULL) {
+    // select * from {resource_relationships} where child = $resource->id;
+    // foreach parent { $parent[] = $this->loadId($child->rid)->context($context); }
+    // return $parents;
+  }   
+
+  function loadPeers($rid, $context, $media)  {}
+  /**
+   * @param key    primary key for where clause
+   * @param value  to limit key to.
+    think about this context thing later..
+   */
+  function loadRelationship($key, $id, $context = NULL, $media = NULL) {
+    // select * from relationships where $key = $candidate AND context = $context
+    // foreach row { $relatives[] = $this->loadId($relative->rid)->context($row) }
+  }
+}

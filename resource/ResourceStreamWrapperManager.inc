@@ -5,7 +5,7 @@
  *  user defined stream wrappers in PHP.
  */
 
-class DrupalResourceStreamWrapperManager {
+class ResourceStreamWrapperManager {
   // stream wrapper registry
   private $wrappers = array();
 
@@ -19,7 +19,7 @@ class DrupalResourceStreamWrapperManager {
   public static function singleton() {
     static $instance = NULL;
     if (is_null($instance)) {
-      $instance = new DrupalResourceStreamWrapperManager();
+      $instance = new ResourceStreamWrapperManager();
     }
     return $instance;
   }
@@ -31,11 +31,9 @@ class DrupalResourceStreamWrapperManager {
    * @return bool result of stream_wrapper_register 
    * @see: http://us3.php.net/manual/en/function.stream-wrapper-register.php
    */
-  function register($scheme, $DrupalStreamWrapperClass, $DrupalResourceClass) {
-    //resource_debug("StreamWrapperManager:: register($scheme, $DrupalStreamWrapperClass, $DrupalResourceClass)");
-    $this->wrappers[$scheme]['DrupalStreamWrapperClass'] = $DrupalStreamWrapperClass;
-    $this->wrappers[$scheme]['DrupalResourceClass'] = $DrupalResourceClass;
-    return stream_wrapper_register($scheme, $DrupalStreamWrapperClass);
+  function register($scheme, $classname) {
+    $this->wrappers[$scheme] = $classname;
+    return stream_wrapper_register($scheme, $classname);
   }
 
   function unregister($scheme) {
@@ -51,8 +49,8 @@ class DrupalResourceStreamWrapperManager {
    * @param string $scheme stream scheme.
    * @return mixed string is a scheme has a registered handler or FALSE.
    */
-  function streamWrapperClass($scheme) {
-    if (empty(self::$this->wrappers[$scheme]['DrupalStreamWrapperClass'])) {
+  function classname($scheme) {
+    if (empty(self::$this->wrappers[$scheme])) {
       return FALSE;
     }
     return self::$this->wrappers[$scheme];
@@ -63,13 +61,9 @@ class DrupalResourceStreamWrapperManager {
    * @param string $scheme stream scheme.
    * @return mixed string is a scheme has a registered handler or FALSE.
    */
-  function resourceClass($scheme) {
-    if (empty(self::$this->wrappers[$scheme]['DrupalResourceClass'])) {
-      return FALSE;
-    }
-    return self::$this->wrappers[$scheme];
+  function scheme($class) {
+    return array_search(self::$this->wrappers, $class);
   }
-
 
   /**
    * Return the DrupalStreamWrapperManager's wrapper registry.
