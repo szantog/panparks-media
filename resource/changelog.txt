@@ -1,0 +1,8 @@
+// $Id$
+
+Changelog for the Resource module.
+
+January 2009
+------------
+ * Initial backport to d6 (aaron).
+ * Initial development (dopry).

@@ -1,9 +1,10 @@
 <?php
+// $Id$
 
 /**
  * public:// stream wrapper class.
- * 
- * This class provides support for storing publicly 
+ *
+ * This class provides support for storing publicly
  * accessible files with the Drupal resource api.
  */
 class ResourcePublicStreamWrapper extends ResourceStreamWrapper {
@@ -26,14 +27,14 @@ class ResourcePublicStreamWrapper extends ResourceStreamWrapper {
    */
   function interpolateUrl($url) {
     $basepath = variable_get($this->pathKey, $this->pathDefault);
-    
+
     // just in case stream_public_path is s3://, ftp://, etc. Don't call PHP's
     // realpath().
     if (parse_url($basepath, PHP_URL_SCHEME)) {
       $path =  $basepath . parse_url($url, PHP_URL_PATH);;
     }
     else {
-      // interpolate relative paths for basepath, and strip relative paths from 
+      // interpolate relative paths for basepath, and strip relative paths from
       // url path.
       $path = realpath($basepath) . str_replace('/..','', parse_url($url, PHP_URL_PATH));
     }

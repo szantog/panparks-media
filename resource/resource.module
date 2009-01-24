@@ -1,17 +1,17 @@
 <?php
-
+// $Id$
 
 /**
- * @file 
+ * @file
  * Resource API for Drupal, a replacement for files.
- * 
- * The Resource API superceeds Drupal's file api, providing an interface to 
+ *
+ * The Resource API superceeds Drupal's file api, providing an interface to
  * manage Resources identified by a URL.
  *
- * There are two base classes, Resource and ResourceScheme, that constitue the ResourceAPI. 
+ * There are two base classes, Resource and ResourceScheme, that constitue the ResourceAPI.
  * The Resource class provides a high level interaction with resources including event hooks,
  * DB synchronization, and support methods including, but not limited, to url generation and
- * mime identification. The ResourceScheme is a user defined stream wrapper for PHP. 
+ * mime identification. The ResourceScheme is a user defined stream wrapper for PHP.
  *
  * In most cases each class extending Resource will have a complimentary ResourceScheme
  * class, and will share configuration options and settings.
@@ -25,16 +25,21 @@
  *    function htmlUrl();
  *    function mime();
  *
- *    
+ *
  */
- 
+
 /**
  * Implementation of hook_boot
- * 
+ *
  * Registers core stream handlers for public and private files.
  */
 
 function resource_boot() {
+  $path = variable_get('resource_path', '');
+  require_once($path .'/ResourceStreamWrapperManager.inc');
+  require_once($path .'/ResourceStreamWrapper.inc');
+  require_once($path .'/ResourcePublicStreamWrapper.inc');
+  require_once($path .'/ResourcePrivateStreamWrapper.inc');
   $manager = ResourceStreamWrapperManager::singleton();
   $manager->register('public',   'ResourcePublicStreamWrapper');
   $manager->register('private',  'ResourcePrivateStreamWrapper');
@@ -46,7 +51,7 @@ function resource_perm() {
       'title' => 'Administer resources',
       'Description' => 'Administer settings for resources and stream handlers.'
     ),
-  );  
+  );
 }
 
 function resource_menu() {
@@ -72,7 +77,7 @@ function resource_menu() {
     'page arguments' => array('resource_settings_private_form'),
     'access arguments' => array('administer resources')
   );
-  return $items; 
+  return $items;
 }
 
 /**
@@ -123,7 +128,7 @@ function resource_settings_private_form() {
  * Resource API
  */
 
-/** 
+/**
  * Debug Logging function.
  */
 function resource_debug($message) {
@@ -131,15 +136,15 @@ function resource_debug($message) {
 }
 
 /**
- * Base Resource class. 
+ * Base Resource class.
  *
  * The drupal_file class represents a physical file stored in Drupal's
- * 'File System Path'. It is important to understand that copy, move, 
+ * 'File System Path'. It is important to understand that copy, move,
  * delete, etc method affect both the the physical file the object
- * represents and the database record for the file. 
+ * represents and the database record for the file.
  *
  * Example Factory Usage:
- *   
+ *
  *   $factory = new Resource();
  *   $file = $factory->load_id(87);
  *   $another = $file->load_path('images/logo.png');
@@ -148,10 +153,10 @@ function resource_debug($message) {
  *
  *   $yet_another = $file->load('path', 'uploads/myfile.pdf');
  *
- * 
+ *
  *   if ($yet_another->delete()) unset($yet_another);
  *
- */ 
+ */
 
 class Resource  {
 
@@ -165,7 +170,7 @@ class Resource  {
   protected $name = '';
   protected $url = '';
   protected $mime = 'application/octet-stream';
-  protected $size = 0;  
+  protected $size = 0;
   protected $status = 0;
   protected $timestamp = 0;
   protected $htmlUrl = '';
@@ -185,7 +190,7 @@ class Resource  {
     $this->mime = $resoruce->mime;
     $this->size = $resource->size;
     $this->name = $resource->name;
-    $this->htmlUrl = $this->streamWrapper->htmlUrl($this->url);  
+    $this->htmlUrl = $this->streamWrapper->htmlUrl($this->url);
   }
 
   /**
@@ -197,7 +202,7 @@ class Resource  {
     if ($replace & FILE_EXISTS_REPLACE) return true;
     if (!file_exists($destination))  return $destination;
     if ($replace & FILE_EXISTS_ERROR)  return FALSE;
- 
+
     $streamdir = dirname($destination);
     $basename = basename($destination);
 
@@ -211,7 +216,7 @@ class Resource  {
       $name = $basename;
       $ext = '';
     }
-  
+
     $counter = 0;
     do {
       $destination = $streamdir . '/' . $name . '_' . $counter++ . $ext;
@@ -229,7 +234,7 @@ class Resource  {
    */
   function copy($destination, $replace = FILE_EXISTS_RENAME) {
     $destination = $this->_destination($destination, $replace);
-      
+
     if (copy($this->url, $destination)) {
       $copy = clone $this;
       $copy->rid = NULL;
@@ -239,7 +244,7 @@ class Resource  {
         return ResourceFactory::loadId($copy->rid);
       }
     }
-    return FALSE; 
+    return FALSE;
   }
 
 
@@ -249,14 +254,14 @@ class Resource  {
    * @param $force
    *   Boolean indicating that the file should be deleted even if
    *   hook_file_references() reports that the file is in use.
-   * @return mixed 
+   * @return mixed
    *   TRUE for success, array for reference count, or FALSE in the event
    *   of an error.
    *
    * @see hook_file_references()
    */
   function delete($force = FALSE) {
-    // If any module returns a value from the reference hook, the 
+    // If any module returns a value from the reference hook, the
     // file will not be deleted from Drupal, but file_delete will
     // return a populated array that tests as TRUE.
     if (!$force && ($references = module_invoke_all('resource', $this))) {
@@ -265,8 +270,8 @@ class Resource  {
 
     // Let other modules clean up on delete.
     module_invoke_all('resource_delete', $this);
- 
-    // Make sure the file is deleted before removing its row from the 
+
+    // Make sure the file is deleted before removing its row from the
     // database, so UIs can still find the file in the database.
     if (unlink($this->url)) {
       db_query('DELETE FROM {resource} WHERE rid = %d', $this->rid);
@@ -278,17 +283,17 @@ class Resource  {
     return FALSE;
   }
 
- 
+
   /**
    * Move a Resource.
    *
    * @param  string $destination (optional) @see file_copy.
    * @param int $replace (optional) @see file_destination
-   * @return bool 
+   * @return bool
    * @see file_copy()
    */
   function move($destination, $replace = FILE_EXISTS_RENAME) {
-    $destination = $this->_destination($destination, $rename); 
+    $destination = $this->_destination($destination, $rename);
 
     if (copy($this->url, $destination)) {
       unlink($this->url);
@@ -305,7 +310,7 @@ class Resource  {
 
   /**
    * Save the current state of a drupal_file in the database.
-   * If the file->fid is empty a new database record will be added. 
+   * If the file->fid is empty a new database record will be added.
    *
    * @return bool TRUE if save succeeded, FALSE if save failed.
    */
@@ -317,10 +322,10 @@ class Resource  {
     if ($class != get_class($this->streamWrapperManager())) {
       $this->streamWrapperHandler = new $class();
     }
-    
+
     $this->size = $this->streamWrapperHandler->size($this->url);
     $this->mime = $this->streamWrapperHandler->mime($this->url);
-  
+
     if (empty($this->fid)) {
       $result = drupal_write_record('resource', $this);
       module_invoke_all('resource_insert', $this);
@@ -335,7 +340,7 @@ class Resource  {
   /**
    * Mark a file as permanent.
    *
-   * @return bool 
+   * @return bool
    */
   function set_status($bitmask = NULL) {
     if (is_null($bitmask)) {
@@ -348,7 +353,7 @@ class Resource  {
     }
     return FALSE;
   }
-  
+
   function refresh() {
     $this->htmlUrl = $this->streamWrapper->htmlUrl($this->url);
     $this->size = $this->streamWrapper->size($this->url);
@@ -358,8 +363,8 @@ class Resource  {
 }
 
 class ResourcePublic extends Resource {
-  function url() { }  
-  function mime() { } 
+  function url() { }
+  function mime() { }
 }
 
 class ResourcePrivate extends ResourcePublic {
@@ -383,7 +388,7 @@ class ResourceUpload extends Resource {
     if (!isset($this->errors)) {
       // Default validation for all uploads.
       $validators['file_validate_name_length'] = array();
-    
+
       $this->errors = array();
       foreach ($validators as $function => $args) {
         array_unshift($args, $file);
@@ -403,7 +408,7 @@ class ResourceUpload extends Resource {
       return FALSE;
     }
     // for upload files we changed the filename in the path to a junk string...
-     
+
   }
 
   /**
@@ -430,7 +435,7 @@ class ResourceUpload extends Resource {
    *   destination directory should overwritten. A FALSE value will generate a
    *   new, unique filename in the destination directory.
    * @return
-   *   An object containing the file information, or FALSE in the event of an 
+   *   An object containing the file information, or FALSE in the event of an
    *   error.
    */
 
@@ -452,7 +457,7 @@ class ResourceUpload extends Resource {
     $file->filesize = $_FILES['files']['size'][$source];
 
 
-    // Move uploaded files from PHP's upload_tmp_dir to Drupal's temporary 
+    // Move uploaded files from PHP's upload_tmp_dir to Drupal's temporary
     // directory. This overcomes open_basedir restrictions for future file
     // operations.
     if (!move_uploaded_file($_FILES['files']['tmp_name'][$source], $file->filepath)) {
@@ -485,7 +490,7 @@ class ResourceUpload extends Resource {
 
       case UPLOAD_ERR_NO_TMP_DIR:
         return t('The file %file could not be saved, because the PHP upload_tmp_dir does not exist.', array('%file' => $source));
-          
+
       case UPLOAD_ERR_CANT_WRITE:
         return t('The file %file could not be saved, because the file could not be written to the disk.', array('%file' => $source));
 
@@ -496,10 +501,10 @@ class ResourceUpload extends Resource {
       default:
         return t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $source));
     }
-  } 
+  }
 
   // Use static load as the entry point to keep the API interface
-  // consistent.    
+  // consistent.
   function load($source) {
     if (isset(self::$files[$source])) return self::$files[$source];
 
@@ -510,7 +515,7 @@ class ResourceUpload extends Resource {
   }
 
 }
-  
+
 
 
 class ResourceFactory {
@@ -531,19 +536,19 @@ class ResourceFactory {
    * @see drupal_file::load(), drupal_file::load_path()
    */
   public function _load($column, $value) {
-    // set a cache id based on key and value so we can statically cache 
+    // set a cache id based on key and value so we can statically cache
     // all simple loads.
-    $cid = $column . '::' . $value; 
+    $cid = $column . '::' . $value;
     if (empty(self::$files[$cid])) {
       $resource = db_fetch_object(db_query('SELECT f.* FROM {resource} r WHERE r.%s = %d', $column, $value));
       $resource = new Resource($r);
     }
     module_invoke_all('resource_load', $r);
-    self::$resources[$cid] = $r; 
+    self::$resources[$cid] = $r;
     // Files are not cloned, because there is in fact only one.
     return self::$resources[$cid];
   }
- 
+
   /**
    * Load a file object from the database by id.
    *
@@ -566,7 +571,7 @@ class ResourceFactory {
     return $this->_load('url', $url);
   }
 
-  public function loadUpload($key) { } 
+  public function loadUpload($key) { }
 
   /**
    * Reset the shared static cache.
@@ -584,13 +589,13 @@ class ResourceFactory {
   // table relationship
   // relationship_id
   // left, (resource_id)
-  // relationship ( parent_of, member_of, friend_of, ... ) 
+  // relationship ( parent_of, member_of, friend_of, ... )
   // right, (resource_id)
- 
+
   // table resource_formatter
-  // relationship_id 
-  // display_context(node_full, node_teaser, comment, block, profile, default)  
-  // media(screen, print), 
+  // relationship_id
+  // display_context(node_full, node_teaser, comment, block, profile, default)
+  // media(screen, print),
   // formatter
   // formatter_arguments
   function loadChildren($rid, $context = NULL, $media = NULL) {
@@ -602,7 +607,7 @@ class ResourceFactory {
     // select * from {resource_relationships} where child = $resource->id;
     // foreach parent { $parent[] = $this->loadId($child->rid)->context($context); }
     // return $parents;
-  }   
+  }
 
   function loadPeers($rid, $context, $media)  {}
   /**

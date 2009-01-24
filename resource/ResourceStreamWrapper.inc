@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 /**
  * Definition for a Resource stream wrapper in Drupal.
@@ -19,7 +20,7 @@ interface ResourceStreamWrapperInterface extends StreamWrapperInterface {
    *   Stream wrapper resource url.
    * @return string
    */
-  function mime($url); 
+  function mime($url);
 
   /**
    * Return an absolute stream resource URL.
@@ -67,16 +68,16 @@ interface StreamWrapperInterface {
  *
  * DrupalStreamWrapper implementations need to override at least the interpolateUrl
  * method to rewrite the URL before is it passed back into the calling function.
- * 
+ *
  */
 abstract class ResourceStreamWrapper implements ResourceStreamWrapperInterface {
   private $handle = NULL;
 
-  function interpolateUrl($url) { 
+  function interpolateUrl($url) {
     return $url;
   }
 
-  function htmlUrl($url) { 
+  function htmlUrl($url) {
     return $url;
   }
 
@@ -153,7 +154,7 @@ abstract class ResourceStreamWrapper implements ResourceStreamWrapperInterface {
 
   /**
    * Support for fseek().
-   * 
+   *
    * @param $offset
    *   The byte offset to got to.
    * @param $whence
@@ -222,7 +223,7 @@ abstract class ResourceStreamWrapper implements ResourceStreamWrapperInterface {
   /**
    * Support for rename().
    *
-   * @param $fromUrl, 
+   * @param $fromUrl,
    *   The url to the file to rename.
    * @param $toUrl
    *   The new url for file.

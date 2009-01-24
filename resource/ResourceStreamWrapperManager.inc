@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 /**
  * The StreamWrapperManager provides a class for managing and querying
@@ -28,7 +29,7 @@ class ResourceStreamWrapperManager {
    * Register a class to handle a scheme.
    * @param string $scheme URI scheme.
    * @param string $class  classname for the stream wrapper.
-   * @return bool result of stream_wrapper_register 
+   * @return bool result of stream_wrapper_register
    * @see: http://us3.php.net/manual/en/function.stream-wrapper-register.php
    */
   function register($scheme, $classname) {
@@ -67,7 +68,7 @@ class ResourceStreamWrapperManager {
 
   /**
    * Return the DrupalStreamWrapperManager's wrapper registry.
-   */ 
+   */
   function wrappers() {
     return self::$this->wrappers;
   }

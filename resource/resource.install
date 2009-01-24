@@ -2,6 +2,7 @@
 // $Id$
 
 function resource_install() {
+  variable_set('resource_path', drupal_get_path('module', 'resource'));
   drupal_install_schema('resource');
 }
 
@@ -14,21 +15,21 @@ function resource_enable() {
   $path = file_directory_path();
   if  (variable_get('file_downloads', FILE_DOWNLOADS_PUBLIC) == FILE_DOWNLOADS_PUBLIC) {
     $scheme = 'public:';
-  } 
+  }
   else {
     $scheme = 'private:';
   }
 
   //db_query('INSERT INTO {file_backup} SELECT * FROM {files}');
   //db_query('DELETE FROM {files}');
-      
+
   db_query("
     INSERT INTO {resource} (rid, uid, name, url, mimetype, size, status, timestamp)
-       SELECT 
+       SELECT
           fid, uid, filename, REPLACE(filepath, '%s', '%s'), filemime, filesize, status, timestamp
        FROM {files}
   ", $path, $scheme);
- 
+
 }
 
 function resource_disable() {
