@@ -17,6 +17,9 @@
  * class, and will share configuration options and settings.
  *
  */
+<<<<<<< resource.module
+ 
+=======
 
 /**
  * @todo:
@@ -28,6 +31,7 @@
  *
  */
 
+>>>>>>> 1.4
 /**
  * Implementation of hook_boot
  *
@@ -158,10 +162,8 @@ function resource_debug($message) {
  *
  */
 
-class Resource  {
+class Resource extends ResourceFactory {
 
-  // @see drupal_file::load()
-  protected static $files = array();
   protected static $streamWrapper;
   protected static $streamManager;
 
@@ -176,14 +178,27 @@ class Resource  {
   protected $htmlUrl = '';
 
   /**
-   * drupal_file constructor.
+   * Resource constructor.
    *
-   * @param object $file (optional) stdClass object to initialize self with.
+   * @param object $resource (optional) 
+   *   an object reflecting a resource row in the database;
    */
-  protected function __construct($resource) {
+  protected function __construct($resource = NULL) {
     $this->streamManager = ResourceStreamWrapperManager::singleton();
-    $class = $this->streamManager->class(parse_url($url, PHP_URL_SCHEME));
+    $class = $this->streamManager->class(parse_url($resource->url, PHP_URL_SCHEME));
     $this->streamWrapper = new $class;
+<<<<<<< resource.module
+    if ($resource) {
+      $this->rid = isset($resource->rid) ? $resource->rid : 0;
+      $this->uid = $resource->uid;
+      $this->url = $resource->url;
+      $this->mime = $resoruce->mime;
+      $this->size = $resource->size;
+      $this->name = $resource->name;
+      $this->htmlUrl = $this->streamWrapper->htmlUrl($this->url);  
+      $this->timestamp = $resource->timestamp;
+    }
+=======
 
     $this->rid = isset($resource->rid) ? $resource->rid : 0;
     $this->url = $resource->url;
@@ -191,6 +206,7 @@ class Resource  {
     $this->size = $resource->size;
     $this->name = $resource->name;
     $this->htmlUrl = $this->streamWrapper->htmlUrl($this->url);
+>>>>>>> 1.4
   }
 
   /**
@@ -241,12 +257,11 @@ class Resource  {
       $copy->url = $destination;
       if ($copy->save()) {
         module_invoke_all('resource_copy', $this, $copy);
-        return ResourceFactory::loadId($copy->rid);
+        return $this->loadId($copy->rid);
       }
     }
     return FALSE;
   }
-
 
   /**
    * Delete a file and its database record.
@@ -276,8 +291,8 @@ class Resource  {
     if (unlink($this->url)) {
       db_query('DELETE FROM {resource} WHERE rid = %d', $this->rid);
       // remove internally used static cache entries.
-      $this->reset_cache('rid::'. $this->rid);
-      $this->reset_cache('url::'. $this->url);
+      $this->resetCache('rid::'. $this->rid);
+      $this->resetCache('url::'. $this->url);
       return TRUE;
     }
     return FALSE;
@@ -299,14 +314,15 @@ class Resource  {
       unlink($this->url);
       $orig = clone $this;
       $this->url = $destination;
+      // set rid to 0 so save function will make a new copy.
+      $this->rid = 0;
       if ($this->save()) {
         module_invoke_all('resource_move', $this, $orig);
-        return ResourceFactory::loadId($this->rid);
+        return $this->loadId($this->rid);
       }
     }
     return FALSE;
   }
-
 
   /**
    * Save the current state of a drupal_file in the database.
@@ -316,16 +332,22 @@ class Resource  {
    */
   function save() {
     $this->timestamp = time();
-    $manager = DrupalStreamWrapperManager::singleton();
+    $manager = ResourceStreamWrapperManager::singleton();
     $class = $manager->streamWrapperClass(parse_url($this->url, PHP_URL_SCHEME));
 
     if ($class != get_class($this->streamWrapperManager())) {
       $this->streamWrapperHandler = new $class();
     }
+<<<<<<< resource.module
+    
+    $this->refresh();
+  
+=======
 
     $this->size = $this->streamWrapperHandler->size($this->url);
     $this->mime = $this->streamWrapperHandler->mime($this->url);
 
+>>>>>>> 1.4
     if (empty($this->fid)) {
       $result = drupal_write_record('resource', $this);
       module_invoke_all('resource_insert', $this);
@@ -334,7 +356,7 @@ class Resource  {
       $result = drupal_write_record('resource', $this, 'rid');
       module_invoke_all('resource_update', $this);
     }
-    return $result;
+    return ($result) ? $this : FALSE;;
   }
 
   /**
@@ -342,33 +364,44 @@ class Resource  {
    *
    * @return bool
    */
-  function set_status($bitmask = NULL) {
+  function status($bitmask = NULL) {
     if (is_null($bitmask)) {
-      return $file->status;
+      return $this->status;
     }
     elseif (db_query('UPDATE {files} SET status=%d', $bitmask, $this->fid)) {
       $this->status = $status;
-      module_invoke_all('file_set_status', $this, $status);
-      return TRUE;
+      module_invoke_all('resource_status', $this, $status);
+      return $this;
     }
     return FALSE;
   }
+<<<<<<< resource.module
+ 
+  /**
+   * refresh cache and stream wrapper based properties.
+   */ 
+  private function refresh() {
+=======
 
   function refresh() {
+>>>>>>> 1.4
     $this->htmlUrl = $this->streamWrapper->htmlUrl($this->url);
     $this->size = $this->streamWrapper->size($this->url);
     $this->mime = $this->streamWrapper->mime($this->url);
+    $this::cache('rid:'.$this->rid) = $this;
+    $this::cache('url:'.$this->url) = $this;
     return $this;
   }
+<<<<<<< resource.module
+=======
 }
 
 class ResourcePublic extends Resource {
   function url() { }
   function mime() { }
 }
+>>>>>>> 1.4
 
-class ResourcePrivate extends ResourcePublic {
-  function url() { }
 }
 
 class ResourceUpload extends Resource {
@@ -465,7 +498,9 @@ class ResourceUpload extends Resource {
       watchdog('file api', 'Upload error. Could not move uploaded file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->filepath));
       return FALSE;
     }
+    $this->cache('upload:' . $key, $this);
     return $file;
+
   }
 
   function upload_error($errno) {
@@ -501,6 +536,9 @@ class ResourceUpload extends Resource {
       default:
         return t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $source));
     }
+<<<<<<< resource.module
+  } 
+=======
   }
 
   // Use static load as the entry point to keep the API interface
@@ -514,12 +552,16 @@ class ResourceUpload extends Resource {
     }
   }
 
+>>>>>>> 1.4
 }
+<<<<<<< resource.module
+=======
 
 
+>>>>>>> 1.4
 
 class ResourceFactory {
-  static $resources;
+  static $cache;
 
   function __construct() {
   }
@@ -530,23 +572,42 @@ class ResourceFactory {
    * object loader it in combination with the static $files variable allows all
    * drupal file objects to also act as factories and share the same static cache.
    *
-   * @param string key (required) database column to use in where condition.
-   * @param int|string value (required) the value of the column to use in the where condition.
-   * @return object|bool A Drupal file object or FALSE if a file was not found.
-   * @see drupal_file::load(), drupal_file::load_path()
+   * @param string key (required) 
+   *    database column to use in where condition.
+   * @param int|string value (required) 
+   *    the value of the column to use in the where condition.
+   * @param bool reset
+   *    flag to for reloading of object from database.
+   * @return object|bool 
+   *    A Drupal file object or FALSE if a file was not found.
    */
+<<<<<<< resource.module
+  public function _load($column, $value, $reset = FALSE) {
+    // set a cache id based on key and value so we can statically cache 
+=======
   public function _load($column, $value) {
     // set a cache id based on key and value so we can statically cache
+>>>>>>> 1.4
     // all simple loads.
+<<<<<<< resource.module
+    $cid = $column . '::' . $value; 
+    if ($reset || empty(self::$cache[$cid])) {
+=======
     $cid = $column . '::' . $value;
     if (empty(self::$files[$cid])) {
+>>>>>>> 1.4
       $resource = db_fetch_object(db_query('SELECT f.* FROM {resource} r WHERE r.%s = %d', $column, $value));
       $resource = new Resource($r);
+      module_invoke_all('resource_load', $r);
     }
+<<<<<<< resource.module
+    self::$cache[$cid] = $r; 
+=======
     module_invoke_all('resource_load', $r);
     self::$resources[$cid] = $r;
+>>>>>>> 1.4
     // Files are not cloned, because there is in fact only one.
-    return self::$resources[$cid];
+    return self::$cache[$cid];
   }
 
   /**
@@ -556,8 +617,8 @@ class ResourceFactory {
    * @return object|bool A Drupal file object or FALSE if a file was not found.
    * @see: drupal_file::load()
    */
-  public function loadId($id) {
-    return $this->_load('rid', $id);
+  public function loadId($id, $reset = FALSE) {
+    return $this->_load('rid', $id, $reset);
   }
 
   /**
@@ -567,8 +628,8 @@ class ResourceFactory {
    * @return object|bool A Drupal file object or FALSE if a file was not found.
    * @see: drupal_file::load()
    */
-  public function loadUrl($url) {
-    return $this->_load('url', $url);
+  public function loadUrl($url, $reset = FALSE) {
+    return $this->_load('url', $url, $reset);
   }
 
   public function loadUpload($key) { }
@@ -579,13 +640,17 @@ class ResourceFactory {
   public function resetCache($cid = FALSE) {
     // no cache id, reset the entire cache.
     if (!$cid) {
-      self::$resources = array();
+      self::$cache = array();
     }
-    elseif (isset(self::$resources[$cid])) {
-      unset(self::$resources[$cid]);
+    elseif (isset(self::$cache[$cid])) {
+      unset(self::$cache[$cid]);
     }
   }
+}
 
+
+<<<<<<< resource.module
+=======
   // table relationship
   // relationship_id
   // left, (resource_id)
@@ -620,3 +685,4 @@ class ResourceFactory {
     // foreach row { $relatives[] = $this->loadId($relative->rid)->context($row) }
   }
 }
+>>>>>>> 1.4

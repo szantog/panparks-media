@@ -2,7 +2,37 @@
 // $Id$
 
 /**
+ * Generic PHP stream wrapper interface.
+ * @see: http://php.net/manual/en/function.stream-wrapper-register.php
+ */
+interface StreamWrapperInterface {
+  public function stream_open($url, $mode, $options, &$opened_url);
+  public function stream_close();
+  // Undocumented @see: http://us.php.net/flock
+  public function stream_lock($operation);
+  public function stream_read($count);
+  public function stream_write($data);
+  public function stream_eof();
+  public function stream_seek($offset, $whence);
+  public function stream_flush();
+  public function stream_tell();
+  public function stream_stat();
+  public function unlink($url) ;
+  public function rename($fromUrl, $toUrl);
+  public function mkdir($url, $mode, $options);
+  public function rmdir($url, $options);
+  public function url_stat($url, $flags);
+  public function dir_opendir($url, $options);
+  public function dir_readdir()  ;
+  public function dir_rewinddir();
+  public function dir_closedir() ;
+}
+
+
+/**
  * Definition for a Resource stream wrapper in Drupal.
+ * Extends the StreamWrapperInterface with methods expected by the
+ * Drupal Resource Classes.
  */
 interface ResourceStreamWrapperInterface extends StreamWrapperInterface {
 
@@ -29,33 +59,6 @@ interface ResourceStreamWrapperInterface extends StreamWrapperInterface {
    * @return string
    */
   function interpolateUrl($url);
-}
-
-/**
- * Generic PHP stream wrapper interface.
- * @see: http://php.net/manual/en/function.stream-wrapper-register.php
- */
-interface StreamWrapperInterface {
-  public function stream_open($url, $mode, $options, &$opened_url);
-  public function stream_close();
-  // Undocumented @see: http://us.php.net/flock
-  public function stream_lock($operation);
-  public function stream_read($count);
-  public function stream_write($data);
-  public function stream_eof();
-  public function stream_seek($offset, $whence);
-  public function stream_flush();
-  public function stream_tell();
-  public function stream_stat();
-  public function unlink($url) ;
-  public function rename($fromUrl, $toUrl);
-  public function mkdir($url, $mode, $options);
-  public function rmdir($url, $options);
-  public function url_stat($url, $flags);
-  public function dir_opendir($url, $options);
-  public function dir_readdir()  ;
-  public function dir_rewinddir();
-  public function dir_closedir() ;
 }
 
 

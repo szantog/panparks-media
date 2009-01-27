@@ -3,7 +3,9 @@
 
 /**
  * The StreamWrapperManager provides a class for managing and querying
- *  user defined stream wrappers in PHP.
+ * user defined stream wrappers in PHP. PHP's internal stream_get_wrappers
+ * doesn't return the class registered to handle a stream. We need to be
+ * able to find the handler class for instantiation.
  */
 
 class ResourceStreamWrapperManager {
