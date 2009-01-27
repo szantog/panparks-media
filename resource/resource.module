@@ -17,21 +17,7 @@
  * class, and will share configuration options and settings.
  *
  */
-<<<<<<< resource.module
- 
-=======
 
-/**
- * @todo:
- * interface PHP stream wrapper
- * interface DrupalStreamWrapperExtends PHP stream wrapper {
- *    function htmlUrl();
- *    function mime();
- *
- *
- */
-
->>>>>>> 1.4
 /**
  * Implementation of hook_boot
  *
@@ -39,11 +25,6 @@
  */
 
 function resource_boot() {
-  $path = variable_get('resource_path', '');
-  require_once($path .'/ResourceStreamWrapperManager.inc');
-  require_once($path .'/ResourceStreamWrapper.inc');
-  require_once($path .'/ResourcePublicStreamWrapper.inc');
-  require_once($path .'/ResourcePrivateStreamWrapper.inc');
   $manager = ResourceStreamWrapperManager::singleton();
   $manager->register('public',   'ResourcePublicStreamWrapper');
   $manager->register('private',  'ResourcePrivateStreamWrapper');
@@ -180,14 +161,13 @@ class Resource extends ResourceFactory {
   /**
    * Resource constructor.
    *
-   * @param object $resource (optional) 
+   * @param object $resource (optional)
    *   an object reflecting a resource row in the database;
    */
   protected function __construct($resource = NULL) {
     $this->streamManager = ResourceStreamWrapperManager::singleton();
     $class = $this->streamManager->class(parse_url($resource->url, PHP_URL_SCHEME));
     $this->streamWrapper = new $class;
-<<<<<<< resource.module
     if ($resource) {
       $this->rid = isset($resource->rid) ? $resource->rid : 0;
       $this->uid = $resource->uid;
@@ -195,18 +175,9 @@ class Resource extends ResourceFactory {
       $this->mime = $resoruce->mime;
       $this->size = $resource->size;
       $this->name = $resource->name;
-      $this->htmlUrl = $this->streamWrapper->htmlUrl($this->url);  
+      $this->htmlUrl = $this->streamWrapper->htmlUrl($this->url);
       $this->timestamp = $resource->timestamp;
     }
-=======
-
-    $this->rid = isset($resource->rid) ? $resource->rid : 0;
-    $this->url = $resource->url;
-    $this->mime = $resoruce->mime;
-    $this->size = $resource->size;
-    $this->name = $resource->name;
-    $this->htmlUrl = $this->streamWrapper->htmlUrl($this->url);
->>>>>>> 1.4
   }
 
   /**
@@ -338,16 +309,9 @@ class Resource extends ResourceFactory {
     if ($class != get_class($this->streamWrapperManager())) {
       $this->streamWrapperHandler = new $class();
     }
-<<<<<<< resource.module
-    
+
     $this->refresh();
-  
-=======
 
-    $this->size = $this->streamWrapperHandler->size($this->url);
-    $this->mime = $this->streamWrapperHandler->mime($this->url);
-
->>>>>>> 1.4
     if (empty($this->fid)) {
       $result = drupal_write_record('resource', $this);
       module_invoke_all('resource_insert', $this);
@@ -375,16 +339,8 @@ class Resource extends ResourceFactory {
     }
     return FALSE;
   }
-<<<<<<< resource.module
- 
-  /**
-   * refresh cache and stream wrapper based properties.
-   */ 
-  private function refresh() {
-=======
 
   function refresh() {
->>>>>>> 1.4
     $this->htmlUrl = $this->streamWrapper->htmlUrl($this->url);
     $this->size = $this->streamWrapper->size($this->url);
     $this->mime = $this->streamWrapper->mime($this->url);
@@ -392,15 +348,6 @@ class Resource extends ResourceFactory {
     $this::cache('url:'.$this->url) = $this;
     return $this;
   }
-<<<<<<< resource.module
-=======
-}
-
-class ResourcePublic extends Resource {
-  function url() { }
-  function mime() { }
-}
->>>>>>> 1.4
 
 }
 
@@ -536,29 +483,8 @@ class ResourceUpload extends Resource {
       default:
         return t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $source));
     }
-<<<<<<< resource.module
-  } 
-=======
   }
-
-  // Use static load as the entry point to keep the API interface
-  // consistent.
-  function load($source) {
-    if (isset(self::$files[$source])) return self::$files[$source];
-
-    // attempt to save the upload.
-    if ($file = self::save_upload($source)) {
-      return new ResourcePublic($file);
-    }
-  }
-
->>>>>>> 1.4
 }
-<<<<<<< resource.module
-=======
-
-
->>>>>>> 1.4
 
 class ResourceFactory {
   static $cache;
@@ -572,40 +498,25 @@ class ResourceFactory {
    * object loader it in combination with the static $files variable allows all
    * drupal file objects to also act as factories and share the same static cache.
    *
-   * @param string key (required) 
+   * @param string key (required)
    *    database column to use in where condition.
-   * @param int|string value (required) 
+   * @param int|string value (required)
    *    the value of the column to use in the where condition.
    * @param bool reset
    *    flag to for reloading of object from database.
-   * @return object|bool 
+   * @return object|bool
    *    A Drupal file object or FALSE if a file was not found.
    */
-<<<<<<< resource.module
   public function _load($column, $value, $reset = FALSE) {
-    // set a cache id based on key and value so we can statically cache 
-=======
-  public function _load($column, $value) {
     // set a cache id based on key and value so we can statically cache
->>>>>>> 1.4
     // all simple loads.
-<<<<<<< resource.module
-    $cid = $column . '::' . $value; 
-    if ($reset || empty(self::$cache[$cid])) {
-=======
     $cid = $column . '::' . $value;
-    if (empty(self::$files[$cid])) {
->>>>>>> 1.4
+    if ($reset || empty(self::$cache[$cid])) {
       $resource = db_fetch_object(db_query('SELECT f.* FROM {resource} r WHERE r.%s = %d', $column, $value));
       $resource = new Resource($r);
       module_invoke_all('resource_load', $r);
     }
-<<<<<<< resource.module
-    self::$cache[$cid] = $r; 
-=======
-    module_invoke_all('resource_load', $r);
-    self::$resources[$cid] = $r;
->>>>>>> 1.4
+    self::$cache[$cid] = $r;
     // Files are not cloned, because there is in fact only one.
     return self::$cache[$cid];
   }
@@ -647,42 +558,3 @@ class ResourceFactory {
     }
   }
 }
-
-
-<<<<<<< resource.module
-=======
-  // table relationship
-  // relationship_id
-  // left, (resource_id)
-  // relationship ( parent_of, member_of, friend_of, ... )
-  // right, (resource_id)
-
-  // table resource_formatter
-  // relationship_id
-  // display_context(node_full, node_teaser, comment, block, profile, default)
-  // media(screen, print),
-  // formatter
-  // formatter_arguments
-  function loadChildren($rid, $context = NULL, $media = NULL) {
-    // select * from {resource_relationships} where parent = $resource->id;
-    // foreach child { $children[] = $this->loadId($child->rid)->context($context); }
-    // return $children;
-  }
-  function loadParents($rid, $context = NULL, $media = NULL) {
-    // select * from {resource_relationships} where child = $resource->id;
-    // foreach parent { $parent[] = $this->loadId($child->rid)->context($context); }
-    // return $parents;
-  }
-
-  function loadPeers($rid, $context, $media)  {}
-  /**
-   * @param key    primary key for where clause
-   * @param value  to limit key to.
-    think about this context thing later..
-   */
-  function loadRelationship($key, $id, $context = NULL, $media = NULL) {
-    // select * from relationships where $key = $candidate AND context = $context
-    // foreach row { $relatives[] = $this->loadId($relative->rid)->context($row) }
-  }
-}
->>>>>>> 1.4
