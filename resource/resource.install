@@ -2,7 +2,6 @@
 // $Id$
 
 function resource_install() {
-  variable_set('resource_path', drupal_get_path('module', 'resource'));
   drupal_install_schema('resource');
 }
 
