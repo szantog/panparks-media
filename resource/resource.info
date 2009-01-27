@@ -2,5 +2,9 @@
 name = Resource
 description = A stream wrapper enabled replacement for core filehandling.
 package = Media
-core = 6.x
-
+core = 7.x
+files[] = resource.module
+files[] = ResourceStreamWrapperManager.inc
+files[] = ResourceStreamWrapper.inc
+files[] = ResourcePublicStreamWrapper.inc
+files[] = ResourcePrivateStreamWrapper.inc
