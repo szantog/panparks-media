@@ -8,14 +8,8 @@
  * The Resource API superceeds Drupal's file api, providing an interface to
  * manage Resources identified by a URL.
  *
- * There are two base classes, Resource and ResourceScheme, that constitue the ResourceAPI.
- * The Resource class provides a high level interaction with resources including event hooks,
- * DB synchronization, and support methods including, but not limited, to url generation and
- * mime identification. The ResourceScheme is a user defined stream wrapper for PHP.
- *
- * In most cases each class extending Resource will have a complimentary ResourceScheme
- * class, and will share configuration options and settings.
- *
+ * The resource system depends on having a ResourceStreamWrapperInterface 
+ * implemented for handling each URL scheme.
  */
 
 /**
