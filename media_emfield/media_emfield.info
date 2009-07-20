@@ -4,3 +4,4 @@ name = Media - Embeded Media Module
 description = Provides integration with Embeded Media Field
 package = "Media"
 core = 6.x
+php = 5.2

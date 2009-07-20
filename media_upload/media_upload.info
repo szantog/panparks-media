@@ -1,6 +1,10 @@
 ; $Id$
 
-name = Media Drupal Upload Module
-description = Provides integration with the Drupal Upload Module
-package = "Media"
-core = 6.x
+name = Drupal Upload Module Bridge
+description = Integrated Drupal's Upload module with Media.
+package = Media
+core = 7.x
+php = 5.2
+dependencies[] = media
+dependencies[] = upload
+files[] = media_upload.module

@@ -1,6 +1,10 @@
 ; $Id$
 
-name = Media API Module
-description = Provides core media api
-package = "Media"
-core = 6.x
+name = Media Core
+description = Provides the core Media API
+package = Media
+core = 7.x
+php = 5.2
+files[] = media.install
+files[] = media.module
+files[] = media_ahah.inc
