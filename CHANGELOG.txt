@@ -2,4 +2,4 @@
 
 July 2009
 ---------
-* Clone D6 branch (jmstacey).
+* Untested rough sync up with D6 branch (jmstacey).
