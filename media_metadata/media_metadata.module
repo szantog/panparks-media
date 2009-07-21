@@ -7,22 +7,21 @@
  */
 
 /**
- *  Returns the metadata keys associated with a file stream mimetype.
+ * Returns the metadata keys associated with a file stream mimetype.
  *
- *  The hook_media_metadata_keys of all implementing modules will be invoked
- *  with the mimetype to build a list of keys to be collected and saved for
- *  file resources of that mimetype.
+ * Defines hook_media_metadata_keys. All implementing modules will be invoked
+ * with the MIME type abd a list of keys to be collected and saved will be built.
  *
- *  @param string $mimetype
- *    The file mimetype to return the keys. If '*' is passed, then only the
- *    keys stored for all mimetypes will be returned.
- *  @param boolean $exclusive
- *    If TRUE, then only the keys exclusive to that metadata will be returned.
- *    Otherwise, also include all metadata for the wildcard '*' mimetype.
- *  @param boolean $reset
- *    If TRUE, then rebuild the static cache of keys.
- *  @return array
- *    An array of unique metadata keys that will be saved for that mimetype.
+ * @param string $mimetype
+ *   The file mimetype to return the keys. If '*' is passed, then only the
+ *   keys stored for all mimetypes will be returned.
+ * @param boolean $exclusive
+ *   If TRUE, then only the keys exclusive to that metadata will be returned.
+ *   Otherwise, also include all metadata for the wildcard '*' mimetype.
+ * @param boolean $reset
+ *   If TRUE, then rebuild the static cache of keys.
+ * @return array
+ *   An array of unique metadata keys that will be saved for that mimetype.
  */
 function media_metadata_keys($mimetype = '*', $exclusive = FALSE, $reset = FALSE) {
   static $keys;
@@ -50,7 +49,15 @@ function media_metadata_keys($mimetype = '*', $exclusive = FALSE, $reset = FALSE
   return ($exclusive || ($mimetype == '*')) ? $keys[$mimetype] : array_unique(array_merge($keys['*'], $keys[$mimetype]));
 }
 
-// @TODO: Add the file info here as well.
+/**
+ * Implements hook_form and defines hook_media_metadata_form.
+ *
+ * TODO: Document
+ * TODO: Add the file info here as well.
+ *
+ * @param $form_state
+ * @param $mimetype
+ */
 function media_metadata_form($form_state, $mimetype = '*') {
   $form = module_invoke_all('media_metadata_form', $form_state, $mimetype);
   $form['mimetype'] = array(
@@ -60,6 +67,16 @@ function media_metadata_form($form_state, $mimetype = '*') {
   $form['#submit'] = array('media_metadata_form_submit');
 }
 
+/**
+ * Metadata form submission callback.
+ *
+ * This function is called when the Media Metadata form is submitted.
+ *
+ * @param $form
+ *   The form array.
+ * @param &$form_state
+ *   Reference to the $form_state array, the contents of which are modified.
+ */
 function media_metadata_form_submit($form, &$form_state) {
   $mimetype = $form_state['values']['mimetype'];
   $keys = media_metadata_keys($mimetype);
@@ -68,4 +85,106 @@ function media_metadata_form_submit($form, &$form_state) {
     $values[$key] = $form_state['values'][$key];
   }
   // @TODO: Grab the file info and save the record.
+}
+
+/**
+ * API Functions
+ */
+
+/**
+ * Returns the key value pairs of the given file ID.
+ *
+ * Given a file ID, this function will return an associative array containing
+ * it's metadata.
+ *
+ * If there is data to be returned, the associative array will always contain
+ * mid, fid, name, and data.
+ *
+ * @param $fid
+ *   A file ID.
+ * @param $unhandled
+ *   TRUE returns ALL key value pairs even if they are no longer managed. By default only
+ *   key value pairs that have a handler will be returned. This is to protect against
+ *   metadata added by another module that no longer exists.
+ * @return
+ *   Returns an array of file IDs ({file}.fid) that match the given key value pair.
+ *   An empty array is returned if there are no results.
+ */
+function media_metadata_by_fid($fid, $unhandled = FALSE) {
+  // TODO: Implement
+}
+
+/**
+ * Returns an array of file IDs that match the given key value pair.
+ *
+ * Given a key name or data (or both), the related file IDs will be returned.
+ *
+ * If there is data to be returned, the associative array will always contain
+ * mid, fid, name, and data.
+ *
+ * @param $name
+ *   An optional key name.
+ * @param $data
+ *   An optional data value.
+ * @param $unhandled
+ *   TRUE returns ALL key value pairs even if they are no longer managed. By default only
+ *   key value pairs that have a handler will be returned. This is to protect against
+ *   metadata added by another module that no longer exists.
+ * @return
+ *   Returns an array of file IDs ({file}.fid) that match the given key value pair.
+ *   An empty array is returned if there are no results.
+ */
+function media_metadata_by_pair($name = NULL, $data = NULL, $unhandled = FALSE) {
+  // TODO: Implement
+}
+
+/**
+ * Returns the key value pairs of the given URI.
+ *
+ * This is a convenience method. If you already have the file ID use
+ * media_metadata_by_fid(), otherwise unecessary resources will be wasted.
+ *
+ * If there is data to be returned, the associative array will always contain
+ * mid, fid, name, and data.
+ *
+ * @param $uri
+ *   A stream such as public://foobar.txt
+ * @param $unhandled
+ *   TRUE returns ALL key value pairs even if they are no longer managed. By default only
+ *   key value pairs that have a handler will be returned. This is to protect against
+ *   metadata added by another module that no longer exists.
+ * @return
+ *   Returns an array of file IDs ({file}.fid) that match the given key value pair.
+ *   An empty array is returned if there are no results.
+ */
+function media_metadata_by_uri($uri, $unhandled = FALSE) {
+  // TODO: Implement
+}
+
+/**
+ * Add a new metadata key value pair to the file ID.
+ *
+ * @param $fid
+ *   The file ID.
+ * @param $name
+ *   The key name.
+ * @param $data
+ *   The data value.
+ * @return
+ *   Returns the new mid of the key value pair on success, or FALSE on failure.
+ */
+function media_metadata_add($fid, $name, $data) {
+  // TODO: Implement
+}
+
+/**
+ * Deletes a metadata key value pair.
+ *
+ * @param $mid
+ *   The metadata ID.
+ * @return
+ *   Returns TRUE on success, or FALSE on failure.
+ */
+function media_metadata_delete($mid) {
+  // TODO: Implement
 }

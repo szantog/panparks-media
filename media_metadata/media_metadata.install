@@ -2,6 +2,11 @@
 // $Id$
 
 /**
+ * @file
+ * Install, update, and uninstall functions for the Media Metadata module.
+ */
+
+/**
  * Implementation of hook_install().
  */
 function media_metadata_install() {
@@ -15,7 +20,9 @@ function media_metadata_uninstall() {
   drupal_uninstall_schema('media_metadata');
 
   // Remove all variables that live in our namespace.
-  db_query("DELETE FROM {variable} WHERE name LIKE 'media_metadata_%'");
+  db_delete('variable')
+    ->condition('name', 'media_metadata_%', 'LIKE')
+    ->execute();
 }
 
 /**
@@ -26,24 +33,24 @@ function media_metadata_schema() {
     'description' => 'Stores file resource metadata.',
     'fields'      => array(
       'mid'         => array(
-        'description' => 'The primary identifier for a metadata pair.',
         'type'        => 'serial',
         'unsigned'    => TRUE,
-        'not null'    => TRUE
+        'not null'    => TRUE,
+        'description' => 'The primary identifier for a metadata pair.',
       ),
       'fid' => array(
         'type'        => 'int',
         'unsigned'    => TRUE,
         'not null'    => TRUE,
         'default'     => 0,
-        'description' => 'Primary Key: The {files}.fid.',
+        'description' => 'Primary Key: The {file}.fid.',
       ),
       'name' => array(
+        'type'        => 'varchar',
         'default'     => '',
-        'description' => 'The metadata key name.',
         'length'      => 255,
         'not null'    => TRUE,
-        'type'        => 'varchar',
+        'description' => 'The metadata key name.',
       ),
       'data' => array(
         'type'        => 'text',
@@ -51,10 +58,11 @@ function media_metadata_schema() {
         'description' => 'The value of metadata value pairs that are related to the file resource.',
       ),
     ),
-    'primary key'     => array('mid'),
-    'indexes'         => array('fid', 'name'),
+    'primary key' => array('mid'),
+    'indexes'     => array(
+      'meta_key'   => array('fid', 'name'),
+    ),
   );
   
   return $schema;
 }
-

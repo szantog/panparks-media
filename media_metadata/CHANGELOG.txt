@@ -4,4 +4,5 @@
 
 July 2009
 -------------
+* media_metadata.install brought up to D7 spec (jmstacey).
 * Clone initial module from D6 branch by aaron (jmstacey).
