@@ -33,12 +33,10 @@ function media_menu() {
   $items['media/js'] = array(
     'page callback' => 'media_ahah_formatter_load',
     'access arguments' => array('access content'),
-    'file' => 'media_ahah.inc',
   );
   $items['media/metadata/js'] = array(
     'page callback' => 'media_ahah_metadata_ahah',
     'access arguments' => array('access content'),
-    'file' => 'media_ahah.inc',
   );
 
   // Default settings, for content types that do not have their own.
@@ -46,9 +44,8 @@ function media_menu() {
     'title' => 'Media settings',
     'description' => 'Configure Global Media settings, including default content type settings.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('media_settings_global', 'global'),
+    'page arguments' => array('media_settings_global'),
     'access arguments' => array('administer media'),
-    'file' => 'media_settings.inc',
     'weight' => 3,
   );
 
@@ -107,19 +104,16 @@ function media_theme() {
   return array(
     // The media file browser form.
     'media_file_browser' => array(
-      'file' => 'media_theme.inc',
       'arguments' => array('element' => NULL),
     ),
 
     // The default media file list form element.
     'media_file_list' => array(
-      'file' => 'media_theme.inc',
       'arguments' => array('element' => NULL),
     ),
 
     // The media browser pane.
     'media_browser_pane' => array(
-      'file' => 'media_theme.inc',
       'arguments' => array('form' => array()),
     ),
   );

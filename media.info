@@ -8,3 +8,5 @@ php = 5.2
 files[] = media.install
 files[] = media.module
 files[] = media_ahah.inc
+files[] = media_settings.inc
+files[] = media_theme.inc

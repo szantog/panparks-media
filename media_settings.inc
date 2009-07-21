@@ -77,27 +77,23 @@ function media_settings_content_type(&$form, $type_name = NULL) {
 
 /**
  * Provide global settings.
+ * 
+ * Global settings are currently just defaults for content types.
  *
- * @param array $form
+ * @param $form
  *  A form structure.
- * @param string $type_name
- *  Content type name.
- * @return array
- *  A form structure.
+ * @return
+ *  A form structured array.
  */
-function media_settings_global($form = array(), $type_name = NULL) {
-  // Create global options form structure.
-  $form = array();
+function media_settings_global($form) {
+  $settings_form = array();
   
-  // Global settings are currently just defaults for content types
-  if ($type_name == 'global') {
-    $form['media_global_enabled'] = array(
-      '#title'          => t('Media resource browser'),
-      '#type'           => 'checkbox',
-      '#description'    => t('Enable or Disable the Media resource browser for all types, unless specifically set for a given type.'),
-      '#default_value'  => variable_get('media_global_enabled', 1),
-    );
-  }
+  $settings_form['media_global_enabled'] = array(
+    '#title'          => t('Media resource browser'),
+    '#type'           => 'checkbox',
+    '#description'    => t('Enable or Disable the Media resource browser for all types, unless specifically set for a given type.'),
+    '#default_value'  => variable_get('media_global_enabled', 1),
+  );
 
-  return system_settings_form($form);
+  return system_settings_form($settings_form);
 }
