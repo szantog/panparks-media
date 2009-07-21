@@ -18,6 +18,7 @@
 function theme_media_file_browser($element) {
   // Add the CSS for our display.
   $output = '<div class="media browser">'. $element .'</div>';
+  
   return $output;
 }
 
@@ -41,7 +42,7 @@ function theme_media_file_list($element) {
  * @return string
  */
 function theme_media_browser_pane($form) {
-  $output = array();
+  $output   = array();
   
   // render the drawers
   $output[] = '<div'. drupal_attributes($form['#attributes']) .'>';

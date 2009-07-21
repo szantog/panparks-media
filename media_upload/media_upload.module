@@ -25,7 +25,7 @@ function media_upload_media_register() {
 		'types'       => '*',
 		'description'	=> t("Displays all of current user's files."),
 		'callbacks'   => array(
-			'resource'  	=> 'media_upload_user_files_select',
+			'resource'    => 'media_upload_user_files_select',
 		),
 		'fields'      => array('attachments', 'filefield'),
 	);
@@ -98,15 +98,15 @@ function media_upload_user_files_select($node_type, $field, $uid) {
 
   while ($file = db_fetch_array($results)) {
     $files[] = array(
-      'uri' => $file['filepath'],
+      'uri'      => $file['filepath'],
       'filename' => $file['filename'],
-      'meta' => '',
+      'meta'     => '',
     );
   }
 
   $return = array(
     t('My files') => array(
-      t('Local') => media_resource_display_user_files_form($files, t('Your files')),
+      t('Local')    => media_resource_display_user_files_form($files, t('Your files')),
     )
   );
 
@@ -126,12 +126,12 @@ function media_upload_user_files_select($node_type, $field, $uid) {
 function media_upload_formatter_form($node_type, $field, $file_extension, $uri) {
   if ($uri) {
     $form['display'] = array(
-      '#type' => 'item',
+      '#type'  => 'item',
       '#value' => l($uri, $uri),
     );
     $form['list'] = array(
-      '#type' => 'checkbox',
-      '#title' => 'List file',
+      '#type'          => 'checkbox',
+      '#title'         => 'List file',
       '#default_value' => TRUE,
     );
   }
@@ -152,7 +152,7 @@ function media_upload_formatter_form($node_type, $field, $file_extension, $uri) 
 function media_upload_resource_add_file($node_type, $field, $uid) {
   return array(
     t('Add files') => array(
-      t('New file') => media_resource_display_upload_form(),
+      t('New file')  => media_resource_display_upload_form(),
     )
   );
 }
@@ -180,9 +180,10 @@ function media_upload_resource_embed_file($node_type, $field, $uid) {
  */
 function _media_upload_display_embed_form() {
   $form['media_upload']['upload'] = array(
-    '#type' => 'textarea',
+    '#type'  => 'textarea',
     '#title' => t('Upload your file'),
    );
+   
    return $form;
 }
 
@@ -196,5 +197,4 @@ function media_upload_media_action(&$form, $form_state, $op = '') {
   dsm($op);
   dsm($form_state);
   dsm($form);
-  
 }

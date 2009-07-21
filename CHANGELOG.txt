@@ -2,9 +2,10 @@
 
 July 2009
 ---------
-* Drupal 7 compatability
+* Drupal 7 compatability (jmstacey)
   * Update .info files.
   * Added necessary files to new registry.
   * Removed 'file' keys from hook_menu().
   * Global media settings page fixed.
+* Code styling cleanup (jmstacey).
 * Untested rough sync up with D6 branch (jmstacey).

@@ -7,10 +7,10 @@
  */
 
 /**
- * Returns the metadata keys associated with a file stream mimetype.
+ * Returns the metadata keys associated with a file stream MIME type.
  *
  * Defines hook_media_metadata_keys. All implementing modules will be invoked
- * with the MIME type abd a list of keys to be collected and saved will be built.
+ * with the MIME type and a list of keys to be collected and saved will be built.
  *
  * @param string $mimetype
  *   The file mimetype to return the keys. If '*' is passed, then only the
@@ -28,8 +28,8 @@ function media_metadata_keys($mimetype = '*', $exclusive = FALSE, $reset = FALSE
 
   // Build our static cache.
   if (is_null($keys)) {
-    $keys = array();
     // Collect all metadata keys for the wildcard/all '*' mimetype.
+    $keys      = array();
     $keys['*'] = module_invoke_all('media_metadata_keys', '*');
   }
 
@@ -60,10 +60,12 @@ function media_metadata_keys($mimetype = '*', $exclusive = FALSE, $reset = FALSE
  */
 function media_metadata_form($form_state, $mimetype = '*') {
   $form = module_invoke_all('media_metadata_form', $form_state, $mimetype);
+  
   $form['mimetype'] = array(
-    '#type' => 'value',
+    '#type'  => 'value',
     '#value' => $mimetype,
   );
+  
   $form['#submit'] = array('media_metadata_form_submit');
 }
 
@@ -79,8 +81,9 @@ function media_metadata_form($form_state, $mimetype = '*') {
  */
 function media_metadata_form_submit($form, &$form_state) {
   $mimetype = $form_state['values']['mimetype'];
-  $keys = media_metadata_keys($mimetype);
-  $values = array();
+  $keys     = media_metadata_keys($mimetype);
+  $values   = array();
+  
   foreach ($keys as $key) {
     $values[$key] = $form_state['values'][$key];
   }
