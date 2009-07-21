@@ -8,3 +8,4 @@
 // Test saving metadata
 // Test deleing metadata
 // Test hook_media_metadata_form
+// Test hook_media_metadata_keys
