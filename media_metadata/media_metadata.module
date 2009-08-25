@@ -110,12 +110,12 @@ function media_metadata_form_submit($form, &$form_state) {
  *   key value pairs that have a handler will be returned. This is to protect against
  *   metadata added by another module that no longer exists.
  * @return
- *   Returns an array of file IDs ({file}.fid) that match the given key value pair.
+ *   Returns an associative array of metadata records, keyed by mid.
  *   An empty array is returned if there are no results.
  */
 function media_metadata_by_fid($fid, $unhandled = FALSE) {
   $metadata = array();
-  $result = db_query("SELECT name, data FROM {media_metadata} WHERE fid = :fid", array(
+  $result = db_query("SELECT mid, name, data FROM {media_metadata} WHERE fid = :fid", array(
     ':fid' => $fid,
   ));
   // @TODO: Get only the keys handled for the file's MIMEtype.
@@ -124,7 +124,7 @@ function media_metadata_by_fid($fid, $unhandled = FALSE) {
     // Filter so that only keys handled by a registered module are returned,
     // unless $unhandled is TRUE.
     if ($unhandled || in_array($keys, $record->name)) {
-      $metadata[$record->name] = $record->data;
+      $metadata[$record->mid] = (array)$record;
     }
   }
   return $metadata;

@@ -1,9 +1,11 @@
 // $Id$
 
-/** Changelog for media_metadatad.module **/
+/** Changelog for media_metadata.module **/
 
 August 2009
 -----------
+* media_metadata_by_fid Returns an associative array of metadata records,
+  keyed by mid. (aaron)
 * Filter media_metadata_by_fid so that only keys handled by a registered module
   are returned (aaron).
 * Begin implementation of media_metadata_by_fid() (aaron).
