@@ -104,6 +104,7 @@ function media_metadata_form_submit($form, &$form_state) {
  * following values:
  *  ->mid, the unique serial ID for the record;
  *  ->fid, the associated File ID for the metadata;
+ *  ->filemime, the associated MIMEtype for the associated File;
  *  ->name, the metadata key; and,
  *  ->data, the metadata value.
  *
@@ -119,7 +120,7 @@ function media_metadata_form_submit($form, &$form_state) {
  */
 function media_metadata_by_fid($fid, $unhandled = FALSE) {
   $metadata = array();
-  $result = db_query("SELECT m.mid, m.fid, m.name, m.data, f.filemime FROM {media_metadata} m INNER JOIN {file} f ON f.fid = m.fid WHERE m.fid = :fid", array(
+  $result = db_query("SELECT m.mid, m.fid, f.filemime, m.name, m.data FROM {media_metadata} m INNER JOIN {file} f ON f.fid = m.fid WHERE m.fid = :fid", array(
     ':fid' => $fid,
   ));
   foreach ($result as $record) {
