@@ -98,10 +98,14 @@ function media_metadata_form_submit($form, &$form_state) {
  * Returns the key value pairs of the given file ID.
  *
  * Given a file ID, this function will return an associative array containing
- * it's metadata.
+ * its metadata.
  *
- * If there is data to be returned, the associative array will always contain
- * mid, fid, name, and data.
+ * If there is data to be returned, each record will be an object with the
+ * following values:
+ *  ->mid, the unique serial ID for the record;
+ *  ->fid, the associated File ID for the metadata;
+ *  ->name, the metadata key; and,
+ *  ->data, the metadata value.
  *
  * @param $fid
  *   A file ID.
@@ -115,16 +119,18 @@ function media_metadata_form_submit($form, &$form_state) {
  */
 function media_metadata_by_fid($fid, $unhandled = FALSE) {
   $metadata = array();
-  $result = db_query("SELECT mid, name, data FROM {media_metadata} WHERE fid = :fid", array(
+  $result = db_query("SELECT m.mid, m.fid, m.name, m.data, f.filemime FROM {media_metadata} m INNER JOIN {file} f ON f.fid = m.fid WHERE m.fid = :fid", array(
     ':fid' => $fid,
   ));
-  // @TODO: Get only the keys handled for the file's MIMEtype.
-  $keys = media_metadata_keys();
   foreach ($result as $record) {
+    if (!isset($keys)) {
+      // Get only the keys handled for the file's MIMEtype.
+      $keys = media_metadata_keys($record->mimetype);
+    }
     // Filter so that only keys handled by a registered module are returned,
     // unless $unhandled is TRUE.
     if ($unhandled || in_array($keys, $record->name)) {
-      $metadata[$record->mid] = (array)$record;
+      $metadata[$record->mid] = $record;
     }
   }
   return $metadata;

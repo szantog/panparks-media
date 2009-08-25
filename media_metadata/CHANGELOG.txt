@@ -4,6 +4,7 @@
 
 August 2009
 -----------
+* Get only the keys handled for the file's MIMEtype. (aaron)
 * media_metadata_by_fid Returns an associative array of metadata records,
   keyed by mid. (aaron)
 * Filter media_metadata_by_fid so that only keys handled by a registered module
