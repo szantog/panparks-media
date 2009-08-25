@@ -63,6 +63,6 @@ function media_metadata_schema() {
       'meta_key'   => array('fid', 'name'),
     ),
   );
-  
+
   return $schema;
 }

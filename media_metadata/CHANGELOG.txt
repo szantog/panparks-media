@@ -2,6 +2,10 @@
 
 /** Changelog for media_metadatad.module **/
 
+August 2009
+-----------
+* Create media_metadata_add() (aaron).
+
 July 2009
 -------------
 * media_metadata.install brought up to D7 spec (jmstacey).

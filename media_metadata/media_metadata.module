@@ -60,12 +60,12 @@ function media_metadata_keys($mimetype = '*', $exclusive = FALSE, $reset = FALSE
  */
 function media_metadata_form($form_state, $mimetype = '*') {
   $form = module_invoke_all('media_metadata_form', $form_state, $mimetype);
-  
+
   $form['mimetype'] = array(
     '#type'  => 'value',
     '#value' => $mimetype,
   );
-  
+
   $form['#submit'] = array('media_metadata_form_submit');
 }
 
@@ -83,7 +83,7 @@ function media_metadata_form_submit($form, &$form_state) {
   $mimetype = $form_state['values']['mimetype'];
   $keys     = media_metadata_keys($mimetype);
   $values   = array();
-  
+
   foreach ($keys as $key) {
     $values[$key] = $form_state['values'][$key];
   }
@@ -177,7 +177,14 @@ function media_metadata_by_uri($uri, $unhandled = FALSE) {
  *   Returns the new mid of the key value pair on success, or FALSE on failure.
  */
 function media_metadata_add($fid, $name, $data) {
-  // TODO: Implement
+  // Create the db record containing the metadata to be saved.
+  $record = array(
+    'fid' => $fid,
+    'name' => $name,
+    'data' => $data,
+  );
+  drupal_write_record('media_metadata', $record);
+  return $record->mid;
 }
 
 /**
