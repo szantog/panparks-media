@@ -125,7 +125,7 @@ function media_metadata_by_fid($fid, $unhandled = FALSE) {
   ));
   foreach ($result as $record) {
     if (!isset($keys)) {
-      // Get only the keys handled for the file's MIMEtype.
+      // Get only the non-exclusive keys handled for the file's MIMEtype.
       $keys = media_metadata_keys($record->mimetype);
     }
     // Filter so that only keys handled by a registered module are returned,
