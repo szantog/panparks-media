@@ -177,14 +177,13 @@ function media_metadata_by_uri($uri, $unhandled = FALSE) {
  *   Returns the new mid of the key value pair on success, or FALSE on failure.
  */
 function media_metadata_add($fid, $name, $data) {
-  // Create the db record containing the metadata to be saved.
-  $record = array(
+  return db_insert('media_metadata')
+  ->fields(array(
     'fid' => $fid,
     'name' => $name,
     'data' => $data,
-  );
-  drupal_write_record('media_metadata', $record);
-  return $record->mid;
+  ))
+  ->execute();
 }
 
 /**
@@ -196,5 +195,7 @@ function media_metadata_add($fid, $name, $data) {
  *   Returns TRUE on success, or FALSE on failure.
  */
 function media_metadata_delete($mid) {
-  // TODO: Implement
+  db_delete('media_metadata')
+  ->condition('mid', $mid)
+  ->execute();
 }
