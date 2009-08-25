@@ -114,7 +114,15 @@ function media_metadata_form_submit($form, &$form_state) {
  *   An empty array is returned if there are no results.
  */
 function media_metadata_by_fid($fid, $unhandled = FALSE) {
-  // TODO: Implement
+  $metadata = array();
+  $result = db_query("SELECT name, data FROM {media_metadata} WHERE fid = :fid", array(
+    ':fid' => $fid,
+  ));
+  foreach ($result as $record) {
+    // @TODO: Honor $unhandled. This currently returns the raw result from the query.
+    $metadata[$record->name] = $record->data;
+  }
+  return $metadata;
 }
 
 /**
