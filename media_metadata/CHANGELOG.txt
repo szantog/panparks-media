@@ -4,6 +4,8 @@
 
 August 2009
 -----------
+* Filter media_metadata_by_fid so that only keys handled by a registered module
+  are returned (aaron).
 * Begin implementation of media_metadata_by_fid() (aaron).
 * Remove return value in media_metadata_delete documentation (aaron).
 * Implement media_metadata_delete() (aaron).

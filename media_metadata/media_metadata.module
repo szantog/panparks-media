@@ -118,9 +118,14 @@ function media_metadata_by_fid($fid, $unhandled = FALSE) {
   $result = db_query("SELECT name, data FROM {media_metadata} WHERE fid = :fid", array(
     ':fid' => $fid,
   ));
+  // @TODO: Get only the keys handled for the file's MIMEtype.
+  $keys = media_metadata_keys();
   foreach ($result as $record) {
-    // @TODO: Honor $unhandled. This currently returns the raw result from the query.
-    $metadata[$record->name] = $record->data;
+    // Filter so that only keys handled by a registered module are returned,
+    // unless $unhandled is TRUE.
+    if ($unhandled || in_array($keys, $record->name)) {
+      $metadata[$record->name] = $record->data;
+    }
   }
   return $metadata;
 }
