@@ -4,6 +4,7 @@
 
 August 2009
 -----------
+* Remove return value in media_metadata_delete documentation (aaron).
 * Implement media_metadata_delete() (aaron).
 * Rewrite media_metadata_add() to use new dbtng (aaron).
 * Implement media_metadata_add() (aaron).

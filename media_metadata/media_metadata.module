@@ -191,8 +191,6 @@ function media_metadata_add($fid, $name, $data) {
  *
  * @param $mid
  *   The metadata ID.
- * @return
- *   Returns TRUE on success, or FALSE on failure.
  */
 function media_metadata_delete($mid) {
   db_delete('media_metadata')
