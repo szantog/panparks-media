@@ -1,5 +1,9 @@
 // $Id$
 
+September 2009
+-----------
+* Move menu settings to media config (aaron).
+
 July 2009
 ---------
 * Drupal 7 compatability (jmstacey)

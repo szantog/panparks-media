@@ -39,9 +39,10 @@ function media_menu() {
   );
 
   // Default settings, for content types that do not have their own.
-  $items['admin/settings/media'] = array(
+  $items['admin/config/media/media'] = array(
     'title'            => 'Media settings',
     'description'      => 'Configure Global Media settings, including default content type settings.',
+    'file'             => 'media_settings.inc',
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('media_settings_global'),
     'access arguments' => array('administer media'),
@@ -248,7 +249,7 @@ function media_get_fields($field_type, $function_type = 'resource') {
       }
     }
   }
-  
+
   return $data[$field_type][$function_type];
 }
 
@@ -278,7 +279,7 @@ function media_get_applicable_formatters($registrations, $file_extension) {
       }
     }
   }
-  
+
   return $registrations;
 }
 
@@ -312,7 +313,7 @@ function media_get_registration_kinds($kind = NULL) {
       $kinds[$id] = $registration;
     }
   }
-  
+
   return $kinds;
 }
 
@@ -344,7 +345,7 @@ function media_registration_item_formatters($description = '*', $registrations =
       $formatters[$registration['module']] = $id;
     }
   }
-  
+
   return $formatters;
 }
 
@@ -364,7 +365,7 @@ function media_registration_types($type = NULL) {
   foreach ($registrations as $registration) {
     // @TODO
   }
-  
+
   // return
 }
 
@@ -378,10 +379,10 @@ function media_registration_types($type = NULL) {
  */
 function media_registration_data($name) {
   $data = array();
-  
+
   // Get the registered modules.
   $registrations = media_get_registered_modules();
-  
+
   // Parse the registrations.
   foreach ($registrations as $id => $registration) {
     // Do we have this data in this registration?
@@ -395,7 +396,7 @@ function media_registration_data($name) {
       );
     }
   }
-  
+
   return $data;
 }
 
@@ -513,7 +514,7 @@ function media_active_fields_for_node_type($type_name, $function = 'resource') {
       }
     }
   }
-  
+
   return $data;
 }
 
@@ -633,25 +634,25 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
     // build the drawers for this tab
     $drawer_list   = array();
     $active_drawer = TRUE;
-    
+
     // check to see if we do have children- we should, but just in case
     if (is_array($data)) {
       $drawers = array();
-      
+
       foreach ($data as $drawer_name => $drawer_data) {
         // @TODO check drawer access permissions here to make sure we should present this to the user
 
         // The drawer id needs to have additional data on it to prevent
         // name space conflicts with ids
         $drawer_id = strtolower(str_replace(' ', '_', $drawer_name)) .'_display';
-        
+
         // create a link with a specific id to call
         $drawers_link  = '<a onclick="javascript: return FALSE;" href="#'. $drawer_id .'">'. $drawer_name .'</a>';
         $drawer_list[] = array('data' => $drawers_link, 'class' =>  ($active_drawer ? 'active' : '') );
-        
+
         // add the drawer form element
         $form['media_browser'][$tab_id][$drawer_name] = $drawer_data;
-        
+
         // add classes to the drawer display item
         $form['media_browser'][$tab_id][$drawer_name]['#prefix'] = '<div id="'. $drawer_id .'" class="drawer display '. ($active_drawer ? ' active' : NULL) .'">';
         $form['media_browser'][$tab_id][$drawer_name]['#suffix'] = '</div>';
@@ -661,7 +662,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
 
         $drawer_options[$tab_id .'|'. $drawer_id] = '- '. $drawer_name;
       }
-      
+
       // change the drawers to a list for easer display
       $form['media_browser'][$tab_id]['drawers'] = array(
         '#type'  => 'markup',
