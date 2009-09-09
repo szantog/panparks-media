@@ -537,26 +537,30 @@ function media_create_id($drawer_name) {
  *  A form structured array is returned.
  */
 function _media_content_field_types($type_name) {
-  if (module_exists('content')) {
-    // Use CCK if available
-    $type = content_types($type_name);
-  }
-  else {
-    // Get the specific content type.
-    $type = (array)node_get_types('type', $type_name);
-  }
+//   if (module_exists('content')) {
+//     // Use CCK if available
+//     $type = content_types($type_name);
+//   }
+//   else {
+//     // Get the specific content type.
+//     $type = (array)node_get_types('type', $type_name);
+//   }
 
+  $types = node_type_get_types();
+  $type = $types[$type_name]; // node_type_get_name($type_name);
+// print_r($type);
+// print_r(node_type_get_types());
   // Recognize the upload/attachment form and create an artificial field.
   // This should be the only one we ever have to do this for.
-  if (module_exists('upload')) {
-    $type['fields']['attachments'] = array(
-      'field_name'  => 'attachments',
-      'type'        => 'attachments',
-      'widget'      => array(
-        'label'       => $type['extra']['attachments']['label'],
-      ),
-    );
-  }
+//   if (module_exists('upload')) {
+//     $type['fields']['attachments'] = array(
+//       'field_name'  => 'attachments',
+//       'type'        => 'attachments',
+//       'widget'      => array(
+//         'label'       => $type['extra']['attachments']['label'],
+//       ),
+//     );
+//   }
 
   return $type;
 }

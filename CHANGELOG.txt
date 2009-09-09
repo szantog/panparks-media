@@ -3,6 +3,7 @@
 September 2009
 -----------
 * Move menu settings to media config (aaron).
+* Begin to fix content type settings page (aaron).
 
 July 2009
 ---------
