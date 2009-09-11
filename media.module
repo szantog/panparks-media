@@ -467,11 +467,11 @@ function media_active_fields_for_node_type($type_name, $function = 'resource') {
   // At least one of them is enabled at this point.
   $type_override = variable_get('media_'. $type_name .'_override', FALSE);
 
-  $items  = array();
-  $type   = _media_content_field_types($type_name);
+  $items = array();
+  $type = _media_content_field_types($type_name);
 
-  // extract the fields for this node type
-  foreach ((array)$type['fields'] as $field_name => $field) {
+  // Extract the fields for this node type.
+  foreach ((array)$type->fields as $field_name => $field) {
     // Ignore the content-type specific per-field setting unless the override is set
     $fields_enabled = FALSE;
 

@@ -2,6 +2,7 @@
 
 September 2009
 -----------
+* $type is an object (aaron).
 * Move menu settings to media config (aaron).
 * Begin to fix content type settings page (aaron).
 
