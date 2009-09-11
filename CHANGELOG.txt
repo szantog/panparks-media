@@ -2,6 +2,7 @@
 
 September 2009
 -----------
+* Use file_get_field_list() to get a listing of node type's filefields (aaron).
 * $type is an object (aaron).
 * Move menu settings to media config (aaron).
 * Begin to fix content type settings page (aaron).
