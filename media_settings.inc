@@ -120,14 +120,53 @@ function media_admin($form) {
   $form['options']['operation'] = array(
     '#type' => 'select',
     '#options' => $options,
-    '#default_value' => 'approve',
+    '#default_value' => 'delete',
   );
   $options = array();
   $form['options']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Delete'),
+    '#value' => t('Update'),
     '#submit' => array('media_admin_submit'),
   );
+  
+  // Build the sortable table header.
+   $header = array(
+     'title' => array('data' => t('Title'), 'field' => 'f.filename'),
+     'type' => array('data' => t('Type'), 'field' => 'f.filemime'),
+     'size' => array('data' => t('Size'), 'field' => 'f.filesize'),
+     'author' => array('data' => t('Author'), 'field' => 'u.name'),
+     'timestamp' => array('data' => t('Updated'), 'field' => 'f.timestamp', 'sort' => 'desc'),
+     'operations' => array('data' => t('Operations')),
+   );
+
+   $query = db_select('file', 'f')->extend('PagerDefault')->extend('TableSort');
+   $query->join('users', 'u', 'f.uid = u.uid');
+
+   $result = $query
+     ->fields('f')
+     ->fields('u', array('name'))
+     ->limit(50)
+     ->execute();
+  
+   $files = array();
+   foreach ($result as $file) {
+     $options[$file->fid] = array(
+       'title' => check_plain($file->filename),
+       'type' =>  check_plain($file->filemime),
+       'size' => check_plain($file->filesize),
+       'author' => theme('username', array('account' => $file)),
+       'timestamp' => format_date($file->timestamp, 'short'),
+     );
+     $options[$file->fid]['operations'] = l(t('edit'), 'media/file/' . $file->fid . '/edit', array('query' => $destination));
+   }
+   $form['files'] = array(
+     '#type' => 'tableselect',
+     '#header' => $header,
+     '#options' => $options,
+     '#empty' => t('No media available.'),
+   );
+   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
+  
   return $form;
 }
 
