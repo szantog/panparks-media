@@ -194,7 +194,7 @@ function media_admin_list($form) {
       'admin/content/media/thumbnails',
       array(
         'html' => TRUE,
-        'attributes' => array('title' => 'Display as a list.'),
+        'attributes' => array('title' => 'Display as thumbnails.'),
       )
     ),
     'class' => array('media-display-thumbnails'),
@@ -271,7 +271,7 @@ function media_admin_thumbnails($form) {
       'admin/content/media/thumbnails',
       array(
         'html' => TRUE,
-        'attributes' => array('title' => 'Display as a list.'),
+        'attributes' => array('title' => 'Display as thumbnails.'),
       )
     ),
     'class' => array('media-display-thumbnails'),
