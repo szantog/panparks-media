@@ -58,3 +58,11 @@ function theme_media_browser_pane($form) {
   
   return implode("\n", $output);
 }
+
+/**
+ * Output a thumbnail and other info for an admin view.
+ */
+function theme_media_admin_thumbnail($variables) {
+  $output = theme('file_link', $variables);
+  return $output;
+}

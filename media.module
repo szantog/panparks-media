@@ -138,9 +138,10 @@ function media_theme() {
       'arguments'         => array('form' => array()),
     ),
     
-    // The display switcher on admin/content/media.
-    'media_admin_display_switch' => array(
-      'arguments' => array('display' => NULL),
+    // The thumbnail disply on admin pages.
+    'media_admin_thumbnail' => array(
+      'arguments' => array('file' => NULL),
+      'file' => 'media_theme.inc',
     ),
   );
 }

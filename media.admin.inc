@@ -108,9 +108,8 @@ function media_settings_global($form) {
 function media_admin($display = 'list') {
 
   // Load our css.
-  $form['#attached']['css'] = array(
-    drupal_get_path('module', 'media') . '/media.css',
-  );
+  drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
+  
   switch ($display) {
     case 'list':
       return drupal_get_form('media_admin_list');
@@ -208,20 +207,12 @@ function media_admin_thumbnails($form) {
   $destination = drupal_get_destination();
   $rows = array();
   foreach ($result as $file) {
-   $rows[$file->fid] = array(
-     'title' => theme('file_link', array('file' => $file)),
-     'type' =>  check_plain($file->filemime),
-     'size' => t('@size KB', array('@size' => number_format($file->filesize / 1000, 0))),
-     'author' => theme('username', array('account' => $file)),
-     'timestamp' => format_date($file->timestamp, 'short'),
-   );
+   $options[$file->fid] = theme('media_admin_thumbnail', array('file' => $file));
   }
   
   $form['files'] = array(
-   '#type' => 'tableselect',
-   '#header' => array(),
-   '#options' => $rows,
-   '#empty' => t('No media available.'),
+   '#type' => 'checkboxes',
+   '#options' => $options,
   );
   
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
