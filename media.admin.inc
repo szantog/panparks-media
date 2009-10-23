@@ -173,7 +173,7 @@ function media_admin_list($form) {
   );
   $display_types[] = array(
     'data' => l('Thumbnails', 'admin/content/media/thumbnails'),
-    'class' => array('media-display-list'),
+    'class' => array('media-display-thumbnails'),
   );
   drupal_alter('media_display_types', $display_types);
   $form['display_type'] = array(
@@ -225,7 +225,7 @@ function media_admin_thumbnails($form) {
   );
   $display_types[] = array(
     'data' => l('Thumbnails', 'admin/content/media/thumbnails'),
-    'class' => array('media-display-list'),
+    'class' => array('media-display-thumbnails'),
   );
   drupal_alter('media_display_types', $display_types);
   $form['display_type'] = array(

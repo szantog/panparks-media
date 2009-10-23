@@ -2,84 +2,40 @@
 
 /**
  * @file
- * This provides the basic styling for the media browser elements
+ * Basic styles for the media library.
  */
 
-
-/* Style the show media browser link */
-.media.browser.activation{
-  width: 112px;
-  border: 1px solid #999999;
-  padding: 5px 10px;
-  background-color: #cc3355;
-  color: #ffffff;
-  cursor: pointer;
+/**
+ * Display switch
+ */
+.item-list .media-display-switch {
+  float: right;
 }
-
-.media.browser,
-.media-browser-metadata-wrapper {
-  border: 1px solid #999999;
+.item-list .media-display-switch li {
+  float: left;
+}
+.item-list .media-display-switch li a {
+  background: #f2f1f1;
+  border: 1px solid;
+  border-color: #e4e4e4 #e4e4e4 #b4b4b4;
+  display: block;
   padding: 5px;
+  line-height: 1;
 }
-
-/* push the tabs further right */
-.media.browser ul.tabs {
-  margin: 0px 0px -8px 120px;
+.item-list .media-display-switch li.first a {
+  -moz-border-radius-topleft: 5px;
+  -moz-border-radius-bottomleft: 5px;
+  -webkit-border-top-left-radius: 5px;
+  -webkit-border-bottom-left-radius: 5px;
 }
-
-/* style the pane which contains the drawers and drawer data */
-.media.browser .drawer.display{
-  min-height: 300px;
+.item-list .media-display-switch li.last a {
+  -moz-border-radius-topright: 5px;
+  -moz-border-radius-bottomright: 5px;
+  -webkit-border-top-right-radius: 5px;
+  -webkit-border-bottom-right-radius: 5px;
 }
-
-/* style the left hand drawers */
-.media.browser .browser.drawers ul.drawers {
-  margin: 0;
+.item-list .media-display-switch li a.active {
+  background: #666;
+  border: 1px solid #333;
+  color: #fff;
 }
-
-.media.browser .browser.drawers ul.drawers li{
-	background-color: #999999;
-	background-image: none;
-	border: 1px solid #999999;
-	clear: left;
-	float: left;
-	height: 30px;
-	list-style: none;
-	margin: 5px 0px 3px;
-	padding: 5px 10px 5px 10px;
-	width: 90px;
-	line-height: 1.2;
-}
-
-.media.browser .ui-tabs-panel .item-list ul li a {
-	color: #ffffff;
-}
-
-/* push the drawers down */
-.media.browser .ui-tabs-panel .item-list ul li.first{
-	margin-top: 20px;
-}
-
-
-/* style the active drawer */
-.media.browser .browser.drawers ul.drawers li.active{
-	background-color: #ffffff;
-	border-right: none;
-	width: 91px;
-}
-
-.media.browser .ui-tabs-panel .item-list ul li.active a {
-  color: #000000;
-}
-
-
-/* style the display of the drawer */
-.media.browser .drawer.display {
-  border: 1px solid #999999;
-  margin-left: 111px;
-  padding: 0px 10px 10px 20px
-}
-
-.media-browser-file-progress {
-  clear: both;
-  }
