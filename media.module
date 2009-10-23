@@ -317,6 +317,24 @@ function media_get_registration_kinds($kind = NULL) {
   return $kinds;
 }
 
+
+/**
+ * Returns a keyed array of data using the module key and the
+ * value from the key name
+ *
+ * @param string $key
+ * @return array()
+ */
+function media_get_registrations_data($key) {
+  $registrations = media_get_registered_modules();
+  $list = array();
+  foreach ($registrations as $id => $registration) {    
+    $list[$id] = $registration[$key];    
+  }
+  return $list;
+}
+
+
 /**
  * Return a set of formatters which can format the specified item.
  *
@@ -470,7 +488,7 @@ function media_active_fields_for_node_type($type_name, $function = 'resource') {
   $items = array();
 //   $type = _media_content_field_types($type_name);
 
-  $fields = file_get_field_list($type_name);
+  //$fields = file_get_field_list($type_name);
 
   // Extract the fields for this node type.
   foreach ($fields as $field_name => $field) {
