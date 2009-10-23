@@ -61,14 +61,14 @@ function media_menu() {
 function media_form_alter(&$form, $form_state, $form_id) {
   global $user;
 
-  // Load content-type settings
+  // Load content-type settings.
   if ($form_id == 'node_type_form') {
     include_once('media_settings.inc');
     media_settings_content_type($form, $form['#node_type']->type);
   }
 
   // Add the media browser on the node add/edit screen.
-  if (strstr($form_id, 'node_form') ) {
+  if (!empty($form['#node_edit_form'])) {
     // Is the media browser enabled on this node type? Type-specific options override the default.
     if (variable_get('media_'. $form['type']['#value'] .'_override', NULL) !== NULL) {
       $enabled = variable_get('media_'. $form['type']['#value'] .'_enabled', NULL);
@@ -87,7 +87,7 @@ function media_form_alter(&$form, $form_state, $form_id) {
         $form[$field]['media'] = media_build_browser_form($form_state, $registration_ids, $form['type']['#value'], $field, $user->uid);
 
         // Add .media and .replace class to the field CSS class attributes.
-        $form[$field][0]['#attributes'] = array('class' => 'media replace');
+        $form[$field][0]['#attributes'] = array('class' => array('media replace'));
       }
     }
   }
@@ -142,7 +142,7 @@ function media_theme() {
  *     'kind' => Kind of functionality: 'resource' or 'format'.
  *     'description' => A verbose description of functionality.
  *     'callbacks' => An array of key => functions called for data.
- *     'fields' => What fields does this functionality operate on?
+ *     'fields' => What field types does this functionality operate on?
  *     'validation' => @todo
  *     'display' => @todo
  */
@@ -157,26 +157,26 @@ function media_get_registered_modules($ids = NULL, $reset = FALSE) {
       // Get all the registrations defined by the module.
       $function     = $module .'_media_register';
       $registration = $function();
-
+// drupal_set_message(print_r($registration, TRUE));
       // TODO: Fix this. Why are we calling $function twice (jmstacey 6/2/09)?
 
       // Iterate through each registration defined by the implementing module.
       foreach (array_keys($function()) as $key) {
         // Add the module name to each registration.
         // Default the 'module' key of the registration to the implementing module.
-        $registration[$key]['module'] = $registration[$key]['module'] ? $registration[$key]['module'] : $module;
+        $registration[$key]['module'] = isset($registration[$key]['module']) ? $registration[$key]['module'] : $module;
 
         // translate strings now
         $registration[$key]['name']        = t($registration[$key]['name']);
         $registration[$key]['description'] = t($registration[$key]['description']);
 
         // Default the URI to public://.
-        if (!$registration[$key]['uri']) {
+        if (!isset($registration[$key]['uri']) || !$registration[$key]['uri']) {
           $registration[$key]['uri'] = MEDIA_RESOURCE_URI_DEFAULT;
         }
 
         // Default 'types' to * (all).
-        if (!$registration[$key]['types']) {
+        if (!isset($registration[$key]['types']) || !$registration[$key]['types']) {
           $registration[$key]['types'] = MEDIA_TYPES_DEFAULT;
         }
       }
@@ -217,6 +217,8 @@ function media_registration_kinds() {
 /**
  * Get all fields that can be enabled on a field type.
  *
+ *  @TODO: Cache the results and retrieve from cache.
+ *
  * @param string $field_type
  *   The field type to get items for.
  * @param string $function_type
@@ -227,12 +229,22 @@ function media_registration_kinds() {
 function media_get_fields($field_type, $function_type = 'resource') {
   static $data;
 
+  // Set up the initial static variable array.
+  if (!isset($data)) {
+    $data = array();
+  }
+  if (!isset($data[$field_type])) {
+    $data[$field_type] = array();
+  }
+
   // Do we have cached version?
-  if ($data[$field_type][$function_type]) {
+  if (isset($data[$field_type][$function_type])) {
     return $data[$field_type][$function_type];
   }
 
-  $data = array();
+  // So we have something to return, even if it's nothing.
+  $data[$field_type][$function_type] = NULL;
+
   // Get all the registered modules.
   foreach (media_get_registered_modules() as $id => $registration) {
     // Check to see if this registration supports this function type.
@@ -316,24 +328,6 @@ function media_get_registration_kinds($kind = NULL) {
 
   return $kinds;
 }
-
-
-/**
- * Returns a keyed array of data using the module key and the
- * value from the key name
- *
- * @param string $key
- * @return array()
- */
-function media_get_registrations_data($key) {
-  $registrations = media_get_registered_modules();
-  $list = array();
-  foreach ($registrations as $id => $registration) {    
-    $list[$id] = $registration[$key];    
-  }
-  return $list;
-}
-
 
 /**
  * Return a set of formatters which can format the specified item.
@@ -442,7 +436,7 @@ function media_get_resources($registration_ids, $node_type, $field, $uid) {
 
   foreach ($registrations as $id => $registration) {
     // Get the callback function.
-    $function = $registration['callbacks']['resource'];
+    $function = isset($registration['callbacks']['resource']) ? $registration['callbacks']['resource'] : NULL;
 
     if (function_exists($function)) {
       // Get the results of the callback function.
@@ -488,7 +482,11 @@ function media_active_fields_for_node_type($type_name, $function = 'resource') {
   $items = array();
 //   $type = _media_content_field_types($type_name);
 
-  //$fields = file_get_field_list($type_name);
+  // Get all available file fields.
+  $fields = field_info_fields(NULL, NULL, NULL);
+//   drupal_set_message(print_r($fields, TRUE));
+//   return;
+//   $fields = file_get_field_list($type_name);
 
   // Extract the fields for this node type.
   foreach ($fields as $field_name => $field) {
@@ -614,16 +612,24 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
   // We need a static counter for our form element wrapper.
   $id += 1;
 
-  // Load our css.
+  $form  = array();
+
   $path = drupal_get_path('module', 'media');
-  drupal_add_css($path .'/media.css');
-  // Load our specific js for the file selector
-  drupal_add_js($path .'/javascript/media.js');
-  // Load the md5 library so we can hash the upload filename for use in the meta form.
-  drupal_add_js($path .'/javascript/jquery.md5.js');
+
+  // Load our css.
+  $form['#attached']['css'] = array(
+    $path . '/media.css',
+  );
+  // Load our specific js for the file selector.
+  // Load the md5 library so we can hash the upload filename for use in the
+  // metadata collection form.
+  // @TODO: Do we still need the js md5?
+  $form['#attached']['js'] = array(
+    $path .'/javascript/media.js',
+    $path .'/javascript/jquery.md5.js',
+  );
 
   $items = array();
-  $form  = array();
 
   $form['media_browser_activate'] = array(
     '#type'  => 'markup',
@@ -632,8 +638,8 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
 
   // We are using a tab form type.
   $form['media_browser'] = array(
-    '#type'       => 'tabset',
-    '#attributes' => array('class' => 'media browser wrapper'),
+    '#type'       => 'fieldset',
+    '#attributes' => array('class' => array('media browser wrapper')),
   );
 
   // Get all the active resources
@@ -649,7 +655,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
     $tab_id = strtolower(str_replace(' ', '_', $tab_name));
     // create tab
     $form['media_browser'][$tab_id] = array(
-      '#type'  => 'tabpage',
+      '#type'  => 'fieldset',
       '#title' => $tab_name,
       '#theme' => 'media_browser_pane',
     );
@@ -662,7 +668,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
 
     // check to see if we do have children- we should, but just in case
     if (is_array($data)) {
-      $drawers = array();
+      $drawer_options = array();
 
       foreach ($data as $drawer_name => $drawer_data) {
         // @TODO check drawer access permissions here to make sure we should present this to the user
@@ -673,7 +679,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
 
         // create a link with a specific id to call
         $drawers_link  = '<a onclick="javascript: return FALSE;" href="#'. $drawer_id .'">'. $drawer_name .'</a>';
-        $drawer_list[] = array('data' => $drawers_link, 'class' =>  ($active_drawer ? 'active' : '') );
+        $drawer_list[] = array('data' => $drawers_link, 'class' =>  array(($active_drawer ? 'active' : '')) );
 
         // add the drawer form element
         $form['media_browser'][$tab_id][$drawer_name] = $drawer_data;
@@ -691,7 +697,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
       // change the drawers to a list for easer display
       $form['media_browser'][$tab_id]['drawers'] = array(
         '#type'  => 'markup',
-        '#value' => theme('item_list', $drawer_list, NULL, 'ul', array('class' => 'drawers'))
+        '#value' => theme('item_list', array($drawer_list, array('attributes' => array('class' => array('drawers'))))),
       );
 
     }
@@ -713,7 +719,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
   );
   $form['media_browser']['media_browser_file_progress']['file_progress_message'] = array(
     '#type'  => 'item',
-    '#title' => theme('image', variable_get('media_file_progress_image', $path .'/images/uploading-gradient.gif')) . t('Please wait while your file is attached...'),
+    '#title' => theme('image', array('path' => variable_get('media_file_progress_image', $path .'/images/uploading-gradient.gif'))) . t('Please wait while your file is attached...'),
   );
 
   // AHAH enabled submit button.
@@ -723,7 +729,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
     '#description' => t("Add the selected file."),
     '#submit'      => array('media_browser_submit'), // If no javascript action.
     '#validate'    => array('media_browser_validate'),
-    '#attributes'  => array('class' => 'media-browser-submit'),
+    '#attributes'  => array('class' => array('media-browser-submit')),
     '#ahah'        => array(
       'path'         => 'media/js',
       'wrapper'      => 'media-browser-file-progress-'. $id,
@@ -744,8 +750,8 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
   );
 
   $form['media_browser']['media_browser_metadata'] = array(
-    '#type'       => 'tabset',
-    '#attributes' => array('class' => 'media-browser-metadata-wrapper'),
+    '#type'       => 'fieldset',
+    '#attributes' => array('class' => array('media-browser-metadata-wrapper')),
   );
 
   // @TODO: This all goes in the form creation, actually,
@@ -779,7 +785,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
   // @TODO: This is placeholder only.
   foreach (array('Video', 'Image', 'Audio', 'PDF') as $mime_type) {
     $form['media_browser']['media_browser_metadata'][$mime_type] = array(
-      '#type'  => 'tabpage',
+      '#type'  => 'fieldset',
       '#title' => $mime_type,
     );
     $form['media_browser']['media_browser_metadata'][$mime_type][$mime_type .'_title'] = array(
@@ -795,7 +801,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
     '#description' => t("Add the selected file."),
     '#submit'      => array('media_browser_metadata_submit'), // If no javascript action.
     '#validate'    => array('media_browser_metadata_validate'),
-    '#attributes'  => array('class' => 'media-browser-metadata-submit'),
+    '#attributes'  => array('class' => array('media-browser-metadata-submit')),
     '#ahah'        => array(
       'path'         => 'media/metadata/js',
       'wrapper'      => 'media-browser-metadata-message-'. $id,
@@ -808,10 +814,10 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
   // build the tabs into a single form element
   // @TODO make sure we have children for each tab and remove any that
   //       we don't have data for
-  $form['tabs'] = array(
-    '#type'  => 'markup',
-    '#value' => theme('item_list', $tabs, NULL, 'ul', array('class' => 'tabs')),
-  );
+//   $form['tabs'] = array(
+//     '#type'  => 'markup',
+//     '#value' => theme('item_list', array($drawers, array('attributes' => array('class' => 'tabs')))),
+//   );
 
   return $form;
 }
@@ -842,7 +848,7 @@ function media_resource_display_user_files_form($files, $title = NULL) {
     '#type'       => 'select',
     '#options'    => $options,
     '#title'      => $title ? $title : '',
-    '#attributes' => array('class' => 'resource select'),
+    '#attributes' => array('class' => array('resource select')),
     '#size'       => variable_get('media_file_list_size', 10),
   );
 
@@ -860,7 +866,7 @@ function media_resource_display_upload_form() {
     '#type'       => 'file',
     '#title'      => t('Upload your file'),
     '#size'       => 30,
-    '#attributes' => array('class' => 'resource select'),
+    '#attributes' => array('class' => array('resource select')),
   );
 
   return $form;

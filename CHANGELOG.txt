@@ -1,18 +1,28 @@
 // $Id$
 
-September 2009
------------
-* Use file_get_field_list() to get a listing of node type's filefields (aaron).
-* $type is an object (aaron).
-* Move menu settings to media config (aaron).
-* Begin to fix content type settings page (aaron).
+CHANGELOG for Media module.
+===========================
 
-July 2009
----------
-* Drupal 7 compatability (jmstacey)
+by aaron: Wrap js with (function($) {})(jQuery); for library compatibility.
+by aaron: Add settings to each js behavior.
+by aaron: Convert js behavior selection to once().
+by aaron: Add attach methods to js behaviors.
+by aaron: Attach css & js to form using #attached element.
+by aaron: Convert class #attributes to arrays.
+by aaron: Fix php notices for $registration['callbacks']['resource'].
+by aaron: Update parameters to theme('image') call for d7.
+by aaron: Update parameters to theme('item_list') calls for d7.
+by aaron: Set static cache in media_get_fields() and fix notices for isset.
+by aaron: In media_get_registered_modules() fix notices for isset.
+by aaron: In media_active_fields_for_node_type() grab field info for d7.
+by aaron: Use file_get_field_list() to get a listing of node type's filefields.
+by aaron: $type is an object.
+by aaron: Move menu settings to media config.
+by aaron: Begin to fix content type settings page.
+by jmstacey: Drupal 7 compatability.
   * Update .info files.
   * Added necessary files to new registry.
   * Removed 'file' keys from hook_menu().
   * Global media settings page fixed.
-* Code styling cleanup (jmstacey).
-* Untested rough sync up with D6 branch (jmstacey).
+by jmstacey: Code styling cleanup.
+by jmstacey: Untested rough sync up with D6 branch.
