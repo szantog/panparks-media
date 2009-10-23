@@ -128,58 +128,58 @@ function media_admin_list($form) {
   $form = media_admin_operations($form);
   
   // Build the sortable table header.
-   $header = array(
-     'title' => array('data' => t('Title'), 'field' => 'f.filename'),
-     'type' => array('data' => t('Type'), 'field' => 'f.filemime'),
-     'size' => array('data' => t('Size'), 'field' => 'f.filesize'),
-     'author' => array('data' => t('Author'), 'field' => 'u.name'),
-     'timestamp' => array('data' => t('Updated'), 'field' => 'f.timestamp', 'sort' => 'desc'),
-     'operations' => array('data' => t('Operations')),
-   );
+  $header = array(
+   'title' => array('data' => t('Title'), 'field' => 'f.filename'),
+   'type' => array('data' => t('Type'), 'field' => 'f.filemime'),
+   'size' => array('data' => t('Size'), 'field' => 'f.filesize'),
+   'author' => array('data' => t('Author'), 'field' => 'u.name'),
+   'timestamp' => array('data' => t('Updated'), 'field' => 'f.timestamp', 'sort' => 'desc'),
+   'operations' => array('data' => t('Operations')),
+  );
 
-   $query = db_select('file', 'f')->extend('PagerDefault')->extend('TableSort');
-   $query->join('users', 'u', 'f.uid = u.uid');
+  $query = db_select('file', 'f')->extend('PagerDefault')->extend('TableSort');
+  $query->join('users', 'u', 'f.uid = u.uid');
 
-   $result = $query
-     ->fields('f')
-     ->fields('u', array('name'))
-     ->limit(50)
-     ->execute();
-  
-   $destination = drupal_get_destination();
-   $files = array();
-   foreach ($result as $file) {
-     $options[$file->fid] = array(
-       'title' => theme('file_link', array('file' => $file)),
-       'type' =>  check_plain($file->filemime),
-       'size' => t('@size KB', array('@size' => number_format($file->filesize / 1000, 0))),
-       'author' => theme('username', array('account' => $file)),
-       'timestamp' => format_date($file->timestamp, 'short'),
-     );
-     $options[$file->fid]['operations'] = l(t('edit'), 'media/file/' . $file->fid . '/edit', array('query' => $destination));
-   }
-   $form['files'] = array(
-     '#type' => 'tableselect',
-     '#header' => $header,
-     '#options' => $options,
-     '#empty' => t('No media available.'),
+  $result = $query
+   ->fields('f')
+   ->fields('u', array('name'))
+   ->limit(50)
+   ->execute();
+
+  $destination = drupal_get_destination();
+  $files = array();
+  foreach ($result as $file) {
+   $options[$file->fid] = array(
+     'title' => theme('file_link', array('file' => $file)),
+     'type' =>  check_plain($file->filemime),
+     'size' => t('@size KB', array('@size' => number_format($file->filesize / 1000, 0))),
+     'author' => theme('username', array('account' => $file)),
+     'timestamp' => format_date($file->timestamp, 'short'),
    );
-   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
-   
-   // Build the display switch.
-    $display_types = array();
-    $display_types[] = l('List', 'admin/content/media/list');
-    $display_types[] = l('Thumbnails', 'admin/content/media/thumbnails');
-    drupal_alter('media_display_types', $display_types);
-    $form['display_type'] = array(
-      '#type' => 'markup',
-      '#markup' => theme('item_list', array(
-         'items' => $display_types,
-         'attributes' => array('class' => 'media-display-switch'),
-        )
-      ),
-    );
-  
+   $options[$file->fid]['operations'] = l(t('edit'), 'media/file/' . $file->fid . '/edit', array('query' => $destination));
+  }
+  $form['files'] = array(
+   '#type' => 'tableselect',
+   '#header' => $header,
+   '#options' => $options,
+   '#empty' => t('No media available.'),
+  );
+  $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
+
+  // Build the display switch.
+  $display_types = array();
+  $display_types[] = l('List', 'admin/content/media/list');
+  $display_types[] = l('Thumbnails', 'admin/content/media/thumbnails');
+  drupal_alter('media_display_types', $display_types);
+  $form['display_type'] = array(
+    '#type' => 'markup',
+    '#markup' => theme('item_list', array(
+       'items' => $display_types,
+       'attributes' => array('class' => 'media-display-switch'),
+      )
+    ),
+  );
+
   return $form;
 }
 
@@ -190,46 +190,50 @@ function media_admin_thumbnails($form) {
   // Build the 'Update options' form.
   $form = media_admin_operations($form);
 
-   $query = db_select('file', 'f')->extend('PagerDefault')->extend('TableSort');
-   $query->join('users', 'u', 'f.uid = u.uid');
+  $query = db_select('file', 'f')->extend('PagerDefault')->extend('TableSort');
+  $query->join('users', 'u', 'f.uid = u.uid');
 
-   $result = $query
-     ->fields('f')
-     ->fields('u', array('name'))
-     ->limit(50)
-     ->execute();
-  
-   $destination = drupal_get_destination();
-   $rows = array();
-   foreach ($result as $file) {
-     $rows[$file->fid] = array(
-       'title' => theme('file_link', array('file' => $file)),
-       'type' =>  check_plain($file->filemime),
-       'size' => t('@size KB', array('@size' => number_format($file->filesize / 1000, 0))),
-       'author' => theme('username', array('account' => $file)),
-       'timestamp' => format_date($file->timestamp, 'short'),
-     );
-   }
-   $form['files'] = array(
-     '#type' => 'markup',
-     '#markup' => theme('table', array('rows' => $rows)),
+  $result = $query
+   ->fields('f')
+   ->fields('u', array('name'))
+   ->limit(50)
+   ->execute();
+
+  $destination = drupal_get_destination();
+  $rows = array();
+  foreach ($result as $file) {
+   $rows[$file->fid] = array(
+     'title' => theme('file_link', array('file' => $file)),
+     'type' =>  check_plain($file->filemime),
+     'size' => t('@size KB', array('@size' => number_format($file->filesize / 1000, 0))),
+     'author' => theme('username', array('account' => $file)),
+     'timestamp' => format_date($file->timestamp, 'short'),
    );
-   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
-   
-   // Build the display switch.
-    $display_types = array();
-    $display_types[] = l('List', 'admin/content/media/list');
-    $display_types[] = l('Thumbnails', 'admin/content/media/thumbnails');
-    drupal_alter('media_display_types', $display_types);
-    $form['display_type'] = array(
-      '#type' => 'markup',
-      '#markup' => theme('item_list', array(
-         'items' => $display_types,
-         'attributes' => array('class' => 'media-display-switch'),
-        )
-      ),
-    );
+  }
   
+  $form['files'] = array(
+   '#type' => 'tableselect',
+   '#header' => array(),
+   '#options' => $rows,
+   '#empty' => t('No media available.'),
+  );
+  
+  $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
+
+  // Build the display switch.
+  $display_types = array();
+  $display_types[] = l('List', 'admin/content/media/list');
+  $display_types[] = l('Thumbnails', 'admin/content/media/thumbnails');
+  drupal_alter('media_display_types', $display_types);
+  $form['display_type'] = array(
+    '#type' => 'markup',
+    '#markup' => theme('item_list', array(
+       'items' => $display_types,
+       'attributes' => array('class' => 'media-display-switch'),
+      )
+    ),
+  );
+
   return $form;
 }
 
@@ -254,7 +258,8 @@ function media_admin_operations($form = array()) {
   $form['options']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Update'),
-    '#submit' => array('media_admin_list_submit'),
+    '#submit' => array('media_admin_submit'),
+    '#validate' => array('media_admin_validate'),
   );
   return $form;
 }
@@ -265,7 +270,7 @@ function media_admin_operations($form = array()) {
  * Check if any files have been selected to perform the chosen
  * 'Update option' on.
  */
-function media_admin_list_validate($form, &$form_state) {
+function media_admin_validate($form, &$form_state) {
   $files = array_filter($form_state['values']['files']);
   if (count($files) == 0) {
     form_set_error('', t('No items selected.'));
@@ -277,11 +282,11 @@ function media_admin_list_validate($form, &$form_state) {
  *
  * Execute the chosen 'Update option' on the selected files.
  */
-function media_admin_list_submit($form, &$form_state) {
+function media_admin_submit($form, &$form_state) {
   $operations = module_invoke_all('media_operations');
   $operation = $operations[$form_state['values']['operation']];
   // Filter out unchecked nodes
-  $nodes = array_filter($form_state['values']['files']);
+  $files = array_filter($form_state['values']['files']);
   if ($function = $operation['callback']) {
     // Add in callback arguments if present.
     if (isset($operation['callback arguments'])) {
