@@ -103,31 +103,29 @@ function media_settings_global($form) {
 }
 
 /**
- * Form builder: Builds the media administration overview.
+ * Menu callback.  Display the list or thumbnails media admin display.
  */
-function media_admin($form) {
-  // Build the 'Update options' form.
-  $form['options'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Update options'),
-    '#prefix' => '<div class="container-inline">',
-    '#suffix' => '</div>',
+function media_admin($display = 'list') {
+
+  // Load our css.
+  $form['#attached']['css'] = array(
+    drupal_get_path('module', 'media') . '/media.css',
   );
-  $options = array();
-  foreach (module_invoke_all('media_operations') as $operation => $array) {
-    $options[$operation] = $array['label'];
+  switch ($display) {
+    case 'list':
+      return drupal_get_form('media_admin_list');
+    case 'thumbnails':
+      return drupal_get_form('media_admin_thumbnails');
   }
-  $form['options']['operation'] = array(
-    '#type' => 'select',
-    '#options' => $options,
-    '#default_value' => 'delete',
-  );
-  $options = array();
-  $form['options']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Update'),
-    '#submit' => array('media_admin_submit'),
-  );
+}
+
+/**
+ * Form builder: Builds the media list administration overview.
+ */
+function media_admin_list($form) {
+  
+  // Build the 'Update options' form.
+  $form = media_admin_operations($form);
   
   // Build the sortable table header.
    $header = array(
@@ -148,7 +146,7 @@ function media_admin($form) {
      ->limit(50)
      ->execute();
   
-  $destination = drupal_get_destination();
+   $destination = drupal_get_destination();
    $files = array();
    foreach ($result as $file) {
      $options[$file->fid] = array(
@@ -178,10 +176,129 @@ function media_admin($form) {
       '#markup' => theme('item_list', array(
          'items' => $display_types,
          'attributes' => array('class' => 'media-display-switch'),
-        )),
+        )
+      ),
     );
   
   return $form;
+}
+
+/**
+ * Form builder: Builds the media thumbnails administration overview.
+ */
+function media_admin_thumbnails($form) {
+  // Build the 'Update options' form.
+  $form = media_admin_operations($form);
+
+   $query = db_select('file', 'f')->extend('PagerDefault')->extend('TableSort');
+   $query->join('users', 'u', 'f.uid = u.uid');
+
+   $result = $query
+     ->fields('f')
+     ->fields('u', array('name'))
+     ->limit(50)
+     ->execute();
+  
+   $destination = drupal_get_destination();
+   $rows = array();
+   foreach ($result as $file) {
+     $rows[$file->fid] = array(
+       'title' => theme('file_link', array('file' => $file)),
+       'type' =>  check_plain($file->filemime),
+       'size' => t('@size KB', array('@size' => number_format($file->filesize / 1000, 0))),
+       'author' => theme('username', array('account' => $file)),
+       'timestamp' => format_date($file->timestamp, 'short'),
+     );
+   }
+   $form['files'] = array(
+     '#type' => 'markup',
+     '#markup' => theme('table', array('rows' => $rows)),
+   );
+   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
+   
+   // Build the display switch.
+    $display_types = array();
+    $display_types[] = l('List', 'admin/content/media/list');
+    $display_types[] = l('Thumbnails', 'admin/content/media/thumbnails');
+    drupal_alter('media_display_types', $display_types);
+    $form['display_type'] = array(
+      '#type' => 'markup',
+      '#markup' => theme('item_list', array(
+         'items' => $display_types,
+         'attributes' => array('class' => 'media-display-switch'),
+        )
+      ),
+    );
+  
+  return $form;
+}
+
+function media_admin_operations($form = array()) {
+  // Build the 'Update options' form.
+  $form['options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Update options'),
+    '#prefix' => '<div class="container-inline">',
+    '#suffix' => '</div>',
+  );
+  $options = array();
+  foreach (module_invoke_all('media_operations') as $operation => $array) {
+    $options[$operation] = $array['label'];
+  }
+  $form['options']['operation'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => 'delete',
+  );
+  $options = array();
+  $form['options']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+    '#submit' => array('media_admin_list_submit'),
+  );
+  return $form;
+}
+
+/**
+ * Validate media_admin_list form submissions.
+ *
+ * Check if any files have been selected to perform the chosen
+ * 'Update option' on.
+ */
+function media_admin_list_validate($form, &$form_state) {
+  $files = array_filter($form_state['values']['files']);
+  if (count($files) == 0) {
+    form_set_error('', t('No items selected.'));
+  }
+}
+
+/**
+ * Process media_admin_list form submissions.
+ *
+ * Execute the chosen 'Update option' on the selected files.
+ */
+function media_admin_list_submit($form, &$form_state) {
+  $operations = module_invoke_all('media_operations');
+  $operation = $operations[$form_state['values']['operation']];
+  // Filter out unchecked nodes
+  $nodes = array_filter($form_state['values']['files']);
+  if ($function = $operation['callback']) {
+    // Add in callback arguments if present.
+    if (isset($operation['callback arguments'])) {
+      $args = array_merge(array($files), $operation['callback arguments']);
+    }
+    else {
+      $args = array($nodes);
+    }
+    call_user_func_array($function, $args);
+
+    cache_clear_all();
+  }
+  else {
+    // We need to rebuild the form to go to a second step. For example, to
+    // show the confirmation form for the deletion of nodes.
+    $form_state['rebuild'] = TRUE;
+  }
 }
 
 /**
