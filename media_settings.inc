@@ -101,3 +101,7 @@ function media_settings_global($form) {
 
   return system_settings_form($settings_form);
 }
+
+function media_admin($form) {
+  return $form;
+}

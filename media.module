@@ -24,7 +24,7 @@ define('MEDIA_TYPES_DEFAULT', '*');
 /* ***************************************** */
 
 /**
- * Implementation of hook_menu().
+ * Implement hook_menu().
  */
 function media_menu() {
   // AJAX formatter. This page is used to create the formatter form
@@ -37,7 +37,15 @@ function media_menu() {
     'page callback'    => 'media_ahah_metadata_ahah',
     'access arguments' => array('access content'),
   );
-
+  $items['admin/content/media'] = array(
+    'title' => 'Media',
+    'description' => 'Manage files used on your site.',
+    'page callback' => 'drupal_get_form',
+    'page arguments'   => array('media_admin'),
+    'access arguments' => array('administer media'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'media_settings.inc',
+  );
   // Default settings, for content types that do not have their own.
   $items['admin/config/media/media'] = array(
     'title'            => 'Media settings',
@@ -50,6 +58,18 @@ function media_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Implement hook_permission().
+ */
+function media_permission() {
+  return array(
+    'administer media' => array(
+      'title' => t('Administer media'),
+      'description' => t('Add, edit or delete media.'),
+    ),
+  );
 }
 
 /**
