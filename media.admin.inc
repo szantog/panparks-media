@@ -122,6 +122,7 @@ function media_admin($display = 'list') {
  * Form builder: Builds the media list administration overview.
  */
 function media_admin_list($form) {
+  $path = drupal_get_path('module', 'media');
   
   // Build the 'Update options' form.
   $form = media_admin_operations($form);
@@ -169,11 +170,33 @@ function media_admin_list($form) {
   // Build the display switch.
   $display_types = array();
   $display_types[] = array(
-    'data' => l('List', 'admin/content/media/list'),
+    'data' => l(theme('image',
+        array(
+          'path' => $path . '/images/display-list.png',
+          'alt' => 'List',
+        )
+      ),
+      'admin/content/media/list',
+      array(
+        'html' => TRUE,
+        'attributes' => array('title' => 'Display as a list.'),
+      )
+    ),
     'class' => array('media-display-list'),
   );
   $display_types[] = array(
-    'data' => l('Thumbnails', 'admin/content/media/thumbnails'),
+    'data' => l(theme('image',
+        array(
+          'path' => $path . '/images/display-thumbnails.png',
+          'alt' => 'Thumbnails',
+        )
+      ),
+      'admin/content/media/thumbnails',
+      array(
+        'html' => TRUE,
+        'attributes' => array('title' => 'Display as a list.'),
+      )
+    ),
     'class' => array('media-display-thumbnails'),
   );
   drupal_alter('media_display_types', $display_types);
@@ -193,6 +216,8 @@ function media_admin_list($form) {
  * Form builder: Builds the media thumbnails administration overview.
  */
 function media_admin_thumbnails($form) {
+  $path = drupal_get_path('module', 'media');
+  
   // Build the 'Update options' form.
   $form = media_admin_operations($form);
 
@@ -222,11 +247,33 @@ function media_admin_thumbnails($form) {
   // Build the display switch.
   $display_types = array();
   $display_types[] = array(
-    'data' => l('List', 'admin/content/media/list'),
+    'data' => l(theme('image',
+        array(
+          'path' => $path . '/images/display-list.png',
+          'alt' => 'List',
+        )
+      ),
+      'admin/content/media/list',
+      array(
+        'html' => TRUE,
+        'attributes' => array('title' => 'Display as a list.'),
+      )
+    ),
     'class' => array('media-display-list'),
   );
   $display_types[] = array(
-    'data' => l('Thumbnails', 'admin/content/media/thumbnails'),
+    'data' => l(theme('image',
+        array(
+          'path' => $path . '/images/display-thumbnails.png',
+          'alt' => 'Thumbnails',
+        )
+      ),
+      'admin/content/media/thumbnails',
+      array(
+        'html' => TRUE,
+        'attributes' => array('title' => 'Display as a list.'),
+      )
+    ),
     'class' => array('media-display-thumbnails'),
   );
   drupal_alter('media_display_types', $display_types);
