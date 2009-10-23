@@ -14,6 +14,7 @@
 }
 .item-list .media-display-switch li {
   float: left;
+  margin-left: -1px;
 }
 .item-list .media-display-switch li a {
   background: #f2f1f1;
@@ -35,6 +36,7 @@
   -webkit-border-bottom-right-radius: 4px;
 }
 .item-list .media-display-switch li a.active {
+  position: relative;
   background: #666;
   border: 1px solid #555;
   color: #fff;
