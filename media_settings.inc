@@ -102,6 +102,44 @@ function media_settings_global($form) {
   return system_settings_form($settings_form);
 }
 
+/**
+ * Form builder: Builds the media administration overview.
+ */
 function media_admin($form) {
+  // Build the 'Update options' form.
+  $form['options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Update options'),
+    '#prefix' => '<div class="container-inline">',
+    '#suffix' => '</div>',
+  );
+  $options = array();
+  foreach (module_invoke_all('media_operations') as $operation => $array) {
+    $options[$operation] = $array['label'];
+  }
+  $form['options']['operation'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => 'approve',
+  );
+  $options = array();
+  $form['options']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Delete'),
+    '#submit' => array('media_admin_submit'),
+  );
   return $form;
+}
+
+/**
+ * Implement hook_media_operations().
+ */
+function media_media_operations() {
+  $operations = array(
+    'delete' => array(
+      'label' => t('Delete'),
+      'callback' => NULL,
+    ),
+  );
+  return $operations;
 }
