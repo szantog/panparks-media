@@ -99,8 +99,8 @@ function media_file_user_files_select($node_type, $field, $uid) {
 
   foreach ($results as $file) {
     $files[] = array(
-      'uri'      => $file['uri'],
-      'filename' => $file['filename'],
+      'uri'      => $file->uri,
+      'filename' => $file->filename,
       'meta'     => '',
     );
   }
