@@ -44,13 +44,13 @@ function media_menu() {
     'page arguments'   => array('media_admin'),
     'access arguments' => array('administer media'),
     'type' => MENU_LOCAL_TASK,
-    'file' => 'media_settings.inc',
+    'file' => 'media.admin.inc',
   );
   // Default settings, for content types that do not have their own.
   $items['admin/config/media/media'] = array(
     'title'            => 'Media settings',
     'description'      => 'Configure Global Media settings, including default content type settings.',
-    'file'             => 'media_settings.inc',
+    'file'             => 'media.admin.inc',
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('media_settings_global'),
     'access arguments' => array('administer media'),
@@ -83,7 +83,7 @@ function media_form_alter(&$form, $form_state, $form_id) {
 
   // Load content-type settings.
   if ($form_id == 'node_type_form') {
-    include_once('media_settings.inc');
+    include_once('media.admin.inc');
     media_settings_content_type($form, $form['#node_type']->type);
   }
 
