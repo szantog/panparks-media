@@ -147,6 +147,7 @@ function media_admin_list($form) {
 
   $destination = drupal_get_destination();
   $files = array();
+  $options = array();
   foreach ($result as $file) {
    $options[$file->fid] = array(
      'title' => theme('file_link', array('file' => $file)),
@@ -206,6 +207,7 @@ function media_admin_thumbnails($form) {
 
   $destination = drupal_get_destination();
   $rows = array();
+  $options = array();
   foreach ($result as $file) {
    $options[$file->fid] = theme('media_admin_thumbnail', array('file' => $file));
   }
