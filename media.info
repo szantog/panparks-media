@@ -10,5 +10,4 @@ files[] = media.module
 files[] = media_ahah.inc
 files[] = media_settings.inc
 files[] = media_theme.inc
-dependencies[] = field
 dependencies[] = file
