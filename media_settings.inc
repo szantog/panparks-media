@@ -148,12 +148,13 @@ function media_admin($form) {
      ->limit(50)
      ->execute();
   
+  $destination = drupal_get_destination();
    $files = array();
    foreach ($result as $file) {
      $options[$file->fid] = array(
        'title' => check_plain($file->filename),
        'type' =>  check_plain($file->filemime),
-       'size' => check_plain($file->filesize),
+       'size' => t('@size KB', array('@size' => number_format($file->filesize / 1000, 0))),
        'author' => theme('username', array('account' => $file)),
        'timestamp' => format_date($file->timestamp, 'short'),
      );
