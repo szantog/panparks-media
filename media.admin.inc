@@ -168,10 +168,18 @@ function media_admin($form) {
    );
    $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
    
-   $form['display_type'] = array(
-     '#type' => 'markup',
-     '#markup' => theme('media_admin_display_switch', 'list'),
-   );
+   // Build the display switch.
+    $display_types = array();
+    $display_types[] = l('List', 'admin/content/media/list');
+    $display_types[] = l('Thumbnails', 'admin/content/media/thumbnails');
+    drupal_alter('media_display_types', $display_types);
+    $form['display_type'] = array(
+      '#type' => 'markup',
+      '#markup' => theme('item_list', array(
+         'items' => $display_types,
+         'attributes' => array('class' => 'media-display-switch'),
+        )),
+    );
   
   return $form;
 }
@@ -187,11 +195,4 @@ function media_media_operations() {
     ),
   );
   return $operations;
-}
-
-/**
- * Theme function that outputs a display switcher on the admin/content/media form.
- */
-function theme_media_admin_display_switch($display = 'list') {
-  return 'test';
 }
