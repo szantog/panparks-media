@@ -1,0 +1,12 @@
+// $Id$
+
+CHANGELOG for Media File module.
+================================
+
+by aaron: In media_file_resource_add_file() build form w/
+  media_resource_display_upload_form().
+by aaron: In media_file_user_files_select() support new dbtng.
+by aaron: Change fields from array('attachments', 'filefield') to array('file').
+by aaron: Change all references of 'upload' to 'file'.
+by aaron: Change info dependencies[] from Upload module to File.
+by aaron: Change name of module from Media Upload for d7.
