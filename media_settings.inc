@@ -152,7 +152,7 @@ function media_admin($form) {
    $files = array();
    foreach ($result as $file) {
      $options[$file->fid] = array(
-       'title' => check_plain($file->filename),
+       'title' => theme('file_link', array('file' => $file)),
        'type' =>  check_plain($file->filemime),
        'size' => t('@size KB', array('@size' => number_format($file->filesize / 1000, 0))),
        'author' => theme('username', array('account' => $file)),
@@ -167,6 +167,11 @@ function media_admin($form) {
      '#empty' => t('No media available.'),
    );
    $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
+   
+   $form['display_type'] = array(
+     '#type' => 'markup',
+     '#markup' => theme('media_admin_display_switch', 'list'),
+   );
   
   return $form;
 }
@@ -182,4 +187,11 @@ function media_media_operations() {
     ),
   );
   return $operations;
+}
+
+/**
+ * Theme function that outputs a display switcher on the admin/content/media form.
+ */
+function theme_media_admin_display_switch($display = 'list') {
+  return 'test';
 }

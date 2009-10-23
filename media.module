@@ -136,6 +136,11 @@ function media_theme() {
     'media_browser_pane' => array(
       'arguments'         => array('form' => array()),
     ),
+    
+    // The display switcher on admin/content/media.
+    'media_admin_display_switch' => array(
+      'arguments' => array('display' => NULL),
+    ),
   );
 }
 
