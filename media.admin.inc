@@ -168,8 +168,14 @@ function media_admin_list($form) {
 
   // Build the display switch.
   $display_types = array();
-  $display_types[] = l('List', 'admin/content/media/list');
-  $display_types[] = l('Thumbnails', 'admin/content/media/thumbnails');
+  $display_types[] = array(
+    'data' => l('List', 'admin/content/media/list'),
+    'class' => array('media-display-list'),
+  );
+  $display_types[] = array(
+    'data' => l('Thumbnails', 'admin/content/media/thumbnails'),
+    'class' => array('media-display-list'),
+  );
   drupal_alter('media_display_types', $display_types);
   $form['display_type'] = array(
     '#type' => 'markup',
@@ -222,8 +228,14 @@ function media_admin_thumbnails($form) {
 
   // Build the display switch.
   $display_types = array();
-  $display_types[] = l('List', 'admin/content/media/list');
-  $display_types[] = l('Thumbnails', 'admin/content/media/thumbnails');
+  $display_types[] = array(
+    'data' => l('List', 'admin/content/media/list'),
+    'class' => array('media-display-list'),
+  );
+  $display_types[] = array(
+    'data' => l('Thumbnails', 'admin/content/media/thumbnails'),
+    'class' => array('media-display-list'),
+  );
   drupal_alter('media_display_types', $display_types);
   $form['display_type'] = array(
     '#type' => 'markup',
