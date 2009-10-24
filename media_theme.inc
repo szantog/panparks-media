@@ -63,9 +63,17 @@ function theme_media_browser_pane($form) {
  * Output a thumbnail and other info for an admin view.
  */
 function theme_media_admin_thumbnail($variables) {
-  $destination = drupal_get_destination();
-  $output = theme('file_link', $variables);
+  $output = '';
   $file = $variables['file'];
-  $output .= l(t('edit'), 'admin/content/media/' . $file->fid . '/edit', array('query' => $destination));
+  return $output;
+}
+
+/**
+ * Output a thumbnail and other info for an admin view.
+ */
+function theme_media_admin_thumbnail_operations($variables) {
+  $destination = drupal_get_destination();
+  $file = $variables['file'];
+  $output = l(t('edit'), 'admin/content/media/' . $file->fid . '/edit', array('query' => $destination));
   return $output;
 }

@@ -177,6 +177,12 @@ function media_theme() {
       'arguments' => array('file' => NULL),
       'file' => 'media_theme.inc',
     ),
+    
+    // The thumbnail operations disply on admin pages.
+    'media_admin_thumbnail_operations' => array(
+      'arguments' => array('file' => NULL),
+      'file' => 'media_theme.inc',
+    ),
   );
 }
 

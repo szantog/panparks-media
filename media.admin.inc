@@ -203,16 +203,21 @@ function media_admin_thumbnails() {
   $destination = drupal_get_destination();
   $rows = array();
   $options = array();
-  foreach ($result as $file) {
-   $options[$file->fid] = theme('media_admin_thumbnail', array('file' => $file));
-  }
-  
   $form['files'] = array(
-   '#type' => 'checkboxes',
-   '#options' => $options,
+   '#tree' => TRUE,
    '#prefix' => '<div class ="media-display-thumbnails">',
    '#suffix' => '</div>',
   );
+  if (count($result)) {
+    foreach ($result as $file) {
+     $form['files'][$file->fid] = array(
+       '#type' => 'checkbox',
+       '#title' => check_plain($file->filename),
+       '#prefix' => theme('media_admin_thumbnail', array('file' => $file)),
+       '#suffix' => theme('media_admin_thumbnail_operations', array('file' => $file)),
+     );
+    }
+  }
   
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
   
