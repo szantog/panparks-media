@@ -157,7 +157,7 @@ function media_admin_list($form) {
      'author' => theme('username', array('account' => $file)),
      'timestamp' => format_date($file->timestamp, 'short'),
    );
-   $options[$file->fid]['operations'] = l(t('edit'), 'media/file/' . $file->fid . '/edit', array('query' => $destination));
+   $options[$file->fid]['operations'] = l(t('edit'), 'admin/content/media/' . $file->fid . '/edit', array('query' => $destination));
   }
   $form['files'] = array(
    '#type' => 'tableselect',
@@ -289,6 +289,9 @@ function media_admin_thumbnails($form) {
   return $form;
 }
 
+/**
+ * Build the operations portion of the file listing forms.
+ */
 function media_admin_operations($form = array()) {
   // Build the 'Update options' form.
   $form['options'] = array(
@@ -369,4 +372,42 @@ function media_media_operations() {
     ),
   );
   return $operations;
+}
+
+/**
+ * Form builder: Builds the edit file form.
+ */
+function media_edit($form, $files) {
+  $file = $files['args'][0];
+  drupal_set_title($file->filename);
+  $form['title'] = array(
+    '#title' => t('Title'),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#default_value' => $file->filename,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+  $form['file'] = array(
+    '#type' => 'hidden',
+    '#value' => $file->fid,
+  );
+  $form['#redirect'] = 'admin/content/media';
+  return $form;
+}
+
+function media_edit_validate($form, &$form_state) {
+  // TODO: validate the edit form.
+}
+
+/**
+ * Process media_edit form submissions.
+ */
+function media_edit_submit($form, &$form_state) {
+  $file = file_load($form_state['values']['file']);
+  print_r($file);
+  $file->filename = $form_state['values']['title'];
+  file_save($file);
 }
