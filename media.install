@@ -21,7 +21,7 @@ function media_uninstall() {
     if (isset($type->fields)) {
       foreach ((array)$type->fields as $field_name => $field) {
         foreach (media_registration_kinds() as $kind) {
-          variable_del('media_'. $node_type .'_'. $field['field_name'] .'_'. $kind);
+          variable_del('media_' . $node_type . '_' . $field['field_name'] . '_' . $kind);
         }
       }
     }
