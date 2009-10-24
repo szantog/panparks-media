@@ -180,7 +180,7 @@ function media_admin_list() {
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
 
   // Build the display switch.
-  $form = media_admin_display_switch($form);
+  $form = media_admin_display_switch($form, array('active_display' => 'list'));
 
   return $form;
 }
@@ -215,7 +215,7 @@ function media_admin_thumbnails() {
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
   
   // Build the display switch.
-  $form = media_admin_display_switch($form);
+  $form = media_admin_display_switch($form, array('active_display' => 'thumbnails'));
 
   return $form;
 }
@@ -254,8 +254,11 @@ function media_admin_operations() {
 /**
  * Build the display switch portion of the file listings form.
  */
-function media_admin_display_switch($form = array(), $form_location = 'admin/content/media') {
+function media_admin_display_switch($form = array(), $options = array()) {
   $path = drupal_get_path('module', 'media');
+
+  $form_location = (isset($options['form_location'])) ? $options['form_location'] : 'admin/content/media';
+  $active_display = (isset($options['active_display'])) ? $options['active_display'] : NULL;
   
   // Set up the default display types.
   $display_types = array();
@@ -278,15 +281,15 @@ function media_admin_display_switch($form = array(), $form_location = 'admin/con
   $display_items = array();
   foreach ($display_types as $delta => $item) {
     // Set a seperate icon for the active item.
-    #if ($location . '/' . $delta in active trail) {
-    #  $icon = $item['icon_active'];
-    #}
-    #else {
+    if ($delta == $active_display) {
+      $icon = $item['icon_active'];
+    }
+    else {
       $icon = $item['icon'];
-    #}
+    }
     
     $display_items[] = array(
-      'data' => l(theme('image', array('path' => $item['icon'], 'alt' => $item['title'])),
+      'data' => l(theme('image', array('path' => $icon, 'alt' => $item['title'])),
         $form_location . '/' . $delta,
         array(
           'html' => TRUE,
