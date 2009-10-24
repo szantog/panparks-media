@@ -515,14 +515,23 @@ function media_add_files($form, $form_state) {
   return $form;
 }
 
+/**
+ * Validate the generic file upload with the global media settings.
+ */
 function media_add_files_validate($form, &$form_state) {
-  $validators = array();
-  /* TODO: figure out validation
+  
   $validators = array(
-    'file_validate_extensions' => array($limits['extensions']),
-    'file_validate_size' => array($limits['file_size'], $limits['user_size']),
+   'file_validate_extensions' => array(variable_get('media_file_extensions', '')),
+   'file_validate_size' => array(parse_size(variable_get('media_max_filesize', ''))),
   );
-*/
+  // A blank set of allowed file extensions means no need to validate.
+  if (!$validators['file_validate_extensions']) {
+    unset($validators['file_validate_extensions']);
+  }
+  // Use the PHP limit for filesize if no variable was set.
+  if (!$validators['file_validate_size']) {
+    $validators['file_validate_size'] = file_upload_max_size();
+  }
   // Save the file as a temporary file.
   $file = file_save_upload('upload', $validators);
   if ($file === FALSE) {
@@ -533,6 +542,9 @@ function media_add_files_validate($form, &$form_state) {
   }
 }
 
+/**
+ * Upload a file.
+ */
 function media_add_files_submit($form, &$form_state) {
   $scheme = variable_get('file_default_scheme', 'public') .'://';
   $file = $form_state['values']['upload'];
