@@ -1064,3 +1064,48 @@ function media_browser_submit(&$form, $form_state) {
 
   // dsm($form_state['values']);
 }
+
+/**
+ * Implement hook_field_info_alter().
+ */
+function media_field_info_alter(&$info) {
+  $info['file']['default_widget'] = 'media_generic';
+}
+
+function media_field_widget_info_alter(&$info) {
+  // Don't allow users to choose the generic file upload widget
+  // for new fields.
+  unset($info['file_generic']);
+}
+
+/**
+ * Implement hook_field_widget_info().
+ */
+function media_field_widget_info() {
+  return array(
+    'media_generic' => array(
+      'label' => t('File (media)'),
+      'field types' => array('file'),
+      'settings' => array(
+      ),
+      'behaviors' => array(
+        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
+        'default value' => FIELD_BEHAVIOR_NONE,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implement hook_field_widget_settings_form().
+ */
+function media_field_widget_settings_form($field, $instance) {
+  return array();
+}
+
+/**
+ * Implementation of hook_field_widget().
+ */
+function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
+  return file_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0);
+}
