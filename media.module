@@ -47,6 +47,31 @@ function media_menu() {
     'file' => 'media.admin.inc',
   );
   
+  $items['admin/content/media/add/local'] = array(
+    'title' => 'Upload new files',
+    'page callback' => 'media_add_local',
+    'access arguments' => array('administer media'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'media.admin.inc',
+    'weight' => 10,
+  );
+  $items['admin/content/media/add/folder'] = array(
+    'title' => 'Add new folder',
+    'page callback' => 'media_add_folder',
+    'access arguments' => array('administer media'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'media.admin.inc',
+    'weight' => 20,
+  );
+  $items['admin/content/media/add/external'] = array(
+    'title' => 'Add new external source',
+    'page callback' => 'media_add_external',
+    'access arguments' => array('administer media'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'media.admin.inc',
+    'weight' => 30,
+  );
+  
   // Default settings, for content types that do not have their own.
   $items['admin/config/media/media'] = array(
     'title'            => 'Media settings',
