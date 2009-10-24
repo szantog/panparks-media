@@ -205,7 +205,7 @@ function media_admin_thumbnails() {
   $options = array();
   $form['files'] = array(
    '#tree' => TRUE,
-   '#prefix' => '<div class ="media-display-thumbnails">',
+   '#prefix' => '<div class ="media-display-thumbnails clearfix">',
    '#suffix' => '</div>',
   );
   if (count($result)) {
@@ -213,8 +213,8 @@ function media_admin_thumbnails() {
      $form['files'][$file->fid] = array(
        '#type' => 'checkbox',
        '#title' => check_plain($file->filename),
-       '#prefix' => theme('media_admin_thumbnail', array('file' => $file)),
-       '#suffix' => theme('media_admin_thumbnail_operations', array('file' => $file)),
+       '#prefix' => '<div class="media-thumbnail">' . theme('media_admin_thumbnail', array('file' => $file)),
+       '#suffix' => theme('media_admin_thumbnail_operations', array('file' => $file)) . '</div>',
      );
     }
   }

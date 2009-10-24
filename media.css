@@ -41,3 +41,22 @@
   border: 1px solid #555;
   color: #fff;
 }
+
+/**
+ * Thumbnails display
+ */
+.media-display-thumbnails {
+  border: 1px solid #ddd;
+  padding: 20px;
+  margin-bottom: 10px;
+}
+.media-display-thumbnails div.media-thumbnail {
+  float: left;
+}
+.media-display-thumbnails div.media-thumbnail a.media-thumbnail {
+  display: block;
+}
+.media-display-thumbnails div.media-thumbnail .form-item {
+  margin: 0;
+  padding: 0;
+}

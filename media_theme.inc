@@ -60,16 +60,37 @@ function theme_media_browser_pane($form) {
 }
 
 /**
- * Output a thumbnail and other info for an admin view.
+ * Theme a thumbnail.
  */
 function theme_media_admin_thumbnail($variables) {
   $output = '';
   $file = $variables['file'];
+  
+  // Display a thumbnail for images.
+  if (strstr($file->filemime, 'image')) {
+    $thumbnail = theme('image_style',
+      array(
+        'style_name' => 'thumbnail',
+        'path' => $file->uri,
+        'alt' => t('Thumbnail for !filename.', array('!filename' => $file->filename)),
+      ));
+    $output .= l($thumbnail,
+      'admin/content/media/' . $file->fid . '/edit',
+      array(
+        'html' => TRUE,
+        'attributes' => array('class' => 'media-thumbnail'),
+      ));
+  }
+  // Display an icon for other file types.
+  else {
+    $output .= $file->filemine;
+  }
+  
   return $output;
 }
 
 /**
- * Output a thumbnail and other info for an admin view.
+ * Theme operations for a thumbnail.
  */
 function theme_media_admin_thumbnail_operations($variables) {
   $destination = drupal_get_destination();
