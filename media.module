@@ -1265,7 +1265,6 @@ function media_uri_value($element, &$input) {
       return;
     }
     elseif ($scheme == 'public') {
-      $file = new stdClass;
       $file->filename = $input['file_uri'];
       $errors = file_validate_extensions($file, $element['#media_file_extensions']);
       if ($errors) {
@@ -1282,6 +1281,16 @@ function media_uri_value($element, &$input) {
       $file = array_pop($files);
       $input['fid'] = $file->fid;
       return;
+    }
+
+    if (file_exists($input['file_uri']) && is_readable($input['file_uri'])) {
+      $wrapper = file_stream_wrapper_get_instance_by_uri($input['file_uri']);
+      $file = new stdClass;
+      $file->uri = $input['file_uri'];
+      $file->status = 1;
+      $file->uid = $GLOBALS['user']->uid;
+      $file->filemime = $wrapper->getMimeType($input['file_uri']);
+      $file = file_save($file);
     }
     form_set_error($upload_name, t('The file could not be uploaded.'));
 
