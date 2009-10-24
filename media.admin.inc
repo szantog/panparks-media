@@ -355,6 +355,9 @@ function media_admin_submit($form, &$form_state) {
   }
 }
 
+/**
+ * Confirm the request to delete files.
+ */
 function media_multiple_delete_confirm($form, &$form_state, $files) {
   $form['files'] = array('#prefix' => '<ul>', '#suffix' => '</ul>', '#tree' => TRUE);
   // array_filter returns only elements with TRUE values
@@ -373,31 +376,40 @@ function media_multiple_delete_confirm($form, &$form_state, $files) {
   $confirm_question = format_plural(count($files),
                                   'Are you sure you want to delete this item?',
                                   'Are you sure you want to delete these items?');
+  
   return confirm_form($form,
                     $confirm_question,
-                    'admin/content/media', t('This action cannot be undone.'),
+                    $_GET['q'], t('This action cannot be undone.'),
                     t('Delete'), t('Cancel'));
 }
 
+/**
+ * Attempt to delete files and notify the user of the result.
+ */
 function media_multiple_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
     $results = array();
     $files = array_keys($form_state['values']['files']);
     foreach ($files as $fid) {
-      drupal_set_message($fid);
-      $file = array_shift(file_load($fid));
-    //  $results[$fid] = file_delete($file);
+      $file = file_load($fid);
+      $files[$fid] = $file;
+      $results[$fid] = file_delete($file);
     }
-    print_r($results);  
-    $count = count($form_state['values']['files']);
-    $message = format_plural($count,
-                                    'Deleted @count file.',
-                                    'Deleted @count files.', 
-                                    array('@count' => $count));
-    watchdog('media', $message);
-    drupal_set_message($message);
+    // The result of file_delete can be an array if the file is in use, or TRUE/FALSE.
+    foreach ($results as $fid => $result) {
+      if (is_array($result)) {
+        drupal_set_message(t('The file @title is in use and cannot be deleted.', array('@title' => $files[$fid]->filename)), 'warning');
+      }
+      elseif (!$result) {
+        drupal_set_message(t('The file @title was not deleted due to an error.', array('@title' => $files[$fid]->filename)), 'error');
+      }
+      else {
+        $message = t('File @title was deleted', array('@title' => $files[$fid]->filename));
+        watchdog('media', $message);
+        drupal_set_message($message);
+      }
+    }
   }
-//  $form_state['redirect'] = 'admin/content/media';
 }
 
 
