@@ -246,13 +246,13 @@ function media_admin_display_switch($form = array(), $form_location = 'admin/con
   $display_types = array();
   $display_types['list'] = array(
     'title' => t('List'),
-    'description' => t('View as a list.'),
+    'description' => t('Display as a list.'),
     'icon' => $path . '/images/display-list.png',
     'icon_active' => $path . '/images/display-list-active.png',
   );
   $display_types['thumbnails'] = array(
     'title' => t('Thumbnails'),
-    'description' => t('View as thumbnails.'),
+    'description' => t('Display as thumbnails.'),
     'icon' => $path . '/images/display-thumbnails.png',
     'icon_active' => $path . '/images/display-thumbnails-active.png',
   );
@@ -262,6 +262,14 @@ function media_admin_display_switch($form = array(), $form_location = 'admin/con
   // Build the item list.
   $display_items = array();
   foreach ($display_types as $delta => $item) {
+    // Set a seperate icon for the active item.
+    #if ($location . '/' . $delta in active trail) {
+    #  $icon = $item['icon_active'];
+    #}
+    #else {
+      $icon = $item['icon'];
+    #}
+    
     $display_items[] = array(
       'data' => l(theme('image', array('path' => $item['icon'], 'alt' => $item['title'])),
         $form_location . '/' . $delta,
