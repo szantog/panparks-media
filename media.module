@@ -37,7 +37,7 @@ function media_menu() {
     'page callback'    => 'media_ahah_metadata_ahah',
     'access arguments' => array('access content'),
   );
-  
+
   $items['admin/content/media'] = array(
     'title' => 'Media',
     'description' => 'Manage files used on your site.',
@@ -47,7 +47,7 @@ function media_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'media.admin.inc',
   );
-  
+
   $items['admin/content/media/%file/edit'] = array(
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_edit', 3),
@@ -55,7 +55,7 @@ function media_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'media.admin.inc',
   );
-  
+
   $items['admin/content/media/add/files'] = array(
     'title' => 'Upload new files',
     'page callback' => 'media_add_files',
@@ -80,7 +80,7 @@ function media_menu() {
     'file' => 'media.admin.inc',
     'weight' => 30,
   );
-  
+
   // Default settings, for content types that do not have their own.
   $items['admin/config/media/media'] = array(
     'title'            => 'Media settings',
@@ -113,7 +113,7 @@ function media_permission() {
  * @param $form_state
  * @param $form_id
  */
-function media_form_alter(&$form, $form_state, $form_id) {
+function media_form_alter(&$form, &$form_state, $form_id) {
   global $user;
 
   // Load content-type settings.
@@ -171,7 +171,7 @@ function media_theme() {
     'media_browser_pane' => array(
       'arguments'         => array('form' => array()),
     ),
-    
+
     // The thumbnail disply on admin pages.
     'media_admin_thumbnail' => array(
       'arguments' => array('file' => NULL),
