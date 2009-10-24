@@ -900,7 +900,7 @@ function media_resource_display_user_files_form($files, $title = NULL) {
   $options = array();
 
   foreach ($files as $file) {
-		// TODO: Use FID rather than URI
+    // TODO: Use FID rather than URI
     $options[$file['uri']] = $file['filename'];
   }
 
