@@ -122,8 +122,6 @@ function media_admin($display = 'list') {
  * Form builder: Builds the media list administration overview.
  */
 function media_admin_list($form) {
-  $path = drupal_get_path('module', 'media');
-  
   // Build the 'Update options' form.
   $form = media_admin_operations($form);
   
@@ -168,46 +166,7 @@ function media_admin_list($form) {
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
 
   // Build the display switch.
-  $display_types = array();
-  $display_types[] = array(
-    'data' => l(theme('image',
-        array(
-          'path' => $path . '/images/display-list.png',
-          'alt' => 'List',
-        )
-      ),
-      'admin/content/media/list',
-      array(
-        'html' => TRUE,
-        'attributes' => array('title' => 'Display as a list.'),
-      )
-    ),
-    'class' => array('media-display-list'),
-  );
-  $display_types[] = array(
-    'data' => l(theme('image',
-        array(
-          'path' => $path . '/images/display-thumbnails.png',
-          'alt' => 'Thumbnails',
-        )
-      ),
-      'admin/content/media/thumbnails',
-      array(
-        'html' => TRUE,
-        'attributes' => array('title' => 'Display as thumbnails.'),
-      )
-    ),
-    'class' => array('media-display-thumbnails'),
-  );
-  drupal_alter('media_display_types', $display_types);
-  $form['display_type'] = array(
-    '#type' => 'markup',
-    '#markup' => theme('item_list', array(
-       'items' => $display_types,
-       'attributes' => array('class' => 'media-display-switch'),
-      )
-    ),
-  );
+  $form = media_admin_display_switch($form);
 
   return $form;
 }
@@ -216,8 +175,6 @@ function media_admin_list($form) {
  * Form builder: Builds the media thumbnails administration overview.
  */
 function media_admin_thumbnails($form) {
-  $path = drupal_get_path('module', 'media');
-  
   // Build the 'Update options' form.
   $form = media_admin_operations($form);
 
@@ -243,48 +200,9 @@ function media_admin_thumbnails($form) {
   );
   
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
-
+  
   // Build the display switch.
-  $display_types = array();
-  $display_types[] = array(
-    'data' => l(theme('image',
-        array(
-          'path' => $path . '/images/display-list.png',
-          'alt' => 'List',
-        )
-      ),
-      'admin/content/media/list',
-      array(
-        'html' => TRUE,
-        'attributes' => array('title' => 'Display as a list.'),
-      )
-    ),
-    'class' => array('media-display-list'),
-  );
-  $display_types[] = array(
-    'data' => l(theme('image',
-        array(
-          'path' => $path . '/images/display-thumbnails.png',
-          'alt' => 'Thumbnails',
-        )
-      ),
-      'admin/content/media/thumbnails',
-      array(
-        'html' => TRUE,
-        'attributes' => array('title' => 'Display as thumbnails.'),
-      )
-    ),
-    'class' => array('media-display-thumbnails'),
-  );
-  drupal_alter('media_display_types', $display_types);
-  $form['display_type'] = array(
-    '#type' => 'markup',
-    '#markup' => theme('item_list', array(
-       'items' => $display_types,
-       'attributes' => array('class' => 'media-display-switch'),
-      )
-    ),
-  );
+  $form = media_admin_display_switch($form);
 
   return $form;
 }
@@ -293,7 +211,6 @@ function media_admin_thumbnails($form) {
  * Build the operations portion of the file listing forms.
  */
 function media_admin_operations($form = array()) {
-  // Build the 'Update options' form.
   $form['options'] = array(
     '#type' => 'fieldset',
     '#title' => t('Update options'),
@@ -316,6 +233,55 @@ function media_admin_operations($form = array()) {
     '#submit' => array('media_admin_submit'),
     '#validate' => array('media_admin_validate'),
   );
+  return $form;
+}
+
+/**
+ * Build the display switch portion of the file listings form.
+ */
+function media_admin_display_switch($form = array(), $form_location = 'admin/content/media') {
+  $path = drupal_get_path('module', 'media');
+  
+  // Set up the default display types.
+  $display_types = array();
+  $display_types['list'] = array(
+    'title' => t('List'),
+    'description' => t('View as a list.'),
+    'icon' => $path . '/images/display-list.png',
+    'icon_active' => $path . '/images/display-list-active.png',
+  );
+  $display_types['thumbnails'] = array(
+    'title' => t('Thumbnails'),
+    'description' => t('View as thumbnails.'),
+    'icon' => $path . '/images/display-thumbnails.png',
+    'icon_active' => $path . '/images/display-thumbnails-active.png',
+  );
+  // Make it alterable so other modules can add additional displays.
+  drupal_alter('media_display_types', $display_types);
+  
+  // Build the item list.
+  $display_items = array();
+  foreach ($display_types as $delta => $item) {
+    $display_items[] = array(
+      'data' => l(theme('image', array('path' => $item['icon'], 'alt' => $item['title'])),
+        $form_location . '/' . $delta,
+        array(
+          'html' => TRUE,
+          'attributes' => array('title' => $item['description']),
+        )),
+      'class' => array('media-display-' . $delta),
+    );
+  }
+  
+  $form['display_type'] = array(
+    '#type' => 'markup',
+    '#markup' => theme('item_list', array(
+       'items' => $display_items,
+       'attributes' => array('class' => 'media-display-switch'),
+      )
+    ),
+  );
+  
   return $form;
 }
 
