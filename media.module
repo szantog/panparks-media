@@ -47,9 +47,9 @@ function media_menu() {
     'file' => 'media.admin.inc',
   );
   
-  $items['admin/content/media/add/local'] = array(
+  $items['admin/content/media/add/files'] = array(
     'title' => 'Upload new files',
-    'page callback' => 'media_add_local',
+    'page callback' => 'media_add_files',
     'access arguments' => array('administer media'),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'media.admin.inc',
