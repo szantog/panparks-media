@@ -1255,17 +1255,19 @@ function media_uri_value($element, &$input) {
   if (!empty($input['file_uri'])) {
     $upload_name = implode('_', $element['#parents']);
     $scheme = file_uri_scheme($input['file_uri']);
-    if (!$scheme) {
-      form_set_error($upload_name, t('Invalid URI: no scheme.'));
+    $target = file_uri_target($input['file_uri']);
+    if (!$scheme || !$target) {
+      form_set_error($upload_name, t('Invalid URI.'));
       return;
     }
+    $file = new stdClass;
+    $file->filename = basename($target);
     $streams = file_get_stream_wrappers();
     if (empty($streams[$scheme])) {
       form_set_error($upload_name, t('Invalid URI: scheme is not registered.'));
       return;
     }
     elseif ($scheme == 'public') {
-      $file->filename = $input['file_uri'];
       $errors = file_validate_extensions($file, $element['#media_file_extensions']);
       if ($errors) {
         form_set_error($upload_name, implode(' ', $errors));
@@ -1285,12 +1287,15 @@ function media_uri_value($element, &$input) {
 
     if (file_exists($input['file_uri']) && is_readable($input['file_uri'])) {
       $wrapper = file_stream_wrapper_get_instance_by_uri($input['file_uri']);
-      $file = new stdClass;
       $file->uri = $input['file_uri'];
-      $file->status = 1;
+      $file->status = FILE_STATUS_PERMANENT;
       $file->uid = $GLOBALS['user']->uid;
       $file->filemime = $wrapper->getMimeType($input['file_uri']);
       $file = file_save($file);
+      if (isset($file->fid)) {
+        $input['fid'] = $file->fid;
+        return;
+      }
     }
     form_set_error($upload_name, t('The file could not be uploaded.'));
 
@@ -1308,6 +1313,18 @@ function theme_media_managed_file($variables) {
   $output .= '</div>';
   return $output;
 }
+
+/**
+ * Implement hook_file_references().
+ *
+ * Important - without implementing this hook, it's hard insert an existing
+ * file into the file table and attach to a node due to validation in
+ * function file_managed_file_validate() in file.module.
+ */
+function media_file_references($file) {
+  return 1;
+}
+
 
 /**
  * Implement hook_image_default_styles().
