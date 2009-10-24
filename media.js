@@ -5,6 +5,8 @@
  * This file handles the JS for Media Module functions
  */
 
+(function ($) {
+
 /**
 * This handles the activation of drawers on the media browser form
 * @TODO make this a drupal behavior
@@ -66,7 +68,25 @@ $(document).ready(function () {
 });
 
 /**
-* This handles passing the current file data from the media browser
-* to the formater function and returns the correct form elements
-*/
-$(document).ready(function () { });
+ * Thumbnails display
+ */
+$(document).ready(function () {
+  $('div.media-thumbnail :checkbox', '.media-display-thumbnails').each(function () {
+    var checkbox = $(this);
+    
+    if (checkbox.is(':checked')) {
+      checkbox.parents('div.media-thumbnail').addClass('media-thumbnail-checked');
+    }
+    
+    checkbox.change(function () {
+      if (checkbox.is(':checked')) {
+        checkbox.parents('div.media-thumbnail').addClass('media-thumbnail-checked');
+      }
+      else {
+        checkbox.parents('div.media-thumbnail-checked').removeClass('media-thumbnail-checked');
+      }
+    });
+  });
+});
+
+})(jQuery);

@@ -75,7 +75,7 @@ function theme_media_admin_thumbnail($variables) {
         'alt' => t('Thumbnail for !filename.', array('!filename' => $file->filename)),
       ));
     $output .= l($thumbnail,
-      'admin/content/media/' . $file->fid . '/edit',
+      file_create_url($file->uri),
       array(
         'html' => TRUE,
         'attributes' => array('class' => 'media-thumbnail'),

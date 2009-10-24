@@ -21,7 +21,7 @@
   border: 1px solid;
   border-color: #e4e4e4 #d2d2d2 #b4b4b4 #d3d3d3;
   display: block;
-  padding: 8px 9px;
+  padding: 7px 9px;
 }
 .item-list .media-display-switch li.first a {
   -moz-border-radius-topleft: 4px;
@@ -47,14 +47,24 @@
  */
 .media-display-thumbnails {
   border: 1px solid #ddd;
-  padding: 20px;
   margin-bottom: 10px;
 }
 .media-display-thumbnails div.media-thumbnail {
   float: left;
+  margin: 20px;
+  padding: 10px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+}
+.media-display-thumbnails div.media-thumbnail a.media-thumbnail,
+.media-display-thumbnails div.media-thumbnail a.media-thumbnail img {
+  display: block;
 }
 .media-display-thumbnails div.media-thumbnail a.media-thumbnail {
-  display: block;
+  margin-bottom: 5px;
+}
+.media-display-thumbnails div.media-thumbnail-checked {
+  background: #ddd;
 }
 .media-display-thumbnails div.media-thumbnail .form-item {
   margin: 0;

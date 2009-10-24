@@ -106,13 +106,15 @@ function media_settings_global($form) {
  * Display the list or thumbnails media admin display.
  */
 function media_admin($form, $form_state, $display = NULL) {
+  $path = drupal_get_path('module', 'media');
   
   if (!$display) {
     drupal_goto('admin/content/media/list');
   }
 
-  // Load our css.
-  drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
+  // Load our CSS and JS.
+  drupal_add_css($path . '/media.css');
+  drupal_add_js($path . '/media.js');
   
   if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
     return media_multiple_delete_confirm($form, $form_state, array_filter($form_state['values']['files']));
