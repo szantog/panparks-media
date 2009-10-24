@@ -990,7 +990,7 @@ function media_file_list_element_process($element, $edit, $form_state, $form) {
  * @param $form_state
  */
 function media_file_list_element_submit(&$form, $form_state) {
-  drupal_set_message('Successful submit of the Media File List...');
+  drupal_set_message(t('Successful submit of the Media File List...'));
 }
 
 /**
@@ -1000,7 +1000,7 @@ function media_file_list_element_submit(&$form, $form_state) {
  * @param $form_state
  */
 function media_file_list_element_validate($element, $form_state) {
-  drupal_set_message('Successful validation of the Media File List...');
+  drupal_set_message(t('Successful validation of the Media File List...'));
   return $element;
 }
 
@@ -1011,7 +1011,7 @@ function media_file_list_element_validate($element, $form_state) {
  * @param $form_state
  */
 function media_browser_metadata_validate(&$form, $form_state) {
-  drupal_set_message('validating metadata... media_browser_metadata_validate needs to pass it to the registered module.');
+  drupal_set_message(t('validating metadata... media_browser_metadata_validate needs to pass it to the registered module.'));
 }
 
 /**
@@ -1021,7 +1021,7 @@ function media_browser_metadata_validate(&$form, $form_state) {
  * @param $form_state
  */
 function media_browser_metadata_submit(&$form, $form_state) {
-  drupal_set_message('media_browser_metadata_submit: last step... we now have metadata, and need to send that info to the registered module w/ the file info.');
+  drupal_set_message(t('media_browser_metadata_submit: last step... we now have metadata, and need to send that info to the registered module w/ the file info.'));
 }
 
 /**
@@ -1031,7 +1031,7 @@ function media_browser_metadata_submit(&$form, $form_state) {
  * @param $form_state
  */
 function media_browser_validate(&$form, $form_state) {
-  drupal_set_message('media_browser_validate is validating... needs to go to registered module from here.');
+  drupal_set_message(t('media_browser_validate is validating... needs to go to registered module from here.'));
 }
 
 /**
@@ -1042,7 +1042,7 @@ function media_browser_validate(&$form, $form_state) {
  */
 function media_browser_submit(&$form, $form_state) {
   drupal_set_message(theme('image', variable_get('media_file_progress_success', drupal_get_path('module', 'media') . '/images/check-green-blah.png')) . t('media_browser_submit File attachment: !file successful.', array('!file' => l($form_state['values']['media_files'], $form_state['values']['media_files']))));
-  drupal_set_message('(media_browser_submit will need to actually process the file here, sending it to the original registered module to store. we also need to ensure the file is kept in synch with the metadata & formatter coming up next.)');
+  drupal_set_message(t('(media_browser_submit will need to actually process the file here, sending it to the original registered module to store. we also need to ensure the file is kept in synch with the metadata & formatter coming up next.)'));
 
   // To consider: Use module_implements to call all modules which implement this hook.
   // This might allow the modules to determine their own chaining, but at the expense of performance.
@@ -1060,7 +1060,7 @@ function media_browser_submit(&$form, $form_state) {
     $hook_media_action($form, $form_state, 'media_browser_submit');
   }
   else {
-    drupal_set_message(t('Media: No action handler found.'), 'error');
+    drupal_set_message(t('Media: No action handler found in media_browser_submit.'), 'error');
   }
 
   // dsm($form_state['values']);
