@@ -78,8 +78,10 @@ function theme_media_browser_thumbnails($files = array()) {
  * Theme a thumbnail.
  */
 function theme_media_admin_thumbnail($variables) {
-  $output = '';
+  $path = drupal_get_path('module', 'media');
   $file = $variables['file'];
+  $file_url = file_create_url($file->uri);
+  $output = '';
 
   // Display a thumbnail for images.
   if (strstr($file->filemime, 'image')) {
@@ -89,17 +91,23 @@ function theme_media_admin_thumbnail($variables) {
         'path' => $file->uri,
         'alt' => t('Thumbnail for !filename.', array('!filename' => $file->filename)),
       ));
-    $output .= l($thumbnail,
-      file_create_url($file->uri),
+    
+  }
+  // Display the 'unknown' icon for other file types.
+  else {
+    $thumbnail = theme('image',
       array(
-        'html' => TRUE,
-        'attributes' => array('class' => 'media-thumbnail'),
+        'path' => $path . '/images/file-unknown.png',
+        'alt' => t('Thumbnail for !filename.', array('!filename' => $file->filename)),
+        'attributes' => array('class' => 'file-unknown'),
       ));
   }
-  // Display an icon for other file types.
-  else {
-    $output .= $file->filemime;
-  }
+  $output .= l($thumbnail,
+    $file_url,
+    array(
+      'html' => TRUE,
+      'attributes' => array('class' => 'media-thumbnail'),
+    ));
 
   return $output;
 }
