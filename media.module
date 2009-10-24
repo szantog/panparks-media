@@ -125,8 +125,8 @@ function media_form_alter(&$form, &$form_state, $form_id) {
   // Add the media browser on the node add/edit screen.
   if (!empty($form['#node_edit_form'])) {
     // Is the media browser enabled on this node type? Type-specific options override the default.
-    if (variable_get('media_'. $form['type']['#value'] .'_override', NULL) !== NULL) {
-      $enabled = variable_get('media_'. $form['type']['#value'] .'_enabled', NULL);
+    if (variable_get('media_' . $form['type']['#value'] . '_override', NULL) !== NULL) {
+      $enabled = variable_get('media_' . $form['type']['#value'] . '_enabled', NULL);
     }
     else {
       $enabled = variable_get('media_global_enabled', TRUE);
@@ -216,7 +216,7 @@ function media_get_registered_modules($ids = NULL, $reset = FALSE) {
     // Get all the modules which implement hook_media_register().
     foreach (module_implements('media_register') as $module) {
       // Get all the registrations defined by the module.
-      $function     = $module .'_media_register';
+      $function     = $module . '_media_register';
       $registration = $function();
 // drupal_set_message(print_r($registration, TRUE));
       // TODO: Fix this. Why are we calling $function twice (jmstacey 6/2/09)?
@@ -538,7 +538,7 @@ function media_get_resources($registration_ids, $node_type, $field, $uid) {
 function media_active_fields_for_node_type($type_name, $function = 'resource') {
   // Need to know if the type-specific or global settings are going to be used.
   // At least one of them is enabled at this point.
-  $type_override = variable_get('media_'. $type_name .'_override', FALSE);
+  $type_override = variable_get('media_' . $type_name . '_override', FALSE);
 
   $items = array();
 //   $type = _media_content_field_types($type_name);
@@ -555,13 +555,13 @@ function media_active_fields_for_node_type($type_name, $function = 'resource') {
     $fields_enabled = FALSE;
 
     if ($type_override) {
-      $fields_enabled = variable_get('media_'. $type_name .'_'. $field['field_name'] .'_'. $function, FALSE);
+      $fields_enabled = variable_get('media_' . $type_name . '_' . $field['field_name'] . '_' . $function, FALSE);
     }
     else {
       //@TODO: Right now, if it's using the default it will be enabled for all fields.
       // Eventually it will probably be better to allow per-field controls at a global level as well.
       // However, this line will probably just work once the actual variables exist.
-      $fields_enabled = variable_get('media_global_'. $field['field_name'] .'_'. $function, 'default');
+      $fields_enabled = variable_get('media_global_' . $field['field_name'] . '_' . $function, 'default');
 
       // Handle the default special, because we want the default to be on for all fields but don't know what the fields are yet.
       if ($fields_enabled === 'default') {
@@ -570,7 +570,7 @@ function media_active_fields_for_node_type($type_name, $function = 'resource') {
           // get all the kinds that match this field
           if ($registrations = media_get_fields($field['type'], $kind)) {
             foreach ($registrations as $id => $registration) {
-              $compound_id = $field['field_name'] .'--'. $id;
+              $compound_id = $field['field_name'] . '--' . $id;
               $fields_enabled[$compound_id] = $compound_id;
             }
           }
@@ -686,15 +686,15 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
   // metadata collection form.
   // @TODO: Do we still need the js md5?
   $form['#attached']['js'] = array(
-    $path .'/javascript/media.js',
-    $path .'/javascript/jquery.md5.js',
+    $path . '/javascript/media.js',
+    $path . '/javascript/jquery.md5.js',
   );
 
   $items = array();
 
   $form['media_browser_activate'] = array(
     '#type'  => 'markup',
-    '#value' => '<div class="media browser activation">'. t('Add files') .'</div>',
+    '#value' => '<div class="media browser activation">' . t('Add files') . '</div>',
   );
 
   // We are using a tab form type.
@@ -736,23 +736,23 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
 
         // The drawer id needs to have additional data on it to prevent
         // name space conflicts with ids
-        $drawer_id = strtolower(str_replace(' ', '_', $drawer_name)) .'_display';
+        $drawer_id = strtolower(str_replace(' ', '_', $drawer_name)) . '_display';
 
         // create a link with a specific id to call
-        $drawers_link  = '<a onclick="javascript: return FALSE;" href="#'. $drawer_id .'">'. $drawer_name .'</a>';
+        $drawers_link  = '<a onclick="javascript: return FALSE;" href="#' . $drawer_id . '">' . $drawer_name . '</a>';
         $drawer_list[] = array('data' => $drawers_link, 'class' =>  array(($active_drawer ? 'active' : '')) );
 
         // add the drawer form element
         $form['media_browser'][$tab_id][$drawer_name] = $drawer_data;
 
         // add classes to the drawer display item
-        $form['media_browser'][$tab_id][$drawer_name]['#prefix'] = '<div id="'. $drawer_id .'" class="drawer display '. ($active_drawer ? ' active' : NULL) .'">';
+        $form['media_browser'][$tab_id][$drawer_name]['#prefix'] = '<div id="' . $drawer_id . '" class="drawer display ' . ($active_drawer ? ' active' : NULL) . '">';
         $form['media_browser'][$tab_id][$drawer_name]['#suffix'] = '</div>';
 
         // no longer on the first drawer
         $active_drawer = FALSE;
 
-        $drawer_options[$tab_id .'|'. $drawer_id] = '- '. $drawer_name;
+        $drawer_options[$tab_id . '|' . $drawer_id] = '- ' . $drawer_name;
       }
 
       // change the drawers to a list for easer display
@@ -775,12 +775,12 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
 
   // Container for the progress indicator.
   $form['media_browser']['media_browser_file_progress'] = array(
-    '#prefix' => '<div id="media-browser-file-progress-'. $id .'" class="media-browser-file-progress">',
+    '#prefix' => '<div id="media-browser-file-progress-' . $id . '" class="media-browser-file-progress">',
     '#suffix' => '</div>',
   );
   $form['media_browser']['media_browser_file_progress']['file_progress_message'] = array(
     '#type'  => 'item',
-    '#title' => theme('image', array('path' => variable_get('media_file_progress_image', $path .'/images/uploading-gradient.gif'))) . t('Please wait while your file is attached...'),
+    '#title' => theme('image', array('path' => variable_get('media_file_progress_image', $path . '/images/uploading-gradient.gif'))) . t('Please wait while your file is attached...'),
   );
 
   // AHAH enabled submit button.
@@ -793,7 +793,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
     '#attributes'  => array('class' => array('media-browser-submit')),
     '#ahah'        => array(
       'path'         => 'media/js',
-      'wrapper'      => 'media-browser-file-progress-'. $id,
+      'wrapper'      => 'media-browser-file-progress-' . $id,
       'method'       => 'replace',
       'effect'       => 'fade',
       'event'        => 'click',
@@ -802,7 +802,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
 
   // Container for the metadata submission message.
   $form['media_browser']['media_browser_metadata_message'] = array(
-    '#prefix' => '<div id="media-browser-metadata-message-'. $id .'" class="media-browser-metadata-message">',
+    '#prefix' => '<div id="media-browser-metadata-message-' . $id . '" class="media-browser-metadata-message">',
     '#suffix' => '</div>',
   );
   $form['media_browser']['media_browser_metadata_message']['message'] = array(
@@ -849,7 +849,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
       '#type'  => 'fieldset',
       '#title' => $mime_type,
     );
-    $form['media_browser']['media_browser_metadata'][$mime_type][$mime_type .'_title'] = array(
+    $form['media_browser']['media_browser_metadata'][$mime_type][$mime_type . '_title'] = array(
       '#type'  => 'textfield',
       '#title' => t('Title'),
     );
@@ -865,7 +865,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
     '#attributes'  => array('class' => array('media-browser-metadata-submit')),
     '#ahah'        => array(
       'path'         => 'media/metadata/js',
-      'wrapper'      => 'media-browser-metadata-message-'. $id,
+      'wrapper'      => 'media-browser-metadata-message-' . $id,
       'method'       => 'replace',
       'effect'       => 'fade',
       'event'        => 'click',
@@ -1041,7 +1041,7 @@ function media_browser_validate(&$form, $form_state) {
  * @param $form_state
  */
 function media_browser_submit(&$form, $form_state) {
-  drupal_set_message(theme('image', variable_get('media_file_progress_success', drupal_get_path('module', 'media') .'/images/check-green-blah.png')) . t('media_browser_submit File attachment: !file successful.', array('!file' => l($form_state['values']['media_files'], $form_state['values']['media_files']))));
+  drupal_set_message(theme('image', variable_get('media_file_progress_success', drupal_get_path('module', 'media') . '/images/check-green-blah.png')) . t('media_browser_submit File attachment: !file successful.', array('!file' => l($form_state['values']['media_files'], $form_state['values']['media_files']))));
   drupal_set_message('(media_browser_submit will need to actually process the file here, sending it to the original registered module to store. we also need to ensure the file is kept in synch with the metadata & formatter coming up next.)');
 
   // To consider: Use module_implements to call all modules which implement this hook.
@@ -1054,7 +1054,7 @@ function media_browser_submit(&$form, $form_state) {
   // That could get horribly messy in the event of a race condition.
   //
   // For now just look for the specific module's hook and fire it off.
-  $hook_media_action = $form_state['values']['registered_module'] .'_media_action';
+  $hook_media_action = $form_state['values']['registered_module'] . '_media_action';
 
   if (function_exists($hook_media_action)) {
     $hook_media_action($form, $form_state, 'media_browser_submit');
