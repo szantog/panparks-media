@@ -105,25 +105,39 @@ function media_settings_global($form) {
 /**
  * Menu callback.  Display the list or thumbnails media admin display.
  */
-function media_admin($display = 'list') {
+function media_admin($form, $form_state, $display = NULL) {
+  
+  if (!$display) {
+    drupal_goto('admin/content/media/list');
+  }
 
   // Load our css.
   drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
   
+  if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
+    return media_multiple_delete_confirm($form, $form_state, array_filter($form_state['values']['files']));
+  }
+  
+  // Build the 'Update options' form.
+  $form[] = media_admin_operations();
+  
   switch ($display) {
     case 'list':
-      return drupal_get_form('media_admin_list');
+      $form['admin'] = media_admin_list();
+      break;
     case 'thumbnails':
-      return drupal_get_form('media_admin_thumbnails');
+      $form['admin'] = media_admin_thumbnails();
+      // $form['#theme] = 'media_admin_thumbnails';
+      break;
   }
+  return $form;
 }
 
 /**
  * Form builder: Builds the media list administration overview.
  */
-function media_admin_list($form) {
-  // Build the 'Update options' form.
-  $form = media_admin_operations($form);
+function media_admin_list() {
+  $path = drupal_get_path('module', 'media');
   
   // Build the sortable table header.
   $header = array(
@@ -174,9 +188,8 @@ function media_admin_list($form) {
 /**
  * Form builder: Builds the media thumbnails administration overview.
  */
-function media_admin_thumbnails($form) {
-  // Build the 'Update options' form.
-  $form = media_admin_operations($form);
+function media_admin_thumbnails() {
+  $path = drupal_get_path('module', 'media');
 
   $query = db_select('file', 'f')->extend('PagerDefault')->extend('TableSort');
   $query->join('users', 'u', 'f.uid = u.uid');
@@ -210,7 +223,9 @@ function media_admin_thumbnails($form) {
 /**
  * Build the operations portion of the file listing forms.
  */
-function media_admin_operations($form = array()) {
+function media_admin_operations() {
+  
+  // Build the 'Update options' form.
   $form['options'] = array(
     '#type' => 'fieldset',
     '#title' => t('Update options'),
@@ -322,7 +337,7 @@ function media_admin_submit($form, &$form_state) {
       $args = array_merge(array($files), $operation['callback arguments']);
     }
     else {
-      $args = array($nodes);
+      $args = array($files);
     }
     call_user_func_array($function, $args);
 
@@ -334,6 +349,45 @@ function media_admin_submit($form, &$form_state) {
     $form_state['rebuild'] = TRUE;
   }
 }
+
+function media_multiple_delete_confirm($form, &$form_state, $nodes) {
+  $form['file_list'] = array('#prefix' => '<ul>', '#suffix' => '</ul>', '#tree' => TRUE);
+  $files = $form_state['values']['files'];
+  // array_filter returns only elements with TRUE values
+  foreach ($files as $fid => $value) {
+    $title = db_query('SELECT filename FROM {file} WHERE fid = :fid', array(':fid' => $fid))->fetchField();
+    $form['files'][$fid] = array(
+      '#type' => 'hidden',
+      '#value' => $fid,
+      '#prefix' => '<li>',
+      '#suffix' => check_plain($title) . "</li>\n",
+    );
+  }
+  $form['operation'] = array('#type' => 'hidden', '#value' => 'delete');
+  $form['#submit'][] = 'media_multiple_delete_confirm_submit';
+  $confirm_question = format_plural(count($form['file_list']),
+                                  'Are you sure you want to delete this item?',
+                                  'Are you sure you want to delete these items?');
+  return confirm_form($form,
+                    $confirm_question,
+                    'admin/content/media', t('This action cannot be undone.'),
+                    t('Delete'), t('Cancel'));
+}
+
+function media_multiple_delete_confirm_submit($form, &$form_state) {
+  if ($form_state['values']['confirm']) {
+    foreach ($form_state['values']['files'] as $fid) {
+      $file = array_shift(file_load($fid));
+      $results[$fid] = file_delete($file);
+    }
+    print_r($results);  
+    $count = count($form_state['values']['files']);
+    watchdog('media', 'Deleted @count files.', array('@count' => $count));
+    drupal_set_message(t('Deleted @count files.', array('@count' => $count)));
+  }
+  $form_state['redirect'] = 'admin/content/media';
+}
+
 
 /**
  * Implement hook_media_operations().

@@ -41,7 +41,8 @@ function media_menu() {
   $items['admin/content/media'] = array(
     'title' => 'Media',
     'description' => 'Manage files used on your site.',
-    'page callback' => 'media_admin',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_admin'),
     'access arguments' => array('administer media'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'media.admin.inc',
