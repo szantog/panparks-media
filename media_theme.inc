@@ -17,7 +17,7 @@
  */
 function theme_media_file_browser($element) {
   // Add the CSS for our display.
-  $output = '<div class="media browser">'. $element .'</div>';
+  $output = '<div class="media browser">' . $element . '</div>';
 
   return $output;
 }
@@ -31,7 +31,7 @@ function theme_media_file_browser($element) {
  */
 function theme_media_file_list($element) {
   // Add the CSS for our display.
-  return '<div class="media-file-list">'. theme('form_element', $element, $element['#children']) .'</div>';
+  return '<div class="media-file-list">' . theme('form_element', $element, $element['#children']) . '</div>';
 }
 
 /**
@@ -45,7 +45,7 @@ function theme_media_browser_pane($form) {
   $output   = array();
 
   // render the drawers
-  $output[] = '<div'. drupal_attributes($form['#attributes']) .'>';
+  $output[] = '<div' . drupal_attributes($form['#attributes']) . '>';
 
   // render the drawer list
   $output[] = '  <div class="browser drawers">';

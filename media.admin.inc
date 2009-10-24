@@ -27,17 +27,17 @@ function media_settings_content_type(&$form, $type_name = NULL) {
   $type = _media_content_field_types($type_name);
 
   // Master settings override.
-  $form['media']['media_'. $type_name .'_override'] = array(
-    '#title'         => t($type->name .' overrides default values'),
+  $form['media']['media_' . $type_name . '_override'] = array(
+    '#title'         => t($type->name . ' overrides default values'),
     '#type'          => 'checkbox',
     '#description'   => t('Override the default settings for this content type.  The options below will only be used if this box is checked.'),
-    '#default_value' => variable_get('media_'. $type_name .'_override', NULL),
+    '#default_value' => variable_get('media_' . $type_name . '_override', NULL),
   );
-  $form['media']['media_'. $type_name .'_enabled'] = array(
+  $form['media']['media_' . $type_name . '_enabled'] = array(
     '#title'         => t('Enable Media resource browser'),
     '#type'          => 'checkbox',
     '#description'   => t('Enable the Media resource browser for this node type.'),
-    '#default_value' => variable_get('media_'. $type_name .'_enabled', NULL),
+    '#default_value' => variable_get('media_' . $type_name . '_enabled', NULL),
   );
 
   // Extract the fields for this node type
@@ -57,15 +57,15 @@ function media_settings_content_type(&$form, $type_name = NULL) {
           $options = array();
 
           foreach ($registrations as $id => $registration) {
-            $options[$field['field_name'] .'--'. $id] = $registration['name'] .': '. $registration['description'];
+            $options[$field['field_name'] . '--' . $id] = $registration['name'] . ': ' . $registration['description'];
           }
 
-          $form['media'][$field['field_name']]['media_'. $type_name .'_'. $field['field_name'] .'_'. $kind] = array(
+          $form['media'][$field['field_name']]['media_' . $type_name . '_' . $field['field_name'] . '_' . $kind] = array(
             '#title'         => t('Enable !kind options for this field', array('!kind' => $kind)),
             '#description'   => t('Choose which !kind options you would like to have enabled on this field', array('!kind' => $kind)),
             '#type'          => 'checkboxes',
             '#options'       => $options,
-            '#default_value' => variable_get('media_'. $type_name .'_'. $field['field_name'] .'_'. $kind, array()),
+            '#default_value' => variable_get('media_' . $type_name . '_' . $field['field_name'] . '_' . $kind, array()),
           );
         }
       }
@@ -98,13 +98,13 @@ function media_settings_global($form) {
     '#description' => t('Enable or Disable the Media resource browser for all types, unless specifically set for a given type.'),
     '#default_value' => variable_get('media_global_enabled', 1),
   );
-  
+
   $form['global'] = array(
     '#title' => t('Global Settings'),
     '#type' => 'fieldset',
     '#description' => t('These global settings apply when uploading files at e.g. admin/content/media and will be overridden by specific fields.'),
   );
-  
+
   // Make the extension list a little more human-friendly by comma-separation.
   $extensions = str_replace(' ', ', ', variable_get('media_file_extensions', ''));
   $form['global']['media_file_extensions'] = array(
@@ -132,7 +132,7 @@ function media_settings_global($form) {
  */
 function media_admin($form, $form_state, $display = NULL) {
   $path = drupal_get_path('module', 'media');
-  
+
   if (!$display) {
     drupal_goto('admin/content/media/list');
   }
@@ -140,14 +140,14 @@ function media_admin($form, $form_state, $display = NULL) {
   // Load our CSS and JS.
   drupal_add_css($path . '/media.css');
   drupal_add_js($path . '/media.js');
-  
+
   if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
     return media_multiple_delete_confirm($form, $form_state, array_filter($form_state['values']['files']));
   }
-  
+
   // Build the 'Update options' form.
   $form[] = media_admin_operations();
-  
+
   switch ($display) {
     case 'list':
       $form['admin'] = media_admin_list();
@@ -165,7 +165,7 @@ function media_admin($form, $form_state, $display = NULL) {
  */
 function media_admin_list() {
   $path = drupal_get_path('module', 'media');
-  
+
   // Build the sortable table header.
   $header = array(
    'title' => array('data' => t('Title'), 'field' => 'f.filename'),
@@ -246,9 +246,9 @@ function media_admin_thumbnails() {
      );
     }
   }
-  
+
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
-  
+
   // Build the display switch.
   $form = media_admin_display_switch($form, array('active_display' => 'thumbnails'));
 
@@ -259,7 +259,7 @@ function media_admin_thumbnails() {
  * Build the operations portion of the file listing forms.
  */
 function media_admin_operations() {
-  
+
   // Build the 'Update options' form.
   $form['options'] = array(
     '#type' => 'fieldset',
@@ -294,7 +294,7 @@ function media_admin_display_switch($form = array(), $options = array()) {
 
   $form_location = (isset($options['form_location'])) ? $options['form_location'] : 'admin/content/media';
   $active_display = (isset($options['active_display'])) ? $options['active_display'] : NULL;
-  
+
   // Set up the default display types.
   $display_types = array();
   $display_types['list'] = array(
@@ -311,7 +311,7 @@ function media_admin_display_switch($form = array(), $options = array()) {
   );
   // Make it alterable so other modules can add additional displays.
   drupal_alter('media_display_types', $display_types);
-  
+
   // Build the item list.
   $display_items = array();
   foreach ($display_types as $delta => $item) {
@@ -322,7 +322,7 @@ function media_admin_display_switch($form = array(), $options = array()) {
     else {
       $icon = $item['icon'];
     }
-    
+
     $display_items[] = array(
       'data' => l(theme('image', array('path' => $icon, 'alt' => $item['title'])),
         $form_location . '/' . $delta,
@@ -333,7 +333,7 @@ function media_admin_display_switch($form = array(), $options = array()) {
       'class' => array('media-display-' . $delta),
     );
   }
-  
+
   $form['display_type'] = array(
     '#type' => 'markup',
     '#markup' => theme('item_list', array(
@@ -342,7 +342,7 @@ function media_admin_display_switch($form = array(), $options = array()) {
       )
     ),
   );
-  
+
   return $form;
 }
 
@@ -405,11 +405,11 @@ function media_multiple_delete_confirm($form, &$form_state, $files) {
   }
   $form['operation'] = array('#type' => 'hidden', '#value' => 'delete');
   $form['#submit'][] = 'media_multiple_delete_confirm_submit';
-  
+
   $confirm_question = format_plural(count($files),
                                   'Are you sure you want to delete this item?',
                                   'Are you sure you want to delete these items?');
-  
+
   return confirm_form($form,
                     $confirm_question,
                     $_GET['q'], t('This action cannot be undone.'),
@@ -501,17 +501,17 @@ function media_edit_submit($form, &$form_state) {
  * Display the list or thumbnails media admin display.
  */
 function media_add_files($form, $form_state) {
-  
+
   $form['upload'] = array(
     '#type' => 'file',
     '#title' => 'Upload a new file',
   );
-  
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
   );
-  
+
   return $form;
 }
 
@@ -519,7 +519,7 @@ function media_add_files($form, $form_state) {
  * Validate the generic file upload with the global media settings.
  */
 function media_add_files_validate($form, &$form_state) {
-  
+
   $validators = array(
    'file_validate_extensions' => array(variable_get('media_file_extensions', '')),
    'file_validate_size' => array(parse_size(variable_get('media_max_filesize', ''))),
@@ -546,7 +546,7 @@ function media_add_files_validate($form, &$form_state) {
  * Upload a file.
  */
 function media_add_files_submit($form, &$form_state) {
-  $scheme = variable_get('file_default_scheme', 'public') .'://';
+  $scheme = variable_get('file_default_scheme', 'public') . '://';
   $file = $form_state['values']['upload'];
   $destination = file_stream_wrapper_uri_normalize($scheme . $file->filename);
 
