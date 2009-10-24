@@ -971,6 +971,25 @@ function media_element_info() {
     '#element_validate' => array('media_file_list_element_validate'),
     '#submit'           => array('media_file_list_element_submit'),
   );
+  $file_path = drupal_get_path('module', 'file');
+  $elements['media_managed_file'] = array(
+    '#input' => TRUE,
+    '#process' => array('file_managed_file_process'),
+    '#value_callback' => 'file_field_widget_value',
+    '#element_validate' => array('file_managed_file_validate'),
+    '#file_value_callbacks' => array('media_uri_value'),
+    '#theme' => 'media_managed_file',
+    '#theme_wrappers' => array('form_element'),
+    '#progress_indicator' => 'throbber',
+    '#progress_message' => NULL,
+    '#upload_validators' => array(),
+    '#upload_location' => NULL,
+    '#extended' => FALSE,
+    '#attached' => array(
+      'css' => array($file_path . '/file.css'),
+      'js' => array($file_path . '/file.js'),
+    ),
+  );
 
   return $elements;
 }
@@ -1123,7 +1142,162 @@ function media_field_widget_settings_form($field, $instance) {
  * Implementation of hook_field_widget().
  */
 function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
-  return file_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0);
+  // This code was originally copied from file.field.inc.
+  $form['#attributes'] = array('enctype' => 'multipart/form-data');
+
+  $defaults = array(
+    'fid' => 0,
+    'display' => !empty($field['settings']['display_default']),
+    'description' => '',
+    'file_uri' => '',
+  );
+
+  // Retrieve any values set in $form_state, as will be the case during AJAX
+  // rebuilds of this form.
+  if (isset($form_state['values'][$field['field_name']][$langcode])) {
+    $items = $form_state['values'][$field['field_name']][$langcode];
+    unset($form_state['values'][$field['field_name']][$langcode]);
+  }
+
+  foreach ($items as $delta => $item) {
+    $items[$delta] = array_merge($defaults, $items[$delta]);
+    // Remove any items from being displayed that are not needed.
+    if ($items[$delta]['fid'] == 0) {
+      unset($items[$delta]);
+    }
+  }
+
+  // Re-index deltas after removing empty items.
+  $items = array_values($items);
+
+  // Update order according to weight.
+  $items = _field_sort_items($field, $items);
+
+  // Essentially we use the managed_file type, extended with some enhancements.
+  $element_info = element_info('media_managed_file');
+  $element = array(
+    '#type' => 'media_managed_file',
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : $defaults,
+    '#required' => $instance['required'],
+    '#upload_location' => file_field_widget_uri($field, $instance),
+    '#upload_validators' => file_field_widget_upload_validators($field, $instance),
+    '#media_file_extensions' => $instance['settings']['file_extensions'],
+    '#process' => array_merge($element_info['#process'], array('file_field_widget_process', 'media_generic_widget_process')),
+    // Allows this field to return an array instead of a single value.
+    '#extended' => TRUE,
+    // Add extra Field properties.
+    '#field_name' => $field['field_name'],
+    '#bundle' => $instance['bundle'],
+    '#object_type' => $instance['object_type'],
+  );
+
+  if ($field['cardinality'] == 1) {
+    // If there's only one field, return it as delta 0.
+    $element['#title'] = $instance['label'];
+    if (empty($element['#default_value']['fid'])) {
+      $element['#description'] = theme('file_upload_help', array('description' => $instance['description'], 'upload_validators' => $element['#upload_validators']));
+    }
+    $elements = array($element);
+  }
+  else {
+    // If there are multiple values, add an element for each existing one.
+    $delta = -1;
+    foreach ($items as $delta => $item) {
+      $elements[$delta] = $element;
+      $elements[$delta]['#default_value'] = $item;
+      $elements[$delta]['#weight'] = $delta;
+    }
+    // And then add one more empty row for new uploads.
+    $delta++;
+    if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED || $delta < $field['cardinality']) {
+      $elements[$delta] = $element;
+      $elements[$delta]['#default_value'] = $defaults;
+      $elements[$delta]['#weight'] = $delta;
+      $elements[$delta]['#required'] = ($instance['required'] && $delta == 0);
+    }
+    // The group of elements all-together need some extra functionality
+    // after building up the full list (like draggable table rows).
+    $elements['#file_upload_delta'] = $delta;
+    $elements['#theme'] = 'file_widget_multiple';
+    $elements['#theme_wrappers'] = array('fieldset');
+    $elements['#attributes']['class'] = array('file-widget');
+    $elements['#process'] = array('file_field_widget_process_multiple');
+    $elements['#title'] = $instance['label'];
+    $elements['#description'] = $instance['description'];
+
+    // Add some properties that will eventually be added to the file upload
+    // field. These are added here so that they may be referenced easily through
+    // a hook_form_alter().
+    $elements['#file_upload_title'] = t('Add a new file');
+    $elements['#file_upload_description'] = theme('file_upload_help', array('description' => '', 'upload_validators' => $elements[0]['#upload_validators']));
+  }
+
+  return $elements;
+}
+
+function media_generic_widget_process($element, &$form_state, $form) {
+  $fid = isset($element['fid']['#value']) ? $element['fid']['#value'] : 0;
+
+  if (empty($fid)) {
+    $element['file_uri'] = array(
+      //'#name' => implode('_', $element['#parents']) . '_upload_button',
+      '#title' => t('File uri (for existing files)'),
+      '#type' => 'textfield',
+    );
+  }
+  return $element;
+}
+
+/**
+ * The #value_callback for the file_generic field element.
+ */
+function media_uri_value($element, &$input) {
+  if (!empty($input['file_uri'])) {
+    $upload_name = implode('_', $element['#parents']);
+    $scheme = file_uri_scheme($input['file_uri']);
+    if (!$scheme) {
+      form_set_error($upload_name, t('Invalid URI: no scheme.'));
+      return;
+    }
+    $streams = file_get_stream_wrappers();
+    if (empty($streams[$scheme])) {
+      form_set_error($upload_name, t('Invalid URI: scheme is not registered.'));
+      return;
+    }
+    elseif ($scheme == 'public') {
+      $file = new stdClass;
+      $file->filename = $input['file_uri'];
+      $errors = file_validate_extensions($file, $element['#media_file_extensions']);
+      if ($errors) {
+        form_set_error($upload_name, implode(' ', $errors));
+        return;
+      }
+    }
+    else {
+      // TODO: check a list of allowed scheme per field instance.
+    }
+
+    $files = file_load_multiple(array(), array('uri' => $input['file_uri']));
+    if (!empty($files)) {
+      $file = array_pop($files);
+      $input['fid'] = $file->fid;
+      return;
+    }
+    form_set_error($upload_name, t('The file could not be uploaded.'));
+
+    $input['fid'] = 0;
+  }
+}
+
+function theme_media_managed_file($variables) {
+  $element = $variables['element'];
+
+  // This wrapper is required to apply JS behaviors and CSS styling.
+  $output = '';
+  $output .= '<div class="form-managed-file">';
+  $output .= drupal_render_children($element);
+  $output .= '</div>';
+  return $output;
 }
 
 /**
@@ -1144,3 +1318,4 @@ function media_image_default_styles() {
 
   return $styles;
 }
+
