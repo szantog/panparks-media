@@ -98,7 +98,7 @@ function theme_media_admin_thumbnail($variables) {
   }
   // Display an icon for other file types.
   else {
-    $output .= $file->filemine;
+    $output .= $file->filemime;
   }
 
   return $output;

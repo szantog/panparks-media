@@ -11,3 +11,4 @@ files[] = media_ahah.inc
 files[] = media.admin.inc
 files[] = media_theme.inc
 dependencies[] = file
+dependencies[] = image
