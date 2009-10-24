@@ -85,7 +85,7 @@ function theme_media_admin_thumbnail($variables) {
   if (strstr($file->filemime, 'image')) {
     $thumbnail = theme('image_style',
       array(
-        'style_name' => 'thumbnail',
+        'style_name' => 'square_thumbnail',
         'path' => $file->uri,
         'alt' => t('Thumbnail for !filename.', array('!filename' => $file->filename)),
       ));

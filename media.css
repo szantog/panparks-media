@@ -55,6 +55,8 @@
   padding: 10px;
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
+  width: 180px;
+  height: 220px;
 }
 .media-display-thumbnails div.media-thumbnail a.media-thumbnail,
 .media-display-thumbnails div.media-thumbnail a.media-thumbnail img {
