@@ -179,7 +179,7 @@ function media_theme() {
       'arguments' => array('file' => NULL),
       'file' => 'media_theme.inc',
     ),
-    
+
     // The thumbnail operations disply on admin pages.
     'media_admin_thumbnail_operations' => array(
       'arguments' => array('file' => NULL),
@@ -955,8 +955,19 @@ function media_resource_display_upload_form() {
  *    '#title' => $title,             // The translated title, displayed in the tab.
  *    '#description' => $description, // A translated description, to be displayed below the title.
  */
-function media_elements() {
+function media_element_info() {
   $elements = array();
+
+  $elements['media_browser_thumbnails'] = array(
+    '#input' => TRUE,
+    '#process' => array('media_browser_thumbnails_process'),
+    '#after_build' => array('media_browser_thumbnails_after_build'),
+    '#validate' => array('media_browser_thumbnails_validate'),
+    '#element_validate' => array('media_browser_thumbnails_element_validate'),
+    '#pre_render' => array('media_browser_thumbnails_pre_render'),
+    '#post_render' => array('media_browser_thumbnails_post_render'),
+    '#submit' => array('media_browser_thumbnails_submit'),
+  );
 
   $elements['media_file_list'] = array(
     '#input'            => TRUE,

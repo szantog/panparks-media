@@ -66,7 +66,7 @@ function theme_media_browser_pane($form) {
  *    An array of file objects to display.
  *  @return
  */
-function theme_media_browser_thumbnail($files = array()) {
+function theme_media_browser_thumbnails($files = array()) {
   $thumbnails = array();
   foreach ($files as $file) {
     $thumbnails[] = theme('media_admin_thumbnail', array('file' => $file));
