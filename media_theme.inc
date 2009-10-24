@@ -18,7 +18,7 @@
 function theme_media_file_browser($element) {
   // Add the CSS for our display.
   $output = '<div class="media browser">'. $element .'</div>';
-  
+
   return $output;
 }
 
@@ -43,20 +43,35 @@ function theme_media_file_list($element) {
  */
 function theme_media_browser_pane($form) {
   $output   = array();
-  
+
   // render the drawers
   $output[] = '<div'. drupal_attributes($form['#attributes']) .'>';
-  
+
   // render the drawer list
-  $output[] = '  <div class="browser drawers">';  
+  $output[] = '  <div class="browser drawers">';
   $output[] = drupal_render_form(null, $form['drawers']);
   $output[] = ' </div>';
-  
+
   // render the drawer displays
   $output[] = drupal_render_form(null, $form);
   $output[] = '</div>';
-  
+
   return implode("\n", $output);
+}
+
+/**
+ *  Display a radio list of files as thumbnails.
+ *
+ *  @param $files
+ *    An array of file objects to display.
+ *  @return
+ */
+function theme_media_browser_thumbnail_radios($files = array()) {
+  $thumbnails = array();
+  foreach ($files as $file) {
+    $thumbnails[] = theme('media_admin_thumbnail', array('file' => $file));
+  }
+  return theme('item_list', $thumbnails);
 }
 
 /**
@@ -65,7 +80,7 @@ function theme_media_browser_pane($form) {
 function theme_media_admin_thumbnail($variables) {
   $output = '';
   $file = $variables['file'];
-  
+
   // Display a thumbnail for images.
   if (strstr($file->filemime, 'image')) {
     $thumbnail = theme('image_style',
@@ -85,7 +100,7 @@ function theme_media_admin_thumbnail($variables) {
   else {
     $output .= $file->filemine;
   }
-  
+
   return $output;
 }
 
