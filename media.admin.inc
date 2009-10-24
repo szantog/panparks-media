@@ -210,6 +210,8 @@ function media_admin_thumbnails() {
   $form['files'] = array(
    '#type' => 'checkboxes',
    '#options' => $options,
+   '#prefix' => '<div class ="media-display-thumbnails">',
+   '#suffix' => '</div>',
   );
   
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
@@ -353,9 +355,8 @@ function media_admin_submit($form, &$form_state) {
   }
 }
 
-function media_multiple_delete_confirm($form, &$form_state, $nodes) {
-  $form['file_list'] = array('#prefix' => '<ul>', '#suffix' => '</ul>', '#tree' => TRUE);
-  $files = $form_state['values']['files'];
+function media_multiple_delete_confirm($form, &$form_state, $files) {
+  $form['files'] = array('#prefix' => '<ul>', '#suffix' => '</ul>', '#tree' => TRUE);
   // array_filter returns only elements with TRUE values
   foreach ($files as $fid => $value) {
     $title = db_query('SELECT filename FROM {file} WHERE fid = :fid', array(':fid' => $fid))->fetchField();
@@ -368,7 +369,8 @@ function media_multiple_delete_confirm($form, &$form_state, $nodes) {
   }
   $form['operation'] = array('#type' => 'hidden', '#value' => 'delete');
   $form['#submit'][] = 'media_multiple_delete_confirm_submit';
-  $confirm_question = format_plural(count($form['file_list']),
+  
+  $confirm_question = format_plural(count($files),
                                   'Are you sure you want to delete this item?',
                                   'Are you sure you want to delete these items?');
   return confirm_form($form,
@@ -379,16 +381,23 @@ function media_multiple_delete_confirm($form, &$form_state, $nodes) {
 
 function media_multiple_delete_confirm_submit($form, &$form_state) {
   if ($form_state['values']['confirm']) {
-    foreach ($form_state['values']['files'] as $fid) {
+    $results = array();
+    $files = array_keys($form_state['values']['files']);
+    foreach ($files as $fid) {
+      drupal_set_message($fid);
       $file = array_shift(file_load($fid));
-      $results[$fid] = file_delete($file);
+    //  $results[$fid] = file_delete($file);
     }
     print_r($results);  
     $count = count($form_state['values']['files']);
-    watchdog('media', 'Deleted @count files.', array('@count' => $count));
-    drupal_set_message(t('Deleted @count files.', array('@count' => $count)));
+    $message = format_plural($count,
+                                    'Deleted @count file.',
+                                    'Deleted @count files.', 
+                                    array('@count' => $count));
+    watchdog('media', $message);
+    drupal_set_message($message);
   }
-  $form_state['redirect'] = 'admin/content/media';
+//  $form_state['redirect'] = 'admin/content/media';
 }
 
 
