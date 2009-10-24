@@ -58,12 +58,14 @@ function media_menu() {
 
   $items['admin/content/media/add/files'] = array(
     'title' => 'Upload new files',
-    'page callback' => 'media_add_files',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_add_files'),
     'access arguments' => array('administer media'),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'media.admin.inc',
-    'weight' => 10,
+    'weight' => -1,
   );
+  /*
   $items['admin/content/media/add/folder'] = array(
     'title' => 'Add new folder',
     'page callback' => 'media_add_folder',
@@ -72,13 +74,13 @@ function media_menu() {
     'file' => 'media.admin.inc',
     'weight' => 20,
   );
+  */
   $items['admin/content/media/add/external'] = array(
     'title' => 'Add new external source',
     'page callback' => 'media_add_external',
     'access arguments' => array('administer media'),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'media.admin.inc',
-    'weight' => 30,
   );
 
   // Default settings, for content types that do not have their own.

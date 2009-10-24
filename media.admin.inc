@@ -103,7 +103,7 @@ function media_settings_global($form) {
 }
 
 /**
- * Menu callback.  Display the list or thumbnails media admin display.
+ * Display the list or thumbnails media admin display.
  */
 function media_admin($form, $form_state, $display = NULL) {
   
@@ -191,7 +191,7 @@ function media_admin_list() {
 function media_admin_thumbnails() {
   $path = drupal_get_path('module', 'media');
 
-  $query = db_select('file', 'f')->extend('PagerDefault')->extend('TableSort');
+  $query = db_select('file', 'f')->extend('PagerDefault');
   $query->join('users', 'u', 'f.uid = u.uid');
 
   $result = $query
@@ -467,4 +467,54 @@ function media_edit_submit($form, &$form_state) {
   print_r($file);
   $file->filename = $form_state['values']['title'];
   file_save($file);
+}
+
+/**
+ * Display the list or thumbnails media admin display.
+ */
+function media_add_files($form, $form_state) {
+  
+  $form['upload'] = array(
+    '#type' => 'file',
+    '#title' => 'Upload a new file',
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  
+  return $form;
+}
+
+function media_add_files_validate($form, &$form_state) {
+  $validators = array();
+  /* TODO: figure out validation
+  $validators = array(
+    'file_validate_extensions' => array($limits['extensions']),
+    'file_validate_size' => array($limits['file_size'], $limits['user_size']),
+  );
+*/
+  // Save the file as a temporary file.
+  $file = file_save_upload('upload', $validators);
+  if ($file === FALSE) {
+    form_set_error('upload', t("Failed to upload the file."));
+  }
+  elseif ($file !== NULL) {
+    $form_state['values']['upload'] = $file;
+  }
+}
+
+function media_add_files_submit($form, &$form_state) {
+  $scheme = variable_get('file_default_scheme', 'public') .'://';
+  $file = $form_state['values']['upload'];
+  $destination = file_stream_wrapper_uri_normalize($scheme . $file->filename);
+
+  if ($file = file_move($file, $destination, FILE_EXISTS_REPLACE)) {
+    file_save($file);
+    drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
+  }
+  else {
+    drupal_set_message(t('An error occurred and no file was uploaded.'), 'error');
+  }
 }
