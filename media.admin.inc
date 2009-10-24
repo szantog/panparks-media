@@ -90,16 +90,41 @@ function media_settings_content_type(&$form, $type_name = NULL) {
  *  A form structured array.
  */
 function media_settings_global($form) {
-  $settings_form = array();
+  $form = array();
 
-  $settings_form['media_global_enabled'] = array(
-    '#title'         => t('Media resource browser'),
-    '#type'          => 'checkbox',
-    '#description'   => t('Enable or Disable the Media resource browser for all types, unless specifically set for a given type.'),
+  $form['media_global_enabled'] = array(
+    '#title' => t('Media resource browser'),
+    '#type' => 'checkbox',
+    '#description' => t('Enable or Disable the Media resource browser for all types, unless specifically set for a given type.'),
     '#default_value' => variable_get('media_global_enabled', 1),
   );
+  
+  $form['global'] = array(
+    '#title' => t('Global Settings'),
+    '#type' => 'fieldset',
+    '#description' => t('These global settings apply when uploading files at e.g. admin/content/media and will be overridden by specific fields.'),
+  );
+  
+  // Make the extension list a little more human-friendly by comma-separation.
+  $extensions = str_replace(' ', ', ', variable_get('media_file_extensions', ''));
+  $form['global']['media_file_extensions'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Allowed file extensions'),
+    '#default_value' => $extensions,
+    '#description' => t('Separate extensions with a space or comma and do not include the leading dot. Leaving this blank will allow users to upload a file with any extension.'),
+    '#element_validate' => array('_file_generic_settings_extensions'),
+  );
 
-  return system_settings_form($settings_form);
+  $form['global']['media_max_filesize'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum upload size'),
+    '#default_value' => variable_get('media_max_filesize', ''),
+    '#description' => t('Enter a value like "512" (bytes), "80 KB" (kilobytes) or "50 MB" (megabytes) in order to restrict the allowed file size. If left empty the file sizes will be limited only by PHP\'s maximum post and file upload sizes (current limit <strong>%limit</strong>).', array('%limit' => format_size(file_upload_max_size()))),
+    '#element_validate' => array('_file_generic_settings_max_filesize'),
+    '#size' => 10,
+  );
+
+  return system_settings_form($form);
 }
 
 /**
@@ -158,6 +183,7 @@ function media_admin_list() {
    ->fields('f')
    ->fields('u', array('name'))
    ->limit(50)
+   ->orderByHeader($header)
    ->execute();
 
   $destination = drupal_get_destination();

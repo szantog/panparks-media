@@ -136,7 +136,6 @@ function media_form_alter(&$form, &$form_state, $form_id) {
     if ($enabled) {
       // Get the fields we need to enable on this module.
       $fields = media_active_fields_for_node_type($form['type']['#value']);
-
       // Iterate through each field and add a browser form.
       foreach ($fields as $field => $registration_ids) {
 
@@ -217,7 +216,6 @@ function media_theme() {
  */
 function media_get_registered_modules($ids = NULL, $reset = FALSE) {
   static $registrations;
-
   // Only build cache the first time the function is called, or if we reset it.
   if (is_NULL($registrations) || $reset) {
     $registrations = array();
@@ -313,7 +311,6 @@ function media_get_fields($field_type, $function_type = 'resource') {
 
   // So we have something to return, even if it's nothing.
   $data[$field_type][$function_type] = NULL;
-
   // Get all the registered modules.
   foreach (media_get_registered_modules() as $id => $registration) {
     // Check to see if this registration supports this function type.
@@ -570,7 +567,6 @@ function media_active_fields_for_node_type($type_name, $function = 'resource') {
       // Eventually it will probably be better to allow per-field controls at a global level as well.
       // However, this line will probably just work once the actual variables exist.
       $fields_enabled = variable_get('media_global_' . $field['field_name'] . '_' . $function, 'default');
-
       // Handle the default special, because we want the default to be on for all fields but don't know what the fields are yet.
       if ($fields_enabled === 'default') {
         $fields_enabled = array();

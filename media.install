@@ -6,3 +6,29 @@
 *
 * Install, update and uninstall functions for the Media module.
 */
+
+/**
+ * Implement hook_uninstall().
+ */
+function media_uninstall() {
+  $types = node_type_get_types();
+  $global = new stdClass;
+  $global->fields = field_info_instances();
+  $types['global'] = $global;
+  foreach ($types as $name => $type) {
+    variable_del('media_' . $name . '_override');
+    variable_del('media_' . $name . '_enabled');
+    if (isset($type->fields)) {
+      foreach ((array)$type->fields as $field_name => $field) {
+        foreach (media_registration_kinds() as $kind) {
+          variable_del('media_'. $node_type .'_'. $field['field_name'] .'_'. $kind);
+        }
+      }
+    }
+  }
+  variable_del('media_file_extensions');
+  variable_del('media_max_filesize');
+  variable_del('media_file_progress_image');
+  variable_del('media_file_list_size');
+  variable_del('media_file_progress_success');
+}
