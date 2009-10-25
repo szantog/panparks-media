@@ -107,4 +107,51 @@ Drupal.behaviors.mediaAhahHideBrowser ={
     });
   }
 }
+
+
+
+/* **************************************************** */
+/* Content browser navigation                           */
+/* **************************************************** */
+
+/**
+ * @NOTE arthur added this stuff in to prep for the new UI.
+ * This connects navigation elements (results limters, pagers)
+ * to an ajax function that will reload the content navigator
+ * content.
+ */
+
+$(document).ready(function () {
+
+  /**
+   *  Catch the clicks on the result limiters and pager queries
+   *  and modify the links to have the options in their URL so   
+   *  they can be parsed. Note that we are using the live function
+   *  so that updates to the media_content_browser still have
+   *  jquery functionality
+   */  
+  $('ul.result_limit li a, ul.pager li a').live('click', function() {
+    // Get the current query string
+    var query = $(this).attr('href').replace(/.*\?/, '');       
+    // Reload our window with the new parameters    
+    media_load_content_navigator_reload(query);    
+    // Make sure to stop the click
+    return false;
+  });
+  
+  /**
+   * Stub function to get the current active pager
+   * and reload the content based on this navigators
+   * query string
+   */
+  function media_load_content_navigator_reload(query) {
+    $.getJSON(Drupal.settings.media.content_navigator_load_url+'?'+query,     
+      function(data) { $('#media_content_browser').html(data);}
+    );
+  }
+  
+  
+}); // $(document).ready
+
+
 })(jQuery);

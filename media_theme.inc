@@ -112,6 +112,7 @@ function theme_media_admin_thumbnail($variables) {
   return $output;
 }
 
+
 /**
  * Theme operations for a thumbnail.
  */
@@ -120,4 +121,62 @@ function theme_media_admin_thumbnail_operations($variables) {
   $file = $variables['file'];
   $output = l(t('edit'), 'admin/content/media/' . $file->fid . '/edit', array('query' => $destination));
   return $output;
+}
+
+
+/* ******************************************** */
+/* Content navigation controls                  */
+/* ******************************************** */
+
+
+/**
+ * Theme function to display the results limiting- 10, 30, 50 results
+ * per page. 
+ *
+ * @param $options
+ *   array parameters for the URL
+ * @param $limits
+ *   array number of limit settings
+ * @return unknown
+ */
+function theme_media_navigation_control_result_limit($options = array(), $limits = false) {
+  if (! $limits) {
+    $limits = array(10, 30, 50);
+  }
+  // @NOTE these do not need to be aware of the current
+  //       page because clicking them will reset the 
+  //       display to 1 -> $limit
+  
+  foreach ($limits as $limit) {
+    // set the value of this limit parameter to this limit value
+    $options['limit'] = $limit;
+    $per_display[] = l($limit, $limit, array('query' => $options));
+  }
+  
+  return theme('item_list', array('items'  => $per_display, 'attributes' => array('class' => 'result_limit')));
+}
+
+
+/**
+ * Theme function to display pagination of results inside the content navigator
+ * per page. 
+ *
+ * @param $options
+ *   array parameters for the URL
+ * @return unknown
+ */
+function theme_media_navigation_control_pager($options = array()) {
+  if (! $limits) {
+    $limits = array(10, 30, 50);
+  }
+  // @NOTE these do not need to be aware of the current
+  //       page because clicking them will reset the 
+  //       display to 1 -> $limit
+  
+  foreach ($limits as $limit) {
+    // set the value of this limit parameter to this limit value
+    $options['limit'] = $limit;
+    $per_display[] = l($limit, $limit, array('query' => $options));
+  }  
+  return theme('item_list', array('items'  => $per_display, 'attributes' => array('class' => 'result_limit')));
 }

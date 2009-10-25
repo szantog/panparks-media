@@ -41,7 +41,6 @@
   border: 1px solid #555;
   color: #fff;
 }
-
 /**
  * Thumbnails display
  */
@@ -83,3 +82,17 @@
   margin: 0;
   padding: 0;
 }
+
+
+
+/* This is some stuff to just get some basic mockup done on the 
+   content navigator. Should be removed soon */
+ 
+.result_limit {
+  float: right;
+}  
+.result_limit li {
+   display: inline;
+   list-style: none;
+}
+
