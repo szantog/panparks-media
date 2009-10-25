@@ -59,10 +59,17 @@
   width: 180px;
   height: 220px;
 }
+/* Cut off long filenames to prevent a messed up layout. */
+.media-display-thumbnails div.media-thumbnail label.option {
+  white-space: nowrap;
+  overflow: hidden;
+  display: block;
+}
 .media-display-thumbnails div.media-thumbnail a.media-thumbnail,
 .media-display-thumbnails div.media-thumbnail a.media-thumbnail img, {
   display: block;
 }
+/* Align icons with other thumbnails by 'hanging' the shadow. */
 .media-display-thumbnails div.media-thumbnail a.media-thumbnail img.file-unknown {
   margin: -5px;
 }
