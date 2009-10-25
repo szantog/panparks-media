@@ -330,7 +330,6 @@ function media_admin_display_switch($form = array(), $options = array()) {
           'html' => TRUE,
           'attributes' => array('title' => $item['description']),
         )),
-      'class' => array('media-display-' . $delta),
     );
   }
 
