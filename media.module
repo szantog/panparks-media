@@ -971,6 +971,7 @@ function media_element_info() {
     '#element_validate' => array('media_file_list_element_validate'),
     '#submit'           => array('media_file_list_element_submit'),
   );
+
   $file_path = drupal_get_path('module', 'file');
   $elements['media_managed_file'] = array(
     '#input' => TRUE,
@@ -1220,7 +1221,7 @@ function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, 
     $elements['#file_upload_delta'] = $delta;
     $elements['#theme'] = 'file_widget_multiple';
     $elements['#theme_wrappers'] = array('fieldset');
-    $elements['#attributes']['class'] = array('file-widget');
+    $elements['#attributes']['class'] = array('media-file-widget');
     $elements['#process'] = array('file_field_widget_process_multiple');
     $elements['#title'] = $instance['label'];
     $elements['#description'] = $instance['description'];
@@ -1235,21 +1236,34 @@ function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, 
   return $elements;
 }
 
+/**
+ * An element #process callback for the media_managed_file type.
+ *
+ * Expands the media_managed_file type to include the uri field.
+ */
 function media_generic_widget_process($element, &$form_state, $form) {
   $fid = isset($element['fid']['#value']) ? $element['fid']['#value'] : 0;
 
   if (empty($fid)) {
     $element['file_uri'] = array(
-      //'#name' => implode('_', $element['#parents']) . '_upload_button',
-      '#title' => t('File uri (for existing files)'),
+      '#title' => t('File uri (for existing files)'),      
       '#type' => 'textfield',
+      '#maxlength' => 240,
+      '#size' => 60,
     );
+    $element['file_uri']['#attributes']['class'] = array('media-file-uri');
   }
   return $element;
 }
 
 /**
- * The #value_callback for the file_generic field element.
+ * A #file_value_callbacks for the media_managed_file type.
+ *
+ * This callback taks a URI string, validates it and alows the
+ * file to be attached if it's valid.  This is called by function
+ * file_managed_file_value() if the user has not browsed for a
+ * file (i.e. function file_managed_file_save_upload() finds nothing
+ * in $_FILES['files']['name']).
  */
 function media_uri_value($element, &$input) {
   if (!empty($input['file_uri'])) {
