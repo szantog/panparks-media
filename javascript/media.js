@@ -145,7 +145,7 @@ $(document).ready(function () {
    * query string
    */
   function media_load_content_navigator_reload(query) {
-    $.getJSON(Drupal.settings.media.content_navigator_load_url+'?'+query,     
+    $.getJSON(Drupal.settings.media.media_browser_content_load_url+'?'+query,     
       function(data) { $('#media_content_browser').html(data);}
     );
   }

@@ -59,8 +59,10 @@ function theme_media_browser_pane($form) {
   return implode("\n", $output);
 }
 
+
 /**
- *  Display a radio list of files as thumbnails.
+ * Display a item list of files as thumbnails. Implements
+ * the admin thumbnail theme for now- serves as a wrapper
  *
  *  @param $files
  *    An array of file objects to display.
@@ -71,27 +73,29 @@ function theme_media_browser_thumbnails($files = array()) {
   foreach ($files as $file) {
     $thumbnails[] = theme('media_admin_thumbnail', array('file' => $file));
   }
-  return theme('item_list', $thumbnails);
+  return theme('item_list', array('items' => $thumbnails, 'attributes' => array('class' => 'media_content_navigator results')));
 }
+
 
 /**
  * Theme a thumbnail.
+ * @param $variables
+ *   array items being passed in
  */
 function theme_media_admin_thumbnail($variables) {
   $path = drupal_get_path('module', 'media');
   $file = $variables['file'];
   $file_url = file_create_url($file->uri);
   $output = '';
-
   // Display a thumbnail for images.
   if (strstr($file->filemime, 'image')) {
     $thumbnail = theme('image_style',
       array(
-        'style_name' => 'square_thumbnail',
+        'style_name' => 'thumbnail',
         'path' => $file->uri,
         'alt' => t('Thumbnail for !filename.', array('!filename' => $file->filename)),
-      ));
-    
+      )
+    );
   }
   // Display the 'unknown' icon for other file types.
   else {
@@ -108,7 +112,6 @@ function theme_media_admin_thumbnail($variables) {
       'html' => TRUE,
       'attributes' => array('class' => 'media-thumbnail'),
     ));
-
   return $output;
 }
 
@@ -139,18 +142,26 @@ function theme_media_admin_thumbnail_operations($variables) {
  *   array number of limit settings
  * @return unknown
  */
-function theme_media_navigation_control_result_limit($options = array(), $limits = false) {
+function theme_media_browser_control_result_limit($options = array(), $limits = false) {
   if (! $limits) {
     $limits = array(10, 30, 50);
   }
   // @NOTE these do not need to be aware of the current
   //       page because clicking them will reset the 
   //       display to 1 -> $limit
-  
+  $options['page'] = 0;
+  // save the active limit
+  $current_limit = $options['limit'];
   foreach ($limits as $limit) {
+    if ($limit == $current_limit) {
+      $class = 'active'; 
+    }
+    else {
+      $class = '';
+    }
     // set the value of this limit parameter to this limit value
     $options['limit'] = $limit;
-    $per_display[] = l($limit, $limit, array('query' => $options));
+    $per_display[] = l($limit, $limit, array('query' => $options, 'attributes' => array('class' => $class)));
   }
   
   return theme('item_list', array('items'  => $per_display, 'attributes' => array('class' => 'result_limit')));
@@ -159,24 +170,13 @@ function theme_media_navigation_control_result_limit($options = array(), $limits
 
 /**
  * Theme function to display pagination of results inside the content navigator
- * per page. 
+ * per page. Currently just a wrapper around pager with the options to display
+ * the specific content navigator stuff
  *
  * @param $options
  *   array parameters for the URL
  * @return unknown
  */
-function theme_media_navigation_control_pager($options = array()) {
-  if (! $limits) {
-    $limits = array(10, 30, 50);
-  }
-  // @NOTE these do not need to be aware of the current
-  //       page because clicking them will reset the 
-  //       display to 1 -> $limit
-  
-  foreach ($limits as $limit) {
-    // set the value of this limit parameter to this limit value
-    $options['limit'] = $limit;
-    $per_display[] = l($limit, $limit, array('query' => $options));
-  }  
-  return theme('item_list', array('items'  => $per_display, 'attributes' => array('class' => 'result_limit')));
+function theme_media_browser_control_pager($options = array()) {  
+  return theme('pager', array('parameters' => $options));
 }

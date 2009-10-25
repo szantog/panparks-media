@@ -42,9 +42,8 @@ function media_menu() {
     'page callback'    => 'media_test',
     'access arguments' => array('access content'),
   );
-  $items['media/navigator/dispatch'] = array(
-    'page callback'    => 'media_navigator_dispatch',
-    // @TODO what kind of perms here?
+  $items['media/browser/dispatch'] = array(
+    'page callback'    => 'media_browser_dispatch',
     'access arguments' => array('access content'),
   );
   
@@ -196,8 +195,20 @@ function media_theme() {
       'file' => 'media_theme.inc',
     ),
     
+    // The thumbnail operations disply on display pages.
+    'media_admin_thumbnail_operations' => array(
+      'arguments' => array('file' => NULL),
+      'file' => 'media_theme.inc',
+    ),
+    
+    // The thumbnails disply on browser paness.
+    'media_browser_thumbnails' => array(
+      'arguments' => array('files' => NULL),
+      'file' => 'media_theme.inc',
+    ),
+    
     // The navigation results limit control
-    'media_navigation_control_result_limit' => array(
+    'media_browser_control_result_limit' => array(
       'arguments'=> array(
         'options' => null, 
         'limits' => null
@@ -206,7 +217,7 @@ function media_theme() {
     ),
     
      // The navigation results limit control
-    'media_navigation_control_pager' => array(
+    'media_browser_control_pager' => array(
       'arguments'=> array('options' => null),
       'file' => 'media_theme.inc',
     ),
@@ -1418,59 +1429,25 @@ function media_image_default_styles() {
 
 /**
  * This is purely a testing stub function to start working on 
- * how the content navigator works. 
+ * how the content navigator works. It loads a default content navigator
+ * pane.
  *
  * @return unknown
  */
-function media_test() {
-  drupal_add_css(drupal_get_path('module', 'media') .'/media.css');
-  drupal_add_js(drupal_get_path('module', 'media') .'/javascript/media.js');
-  drupal_add_js(array('media' => array('content_navigator_load_url' => base_path() . 'media/navigator/dispatch')), array('type' => 'setting'));
-  
+function media_test() { 
   $options = array(
-    'module' => 'file',
-    'identifier' => 'public',
+    'module' => 'media',
+    'identifier' => 'files',
     'limit' => 10,
   );
   
+  // We always create a frame around the browser
   $html[] = '<div id="media_content_browser">';
-  $html[] = media_navigator_display($options);
+  // when we fist load the module data into the frame, we allow the module
+  // to load items (eg CSS, JS) that they may need for future ajax requests
+  $html[] = module_invoke($options['module'], 'media_browser_content', $options, true);
   $html[] = '</div>';
   return implode("\n", $html);
-}
-
-
-/**
- * This is a dummy display function 
- *
- * @param unknown_type $options
- * @return unknown
- */
-function media_navigator_display($options) {
-  // Create the default options- probably need more here
-    
-  // get the results limit control
-  $html[] = theme('media_navigation_control_result_limit', $options);
-  
-  /**
-   * @NOTE this is where the actual call back to the module will happen:
-   * $html[] = module_invoke($options['module'], 'media_navigator_browser', $options);
-   */
-  
-  // @TODO this is just some extrainous data to load a pager on the page
-  $query =  db_select('menu_router', 'f')->extend('PagerDefault');
-  $query->fields('f', array('path'));
-  $result = $query->limit($options['limit'])->execute();
-  foreach ($result as $item ) {
-    $links[] =  l($item->path, $item->path);
-  }
-  $html[] = '<h2>'. $options['number'] .'</h2>';
-  $html[] = theme('item_list', array('items'  => $links));
-
-  
-  $html[] = theme('pager', $options);
-  $html[] = '</div>';  
-  return  implode("\n", $html);   
 }
 
 
@@ -1480,7 +1457,7 @@ function media_navigator_display($options) {
  *
  * @return unknown
  */
-function media_navigator_dispatch() {
+function media_browser_dispatch() {
   $url_args = drupal_get_query_parameters();  
   // We need to be careful as this is not sanitized data.
   // @TODO can somebody check me here on this method 
@@ -1488,7 +1465,58 @@ function media_navigator_dispatch() {
   foreach ($url_args as $key => $value) {
     $options[check_plain($key)] = check_plain($value);
   }
-  return drupal_json_output(media_navigator_display($options)); 
+  // Invoke the module and identifier being requested
+  $return = module_invoke($options['module'], 'media_browser_content', $options);
+  return drupal_json_output($return); 
 }
 
+
+/**
+ * Implementation of hook_media_browser_content().
+ * Provides standard file navigation system
+ * 
+ * @param $options
+ *   array options which define current navigation states
+ * @param $invoke
+ *   boolean is the first invocation- add specific data that
+ *   is required for by additional ajax callbacks
+ */
+function media_media_browser_content($options, $invoke = false) {
+  switch ($options['identifier']) {
+    case 'files':
+      if ($invoke) {
+        drupal_add_css(drupal_get_path('module', 'media') .'/media.css');
+        drupal_add_js(drupal_get_path('module', 'media') .'/javascript/media.js');
+        drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));
+      }
+      
+       // get the results limit control
+      $html[] = theme('media_browser_control_result_limit', $options);
+      
+      // @NOTE this is just some extrainous data to load a pager on the page
+      $query =  db_select('menu_router', 'f')->extend('PagerDefault');
+      $query->fields('f', array('path'));
+      $result = $query->limit($options['limit'])->execute();
+      
+      // Build a dummy list of files.
+      for ($i = 0; $i < $options['limit']; $i++) {
+        $file = new stdClass;
+        $file->uri = 'public://09-04-05_0010_2.jpg';
+        $file->filename = 'The file name';
+        $file->filemime = 'image/jpeg';
+        $files[] = $file;
+      }
+      
+      // so that we are updating data
+      $html[] = '<pre>' . print_r($options, true) . '</pre>';
+      $html[] =  theme('media_browser_thumbnails', $files);
+      $html[] = theme('media_browser_control_pager', $options);
+      $html[] = '</div>';  
+      return  implode("\n", $html);   
+            
+      break;
+
+    
+  }
+}
 
