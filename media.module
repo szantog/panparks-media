@@ -1123,6 +1123,8 @@ function media_field_widget_info() {
       'label' => t('File (media)'),
       'field types' => array('file'),
       'settings' => array(
+        'progress_indicator' => 'throbber',
+        'allowed_schemes' => array('public', 'private'),
       ),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
@@ -1136,7 +1138,25 @@ function media_field_widget_info() {
  * Implement hook_field_widget_settings_form().
  */
 function media_field_widget_settings_form($field, $instance) {
-  return array();
+
+  // Get form for upload progress.
+  $form = file_field_widget_settings_form($field, $instance);
+  $widget = $instance['widget'];
+  $settings = $widget['settings'];
+  $streams = file_get_stream_wrappers();
+  unset($streams['temporary']);
+  foreach ($streams as $scheme => $data) {
+    $options[$scheme] = t('@scheme (@name)', array('@scheme' => $scheme . '://', '@name' => $data['name']));
+  }
+  $form['allowed_schemes'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Allowed URI schemes'),
+    '#options' => $options,
+    '#default_value' => $settings['allowed_schemes'],
+    '#description' => t('URI schemes include public:// and private:// which are the Drupal files directories, and may also refer to remote sites.'),
+    '#weight' => 1,
+  );
+  return $form;
 }
 
 /**
