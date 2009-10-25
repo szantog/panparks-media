@@ -1203,6 +1203,7 @@ function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, 
     '#upload_location' => file_field_widget_uri($field, $instance),
     '#upload_validators' => file_field_widget_upload_validators($field, $instance),
     '#media_file_extensions' => $instance['settings']['file_extensions'],
+    '#media_allowed_schemes' => $instance['widget']['settings']['allowed_schemes'],
     '#process' => array_merge($element_info['#process'], array('file_field_widget_process', 'media_generic_widget_process')),
     // Allows this field to return an array instead of a single value.
     '#extended' => TRUE,
@@ -1301,7 +1302,11 @@ function media_uri_value($element, &$input) {
       form_set_error($upload_name, t('Invalid URI: scheme is not registered.'));
       return;
     }
-    elseif ($scheme == 'public') {
+    elseif (!in_array($scheme, $element['#media_allowed_schemes'], TRUE)) {
+      form_set_error($upload_name, t('Invalid URI: scheme @scheme:// is not allowed for this field instance.', array('@scheme' => $scheme)));
+      return;
+    }
+    elseif ($scheme == 'public' || $scheme == 'private') {
       $errors = file_validate_extensions($file, $element['#media_file_extensions']);
       if ($errors) {
         form_set_error($upload_name, implode(' ', $errors));
