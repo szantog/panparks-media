@@ -38,6 +38,7 @@ function media_menu() {
     'access arguments' => array('access content'),
   );
   
+  /* this is for dummy content right now */
   $items['media/test'] = array(
     'page callback'    => 'media_test',
     'access arguments' => array('access content'),
@@ -215,12 +216,7 @@ function media_theme() {
       ),
       'file' => 'media_theme.inc',
     ),
-    
-     // The navigation results limit control
-    'media_browser_control_pager' => array(
-      'arguments'=> array('options' => null),
-      'file' => 'media_theme.inc',
-    ),
+   
   );
 }
 
@@ -1441,8 +1437,16 @@ function media_test() {
     'limit' => 10,
   );
   
+  // Make sure that we have CSS and JS functionality loaded  
+  drupal_add_css(drupal_get_path('module', 'media') .'/media.css');
+  drupal_add_js(drupal_get_path('module', 'media') .'/javascript/media.js');
+  drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));
+
+  // Create the throbber
+  $html[] = '<div id="media_content_browser_throbber"></div>';
   // We always create a frame around the browser
   $html[] = '<div id="media_content_browser">';
+
   // when we fist load the module data into the frame, we allow the module
   // to load items (eg CSS, JS) that they may need for future ajax requests
   $html[] = module_invoke($options['module'], 'media_browser_content', $options, true);
@@ -1485,38 +1489,61 @@ function media_media_browser_content($options, $invoke = false) {
   switch ($options['identifier']) {
     case 'files':
       if ($invoke) {
-        drupal_add_css(drupal_get_path('module', 'media') .'/media.css');
-        drupal_add_js(drupal_get_path('module', 'media') .'/javascript/media.js');
-        drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));
       }
       
        // get the results limit control
       $html[] = theme('media_browser_control_result_limit', $options);
       
       // @NOTE this is just some extrainous data to load a pager on the page
-      $query =  db_select('menu_router', 'f')->extend('PagerDefault');
-      $query->fields('f', array('path'));
-      $result = $query->limit($options['limit'])->execute();
-      
-      // Build a dummy list of files.
-      for ($i = 0; $i < $options['limit']; $i++) {
-        $file = new stdClass;
-        $file->uri = 'public://09-04-05_0010_2.jpg';
-        $file->filename = 'The file name';
-        $file->filemime = 'image/jpeg';
-        $files[] = $file;
-      }
-      
+      $query =  db_select('file', 'f')->extend('PagerDefault');
+      $query->fields('f', array('fid'));
+      $fids = $query->limit($options['limit'])->execute()->fetchCol();
+      // Now load all the files       
+      $files = file_load_multiple($fids);      
       // so that we are updating data
-      $html[] = '<pre>' . print_r($options, true) . '</pre>';
-      $html[] =  theme('media_browser_thumbnails', $files);
-      $html[] = theme('media_browser_control_pager', $options);
+     // $html[] = '<pre>' . print_r($options, true) . '</pre>';
+      $html[] = drupal_render(drupal_get_form('media_file_listing_form', $files, $options));   
       $html[] = '</div>';  
       return  implode("\n", $html);   
             
       break;
-
     
   }
+}
+
+
+/**
+ * Creates the file list display form 
+ *
+ * @param unknown_type $form
+ * @param unknown_type $options
+ */
+function media_file_listing_form($form, $form_state, $files, $options) {
+  $form['files'] = array(
+   '#tree' => TRUE,
+   '#prefix' => '<div class ="media-display-thumbnails clearfix">',
+   '#suffix' => '</div>',
+  );
+  if (count($files)) {
+    foreach ($files as $file) {
+     $form['files'][$file->fid] = array(
+       '#type' => 'checkbox',
+       '#return_value' => $file->uri,
+       '#title' => check_plain($file->filename),
+       '#prefix' => '<div class="media-thumbnail">' . theme('media_browser_thumbnails', array('file' => $file)),
+       '#suffix' => '</div>',
+     );
+    }
+  }
+
+  // Unset the page value in options so that the pager can 
+  // control which page the link refers to
+  unset($options['page']);
+  $form['pager'] = array('#markup' => theme('pager', array('parameters' => $options)));
+
+  // Build the display switch.
+  require_once('media.admin.inc');
+  $form = media_admin_display_switch($form, array('active_display' => 'thumbnails'));
+  return $form;
 }
 

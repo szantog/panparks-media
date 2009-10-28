@@ -83,6 +83,23 @@
   padding: 0;
 }
 
+/* For thumbnails that have been choosen by a user */
+div.media-thumbnail.selected {
+  background: #cccccc;
+}
+
+
+/* Hide the checkboxes on the browser display */
+#media_content_browser .media-thumbnail .form-item.form-type-checkbox .form-checkbox {
+  display: none;
+}
+
+/* Set the height to auto */
+#media_content_browser .media-thumbnail {
+  height: auto;
+  width: 140px;
+}
+
 
 
 /* This is some stuff to just get some basic mockup done on the 
@@ -101,3 +118,13 @@
   list-style: none;
 }
 
+/* show the throbber on the page */
+#media_content_browser_throbber {
+  display: none;
+  position: absolute;
+  border: 2px solid #cccccc;
+  width: 80%;
+  height: 80%;
+  background: transparent url(images/throbber.gif) no-repeat  center center;
+}
+  

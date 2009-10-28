@@ -130,14 +130,28 @@ $(document).ready(function () {
    *  so that updates to the media_content_browser still have
    *  jquery functionality
    */  
-  $('ul.result_limit li a, ul.pager li a').live('click', function() {
+  $('ul.result_limit li a, ul.pager li a').live('click', function() {    
     // Get the current query string
-    var query = $(this).attr('href').replace(/.*\?/, '');       
-    // Reload our window with the new parameters    
-    media_load_content_navigator_reload(query);    
-    // Make sure to stop the click
+    var query = $(this).attr('href').replace(/.*\?/, '');
+
+    // Start visual effects
+    // Show the throbber
+    $('#media_content_browser_throbber').fadeIn('fast');    
+    $('#media_content_browser').fadeTo('slow', 0.23, function() {
+      // Fetch content data with the new parameters    
+      media_load_content_navigator_reload(query);    
+      
+      // Hide throbber
+      $('#media_content_browser_throbber').fadeOut('slow', function () {
+        // fade back the content
+        $('#media_content_browser').fadeTo('slow', 1);
+        });      
+        
+    }); // fade    
+     // Make sure to stop the click
     return false;
   });
+  
   
   /**
    * Stub function to get the current active pager
@@ -150,6 +164,23 @@ $(document).ready(function () {
     );
   }
   
+  
+  /**
+   * Handle the clicks on actual images and transfer those values 
+   * to the submission form
+   */
+   // Catch the clicks on the images (how does light box impact this?)
+   $('.media-thumbnail ul.media_content_navigator.results a').live('click', function () {
+     // Remove any current selections
+     $('.media-thumbnail').removeClass('selected');     
+     // We need to get the value of the checkbox
+     var uri = $(this).parents('.item-list').next('.form-item.form-type-checkbox').find('.form-checkbox').val();
+     // Now select this thumbnail
+     $(this).parents('.media-thumbnail').addClass('selected');
+     // @TODO need to swap out selected value with uri
+
+     return false;
+     });
   
 }); // $(document).ready
 

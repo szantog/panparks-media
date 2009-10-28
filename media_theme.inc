@@ -166,17 +166,3 @@ function theme_media_browser_control_result_limit($options = array(), $limits = 
   
   return theme('item_list', array('items'  => $per_display, 'attributes' => array('class' => 'result_limit')));
 }
-
-
-/**
- * Theme function to display pagination of results inside the content navigator
- * per page. Currently just a wrapper around pager with the options to display
- * the specific content navigator stuff
- *
- * @param $options
- *   array parameters for the URL
- * @return unknown
- */
-function theme_media_browser_control_pager($options = array()) {  
-  return theme('pager', array('parameters' => $options));
-}
