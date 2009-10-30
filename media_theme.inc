@@ -10,7 +10,7 @@
 
 /**
  * Display the media file browser.
- *
+ * @TODO this is depreciated I think
  * @param array $element
  *   The form element.
  * @return string
@@ -24,7 +24,7 @@ function theme_media_file_browser($element) {
 
 /**
  * Display a media file list.
- *
+ * @TODO this is depreciated I think
  * @param array $element
  *   The form element.
  * @return string
@@ -36,6 +36,7 @@ function theme_media_file_list($element) {
 
 /**
  * Display a browser pane.
+ * @TODO this is depreciated I think
  *
  * @param array $form
  *   The form element.
@@ -58,6 +59,48 @@ function theme_media_browser_pane($form) {
 
   return implode("\n", $output);
 }
+
+
+/**
+ * Default theming function for creating the browser frame
+ * @param $files
+ *   array of Drupal file objects
+ * @return unknown_type
+ */
+function theme_media_browser_content_frame($variables) {
+  // Pull out all the variables into a usable form
+  extract($variables);
+  // Did we get any files back?
+  if (! count($files)) {
+    // @TODO display no files found
+  }
+
+  $html = array();
+
+  // On the first invocation, load javascript and build the browser frame
+  if ($invoke) {
+     // Make sure that we have CSS and JS functionality loaded
+    drupal_add_css(drupal_get_path('module', 'media') .'/media.css');
+    drupal_add_js(drupal_get_path('module', 'media') .'/javascript/media.js');
+    drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));
+     // Create the throbber
+    $html[] = '<div id="media_content_browser_throbber"></div>';
+    // We always create a frame around the browser
+    $html[] = '<div id="media_content_browser">';
+
+  }
+   // Render the results limiter
+  $html[] = theme('media_browser_control_result_limit', array('parameters' => $parameters));
+  // Render the actual content
+  $html[] = drupal_render(drupal_get_form('media_file_listing_form', $files, $parameters));
+
+  // Make sure to close the wrapping div
+  if ($invoke) {
+    $html[] = '</div>';
+  }
+  return implode("\n", $html);
+}
+
 
 
 /**
@@ -134,35 +177,36 @@ function theme_media_admin_thumbnail_operations($variables) {
 
 /**
  * Theme function to display the results limiting- 10, 30, 50 results
- * per page. 
+ * per page.
  *
- * @param $options
- *   array parameters for the URL
- * @param $limits
- *   array number of limit settings
+ * @param $variables
+ *   array parameters
  * @return unknown
  */
-function theme_media_browser_control_result_limit($options = array(), $limits = false) {
-  if (! $limits) {
+function theme_media_browser_control_result_limit($variables) {
+  // Pull out all the variables into a usable form
+  extract($variables);
+
+  if (! isset($limits)) {
     $limits = array(10, 30, 50);
   }
   // @NOTE these do not need to be aware of the current
-  //       page because clicking them will reset the 
+  //       page because clicking them will reset the
   //       display to 1 -> $limit
-  $options['page'] = 0;
+  $parameters['page'] = 0;
   // save the active limit
-  $current_limit = $options['limit'];
+  $current_limit = $parameters['limit'];
   foreach ($limits as $limit) {
     if ($limit == $current_limit) {
-      $class = 'active'; 
+      $class = 'active';
     }
     else {
       $class = '';
     }
     // set the value of this limit parameter to this limit value
-    $options['limit'] = $limit;
-    $per_display[] = l($limit, $limit, array('query' => $options, 'attributes' => array('class' => $class)));
+    $parameters['limit'] = $limit;
+    $per_display[] = l($limit, $limit, array('query' => $parameters, 'attributes' => array('class' => $class)));
   }
-  
+
   return theme('item_list', array('items'  => $per_display, 'attributes' => array('class' => 'result_limit')));
 }
