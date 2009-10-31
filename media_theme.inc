@@ -1,4 +1,5 @@
 <?php
+
 // $Id$
 
 /**
@@ -43,6 +44,7 @@ function theme_media_file_list($element) {
  * @return string
  */
 function theme_media_browser_pane($form) {
+  return;
   $output   = array();
 
   // render the drawers
@@ -62,9 +64,11 @@ function theme_media_browser_pane($form) {
 
 
 /**
- * Default theming function for creating the browser frame
- * @param $files
- *   array of Drupal file objects
+ * Default theming function for creating the browser frame.
+ * Assumes an array of file objects as $files and an
+ * array of $parameters
+ * @param $variables
+ *   array of variables
  * @return unknown_type
  */
 function theme_media_browser_content_frame($variables) {
@@ -78,12 +82,21 @@ function theme_media_browser_content_frame($variables) {
   $html = array();
 
   // On the first invocation, load javascript and build the browser frame
-  if ($invoke) {
-     // Make sure that we have CSS and JS functionality loaded
-    drupal_add_css(drupal_get_path('module', 'media') .'/media.css');
-    drupal_add_js(drupal_get_path('module', 'media') .'/javascript/media.js');
-    drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));
-     // Create the throbber
+   if ($invoke) {
+      // Load our css.
+      drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
+      drupal_add_css('misc/ui/ui.all.css'); 
+      // Load all of our jQuery UI
+      drupal_add_js('misc/ui/ui.core.js');
+      drupal_add_js('misc/ui/ui.draggable.js');
+      drupal_add_js('misc/ui/ui.resizable.js');
+      drupal_add_js('misc/ui/ui.dialog.js');
+      // Add a URL setting for the AJAX load
+      drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));  
+      // Load the custom JS
+      drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.js'); 
+      
+       // Create the throbber
     $html[] = '<div id="media_content_browser_throbber"></div>';
     // We always create a frame around the browser
     $html[] = '<div id="media_content_browser">';

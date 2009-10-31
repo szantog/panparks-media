@@ -120,6 +120,7 @@ function media_permission() {
   );
 }
 
+
 /**
  * Implementation of hook_form_alter().
  * @param $form
@@ -127,8 +128,6 @@ function media_permission() {
  * @param $form_id
  */
 function media_form_alter(&$form, &$form_state, $form_id) {
-  global $user;
-
   // Load content-type settings.
   if ($form_id == 'node_type_form') {
     include_once('media.admin.inc');
@@ -137,6 +136,9 @@ function media_form_alter(&$form, &$form_state, $form_id) {
 
   // Add the media browser on the node add/edit screen.
   if (!empty($form['#node_edit_form'])) {
+//    media_build_browser_form($form);
+   // print_R($form['media']);
+    
     // Is the media browser enabled on this node type? Type-specific options override the default.
     if (variable_get('media_' . $form['type']['#value'] . '_override', NULL) !== NULL) {
       $enabled = variable_get('media_' . $form['type']['#value'] . '_enabled', NULL);
@@ -149,10 +151,10 @@ function media_form_alter(&$form, &$form_state, $form_id) {
       $fields = media_active_fields_for_node_type($form['type']['#value']);
       // Iterate through each field and add a browser form.
       foreach ($fields as $field => $registration_ids) {
-
+        
         // Add the media browser form.
-        $form[$field]['media'] = media_build_browser_form($form_state, $registration_ids, $form['type']['#value'], $field, $user->uid);
-
+       //$form['media'] = media_build_browser_form($form_state, $registration_ids, $form['type']['#value'], $field);
+//print_r($form[$field]);
         // Add .media and .replace class to the field CSS class attributes.
         $form[$field][0]['#attributes'] = array('class' => array('media replace'));
       }
@@ -644,15 +646,7 @@ function media_active_fields_for_node_type($type_name, $function = 'resource') {
   return $data;
 }
 
-/**
- * Sanitize the incoming name to be used for a html #id.
- *
- * @param string $drawer_name
- * @return string
- */
-function media_create_id($drawer_name) {
-  return str_replace(array(' ', "'", '"', "%", "<", ">"), '', $drawer_name);
-}
+
 
 /**
  * Get a list of content field types.
@@ -714,36 +708,46 @@ function _media_content_field_types($type_name) {
  * @return array
  *   Drupal FAPI form array.
  */
-function media_build_browser_form($form_state, $registration_ids, $node_type, $field, $uid) {
-  static $id;
-
-  // We need a static counter for our form element wrapper.
-  $id += 1;
-
-  $form  = array();
-
-  $path = drupal_get_path('module', 'media');
+function media_build_browser(&$form) {
+  return ;
+  $form['media_browser'] = array(
+   '#type' => 'markup'
+  );
 
   // Load our css.
-  $form['#attached']['css'] = array(
-    $path . '/media.css',
+  $form['media_browser']['#attached']['css'] = array(
+    drupal_get_path('module', 'media') . '/media.css',
+    'misc/ui/ui.all.css', 
   );
-  // Load our specific js for the file selector.
-  // Load the md5 library so we can hash the upload filename for use in the
-  // metadata collection form.
-  // @TODO: Do we still need the js md5?
-  $form['#attached']['js'] = array(
-    $path . '/javascript/media.js',
-    $path . '/javascript/jquery.md5.js',
+  // Load all our jQuery UI
+  $form['media_browser']['#attached']['js'] = array(
+    drupal_get_path('module', 'media') . '/javascript/media.js',
+    'misc/ui/ui.core.js',
+    'misc/ui/ui.draggable.js',
+    'misc/ui/ui.resizable.js',
+    'misc/ui/ui.dialog.js', 
+  );
+ 
+  // Add a URL setting for the AJAX load
+  //drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));
+ 
+  // dummy params for now
+  $parameters = array(
+    'module' => 'media',
+    'identifier' => 'files',
+    'limit' => 10,
   );
 
-  $items = array();
+  // when we fist load the module data into the frame, we allow the module
+  // to load items (eg CSS, JS) that they may need for future ajax requests
+  $dialog = module_invoke($parameters['module'], 'media_browser_content', $parameters, true);
 
-  $form['media_browser_activate'] = array(
-    '#type'  => 'markup',
-    '#value' => '<div class="media browser activation">' . t('Add files') . '</div>',
-  );
+  $form['media_browser']['#value'] =
+     '<div class="media browser activation">' . t('Add files') . '</div>
+    <div id="dialog" style="display: block;">' . $dialog . '</div>';
 
+  return;
+  
   // We are using a tab form type.
   $form['media_browser'] = array(
     '#type'       => 'fieldset',
@@ -752,9 +756,6 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
 
   // Get all the active resources
   $resources = media_get_resources($registration_ids, $node_type, $field, $uid);
-
-  // Store the tab & drawer names for the js form selector.
-  $drawer_options = array();
 
   // loop through the form and start pulling out the data to
   // create tabs -> panes -> drawers
@@ -847,20 +848,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
     ),
   );
 
-  // Container for the metadata submission message.
-  $form['media_browser']['media_browser_metadata_message'] = array(
-    '#prefix' => '<div id="media-browser-metadata-message-' . $id . '" class="media-browser-metadata-message">',
-    '#suffix' => '</div>',
-  );
-  $form['media_browser']['media_browser_metadata_message']['message'] = array(
-    '#type'  => 'item',
-    '#value' => '',
-  );
 
-  $form['media_browser']['media_browser_metadata'] = array(
-    '#type'       => 'fieldset',
-    '#attributes' => array('class' => array('media-browser-metadata-wrapper')),
-  );
 
   // @TODO: This all goes in the form creation, actually,
   // to create our metadata form...
@@ -1315,8 +1303,24 @@ function media_generic_widget_process($element, &$form_state, $form) {
       '#maxlength' => 240,
       '#size' => 60,
     );
-    $element['file_uri']['#attributes']['class'] = array('media-file-uri');
+    $element['file_uri']['#attributes']['class'] = array('form-text', 'media-file-uri');
   }
+
+  // dummy params for now
+  $parameters = array(
+    'module' => 'media',
+    'identifier' => 'files',
+    'limit' => 10,
+  );
+
+  // when we fist load the module data into the frame, we allow the module
+  // to load items (eg CSS, JS) that they may need for future ajax requests
+  $dialog = module_invoke($parameters['module'], 'media_browser_content', $parameters, true);
+
+  $element['file_uri']['#suffix'] =
+    '<div class="media browser activation">' . t('Add files') . '</div>
+      <div id="dialog">'. $dialog .'</div>';
+       
   return $element;
 }
 
@@ -1445,14 +1449,13 @@ function media_test() {
   // Some dummy parameters for now
   $parameters = array(
     'module' => 'media',
-    'identifier' => 'local_files',
+    'identifier' => 'files',
     'limit' => 10,
   );
 
   // when we fist load the module data into the frame, we allow the module
   // to load items (eg CSS, JS) that they may need for future ajax requests
   $html[] = module_invoke($parameters['module'], 'media_browser_content', $parameters, true);
-  $html[] = '</div>';
   return implode("\n", $html);
 }
 
