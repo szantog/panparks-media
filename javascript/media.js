@@ -77,20 +77,7 @@ Drupal.behaviors.mediaBrowserHide = {
     });
   }
 }
-/**
- *  Generate a MD5 hash of the file being uploaded.
- */
-Drupal.behaviors.mediaGenerateMD5 = {
-  attach: function (context, settings) {
-    // Get the value from the file field.
-    $('#edit-field-file-media-media-tabs-tab-Addfiles-media-upload-resource-Newfile-resource-form-media-upload-upload', context).once('mediaGenerateMD5').change(function () {
-      // Add the MD5 hash from the file name to the upload URL.
-      Drupal.settings['ahah']['edit-attach']['url'] += '/'+$.md5($(this).val());
-      // @TODO: Now add the MD5 value to the meta data form.
-      alert(Drupal.settings['ahah']['edit-attach']['url']);
-    });
-  }
-}
+
 
 /**
  *  Hide the browser and bind click behavior.
@@ -123,6 +110,41 @@ Drupal.behaviors.mediaAhahHideBrowser ={
 
 $(document).ready(function () {
 
+  /** 
+   * Load the Media Browser for the first time
+   */
+  $('.media_browser_activation a').bind('click', function() {
+    // We need to check if the dialog box was already instantiated. If
+    // it has been, the dialog box will have UI classes
+    if ($('#dialog').hasClass('ui-dialog-content')) {   
+      // Remove any content from the browser pane
+      $('#media_content_browser').html();
+      $('#dialog').dialog('open');
+    }
+    // Create our dialog box.
+    else {    
+      $('#dialog').dialog({
+        buttons: { "Ok": function() { $(this).dialog("close"); } }, 
+        modal: true,
+        draggable: false,
+        resizable: false,
+        minWidth: 600,
+        width: 800,
+        position: 'center',
+        overlay: {
+          backgroundColor: '#000000',
+          opacity: 0.3
+        }
+      });
+    }
+    // Get the current query string
+    var query = $(this).attr('href').replace(/.*\?/, '');    
+    // Load our content from ajax and style 
+    media_load_content_display(query);
+    return false;
+  });
+   
+   
   /**
    *  Catch the clicks on the result limiters and pager queries
    *  and modify the links to have the options in their URL so   
@@ -130,17 +152,22 @@ $(document).ready(function () {
    *  so that updates to the media_content_browser still have
    *  jquery functionality
    */  
-  $('ul.result_limit li a, ul.pager li a').live('click', function() {    
+  $('ul.result_limit li a, ul.pager li a').live('click', function() {
     // Get the current query string
     var query = $(this).attr('href').replace(/.*\?/, '');
-
+    media_load_content_display(query);
+    // Make sure to stop the click
+    return false;
+  });
+  
+  
+  function media_load_content_display(query) {
     // Start visual effects
     // Show the throbber
     $('#media_content_browser_throbber').fadeIn('fast');    
-    $('#media_content_browser').fadeTo('slow', 0.23, function() {
+    $('#media_content_browser').fadeTo('slow', 0.23, function() {      
       // Fetch content data with the new parameters    
-      media_load_content_navigator_reload(query);    
-      
+      media_load_content_navigator_reload(query);      
       // Hide throbber
       $('#media_content_browser_throbber').fadeOut('slow', function () {
         // fade back the content
@@ -148,10 +175,7 @@ $(document).ready(function () {
         });      
         
     }); // fade    
-     // Make sure to stop the click
-    return false;
-  });
-  
+  }
   
   /**
    * Stub function to get the current active pager
@@ -169,16 +193,22 @@ $(document).ready(function () {
    * Handle the clicks on actual images and transfer those values 
    * to the submission form
    */
-   // Catch the clicks on the images (how does light box impact this?)
+   // Catch the clicks on the images in the modal window
    $('.media-thumbnail ul.media_content_navigator.results a').live('click', function () {
      // Remove any current selections
      $('.media-thumbnail').removeClass('selected');     
-     // We need to get the value of the checkbox
-     var uri = $(this).parents('.item-list').next('.form-item.form-type-checkbox').find('.form-checkbox').val();
-     // Now select this thumbnail
-     $(this).parents('.media-thumbnail').addClass('selected');
-     // @TODO need to swap out selected value with uri
-
+     // Select this thumbnail
+     $(this).parents('.media-thumbnail').addClass('selected');     
+     // We need to get the value of the checkbox for this selected file
+     var uri = $('.media-thumbnail.selected input.form-checkbox').val();
+     // Get the enclosing div and then the file input field and change its value
+     // @TODO this does not support multiple file fields currently because
+     //       the modal window appends to the bottom of the page. We need
+     //       to come up with a mechanism to snif the current field- placing
+     //       a hiden element into the modal dailog with the filefield id 
+     //       might work well
+     $('input.media-file-uri').val(uri);   
+     // Deactivate the click
      return false;
      });
   
