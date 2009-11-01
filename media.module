@@ -12,6 +12,17 @@
  * file lists, tabs, drawers, and forms to the new Upload form.
  */
 
+
+ /**
+  * @TODO
+  *   * we need to remove cruft from earlier implementation strategy
+  *   * we need to modify the registration hook
+  *   * we need to handle the content browser ajax through drupal FAPI ahah 
+  *   * we need better UI 
+  *   * file extesion validation is not working correctly for * option 
+  *   * files are not currently being attached by the file uri field
+  */
+
 /* ***************************************** */
 /* CONSTANTS                                 */
 /* ***************************************** */
@@ -1306,20 +1317,33 @@ function media_generic_widget_process($element, &$form_state, $form) {
     $element['file_uri']['#attributes']['class'] = array('form-text', 'media-file-uri');
   }
 
-  // dummy params for now
-  $parameters = array(
-    'module' => 'media',
-    'identifier' => 'files',
-    'limit' => 10,
+  // Load our css.
+  drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
+  drupal_add_css('misc/ui/ui.all.css'); 
+  // Load all of our jQuery UI
+  drupal_add_js('misc/ui/ui.core.js');
+  drupal_add_js('misc/ui/ui.draggable.js');
+  drupal_add_js('misc/ui/ui.resizable.js');
+  drupal_add_js('misc/ui/ui.dialog.js');
+  // Load the custom JS
+  drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.js');
+   // Add a URL setting for the AJAX load
+  drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));  
+
+  // We should run the media hook here to get a list of what kinds of things the user can choose from
+  $items = array (
+    l(t('Add existing files'), '', array('query' => array('module' => 'media', 'identifier' => 'files'))),
+    l(t('Add from file system'), '', array('query' => array('module' => 'media', 'identifier' => 'local_files')))
   );
-
-  // when we fist load the module data into the frame, we allow the module
-  // to load items (eg CSS, JS) that they may need for future ajax requests
-  $dialog = module_invoke($parameters['module'], 'media_browser_content', $parameters, true);
-
+  
+  // @TODO title for the dialog box should be set dynamically by the calling module
+  
   $element['file_uri']['#suffix'] =
-    '<div class="media browser activation">' . t('Add files') . '</div>
-      <div id="dialog">'. $dialog .'</div>';
+    '<div class="media_browser_activation">' . theme('item_list', array('items' => $items)) . '</div>
+     <div id="dialog" title="' . t('Select your files'). '">
+       <div id="media_content_browser_throbber"></div>
+       <div id="media_content_browser"></div>
+     </div>';
        
   return $element;
 }
@@ -1491,6 +1515,10 @@ function media_browser_dispatch($parameters = null) {
  *   is required for additional ajax callbacks
  */
 function media_media_browser_content($parameters, $invoke = false) {
+  // Use a default value for limit
+  if (! isset($parameters['limit']) ) {
+    $parameters['limit'] = 10;
+  }
   // Which identfier is in use?
   switch ($parameters['identifier']) {
     case 'files':

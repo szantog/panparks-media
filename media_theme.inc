@@ -83,23 +83,7 @@ function theme_media_browser_content_frame($variables) {
 
   // On the first invocation, load javascript and build the browser frame
    if ($invoke) {
-      // Load our css.
-      drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
-      drupal_add_css('misc/ui/ui.all.css'); 
-      // Load all of our jQuery UI
-      drupal_add_js('misc/ui/ui.core.js');
-      drupal_add_js('misc/ui/ui.draggable.js');
-      drupal_add_js('misc/ui/ui.resizable.js');
-      drupal_add_js('misc/ui/ui.dialog.js');
-      // Add a URL setting for the AJAX load
-      drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));  
-      // Load the custom JS
-      drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.js'); 
-      
-       // Create the throbber
-    $html[] = '<div id="media_content_browser_throbber"></div>';
-    // We always create a frame around the browser
-    $html[] = '<div id="media_content_browser">';
+
 
   }
    // Render the results limiter
