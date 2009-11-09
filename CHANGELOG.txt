@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+by aaron: Get MediaReadOnlyStreamWrapper in line with Drupal stream wrappers.
 by aaron: Add MediaReadOnlyStreamWrapper.
 by aaron: Add media_browser_thumbnails form element.
 by aaron: theme_media_browser_thumbnail_radios.

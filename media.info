@@ -10,5 +10,6 @@ files[] = media.module
 files[] = media_ahah.inc
 files[] = media.admin.inc
 files[] = media_theme.inc
+files[] = MediaReadOnlyStreamWrapper.inc
 dependencies[] = file
 dependencies[] = image

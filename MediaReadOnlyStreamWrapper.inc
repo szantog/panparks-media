@@ -2,6 +2,33 @@
 // $Id$
 
 /**
+ * Generic PHP stream wrapper interface.
+ *
+ * @see http://www.php.net/manual/en/class.streamwrapper.php
+ */
+interface MediaReadOnlyStreamWrapperInterface {
+  public function stream_open($uri, $mode, $options, &$opened_url);
+  public function stream_close();
+  public function stream_lock($operation);
+  public function stream_read($count);
+  public function stream_write($data);
+  public function stream_eof();
+  public function stream_seek($offset, $whence);
+  public function stream_flush();
+  public function stream_tell();
+  public function stream_stat();
+//   public function unlink($uri);
+//   public function rename($from_uri, $to_uri);
+//   public function mkdir($uri, $mode, $options);
+//   public function rmdir($uri, $options);
+  public function url_stat($uri, $flags);
+  public function dir_opendir($uri, $options);
+  public function dir_readdir();
+  public function dir_rewinddir();
+  public function dir_closedir();
+}
+
+/**
  * A base class for Resource Stream Wrappers.
  *
  * This class provides a complete stream wrapper implementation. It passes
@@ -12,20 +39,79 @@
  * interpolateUrl method to rewrite the URL before is it passed back into the
  * calling function.
  */
-abstract class MediaReadOnlyStreamWrapper implements DrupalStreamWrapperInterface {
+abstract class MediaReadOnlyStreamWrapper implements MediaReadOnlyStreamWrapperInterface {
   private $parameters = array();
   private $base_url = NULL;
+  private $_DEBUG_MODE = NULL;
 
-  function interpolateUrl($url) {
+  function interpolateUrl() {
     return $this->base_url .'?'. implode('&', $this->parameters);
   }
 
-  function htmlUrl($url) {
-    return $this->interpolateUrl($url);
+  /**
+   * Returns a web accessible URL for the resource.
+   *
+   * This function should return a URL that can be embedded in a web page
+   * and accessed from a browser. For example, the external URL of
+   * "youtube://xIpLd0WQKCY" might be
+   * "http://www.youtube.com/watch?v=xIpLd0WQKCY".
+   *
+   * @return
+   *   Returns a string containing a web accessible URL for the resource.
+   */
+  public function getExternalUrl() {
+    return $this->interpolateUrl();
   }
 
-  function mime($url) {
+  /**
+   * Base implementation of getMimeType().
+   */
+  static function getMimeType($uri, $mapping = NULL) {
     return 'application/octet-stream';
+  }
+
+  /**
+   * Base implementation of realpath().
+   */
+  function realpath() {
+    return $this->getExternalUrl();
+  }
+
+   /**
+   * Stream context resource.
+   *
+   * @var Resource
+   */
+  public $context;
+
+  /**
+   * A generic resource handle.
+   *
+   * @var Resource
+   */
+  public $handle = NULL;
+
+  /**
+   * Instance URI (stream).
+   *
+   * A stream is referenced as "scheme://target".
+   *
+   * @var String
+   */
+  protected $uri;
+
+  /**
+   * Base implementation of setUri().
+   */
+  function setUri($uri) {
+    $this->uri = $uri;
+  }
+
+  /**
+   * Base implementation of getUri().
+   */
+  function getUri() {
+    return $this->uri;
   }
 
   /**
@@ -46,6 +132,12 @@ abstract class MediaReadOnlyStreamWrapper implements DrupalStreamWrapperInterfac
       drupal_set_message(t($message, $options), 'error');
     }
     return FALSE;
+  }
+
+  private function _debug($message, $type = 'status') {
+    if ($this->_DEBUG_MODE) {
+      drupal_set_message($message, $type);
+    }
   }
 
   /**
@@ -92,7 +184,7 @@ abstract class MediaReadOnlyStreamWrapper implements DrupalStreamWrapperInterfac
    *  TRUE if file was opened successfully.
    */
   public function stream_open($url, $mode, $options, &$opened_url) {
-    resource_debug(t('Stream open: %url', array('%url' => $url)));
+    $this->_debug(t('Stream open: %url', array('%url' => $url)));
 
     // We only handle Read-Only mode by default.
     if ($mode != 'r') {
@@ -111,7 +203,7 @@ abstract class MediaReadOnlyStreamWrapper implements DrupalStreamWrapperInterfac
       $opened_url = $url;
     }
 
-    resource_debug(t('Stream opened: %parameters', array('%parameters' => print_r($this->parameters, TRUE))));
+    $this->_debug(t('Stream opened: %parameters', array('%parameters' => print_r($this->parameters, TRUE))));
 
     return (bool)$this->parameters;
   }
@@ -210,71 +302,86 @@ abstract class MediaReadOnlyStreamWrapper implements DrupalStreamWrapperInterfac
     return TRUE;
   }
 
+
   /**
    * Support for unlink().
    *
-   * @param $url
-   *   A string containing the url to the resource to delete.
+   * @param $uri
+   *   A string containing the uri to the resource to delete.
    * @return
    *   TRUE if resource was successfully deleted.
+   * @see http://php.net/manual/en/streamwrapper.unlink.php
    */
-//   public function unlink($url) {
-//     return unlink($this->interpolateUrl($url));
+//   public function unlink($uri) {
+//     $this->uri = $uri;
+//     return unlink($this->getLocalPath());
 //   }
 
   /**
    * Support for rename().
    *
-   * @param $fromUrl,
-   *   The url to the file to rename.
-   * @param $toUrl
-   *   The new url for file.
-   *
+   * @param $from_uri,
+   *   The uri to the file to rename.
+   * @param $to_uri
+   *   The new uri for file.
    * @return
    *   TRUE if file was successfully renamed.
+   * @see http://php.net/manual/en/streamwrapper.rename.php
    */
-//   public function rename($fromUrl, $toUrl) {
-//     return rename($this->interpolateUrl($fromUrl), $this->interpolateUrl($toUrl));
+//   public function rename($from_uri, $to_uri) {
+//     return rename($this->getLocalPath($from_uri), $this->getLocalPath($to_uri));
 //   }
 
   /**
    * Support for mkdir().
    *
-   * @param $url
-   *   A string containing the url to the directory to create.
+   * @param $uri
+   *   A string containing the URI to the directory to create.
    * @param $mode
    *   Permission flags - see mkdir().
    * @param $options
    *   A bit mask of STREAM_REPORT_ERRORS and STREAM_MKDIR_RECURSIVE.
    * @return
    *   TRUE if directory was successfully created.
+   * @see http://php.net/manual/en/streamwrapper.mkdir.php
    */
-//   public function mkdir($url, $mode, $options) {
+//   public function mkdir($uri, $mode, $options) {
+//     $this->uri = $uri;
 //     $recursive = (bool)($options & STREAM_MKDIR_RECURSIVE);
-//     if ($options & STREAM_REPORT_ERRORS) {
-//       return mkdir($this->interpolateUrl($url), $mode, $recursive);
+//     if ($recursive) {
+//       // $this->getLocalPath() fails if $uri has multiple levels of directories
+//       // that do not yet exist.
+//       $localpath = $this->getDirectoryPath() . '/' . file_uri_target($uri);
 //     }
 //     else {
-//       return @mkdir($this->interpolateUrl($url), $mode, $recursive);
+//       $localpath = $this->getLocalPath($uri);
+//     }
+//     if ($options & STREAM_REPORT_ERRORS) {
+//       return mkdir($localpath, $mode, $recursive);
+//     }
+//     else {
+//       return @mkdir($localpath, $mode, $recursive);
 //     }
 //   }
 
   /**
    * Support for rmdir().
    *
-   * @param $url
-   *   A string containing the url to the directory to delete.
+   * @param $uri
+   *   A string containing the URI to the directory to delete.
    * @param $options
    *   A bit mask of STREAM_REPORT_ERRORS.
    * @return
    *   TRUE if directory was successfully removed.
+   * @see http://php.net/manual/en/streamwrapper.rmdir.php
    */
-//   public function rmdir($url, $options) {
+//   public function rmdir($uri, $options) {
+//     $this->uri = $uri;
 //     if ($options & STREAM_REPORT_ERRORS) {
-//       return rmdir($this->interpolateUrl($url));
+//       return rmdir($this->getLocalPath());
 //     }
 //     else {
-//       return @rmdir($this->interpolateUrl($url));
+//       return @rmdir($this->getLocalPath());
 //     }
 //   }
 
@@ -336,6 +443,7 @@ abstract class MediaReadOnlyStreamWrapper implements DrupalStreamWrapperInterfac
   public function dir_closedir() {
     return FALSE;
   }
+
 }
 
 
