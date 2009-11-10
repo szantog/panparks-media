@@ -17,9 +17,9 @@
   * @TODO
   *   * we need to remove cruft from earlier implementation strategy
   *   * we need to modify the registration hook
-  *   * we need to handle the content browser ajax through drupal FAPI ahah 
-  *   * we need better UI 
-  *   * file extesion validation is not working correctly for * option 
+  *   * we need to handle the content browser ajax through drupal FAPI ahah
+  *   * we need better UI
+  *   * file extesion validation is not working correctly for * option
   *   * files are not currently being attached by the file uri field
   */
 
@@ -149,7 +149,7 @@ function media_form_alter(&$form, &$form_state, $form_id) {
   if (!empty($form['#node_edit_form'])) {
 //    media_build_browser_form($form);
    // print_R($form['media']);
-    
+
     // Is the media browser enabled on this node type? Type-specific options override the default.
     if (variable_get('media_' . $form['type']['#value'] . '_override', NULL) !== NULL) {
       $enabled = variable_get('media_' . $form['type']['#value'] . '_enabled', NULL);
@@ -162,7 +162,7 @@ function media_form_alter(&$form, &$form_state, $form_id) {
       $fields = media_active_fields_for_node_type($form['type']['#value']);
       // Iterate through each field and add a browser form.
       foreach ($fields as $field => $registration_ids) {
-        
+
         // Add the media browser form.
        //$form['media'] = media_build_browser_form($form_state, $registration_ids, $form['type']['#value'], $field);
 //print_r($form[$field]);
@@ -728,7 +728,7 @@ function media_build_browser(&$form) {
   // Load our css.
   $form['media_browser']['#attached']['css'] = array(
     drupal_get_path('module', 'media') . '/media.css',
-    'misc/ui/ui.all.css', 
+    'misc/ui/ui.all.css',
   );
   // Load all our jQuery UI
   $form['media_browser']['#attached']['js'] = array(
@@ -736,12 +736,12 @@ function media_build_browser(&$form) {
     'misc/ui/ui.core.js',
     'misc/ui/ui.draggable.js',
     'misc/ui/ui.resizable.js',
-    'misc/ui/ui.dialog.js', 
+    'misc/ui/ui.dialog.js',
   );
- 
+
   // Add a URL setting for the AJAX load
   //drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));
- 
+
   // dummy params for now
   $parameters = array(
     'module' => 'media',
@@ -758,7 +758,7 @@ function media_build_browser(&$form) {
     <div id="dialog" style="display: block;">' . $dialog . '</div>';
 
   return;
-  
+
   // We are using a tab form type.
   $form['media_browser'] = array(
     '#type'       => 'fieldset',
@@ -1319,7 +1319,7 @@ function media_generic_widget_process($element, &$form_state, $form) {
 
   // Load our css.
   drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
-  drupal_add_css('misc/ui/ui.all.css'); 
+  drupal_add_css('misc/ui/ui.all.css');
   // Load all of our jQuery UI
   drupal_add_js('misc/ui/ui.core.js');
   drupal_add_js('misc/ui/ui.draggable.js');
@@ -1328,23 +1328,23 @@ function media_generic_widget_process($element, &$form_state, $form) {
   // Load the custom JS
   drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.js');
    // Add a URL setting for the AJAX load
-  drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));  
+  drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));
 
   // We should run the media hook here to get a list of what kinds of things the user can choose from
   $items = array (
     l(t('Add existing files'), '', array('query' => array('module' => 'media', 'identifier' => 'files'))),
     l(t('Add from file system'), '', array('query' => array('module' => 'media', 'identifier' => 'local_files')))
   );
-  
+
   // @TODO title for the dialog box should be set dynamically by the calling module
-  
+
   $element['file_uri']['#suffix'] =
     '<div class="media_browser_activation">' . theme('item_list', array('items' => $items)) . '</div>
      <div id="dialog" title="' . t('Select your files'). '">
        <div id="media_content_browser_throbber"></div>
        <div id="media_content_browser"></div>
      </div>';
-       
+
   return $element;
 }
 
@@ -1386,6 +1386,17 @@ function media_uri_value($element, &$input) {
     }
     else {
       // TODO: check a list of allowed scheme per field instance.
+      // @TODO: Merge w/ the file_exists section below.
+      $wrapper = file_stream_wrapper_get_instance_by_uri($input['file_uri']);
+      $file->uri = $input['file_uri'];
+      $file->status = FILE_STATUS_PERMANENT;
+      $file->uid = $GLOBALS['user']->uid;
+      $file->filemime = $wrapper->getMimeType($input['file_uri']);
+      $file = file_save($file);
+      if (isset($file->fid)) {
+        $input['fid'] = $file->fid;
+        return;
+      }
     }
 
     $files = file_load_multiple(array(), array('uri' => $input['file_uri']));
@@ -1395,6 +1406,7 @@ function media_uri_value($element, &$input) {
       return;
     }
 
+    // @TODO: file_exists doesn't work with streams.
     if (file_exists($input['file_uri']) && is_readable($input['file_uri'])) {
       $wrapper = file_stream_wrapper_get_instance_by_uri($input['file_uri']);
       $file->uri = $input['file_uri'];

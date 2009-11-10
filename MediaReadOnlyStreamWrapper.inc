@@ -40,12 +40,12 @@ interface MediaReadOnlyStreamWrapperInterface {
  * calling function.
  */
 abstract class MediaReadOnlyStreamWrapper implements MediaReadOnlyStreamWrapperInterface {
-  private $parameters = array();
-  private $base_url = NULL;
+  protected $parameters = array();
+  protected $base_url = NULL;
   private $_DEBUG_MODE = NULL;
 
   function interpolateUrl() {
-    return $this->base_url .'?'. implode('&', $this->parameters);
+    return $this->base_url .'?'. http_build_query($this->parameters);
   }
 
   /**
@@ -105,6 +105,7 @@ abstract class MediaReadOnlyStreamWrapper implements MediaReadOnlyStreamWrapperI
    */
   function setUri($uri) {
     $this->uri = $uri;
+    $this->parameters = $this->_parse_url($uri);
   }
 
   /**
@@ -148,13 +149,13 @@ abstract class MediaReadOnlyStreamWrapper implements MediaReadOnlyStreamWrapperI
    *    An associative array of all the parameters in the path,
    *    or FALSE if the $url is ill-formed.
    */
-  private function _parse_url($url) {
-    $path = parse_url($url, PHP_URL_PATH);
+  protected function _parse_url($url) {
+    $path = parse_url($url, PHP_URL_HOST) . parse_url($url, PHP_URL_PATH);
     if ($path === FALSE) {
       // Non-recoverable error when parsing the path.
       return FALSE;
     }
-    $parts = explode('/', $path);
+    $parts = explode('/',  $path);
     $params = array();
     $count = 0;
     $total = count($parts);
@@ -289,7 +290,21 @@ abstract class MediaReadOnlyStreamWrapper implements MediaReadOnlyStreamWrapperI
    *   for a description of this array.
    */
   public function stream_stat() {
-    return FALSE;
+    return array(
+      'dev' => 0,
+      'ino' => 0,
+      'mode' => 0,
+      'nlink' => 0,
+      'uid' => 0,
+      'gid' => 0,
+      'rdev' => 0,
+      'size' => 1000,
+      'atime' => 0,
+      'mtime' => 0,
+      'ctime' => 0,
+      'blksize' => 0,
+      'blocks' => 0,
+    );
   }
 
   /**
