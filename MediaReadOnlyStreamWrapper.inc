@@ -44,6 +44,39 @@ abstract class MediaReadOnlyStreamWrapper implements MediaReadOnlyStreamWrapperI
   protected $base_url = NULL;
   private $_DEBUG_MODE = NULL;
 
+  /**
+   * "Template" for stat calls. All elements must be initialized.
+   * @var array
+   */
+  protected $_stat = array(
+    0 => 0, // device number
+    'dev' => 0,
+    1 => 0, // inode number
+    'ino' => 0,
+    2 => 0, // inode protection mode
+    'mode' => 0,
+    3 => 0, // number of links
+    'nlink' => 0,
+    4 => 0, // userid of owner
+    'uid' => 0,
+    5 => 0, // groupid of owner
+    'gid' => 0,
+    6 => -1, // device type, if inode device *
+    'rdev' => -1,
+    7 => 0, // size in bytes
+    'size' => 0,
+    8 => 0, // time of last access (Unix timestamp)
+    'atime' => 0,
+    9 => 0, // time of last modification (Unix timestamp)
+    'mtime' => 0,
+    10 => 0, // time of last inode change (Unix timestamp)
+    'ctime' => 0,
+    11 => -1, // blocksize of filesystem IO
+    'blksize' => -1,
+    12 => -1, // number of blocks allocated
+    'blocks' => -1,
+  );
+
   function interpolateUrl() {
     return $this->base_url .'?'. http_build_query($this->parameters);
   }
@@ -290,21 +323,7 @@ abstract class MediaReadOnlyStreamWrapper implements MediaReadOnlyStreamWrapperI
    *   for a description of this array.
    */
   public function stream_stat() {
-    return array(
-      'dev' => 0,
-      'ino' => 0,
-      'mode' => 0,
-      'nlink' => 0,
-      'uid' => 0,
-      'gid' => 0,
-      'rdev' => 0,
-      'size' => 1000,
-      'atime' => 0,
-      'mtime' => 0,
-      'ctime' => 0,
-      'blksize' => 0,
-      'blocks' => 0,
-    );
+    return $this->_stat;
   }
 
   /**
@@ -412,7 +431,7 @@ abstract class MediaReadOnlyStreamWrapper implements MediaReadOnlyStreamWrapperI
    *   for a description of this array.
    */
   public function url_stat($url, $flags) {
-    return FALSE;
+    return $this->stream_stat();
   }
 
   /**
