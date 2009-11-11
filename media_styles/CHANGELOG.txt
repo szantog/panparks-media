@@ -2,4 +2,5 @@
 
 CHANGELOG for Media: Styles
 
+by aaron: Remove bundles; create admin list & add style form.
 by aaron: Create Media Styles, based largely off Image styles.

@@ -12,7 +12,7 @@
 function media_style_list() {
   $page = array();
 
-  $styles = media_style_bundles();
+  $styles = media_styles();
   $page['media_style_list'] = array(
     '#markup' => theme('media_style_list', array('styles' => $styles)),
     '#attached' => array(
@@ -23,7 +23,56 @@ function media_style_list() {
   return $page;
 }
 
-function media_style_add_form() {
+/**
+ * Form builder; Form for adding a new media style.
+ *
+ * @ingroup forms
+ * @see media_style_add_form_submit()
+ * @see media_style_name_validate()
+ */
+function media_style_add_form($form, &$form_state) {
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#size' => '64',
+    '#title' => t('Style name'),
+    '#default_value' => '',
+    '#description' => t('The name is used in URLs for generated images and the like. Use only lowercase alphanumeric characters, underscores (_), and hyphens (-).'),
+    '#element_validate' => array('media_style_name_validate'),
+    '#required' => TRUE,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Create new style'),
+  );
+
+  return $form;
+}
+
+/**
+ * Submit handler for adding a new image style.
+ */
+function media_style_add_form_submit($form, &$form_state) {
+  $style = array('name' => $form_state['values']['name']);
+  $style = media_style_save($style);
+  drupal_set_message(t('Style %name was created.', array('%name' => $style['name'])));
+  $form_state['redirect'] = 'admin/config/media/media-styles/edit/' . $style['name'];
+}
+
+/**
+ * Element validate function to ensure unique, URL safe style names.
+ */
+function media_style_name_validate($element, $form_state) {
+  // Check for duplicates.
+  $styles = media_styles();
+  if (isset($styles[$element['#value']]) && (!isset($form_state['media_style']['msid']) || $styles[$element['#value']]['msid'] != $form_state['media_style']['msid'])) {
+    form_set_error($element['#name'], t('The media style name %name is already in use.', array('%name' => $element['#value'])));
+  }
+
+  // Check for illegal characters in image style names.
+  if (preg_match('/[^0-9a-z_\-]/', $element['#value'])) {
+    form_set_error($element['#name'], t('Please only use lowercase alphanumeric characters, underscores (_), and hyphens (-) for style names.'));
+  }
 }
 
 function media_style_form() {

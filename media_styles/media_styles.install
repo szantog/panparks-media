@@ -33,11 +33,11 @@ function media_styles_schema() {
   $schema['cache_media_styles'] = drupal_get_schema_unprocessed('system', 'cache');
   $schema['cache_media_styles']['description'] = 'Cache table used to store information media image manipulations that are in-progress.';
 
-  $schema['media_style_bundles'] = array(
-    'description' => 'Stores configuration options for media style bundles.',
+  $schema['media_styles'] = array(
+    'description' => 'Stores configuration options for media styles.',
     'fields' => array(
       'msid' => array(
-        'description' => 'The primary identifier for a media style bundle.',
+        'description' => 'The primary identifier for a media style.',
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
@@ -55,52 +55,52 @@ function media_styles_schema() {
     ),
   );
 
-//   $schema['image_effects'] = array(
-//     'description' => 'Stores configuration options for image effects.',
-//     'fields' => array(
-//       'ieid' => array(
-//         'description' => 'The primary identifier for an image effect.',
-//         'type' => 'serial',
-//         'unsigned' => TRUE,
-//         'not null' => TRUE,
-//       ),
-//       'isid' => array(
-//         'description' => 'The {image_styles}.isid for an image style.',
-//         'type' => 'int',
-//         'unsigned' => TRUE,
-//         'not null' => TRUE,
-//         'default' => 0,
-//       ),
-//       'weight' => array(
-//         'description' => 'The weight of the effect in the style.',
-//         'type' => 'int',
-//         'unsigned' => FALSE,
-//         'not null' => TRUE,
-//         'default' => 0,
-//       ),
-//       'name' => array(
-//         'description' => 'The unique name of the effect to be executed.',
-//         'type' => 'varchar',
-//         'length' => 255,
-//         'not null' => TRUE,
-//       ),
-//       'data' => array(
-//         'description' => 'The configuration data for the effect.',
-//         'type' => 'text',
-//         'not null' => TRUE,
-//         'size' => 'big',
-//         'serialize' => TRUE,
-//       ),
-//     ),
-//     'primary key' => array('ieid'),
-//     'indexes' => array(
-//       'isid' => array('isid'),
-//       'weight' => array('weight'),
-//     ),
-//     'foreign keys' => array(
-//       'isid' => array('image_styles' => 'isid'),
-//     ),
-//   );
+  $schema['media_effects'] = array(
+    'description' => 'Stores configuration options for media effects.',
+    'fields' => array(
+      'meid' => array(
+        'description' => 'The primary identifier for an media effect.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'msid' => array(
+        'description' => 'The {media_styles}.isid for a media style.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'weight' => array(
+        'description' => 'The weight of the effect in the style.',
+        'type' => 'int',
+        'unsigned' => FALSE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => 'The unique name of the effect to be executed.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => 'The configuration data for the effect.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('meid'),
+    'indexes' => array(
+      'msid' => array('msid'),
+      'weight' => array('weight'),
+    ),
+    'foreign keys' => array(
+      'msid' => array('media_styles' => 'msid'),
+    ),
+  );
 
   return $schema;
 }
