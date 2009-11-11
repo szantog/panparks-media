@@ -113,7 +113,7 @@ $(document).ready(function () {
   /** 
    * Load the Media Browser for the first time
    */
-  $('.media-file-uri.form-text').bind('click', function() {
+  $('.media_browser_activation a').bind('click', function() {
     // We need to check if the dialog box was already instantiated. If
     // it has been, the dialog box will have UI classes
     if ($('#dialog').hasClass('ui-dialog-content')) {   
@@ -130,7 +130,7 @@ $(document).ready(function () {
         resizable: false,
         minWidth: 600,
         width: 800,
-        position: 'top',
+        position: 'center',
         overlay: {
           backgroundColor: '#000000',
           opacity: 0.3
