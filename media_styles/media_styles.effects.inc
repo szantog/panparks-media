@@ -1,0 +1,29 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Functions needed to execute image effects provided by Image module.
+ */
+
+/**
+ * Implement hook_media_effect_info().
+ */
+function media_styles_media_effect_info() {
+  $effects = array(
+    'media_styles_image' => array(
+      'label' => t('Image styles'),
+      'styles' => array(),
+      'streams' => array('public://', 'private://'),
+      'mimetypes' => array('image/gif', 'image/jpeg', 'image/png'),
+      'module' => 'image',
+      'add-new-link' => l(t('Add new image style'), 'admin/config/media/image-styles/add'),
+    )
+  );
+
+  foreach (image_styles() as $style_name => $style) {
+    $effects['media_styles_image']['styles'][$style_name] = $style;
+  }
+
+  return $effects;
+}
