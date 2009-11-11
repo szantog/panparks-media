@@ -36,7 +36,7 @@ function media_style_add_form($form, &$form_state) {
     '#size' => '64',
     '#title' => t('Style name'),
     '#default_value' => '',
-    '#description' => t('The name is used in URLs for generated images and the like. Use only lowercase alphanumeric characters, underscores (_), and hyphens (-).'),
+    '#description' => t('The name is used in URLs for generated media. Use only lowercase alphanumeric characters, underscores (_), and hyphens (-).'),
     '#element_validate' => array('media_style_name_validate'),
     '#required' => TRUE,
   );
@@ -50,7 +50,7 @@ function media_style_add_form($form, &$form_state) {
 }
 
 /**
- * Submit handler for adding a new image style.
+ * Submit handler for adding a new media style.
  */
 function media_style_add_form_submit($form, &$form_state) {
   $style = array('name' => $form_state['values']['name']);
@@ -69,13 +69,227 @@ function media_style_name_validate($element, $form_state) {
     form_set_error($element['#name'], t('The media style name %name is already in use.', array('%name' => $element['#value'])));
   }
 
-  // Check for illegal characters in image style names.
+  // Check for illegal characters in media style names.
   if (preg_match('/[^0-9a-z_\-]/', $element['#value'])) {
     form_set_error($element['#name'], t('Please only use lowercase alphanumeric characters, underscores (_), and hyphens (-) for style names.'));
   }
 }
 
-function media_style_form() {
+
+/**
+ * Form builder; Edit a media style name and effects order.
+ *
+ * @param $form_state
+ *   An associative array containing the current state of the form.
+ * @param $style
+ *   An media style array.
+ * @ingroup forms
+ * @see media_style_form_submit()
+ * @see media_style_name_validate()
+ */
+function media_style_form($form, &$form_state, $style) {
+  $title = t('Edit %name style', array('%name' => $style['name']));
+  drupal_set_title($title, PASS_THROUGH);
+
+  // Adjust this form for styles that must be overridden to edit.
+  $editable = (bool) ($style['storage'] & IMAGE_STORAGE_EDITABLE);
+
+  if (!$editable && empty($form_state['input'])) {
+    drupal_set_message(t('This media style is currently being provided by a module. Click the "Override defaults" button to change its settings.'), 'warning');
+  }
+
+  $form_state['media_style'] = $style;
+  $form['#tree'] = TRUE;
+  $form['#attached']['css'][drupal_get_path('module', 'media') . '/media.admin.css'] = array('preprocess' => FALSE);
+
+  // Show the thumbnail preview.
+  $form['preview'] = array(
+    '#type' => 'item',
+    '#title' => t('Preview'),
+    '#markup' => theme('media_style_preview', array('style' => $style)),
+  );
+
+  // Allow the name of the style to be changed, unless this style is
+  // provided by a module's hook_default_media_styles().
+  if ($style['storage'] & IMAGE_STORAGE_MODULE) {
+    $form['name'] = array(
+      '#type' => 'item',
+      '#title' => t('Media style name'),
+      '#markup' => $style['name'],
+      '#description' => t('This media style is being provided by %module module and may not be renamed.', array('%module' => $style['module'])),
+    );
+  }
+  else {
+    $form['name'] = array(
+      '#type' => 'textfield',
+      '#size' => '64',
+      '#title' => t('Media style name'),
+      '#default_value' => $style['name'],
+      '#description' => t('The name is used in URLs for generated media. Use only lowercase alphanumeric characters, underscores (_), and hyphens (-).'),
+      '#element_validate' => array('media_style_name_validate'),
+      '#required' => TRUE,
+    );
+  }
+
+  // Build the list of existing media effects for this media style.
+  $form['effects'] = array(
+    '#theme' => 'media_style_effects',
+  );
+//   foreach ($style['effects'] as $meid => $effect) {
+//     $form['effects'][$meid]['#weight'] = isset($form_state['input']['effects']) ? $form_state['input']['effects'][$meid]['weight'] : NULL;
+//     $form['effects'][$meid]['label'] = array(
+//       '#markup' => $effect['label'],
+//     );
+//     $form['effects'][$meid]['summary'] = array(
+//       '#markup' => isset($effect['summary theme']) ? theme($effect['summary theme'], array('data' => $effect['data'])) : '',
+//     );
+//     $form['effects'][$meid]['weight'] = array(
+//       '#type' => 'weight',
+//       '#default_value' => $effect['weight'],
+//       '#access' => $editable,
+//     );
+//     $form['effects'][$meid]['configure'] = array(
+//       '#type' => 'link',
+//       '#title' => t('edit'),
+//       '#href' => 'admin/config/media/media-styles/edit/' . $style['name'] . '/effects/' . $effect['meid'],
+//       '#access' => $editable && isset($effect['form callback']),
+//     );
+//     $form['effects'][$meid]['remove'] = array(
+//       '#type' => 'link',
+//       '#title' => t('delete'),
+//       '#href' => 'admin/config/media/media-styles/edit/' . $style['name'] . '/effects/' . $effect['meid'] . '/delete',
+//       '#access' => $editable,
+//     );
+//   }
+
+  // Build the new media effect addition form and add it to the effect list.
+  foreach (media_effect_definitions() as $definition_name => $definition) {
+    $form['effects'][$definition_name] = array(
+      '#type' => 'fieldset',
+      '#title' => check_plain($definition['label']),
+    );
+    $new_effect_options = array('' => t('Select a media style to apply'));
+    foreach ($definition['styles'] as $style_name => $style) {
+      $new_effect_options[$style_name] = check_plain($style['name']);
+    }
+    $form['effects'][$definition_name]['new'] = array(
+      '#type' => 'radios',
+      '#options' => $new_effect_options,
+      '#description' => t('This effect will be applied to the following file types in the @streams streams: %types.', array('@streams' => implode(' ', $definition['streams']), '%types' => implode(', ', $definition['mimetypes']))),
+    );
+    if (isset($definition['add-new-link'])) {
+      $form['effects'][$definition_name]['new']['#description'] .= '<br />' . filter_xss($definition['add-new-link']);
+    }
+//     $form['effects'][$definition_name]['weight'] = array(
+//       '#type' => 'weight',
+//       '#default_value' => count($form['effects'][$definition_name]) - 1,
+//     );
+  }
+
+//   $new_effect_options = array('' => t('Select a new effect'));
+//   foreach (media_effect_definitions() as $effect => $definition) {
+//     $new_effect_options[$effect] = check_plain($definition['name']);
+//   }
+//   $form['effects']['new'] = array(
+//     '#tree' => FALSE,
+//     '#weight' => isset($form_state['input']['weight']) ? $form_state['input']['weight'] : NULL,
+//     '#access' => $editable,
+//   );
+//   $form['effects']['new']['new'] = array(
+//     '#type' => 'radios',
+//     '#options' => $new_effect_options,
+//   );
+
+//   $form['effects']['new']['add'] = array(
+//     '#type' => 'submit',
+//     '#value' => t('Add'),
+//     '#validate' => array('media_style_form_add_validate'),
+//     '#submit' => array('media_style_form_submit', 'media_style_form_add_submit'),
+//   );
+
+  // Show the Override or Submit button for this style.
+  $form['override'] = array(
+    '#type' => 'submit',
+    '#value' => t('Override defaults'),
+    '#validate' => array(),
+    '#submit' => array('media_style_form_override_submit'),
+    '#access' => !$editable,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update style'),
+    '#access' => $editable,
+  );
+
+  return $form;
+}
+
+/**
+ * Validate handler for adding a new media effect to a media style.
+ */
+function media_style_form_add_validate($form, &$form_state) {
+  if (!$form_state['values']['new']) {
+    form_error($form['effects']['new']['new'], t('Select an effect to add.'));
+    $form_state['rebuild'] = TRUE;
+  }
+}
+
+/**
+ * Submit handler for adding a new media effect to a media style.
+ */
+function media_style_form_add_submit($form, &$form_state) {
+  $style = $form_state['media_style'];
+  // Check if this field has any configuration options.
+  $effect = media_effect_definition_load($form_state['values']['new']);
+
+  // Load the configuration form for this option.
+  if (isset($effect['form callback'])) {
+    $path = 'admin/config/media/media-styles/edit/' . $form_state['media_style']['name'] . '/add/' . $form_state['values']['new'];
+    $form_state['redirect'] = array($path, array('query' => array('weight' => $form_state['values']['weight'])));
+  }
+  // If there's no form, immediately add the media effect.
+  else {
+    $effect['isid'] = $style['isid'];
+    $effect['weight'] = $form_state['values']['weight'];
+    media_effect_save($effect);
+    drupal_set_message(t('The media effect was successfully applied.'));
+  }
+}
+
+/**
+ * Submit handler for overriding a module-defined style.
+ */
+function media_style_form_override_submit($form, &$form_state) {
+  drupal_set_message(t('The %style style has been overridden, allowing you to change its settings.', array('%style' => $form_state['media_style']['name'])));
+  media_default_style_save($form_state['media_style']);
+}
+
+/**
+ * Submit handler for saving a media style.
+ */
+function media_style_form_submit($form, &$form_state) {
+  // Update the media style name if it has changed.
+  $style = $form_state['media_style'];
+  if (isset($form_state['values']['name']) && $style['name'] != $form_state['values']['name']) {
+    $style['name'] = $form_state['values']['name'];
+  }
+
+  // Update media effect weights.
+  if (!empty($form_state['values']['effects'])) {
+    foreach ($form_state['values']['effects'] as $meid => $effect_data) {
+      if (isset($style['effects'][$meid])) {
+        $effect = $style['effects'][$meid];
+        $effect['weight'] = $effect_data['weight'];
+        media_effect_save($effect);
+      }
+    }
+  }
+
+  media_style_save($style);
+  if ($form_state['values']['op'] == t('Update style')) {
+    drupal_set_message('Changes to the style have been saved.');
+  }
+  $form_state['redirect'] = 'admin/config/media/media-styles/edit/' . $style['name'];
 }
 
 function media_style_delete_form() {
@@ -113,7 +327,7 @@ function theme_media_style_list($variables) {
     $row[] = l($style['name'], 'admin/config/media/media-styles/edit/' . $style['name']);
     $link_attributes = array(
       'attributes' => array(
-        'class' => array('image-style-link'),
+        'class' => array('media-style-link'),
       ),
     );
     if ($style['storage'] == IMAGE_STORAGE_NORMAL) {

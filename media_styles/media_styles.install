@@ -31,7 +31,7 @@ function media_styles_schema() {
   $schema = array();
 
   $schema['cache_media_styles'] = drupal_get_schema_unprocessed('system', 'cache');
-  $schema['cache_media_styles']['description'] = 'Cache table used to store information media image manipulations that are in-progress.';
+  $schema['cache_media_styles']['description'] = 'Cache table used to store information media manipulations that are in-progress.';
 
   $schema['media_styles'] = array(
     'description' => 'Stores configuration options for media styles.',
@@ -104,4 +104,3 @@ function media_styles_schema() {
 
   return $schema;
 }
-

@@ -154,6 +154,68 @@ function media_styles_field_formatter_info() {
 }
 
 /**
+ * Get an array of all styles and their settings.
+ *
+ * @return
+ *   An array of styles keyed by the image style ID (isid).
+ * @see image_style_load()
+ */
+function media_styles() {
+  $styles = &drupal_static(__FUNCTION__);
+
+  // Grab from cache or build the array.
+  if (!isset($styles)) {
+    if ($cache = cache_get('media_styles', 'cache')) {
+      $styles = $cache->data;
+    }
+    else {
+      $styles = array();
+
+      // Select the module-defined styles.
+      foreach (module_implements('media_default_styles') as $module) {
+        $module_styles = module_invoke($module, 'media_default_styles');
+        foreach ($module_styles as $style_name => $style) {
+          $style['name'] = $style_name;
+          $style['module'] = $module;
+          $style['storage'] = MEDIA_STORAGE_DEFAULT;
+          foreach ($style['effects'] as $ieid => $effect) {
+            $definition = media_effect_definition_load($effect['name']);
+            $effect = array_merge($definition, $effect);
+            $effect['meid'] = $ieid;
+            $style['effects'][$ieid] = $effect;
+          }
+          $styles[$style_name] = $style;
+        }
+      }
+
+      // Select all the user-defined styles.
+      $user_styles = db_select('media_styles', NULL, array('fetch' => PDO::FETCH_ASSOC))
+        ->fields('media_styles')
+        ->orderBy('name')
+        ->execute()
+        ->fetchAllAssoc('name', PDO::FETCH_ASSOC);
+
+      // Allow the user styles to override the module styles.
+      foreach ($user_styles as $style_name => $style) {
+        $style['module'] = NULL;
+        $style['storage'] = IMAGE_STORAGE_NORMAL;
+        $style['effects'] = image_style_effects($style);
+        if (isset($styles[$style_name]['module'])) {
+          $style['module'] = $styles[$style_name]['module'];
+          $style['storage'] = IMAGE_STORAGE_OVERRIDE;
+        }
+        $styles[$style_name] = $style;
+      }
+
+      drupal_alter('media_styles', $styles);
+      cache_set('media_styles', $styles);
+    }
+  }
+
+  return $styles;
+}
+
+/**
  *  Build a list of all registered Media styles.
  *
  *  Each effect within a style will be attached to a specific mimetype, and
@@ -171,7 +233,7 @@ function media_styles_field_formatter_info() {
  *  @return
  *    This returns an array of all media styles, keyed by the style names.
  */
-function media_styles() {
+function hhhmedia_styles() {
   $styles = &drupal_static(__FUNCTION__);
 
   // Grab from cache or build the array.
@@ -330,4 +392,93 @@ function media_style_flush($style) {
     cache_clear_all('*', 'cache_block', TRUE);
   }
   cache_clear_all('*', 'cache_page', TRUE);
+}
+
+/**
+ * Load a style by style name or ID. May be used as a loader for menu items.
+ *
+ * @param $name
+ *   The name of the style.
+ * @param $isid
+ *   Optional. The numeric id of a style if the name is not known.
+ * @param $include
+ *   If set, this loader will restrict to a specific type of media style, may be
+ *   one of the defined Image style storage constants.
+ * @return
+ *   An image style array containing the following keys:
+ *   - "msid": The unique media style ID.
+ *   - "name": The unique media style name.
+ *   - "effects": An array of media effects within this media style.
+ *   If the media style name or ID is not valid, an empty array is returned.
+ * @see media_effect_load()
+ */
+function media_style_load($name = NULL, $isid = NULL, $include = NULL) {
+  $styles = media_styles();
+
+  // If retrieving by name.
+  if (isset($name) && isset($styles[$name])) {
+    $style = $styles[$name];
+  }
+
+  // If retrieving by media style id.
+  if (!isset($name) && isset($isid)) {
+    foreach ($styles as $name => $database_style) {
+      if (isset($database_style['msid']) && $database_style['msid'] == $isid) {
+        break;
+      }
+    }
+  }
+
+  // Restrict to the specific type of flag. This bitwise operation basically
+  // states "if the storage is X, then allow".
+  if (isset($style) && (!isset($include) || ($style['storage'] & (int) $include))) {
+    return $style;
+  }
+
+  // Otherwise the style was not found.
+  return FALSE;
+}
+
+/**
+ * Pull in media effects exposed by modules implementing hook_media_effect_info().
+ *
+ * @return
+ *   An array of media effects to be used when transforming media.
+ * @see hook_media_effect_info()
+ * @see media_effect_definition_load()
+ */
+function media_effect_definitions() {
+  $effects = &drupal_static(__FUNCTION__);
+
+  if (!isset($effects)) {
+    if ($cache = cache_get('media_effects') && !empty($cache->data)) {
+      $effects = $cache->data;
+    }
+    else {
+      $effects = array();
+      module_load_include('inc', 'media_styles', 'media_styles.effects');
+      foreach (module_implements('media_effect_info') as $module) {
+        foreach (module_invoke($module, 'media_effect_info') as $name => $effect) {
+          // Ensure the current toolkit supports the effect.
+          $effect['module'] = $module;
+          $effect['name'] = $name;
+          $effect['data'] = isset($effect['data']) ? $effect['data'] : array();
+          $effects[$name] = $effect;
+        };
+      }
+      uasort($effects, '_media_effect_definitions_sort');
+      cache_set('media_effects', $effects);
+    }
+  }
+
+  return $effects;
+}
+
+/**
+ * Internal function for sorting media effect definitions through uasort().
+ *
+ * @see media_effect_definitions()
+ */
+function _media_effect_definitions_sort($a, $b) {
+  return strcasecmp($a['name'], $b['name']);
 }
