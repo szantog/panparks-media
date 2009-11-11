@@ -1,0 +1,5 @@
+// $Id$
+
+CHANGELOG for Media: Styles
+
+by aaron: Create Media Styles, based largely off Image styles.

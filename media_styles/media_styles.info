@@ -1,0 +1,9 @@
+; $Id$
+
+name = Media Styles
+description = Allows preset transformation of media files for display.
+package = Media
+core = 7.x
+files[] = media_styles.module
+files[] = media_styles.admin.inc
+dependencies[] = media
