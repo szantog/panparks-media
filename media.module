@@ -1314,7 +1314,7 @@ function media_generic_widget_process($element, &$form_state, $form) {
       '#maxlength' => 240,
       '#size' => 60,
     );
-    $element['file_uri']['#attributes']['class'] = array('form-text', 'media-file-uri');
+    $element['file_uri']['#attributes']['class'] = array('media-file-uri');
   }
 
   // Load our css.
@@ -1336,12 +1336,10 @@ function media_generic_widget_process($element, &$form_state, $form) {
     l(t('Add from file system'), '', array('query' => array('module' => 'media', 'identifier' => 'local_files')))
   );
 
-  // @TODO title for the dialog box should be set dynamically by the calling module
-
   $element['file_uri']['#suffix'] =
-    '<div class="media_browser_activation">' . theme('item_list', array('items' => $items)) . '</div>
-     <div id="dialog" title="' . t('Select your files'). '">
+     '<div id="dialog" title="' . t('Select your files'). '">
        <div id="media_content_browser_throbber"></div>
+       <div>' . theme('item_list', array('items' => $items)) . '
        <div id="media_content_browser"></div>
      </div>';
 
