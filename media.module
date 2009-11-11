@@ -1315,6 +1315,7 @@ function media_generic_widget_process($element, &$form_state, $form) {
       '#size' => 60,
     );
     $element['file_uri']['#attributes']['class'] = array('media-file-uri');
+    $element['file_uri']['#attributes']['file-field-id'] = array($element['#field_name']);
   }
 
   // Load our css.
@@ -1332,8 +1333,8 @@ function media_generic_widget_process($element, &$form_state, $form) {
 
   // We should run the media hook here to get a list of what kinds of things the user can choose from
   $items = array (
-    l(t('Add existing files'), '', array('query' => array('module' => 'media', 'identifier' => 'files'))),
-    l(t('Add from file system'), '', array('query' => array('module' => 'media', 'identifier' => 'local_files')))
+    l(t('Add existing files'), '', array('query' => array('module' => 'media', 'identifier' => 'files', 'file-field-id' => $element['#field_name']))),
+    l(t('Add from file system'), '', array('query' => array('module' => 'media', 'identifier' => 'local_files', 'file-field-id' => $element['#field_name'])))
   );
 
   $element['file_uri']['#suffix'] =
@@ -1533,6 +1534,7 @@ function media_media_browser_content($parameters, $invoke = false) {
   switch ($parameters['identifier']) {
     case 'files':
       // Get all files in the system
+      // TODO: allow this to use a View.
       $query =  db_select('file', 'f')->extend('PagerDefault');
       $query->fields('f', array('fid'));
       $fids = $query->limit($parameters['limit'])->execute()->fetchCol();
