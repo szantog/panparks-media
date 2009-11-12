@@ -87,35 +87,36 @@ function media_style_name_validate($element, $form_state) {
  * @see media_style_form_submit()
  * @see media_style_name_validate()
  */
-function media_style_form($form, &$form_state, $style) {
-  $title = t('Edit %name style', array('%name' => $style['name']));
+function media_style_form($form, &$form_state, $media_style) {
+  $title = t('Edit %name style', array('%name' => $media_style['name']));
   drupal_set_title($title, PASS_THROUGH);
 
   // Adjust this form for styles that must be overridden to edit.
-  $editable = (bool) ($style['storage'] & IMAGE_STORAGE_EDITABLE);
+  $editable = (bool) ($media_style['storage'] & IMAGE_STORAGE_EDITABLE);
 
   if (!$editable && empty($form_state['input'])) {
     drupal_set_message(t('This media style is currently being provided by a module. Click the "Override defaults" button to change its settings.'), 'warning');
   }
 
-  $form_state['media_style'] = $style;
+  $form_state['media_style'] = $media_style;
   $form['#tree'] = TRUE;
   $form['#attached']['css'][drupal_get_path('module', 'media') . '/media.admin.css'] = array('preprocess' => FALSE);
+  $form['#attached']['css'][drupal_get_path('module', 'image') . '/image.admin.css'] = array('preprocess' => FALSE);
 
-  // Show the thumbnail preview.
-  $form['preview'] = array(
-    '#type' => 'item',
-    '#title' => t('Preview'),
-    '#markup' => theme('media_style_preview', array('style' => $style)),
-  );
+//   // Show the thumbnail preview.
+//   $form['preview'] = array(
+//     '#type' => 'item',
+//     '#title' => t('Preview'),
+//     '#markup' => theme('media_style_preview', array('style' => $style)),
+//   );
 
   // Allow the name of the style to be changed, unless this style is
   // provided by a module's hook_default_media_styles().
-  if ($style['storage'] & IMAGE_STORAGE_MODULE) {
+  if ($media_style['storage'] & IMAGE_STORAGE_MODULE) {
     $form['name'] = array(
       '#type' => 'item',
       '#title' => t('Media style name'),
-      '#markup' => $style['name'],
+      '#markup' => $media_style['name'],
       '#description' => t('This media style is being provided by %module module and may not be renamed.', array('%module' => $style['module'])),
     );
   }
@@ -124,7 +125,7 @@ function media_style_form($form, &$form_state, $style) {
       '#type' => 'textfield',
       '#size' => '64',
       '#title' => t('Media style name'),
-      '#default_value' => $style['name'],
+      '#default_value' => $media_style['name'],
       '#description' => t('The name is used in URLs for generated media. Use only lowercase alphanumeric characters, underscores (_), and hyphens (-).'),
       '#element_validate' => array('media_style_name_validate'),
       '#required' => TRUE,
@@ -166,19 +167,40 @@ function media_style_form($form, &$form_state, $style) {
   foreach (media_effect_definitions() as $definition_name => $definition) {
     $form['effects'][$definition_name] = array(
       '#type' => 'fieldset',
+      '#collapsible' => TRUE,
       '#title' => check_plain($definition['label']),
+      '#description' => t('@label will be applied to the following:<br />Streams: %streams<br />File types: %types', array('@label' => $definition['label'], '%streams' => implode(', ', $definition['streams']), '%types' => implode(', ', $definition['mimetypes']))),
     );
-    $new_effect_options = array('' => t('Select a media style to apply'));
+    $new_effect_options = array(' ' => t('Select a media style to apply'));
     foreach ($definition['styles'] as $style_name => $style) {
-      $new_effect_options[$style_name] = check_plain($style['name']);
+      $effects = array();
+      foreach ($style['effects'] as $effect) {
+        $data = array();
+        foreach ($effect['data'] as $type => $value) {
+          $data[] = t('@type = @value', array('@type' => $type, '@value' => $value));
+        }
+        $effects[] = t('@effect: (@data)', array('@effect' => $effect['label'], '@data' => implode(', ', $data)));
+      }
+      $new_effect_options[$style_name] = t('@name - %effects', array('@name' => $style['name'], '%effects' => implode('; ', $effects))); // check_plain($style['name'] . ' ' . implode(', ', $effects));
     }
     $form['effects'][$definition_name]['new'] = array(
       '#type' => 'radios',
+      '#title' => t('Please select a style from the following options:'),
       '#options' => $new_effect_options,
-      '#description' => t('This effect will be applied to the following file types in the @streams streams: %types.', array('@streams' => implode(' ', $definition['streams']), '%types' => implode(', ', $definition['mimetypes']))),
+      '#default_value' => isset($media_style['styles'][$definition_name]) ? $media_style['styles'][$definition_name] : ' ',
     );
     if (isset($definition['add-new-link'])) {
-      $form['effects'][$definition_name]['new']['#description'] .= '<br />' . filter_xss($definition['add-new-link']);
+      $form['effects'][$definition_name]['new']['#description'] = filter_xss($definition['add-new-link']);
+    }
+    if (isset($definition['preview-theme'])) {
+      // theme_image_style_preview is not properly registered.
+      module_load_include('inc', 'image', 'image.admin');
+      // Show the thumbnail preview.
+      $form['effects'][$definition_name]['preview'] = array(
+        '#type' => 'item',
+        '#title' => t('Preview'),
+        '#markup' => theme($definition['preview-theme'], array('style' => $definition['styles']['thumbnail'])),// $media_style['styles'][$definition_name])),
+      );
     }
 //     $form['effects'][$definition_name]['weight'] = array(
 //       '#type' => 'weight',

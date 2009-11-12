@@ -17,6 +17,7 @@ function media_styles_media_effect_info() {
       'streams' => array('public://', 'private://'),
       'mimetypes' => array('image/gif', 'image/jpeg', 'image/png'),
       'module' => 'image',
+      'preview-theme' => 'image_style_preview',
       'add-new-link' => l(t('Add new image style'), 'admin/config/media/image-styles/add'),
     )
   );
