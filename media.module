@@ -1315,7 +1315,9 @@ function media_generic_widget_process($element, &$form_state, $form) {
       '#size' => 60,
     );
     $element['file_uri']['#attributes']['class'] = array('form-text', 'media-file-uri');
-    $element['file_uri']['#attributes']['file-field-id'] = array($element['#field_name']);
+    $element['file_uri']['#attributes']['field-name'] = array($element['#field_name']);
+    $element['file_uri']['#attributes']['bundle'] = array($element['#bundle']);
+    $element['file_uri']['#attributes']['object-type'] = array($element['#object_type']);
   }
 
   // Load our css.
@@ -1333,8 +1335,8 @@ function media_generic_widget_process($element, &$form_state, $form) {
 
   // We should run the media hook here to get a list of what kinds of things the user can choose from
   $items = array (
-    l(t('Add existing files'), '', array('query' => array('module' => 'media', 'identifier' => 'files', 'file-field-id' => $element['#field_name']))),
-    l(t('Add from file system'), '', array('query' => array('module' => 'media', 'identifier' => 'local_files', 'file-field-id' => $element['#field_name'])))
+    l(t('Add existing files'), '', array('query' => array('module' => 'media', 'identifier' => 'files', 'field-name' => $element['#field_name'], 'bundle' => $element['#bundle'], 'object-type' => $element['#object_type']))),
+    l(t('Add from file system'), '', array('query' => array('module' => 'media', 'identifier' => 'local_files', 'field-name' => $element['#field_name'], 'bundle' => $element['#bundle'], 'object-type' => $element['#object_type'])))
   );
 
   // @TODO title for the dialog box should be set dynamically by the calling module
@@ -1529,9 +1531,22 @@ function media_browser_dispatch($parameters = null) {
  */
 function media_media_browser_content($parameters, $invoke = false) {
   // Use a default value for limit
-  if (! isset($parameters['limit']) ) {
+  if (!isset($parameters['limit']) ) {
     $parameters['limit'] = 10;
   }
+
+  if (isset($parameters['object-type']) && isset($parameters['field-name']) && isset($parameters['bundle'])) {
+    $instance = field_info_instance($parameters['object-type'], $parameters['field-name'], $parameters['bundle']);
+    $field = field_info_field($parameters['field-name']);
+  }
+  if (empty($instance) || empty($field)) {
+    // Invalid parameters.
+    return;
+  }
+  $allowed_schemes = $instance['widget']['settings']['allowed_schemes'];
+  $directory = $instance['settings']['file_directory'];
+  $extensions = $instance['settings']['file_extensions'];
+  $scheme = $field['settings']['uri_scheme'];
   // Which identfier is in use?
   switch ($parameters['identifier']) {
     case 'files':
@@ -1539,6 +1554,12 @@ function media_media_browser_content($parameters, $invoke = false) {
       // TODO: allow this to use a View.
       $query =  db_select('file', 'f')->extend('PagerDefault');
       $query->fields('f', array('fid'));
+      $or = db_or();
+      foreach ($allowed_schemes as $scheme) {
+        $or->condition('f.uri', $scheme . '://%', 'LIKE');
+      }
+      $query->condition($or);
+      // TODO: filter by mimetype.
       $fids = $query->limit($parameters['limit'])->execute()->fetchCol();
       // Now load all the files as objects
       $files = file_load_multiple($fids);
@@ -1547,11 +1568,12 @@ function media_media_browser_content($parameters, $invoke = false) {
 
     case 'local_files':
       // set our directory
-      $directory = file_directory_path();
-      $files = file_scan_directory($directory, '/.*/');
+      $regex = '/[^.]+\.(' . preg_replace('/ +/', '|', preg_quote($extensions)) . ')$/i';
+      $files = file_scan_directory($scheme . '://' . $directory, $regex, array('recurse' => FALSE));
       foreach($files as $id => $file) {
       	$file->filemime = file_get_mimetype($file->uri);
       }
+      // TODO: scan again and add directories.  file_scan_directory() sucks.
       return theme('media_browser_content_frame', array('files' => $files, 'parameters' => $parameters, 'invoke' => $invoke));
     break;
   }
