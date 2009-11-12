@@ -1314,39 +1314,27 @@ function media_generic_widget_process($element, &$form_state, $form) {
       '#maxlength' => 240,
       '#size' => 60,
     );
-    $element['file_uri']['#attributes']['class'] = array('form-text', 'media-file-uri');
+
+    // Provide attributes to allow us to pick up this field via jQuery
+    $element['file_uri']['#attributes']['class'] = array('media-file-uri');
     $element['file_uri']['#attributes']['field-name'] = array($element['#field_name']);
     $element['file_uri']['#attributes']['bundle'] = array($element['#bundle']);
     $element['file_uri']['#attributes']['object-type'] = array($element['#object_type']);
   }
 
+  // Load up all of our necessary jQuery
+  drupal_add_library('system', 'vertical-tabs');
+  drupal_add_library('system', 'ui');
+  drupal_add_library('system', 'ui.draggable');
+  drupal_add_library('system', 'ui.resizable');
+  drupal_add_library('system', 'ui.dialog');
+
   // Load our css.
   drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
-  drupal_add_css('misc/ui/ui.all.css');
-  // Load all of our jQuery UI
-  drupal_add_js('misc/ui/ui.core.js');
-  drupal_add_js('misc/ui/ui.draggable.js');
-  drupal_add_js('misc/ui/ui.resizable.js');
-  drupal_add_js('misc/ui/ui.dialog.js');
   // Load the custom JS
   drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.js');
    // Add a URL setting for the AJAX load
   drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));
-
-  // We should run the media hook here to get a list of what kinds of things the user can choose from
-  $items = array (
-    l(t('Add existing files'), '', array('query' => array('module' => 'media', 'identifier' => 'files', 'field-name' => $element['#field_name'], 'bundle' => $element['#bundle'], 'object-type' => $element['#object_type']))),
-    l(t('Add from file system'), '', array('query' => array('module' => 'media', 'identifier' => 'local_files', 'field-name' => $element['#field_name'], 'bundle' => $element['#bundle'], 'object-type' => $element['#object_type'])))
-  );
-
-  // @TODO title for the dialog box should be set dynamically by the calling module
-
-  $element['file_uri']['#suffix'] =
-    '<div class="media_browser_activation">' . theme('item_list', array('items' => $items)) . '</div>
-     <div id="dialog" title="' . t('Select your files'). '">
-       <div id="media_content_browser_throbber"></div>
-       <div id="media_content_browser"></div>
-     </div>';
 
   return $element;
 }
@@ -1477,45 +1465,104 @@ function media_image_default_styles() {
 
 
 /**
- * This is purely a testing stub function to start working on
- * how the content navigator works. It loads a default content navigator
- * pane.
- *
+ * This is the ajax callback to reload data into the media
+ * content browser.
+ * @pram $object_type
+ *   string, kind of object- node
+ * @param $bundle
+ *   string, name of the bundle
+ * @param $field_name
+ *   string, name of the field we are loading content for
+ * @pararm $item
+ *   string, one of tabs, subtabs
  * @return unknown
  */
-function media_test() {
+function media_browser_dispatch($object_type = null, $bundle = null, $field_name = null, $item = null) {
+	// Create an array of parameters from our data
+	$parameters = array(
+	  'object-type' => $object_type,
+	  'bundle' => $bundle,
+    'field-name' => $field_name
+	);
 
-  // Some dummy parameters for now
-  $parameters = array(
-    'module' => 'media',
-    'identifier' => 'files',
-    'limit' => 10,
-  );
+	// What kind of thing are we rendering?
+	switch ($item) {
+		case 'tabs':
+			// @TODO obviously need to do something here
+      $return = 'local | external | something ';
+	  break;
 
-  // when we fist load the module data into the frame, we allow the module
-  // to load items (eg CSS, JS) that they may need for future ajax requests
-  $html[] = module_invoke($parameters['module'], 'media_browser_content', $parameters, true);
-  return implode("\n", $html);
+		case 'subtabs':
+      $return = drupal_render(drupal_get_form('media_browser_subtabs_form', $parameters));
+     // $return = module_invoke('media', 'media_browser_content',  $parameters);
+    break;
+
+	  // Our default case just returns the requested data
+		case 'pane':
+	  default:
+		  $query = drupal_get_query_parameters();
+		  // We need to be careful as this is not sanitized data.
+		  // @TODO can somebody check me here on this method
+		  // of cleaning the URL data?
+		  foreach ($query as $key => $value) {
+		    $url_args[check_plain($key)] = check_plain($value);
+		  }
+		  // Invoke the module and identifier being requested
+		  $return = module_invoke($url_args['module'], 'media_browser_content', $url_args);
+		break;
+	}
+
+  return drupal_json_output($return);
 }
 
 
 /**
- * This is the ajax callback to reload data into the media
- * content browser.
- *
- * @return unknown
+ * Build the tabs across the media browser
+ * @param $parameters
+ *   array, provides validation and selection criteria
+ * @return unknown_type
  */
-function media_browser_dispatch($parameters = null) {
-  $url_args = drupal_get_query_parameters();
-  // We need to be careful as this is not sanitized data.
-  // @TODO can somebody check me here on this method
-  // of cleaning the URL data?
-  foreach ($url_args as $key => $value) {
-    $parameters[check_plain($key)] = check_plain($value);
+function media_browser_subtabs_form($form, &$form_state, $parameters) {
+	// This is some stub content. We need to look at the registration
+	// hook to see what kind of data we can pull in here that makes sense
+  $subtabs = array(
+    array(
+      'title' => 'Add existing files',
+      'attributes' => array (
+        'module' => 'media',
+        'identifier' => 'files'
+      )
+    ),
+    array(
+      'title' => 'Add files from local file system',
+      'attributes' => array (
+        'module' => 'media',
+        'identifier' => 'local_files'
+      )
+    ),
+  );
+
+  $form['subtabs'] = array('#type' => 'vertical_tabs');
+  foreach($subtabs as $subtab) {
+   	$id = $subtab['attributes']['module'] . '_' . $subtab['attributes']['identifier'];
+  	$form[$id] = array(
+  	  '#type' => 'fieldset',
+  	  '#title' => $subtab['title'],
+  	  '#group' => 'subtabs',
+  	);
+  	$element_params = array_merge($subtab['attributes'], $parameters);
+  	$element_params['class'] .= ' subtab_data';
+  	$form[$id]['data'] = array(
+  	  '#type' => 'hidden',
+  	  '#attributes' => $element_params,
+  	  '#value' => $id,
+  	  // This provides a place to render our content
+  	  '#suffix' => '<div class="pane_content"></div>',
+  	);
+
   }
-  // Invoke the module and identifier being requested
-  $return = module_invoke($parameters['module'], 'media_browser_content', $parameters);
-  return drupal_json_output($return);
+
+  return $form;
 }
 
 
@@ -1539,14 +1586,17 @@ function media_media_browser_content($parameters, $invoke = false) {
     $instance = field_info_instance($parameters['object-type'], $parameters['field-name'], $parameters['bundle']);
     $field = field_info_field($parameters['field-name']);
   }
+
   if (empty($instance) || empty($field)) {
     // Invalid parameters.
-    return;
+    // @TODO another arthur hack to make things "work"
+    // return;
   }
   $allowed_schemes = $instance['widget']['settings']['allowed_schemes'];
   $directory = $instance['settings']['file_directory'];
   $extensions = $instance['settings']['file_extensions'];
   $scheme = $field['settings']['uri_scheme'];
+
   // Which identfier is in use?
   switch ($parameters['identifier']) {
     case 'files':
@@ -1554,11 +1604,16 @@ function media_media_browser_content($parameters, $invoke = false) {
       // TODO: allow this to use a View.
       $query =  db_select('file', 'f')->extend('PagerDefault');
       $query->fields('f', array('fid'));
+  /*
+      @TODO sorry peter, this was bombing things for me
+            I need to figure out why my data coming back to
+            you is not valid....
+
       $or = db_or();
       foreach ($allowed_schemes as $scheme) {
         $or->condition('f.uri', $scheme . '://%', 'LIKE');
       }
-      $query->condition($or);
+      $query->condition($or);*/
       // TODO: filter by mimetype.
       $fids = $query->limit($parameters['limit'])->execute()->fetchCol();
       // Now load all the files as objects

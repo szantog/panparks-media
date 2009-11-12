@@ -5,101 +5,56 @@
  *  This file handles the JS for Media Module functions.
  */
 
-
-/**
- *  This handles the display, activation
- *  and hiding of drawers on the media browser form.
- */
 (function ($) {
-Drupal.behaviors.mediaDrawers = {
-  attach: function (context, settings) {
-
-    // Hide all the drawer display items on page load.
-    $('.media.browser .ui-tabs-panel .drawer.display', context).once('mediaDrawersHide', function() {
-      $(this).hide();
-    });
-
-    // Activate all the drawer data display that needs to be shown when
-    // the page is loaded.
-    $('.media.browser .ui-tabs-panel .drawer.display.active', context).once('mediaDrawersActivate', function() {
-      $(this).show();
-    });
-
-    // --------------------------------------
-    // Click actions.
-
-    // Now we need to bind click functionality on drawers to display.
-    $('.media.browser .drawers .item-list ul li, .drawers li a', context).once('mediaDrawersBind').bind('click', function () {
-      // Get the href id that we want to display.
-      var display_id = $(this).attr('href');
-      // This handles the LI click.
-      if (display_id == undefined) {
-        var display_id = $(this).children('a').attr('href');
-      }
-      // We need to get the tab page that this drawer is in.
-      var parent = $(this).parents('.ui-tabs-panel').attr('id');
-      // Hide current active drawer display.
-      $('#'+parent+' .drawer.display.active').removeClass('active').hide();
-      // Set any drawers to not active.
-      $('#'+parent+' .drawers li.active').removeClass('active');
-      // Make this drawer active.
-      $(this).addClass('active');
-      // Make the requested drawer display active.
-      $(display_id).addClass('active').show();
-    });
-  }
-}
-/**
- *  We need to hide any form elements that were replaced by the media browser
- *  form, activate the add button, and hide the browser.
- */
-Drupal.behaviors.mediaBrowserHide = {
-  attach: function (context, settings) {
-    // Hide our file progress indicators.
-    $('.media-browser-file-progress', context).once('mediaBrowserHide').attr('style', 'display:none');
-    $('.media-browser-metadata-wrapper', context).once('mediaBroswerHide').hide();
-    $('.media-browser-drawer-select', context).once('mediaBroswerHide').attr('style', 'display:none');
-    $('.media-browser-metadata-submit', context).once('mediaBroswerHide', function() {
-      $(this).attr('style', 'display:none').click(function() {
-        $(this).hide().siblings('.media-browser-metadata-wrapper').slideUp();
-      });
-    });
-
-    // Add behavior to our big red activation button.
-    $('.media.browser.activation', context).once('mediaBrowserHide', function () {
-      // Hide the browser associated with this button.
-      $(this).next('.media.browser').hide();
-      $(this).click(function () {
-        // When clicking, show the browser and hide this button.
-        $(this).next('.media.browser').slideDown('slow');
-        $(this).slideUp();
-      });
-    });
-  }
-}
-
-
-/**
- *  Hide the browser and bind click behavior.
- */
-Drupal.behaviors.mediaAhahHideBrowser ={
-  attach: function (context, settings) {
-    $('.media-browser-submit', context).once('mediaAhahHideBrowser', function() {
-      $(this).bind('click', function() {
-        $(this).hide().siblings('.ui-tabs-panel, ul').slideUp();
-        $(this).siblings('.media-browser-file-progress').show();
-        $(this).siblings('.media-browser-metadata-wrapper').show();
-        $(this).siblings('.media-browser-metadata-submit').show();
-      });
-    });
-  }
-}
-
 
 
 /* **************************************************** */
 /* Content browser navigation                           */
 /* **************************************************** */
+
+
+/**
+ *  This loads pane content based on subtab clicks. It needs
+ *  to be run each time that a new set of sub tabs is rendered 
+ *  in the dialog box
+ */
+Drupal.behaviors.subTabsPaneLoad ={
+  attach: function (context, settings) {
+    $('#media_content_browser_subtabs li.vertical-tab-button  a', context).once('subTabsPaneLoad', function() {
+      $(this).bind('click', render_subTab_pane_content());
+    });
+  }
+}
+
+
+/**
+ * This does the actual render of content into the subTab pane
+ * @TODO add a throbber to alert the user we are loading content
+ */
+function render_subTab_pane_content() {
+   // @TODO we have to pull in the pane content via ajax when the active tab is clicked
+   // we can find it with something like:
+   var active_tab = '#'+$('#edit-subtabs--active-tab').attr('value');
+   var bundle = $(active_tab+' input').attr('bundle');
+   var object_type = $(active_tab+' input').attr('object-type');
+   var field_name = $(active_tab+' input').attr('field-name');
+   
+   // Now we have to build a query which the dispatcher uses to get the correct content
+   // for this subtab
+   var query = '?module='+$(active_tab+' input').attr('module')+'&identifier='+$(active_tab+' input').attr('identifier');
+   // This populates the pane with the proper settings
+   $.getJSON(Drupal.settings.media.media_browser_content_load_url+'/'+object_type+'/'+bundle+'/'+field_name+'/pane'+query,
+     function(data) { 
+       // Remove any exisiting pane content
+       $('div.pane_content.active').removeClass('active').html('');
+       $(active_tab+' div.pane_content').html(data);
+       // Make this pane active
+       $(active_tab+' div.pane_content').addClass('active');
+     }
+   );
+   
+   // @TODO we need to clear out all previous data from closed panes here
+}
 
 /**
  * @NOTE arthur added this stuff in to prep for the new UI.
@@ -113,38 +68,34 @@ $(document).ready(function () {
   /** 
    * Load the Media Browser for the first time
    */
-  $('.media_browser_activation a').bind('click', function() {
-    // We need to check if the dialog box was already instantiated. If
-    // it has been, the dialog box will have UI classes
-    if ($('#dialog').hasClass('ui-dialog-content')) {   
-      // Remove any content from the browser pane
-      $('#media_content_browser').html();
-      $('#dialog').dialog('open');
-    }
-    // Create our dialog box.
-    else {    
-      $('#dialog').dialog({
-        buttons: { "Ok": function() { $(this).dialog("close"); } }, 
-        modal: true,
-        draggable: false,
-        resizable: false,
-        minWidth: 600,
-        width: 800,
-        position: 'center',
-        overlay: {
-          backgroundColor: '#000000',
-          opacity: 0.3
-        }
-      });
-    }
-    // Get the current query string
-    var query = $(this).attr('href').replace(/.*\?/, '');    
+  $('input.media-file-uri ').bind('click', function() {
+           
+    // Add the dialog box to the page using this file field id
+    media_render_dialog($(this).attr('id'), $(this).attr('object-type'), $(this).attr('bundle'), $(this).attr('field-name'));
+
+    $('#dialog').dialog({
+      buttons: { "Ok": function() { $(this).dialog("close"); } }, 
+      modal: true,
+      draggable: false,
+      resizable: false,
+      minWidth: 600,
+      width: 800,
+      position: 'center',
+      overlay: {
+        backgroundColor: '#000000',
+        opacity: 0.4
+      }
+    });
+    
+
+    // Get the current query string    
+  //  var query = $(this).attr('href').replace(/.*\?/, '')+'&file_field_id='+$(this).attr('id');
     // Load our content from ajax and style 
-    media_load_content_display(query);
+  //  media_load_content_display(query);
     return false;
   });
    
-   
+    
   /**
    *  Catch the clicks on the result limiters and pager queries
    *  and modify the links to have the options in their URL so   
@@ -165,13 +116,13 @@ $(document).ready(function () {
     // Start visual effects
     // Show the throbber
     $('#media_content_browser_throbber').fadeIn('fast');    
-    $('#media_content_browser').fadeTo('slow', 0.23, function() {      
+    $('div.pane_content.active').fadeTo('slow', 0.23, function() {      
       // Fetch content data with the new parameters    
       media_load_content_navigator_reload(query);      
       // Hide throbber
       $('#media_content_browser_throbber').fadeOut('slow', function () {
         // fade back the content
-        $('#media_content_browser').fadeTo('slow', 1);
+        $('div.pane_content.active').fadeTo('slow', 1);
         });      
         
     }); // fade    
@@ -184,7 +135,7 @@ $(document).ready(function () {
    */
   function media_load_content_navigator_reload(query) {
     $.getJSON(Drupal.settings.media.media_browser_content_load_url+'?'+query,     
-      function(data) { $('#media_content_browser').html(data);}
+      function(data) { $('div.pane_content.active').html(data);}
     );
   }
   
@@ -212,6 +163,43 @@ $(document).ready(function () {
      return false;
      });
   
+   
+   /**
+    * Render the modal dialog box
+    */
+   function media_render_dialog(field_id, object_type, bundle, field_name) {
+     // If the dialog box already exists, we need to remove it from the DOM
+     if ($('#dialog.ui-dialog-content')) {
+       $('#dialog').dialog('destroy');
+       $('#dialog').remove('#dialog');
+     }
+     // Build out the full HTML structure for the dialog box
+     var html = '<div id="dialog" style="display: none;" title="Select your files"> \
+       <div id="media_content_browser_throbber"></div> \
+       <div id="media_content_browser_tabs"></div> \
+       <div id="media_content_browser_subtabs"></div> \
+     </div>';
+   
+     // Add the html to the page
+     $('#'+field_id).append(html);
+          
+     // We need to get the tabs for this dialog box. Note that
+     // these are static
+     $.getJSON(Drupal.settings.media.media_browser_content_load_url+'/'+object_type+'/'+bundle+'/'+field_name+'/tabs',
+       function(data) { $('#media_content_browser_tabs').html(data);}
+     );
+
+     // We need to get the subtabs for the currently selected tab
+     // @TODO this needs to be dynamic based on above
+     $.getJSON(Drupal.settings.media.media_browser_content_load_url+'/'+object_type+'/'+bundle+'/'+field_name+'/subtabs',
+       function(data) {
+         $('#media_content_browser_subtabs').html(data);
+         // Reattach behaviors to the content in the dialog box
+         Drupal.attachBehaviors($('#dialog'));
+       }       
+     );
+   }
+   
 }); // $(document).ready
 
 
