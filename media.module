@@ -144,33 +144,6 @@ function media_form_alter(&$form, &$form_state, $form_id) {
     include_once('media.admin.inc');
     media_settings_content_type($form, $form['#node_type']->type);
   }
-
-  // Add the media browser on the node add/edit screen.
-  if (!empty($form['#node_edit_form'])) {
-//    media_build_browser_form($form);
-   // print_R($form['media']);
-
-    // Is the media browser enabled on this node type? Type-specific options override the default.
-    if (variable_get('media_' . $form['type']['#value'] . '_override', NULL) !== NULL) {
-      $enabled = variable_get('media_' . $form['type']['#value'] . '_enabled', NULL);
-    }
-    else {
-      $enabled = variable_get('media_global_enabled', TRUE);
-    }
-    if ($enabled) {
-      // Get the fields we need to enable on this module.
-      $fields = media_active_fields_for_node_type($form['type']['#value']);
-      // Iterate through each field and add a browser form.
-      foreach ($fields as $field => $registration_ids) {
-
-        // Add the media browser form.
-       //$form['media'] = media_build_browser_form($form_state, $registration_ids, $form['type']['#value'], $field);
-//print_r($form[$field]);
-        // Add .media and .replace class to the field CSS class attributes.
-        $form[$field][0]['#attributes'] = array('class' => array('media replace'));
-      }
-    }
-  }
 }
 
 
@@ -276,36 +249,35 @@ function media_get_registered_modules($ids = NULL, $reset = FALSE) {
   if (is_NULL($registrations) || $reset) {
     $registrations = array();
     // Get all the modules which implement hook_media_register().
+    // We use module_implements so that we have access to the module name
     foreach (module_implements('media_register') as $module) {
       // Get all the registrations defined by the module.
-      $function     = $module . '_media_register';
-      $registration = $function();
-// drupal_set_message(print_r($registration, TRUE));
-      // TODO: Fix this. Why are we calling $function twice (jmstacey 6/2/09)?
+      $function = $module . '_media_register';
 
       // Iterate through each registration defined by the implementing module.
-      foreach (array_keys($function()) as $key) {
+      foreach ($function() as $identifier => $registration) {
         // Add the module name to each registration.
         // Default the 'module' key of the registration to the implementing module.
-        $registration[$key]['module'] = isset($registration[$key]['module']) ? $registration[$key]['module'] : $module;
-
-        // translate strings now
-        $registration[$key]['name']        = t($registration[$key]['name']);
-        $registration[$key]['description'] = t($registration[$key]['description']);
+        $registration['module'] = isset($registration['module']) ? $registration['module'] : $module;
+        // Translate strings now
+        $registration['tab'] = isset($registration['tab']) ? t($registration['tab']) : null;
+        $registration['subtab'] = isset( $registration['subtab']) ? t($registration['subtab']) : null;
+        $registration['name'] = isset($registration['name']) ? t($registration['name']) : null;
+        $registration['description'] = isset($registration['description']) ? t($registration['description']) : null;
 
         // Default the URI to public://.
-        if (!isset($registration[$key]['uri']) || !$registration[$key]['uri']) {
-          $registration[$key]['uri'] = MEDIA_RESOURCE_URI_DEFAULT;
+        if (! isset($registration['uri']) || ! $registration['uri']) {
+          $registration['uri'] = MEDIA_RESOURCE_URI_DEFAULT;
         }
 
         // Default 'types' to * (all).
-        if (!isset($registration[$key]['types']) || !$registration[$key]['types']) {
-          $registration[$key]['types'] = MEDIA_TYPES_DEFAULT;
+        if (!isset($registration['types']) || !$registration['types']) {
+          $registration['types'] = MEDIA_TYPES_DEFAULT;
         }
-      }
 
-      // Add the new registrations to our total.
-      $registrations = array_merge($registrations, $registration);
+        // Add the new registration
+        $registrations[$identifier] = $registration;
+      }
     }
   }
 
@@ -316,7 +288,6 @@ function media_get_registered_modules($ids = NULL, $reset = FALSE) {
     }
     return $return;
   }
-
   return $registrations;
 }
 
@@ -336,6 +307,39 @@ function media_get_registered_modules($ids = NULL, $reset = FALSE) {
 function media_registration_kinds() {
   return array('resource', 'formatter');
 }
+
+
+/**
+ * Helper function to retrieve a list of all the tabs from
+ * the registered modules
+ * @return array
+ */
+function media_get_registered_modules_get_tabs() {
+	$tabs = array();
+	foreach(media_get_registered_modules() as $registration) {
+		if (isset($registration['tab']) && $registration['tab']) {
+		  $tabs[] = $registration['tab'];
+		}
+	}
+	return $tabs;
+}
+
+
+/**
+ * Helper function to retrieve a list of all subtabs
+ * defined for this tab
+ * @return array
+ */
+function media_get_registered_modules_get_subtabs($tab_name) {
+  $subtabs = array();
+  foreach(media_get_registered_modules() as $registration) {
+  	if ($registration['tab'] == $tab_name) {
+      $subtabs[] = $registration;
+  	}
+  }
+  return $subtabs;
+}
+
 
 /**
  * Get all fields that can be enabled on a field type.
@@ -503,6 +507,7 @@ function media_registration_types($type = NULL) {
   // return
 }
 
+
 /**
  * Parsing function for the registrations to hand back the kinds of modules
  * registering.
@@ -585,6 +590,7 @@ function media_get_resources($registration_ids, $node_type, $field, $uid) {
 
   return $items;
 }
+
 
 /**
  * Get a list of fields for the requested node type.
@@ -1334,29 +1340,15 @@ function media_generic_widget_process($element, &$form_state, $form) {
   // Load the custom JS
   drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.js');
 
-  // Implement registration tab hook here
-  // @TODO add the attributes for the subtabs call backs here
-  $options = array('attributes' => array (
-    'module' => 'media',
-    'identifier' => 'files',
-    'class' => 'active',
-  ));
-
-  $items[] = array(
-    'data' => l(t('Internal'), '#', $options),
-    'class' => array('active'),
-  );
-
-  // These tabs are not active
-  unset($options['class']);
-
-  $items[] = array(
-    'data' => l(t('External'), '#', $options),
-  );
-  $items[] = array(
-    'data' => l(t('Something'), '#', $options),
-  );
-
+  $i = false;
+  // Fetch all defined tabs
+  foreach (media_get_registered_modules_get_tabs() as $tabname) {
+	  $items[] = array(
+	    'data' => l($tabname, '#', ($i ? array('attributes' => array('tabname' => $tabname)): array('attributes' => array('class' => 'active', 'tabname' => $tabname))) ),
+	    'class' => $i ? null : array('active'),
+	  );
+	  $i = true;
+  }
    // Add a URL setting for the AJAX load
   drupal_add_js(array('media' => array(
     'media_browser_content_load_url' => base_path() . 'media/browser/dispatch',
@@ -1547,6 +1539,7 @@ function media_browser_dispatch($object_type = null, $bundle = null, $field_name
  * @return unknown_type
  */
 function media_browser_subtabs_form($form, &$form_state, $parameters) {
+	$subtabs = media_get_registered_modules_get_subtabs($parameters['tabname']);
 	// This is some stub content. We need to look at the registration
 	// hook to see what kind of data we can pull in here that makes sense
   $subtabs = array(

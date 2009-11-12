@@ -19,6 +19,8 @@ function media_file_media_register() {
 
   // Register User files display
   $items['media_file_user_files'] = array(
+    'tab' => 'My files',
+    'subtab' => 'Files I have uploaded',
     'name'        => t('User files'),
     'uri'         => 'file',
     'kind'        => 'resource',
@@ -32,6 +34,8 @@ function media_file_media_register() {
 
   // Register Add/File file functionality
   $items['media_file_resource_add_file'] = array(
+    'tab' => 'Upload a file',
+    'subtab' => 'Upload a file',
     'name'        => 'Media File add file',
     'description' => t("Add new file using Drupal's File module"),
     'kind'        => 'resource',

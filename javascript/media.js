@@ -12,21 +12,7 @@
 /* Content browser navigation                           */
 /* **************************************************** */
 
-
-/**
- *  This loads pane content based on subtab clicks. It needs
- *  to be run each time that a new set of sub tabs is rendered 
- *  in the dialog box
- */
-Drupal.behaviors.subTabsPaneLoad ={
-  attach: function (context, settings) {
-    $('#media_content_browser_subtabs li.vertical-tab-button  a', context).once('subTabsPaneLoad', function() {
-      $(this).bind('click', function () {render_subTab_pane_content();});
-    });
-  }
-}
-
-
+  
 /**
  * Render the main tabs across the top of the 
  * media browser
@@ -50,6 +36,20 @@ Drupal.behaviors.TabsRender ={
         $(this).addClass('active');
         $(this).parents('li').addClass('active');
       });
+    });
+  }
+}
+
+
+/**
+ *  This loads pane content based on subtab clicks. It needs
+ *  to be run each time that a new set of sub tabs is rendered 
+ *  in the dialog box
+ */
+Drupal.behaviors.subTabsPaneLoad ={
+  attach: function (context, settings) {
+    $('#media_content_browser_subtabs li.vertical-tab-button a', context).once('subTabsPaneLoad', function() {
+      $(this).bind('click', function () {render_subTab_pane_content();});
     });
   }
 }
@@ -81,6 +81,7 @@ function render_subTab_pane_content() {
      }
   );
 }
+
 
 /**
  * @NOTE arthur added this stuff in to prep for the new UI.
@@ -217,6 +218,8 @@ $(document).ready(function () {
          $('#media_content_browser_subtabs').html(data);
          // Reattach behaviors to the content in the dialog box
          Drupal.attachBehaviors($('#dialog'));
+         // Make sure the active subtab renders its content
+         render_subTab_pane_content();
        }       
      );
    }
