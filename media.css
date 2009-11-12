@@ -101,6 +101,10 @@ div.media-thumbnail.selected {
 }
 
 
+/* Push content under the tabs */
+#media_content_browser_tabs {
+  margin-bottom: 30px;
+}
 
 /* This is some stuff to just get some basic mockup done on the 
    content navigator. Should be removed/revised soon */

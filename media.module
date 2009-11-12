@@ -1328,13 +1328,41 @@ function media_generic_widget_process($element, &$form_state, $form) {
   drupal_add_library('system', 'ui.draggable');
   drupal_add_library('system', 'ui.resizable');
   drupal_add_library('system', 'ui.dialog');
-
+  drupal_add_library('system', 'ui.tabs');
   // Load our css.
   drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
   // Load the custom JS
   drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.js');
+
+  // Implement registration tab hook here
+  // @TODO add the attributes for the subtabs call backs here
+  $options = array('attributes' => array (
+    'module' => 'media',
+    'identifier' => 'files',
+    'class' => 'active',
+  ));
+
+  $items[] = array(
+    'data' => l(t('Internal'), '#', $options),
+    'class' => array('active'),
+  );
+
+  // These tabs are not active
+  unset($options['class']);
+
+  $items[] = array(
+    'data' => l(t('External'), '#', $options),
+  );
+  $items[] = array(
+    'data' => l(t('Something'), '#', $options),
+  );
+
    // Add a URL setting for the AJAX load
-  drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));
+  drupal_add_js(array('media' => array(
+    'media_browser_content_load_url' => base_path() . 'media/browser/dispatch',
+    'media_browser_tabs' => theme('item_list', array('items' => $items, 'attributes' => array('class' => 'tabs primary', 'onclick' => 'javascript: return false;')))
+  )),
+  array('type' => 'setting'));
 
   return $element;
 }
@@ -1474,7 +1502,7 @@ function media_image_default_styles() {
  * @param $field_name
  *   string, name of the field we are loading content for
  * @pararm $item
- *   string, one of tabs, subtabs
+ *   string, one of subtabs, pane, ...
  * @return unknown
  */
 function media_browser_dispatch($object_type = null, $bundle = null, $field_name = null, $item = null) {
@@ -1487,10 +1515,6 @@ function media_browser_dispatch($object_type = null, $bundle = null, $field_name
 
 	// What kind of thing are we rendering?
 	switch ($item) {
-		case 'tabs':
-			// @TODO obviously need to do something here
-      $return = 'local | external | something ';
-	  break;
 
 		case 'subtabs':
       $return = drupal_render(drupal_get_form('media_browser_subtabs_form', $parameters));
