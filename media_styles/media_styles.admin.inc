@@ -163,9 +163,13 @@ function media_style_form($form, &$form_state, $media_style) {
 //     );
 //   }
 
+  $form['effects']['tabs'] = array(
+    '#type' => 'vertical_tabs',
+  );
+
   // Build the new media effect addition form and add it to the effect list.
   foreach (media_effect_definitions() as $definition_name => $definition) {
-    $form['effects'][$definition_name] = array(
+    $form['effects']['tabs'][$definition_name] = array(
       '#type' => 'fieldset',
       '#collapsible' => TRUE,
       '#title' => check_plain($definition['label']),
@@ -183,28 +187,28 @@ function media_style_form($form, &$form_state, $media_style) {
       }
       $new_effect_options[$style_name] = t('@name - %effects', array('@name' => $style['name'], '%effects' => implode('; ', $effects))); // check_plain($style['name'] . ' ' . implode(', ', $effects));
     }
-    $form['effects'][$definition_name]['new'] = array(
+    $form['effects']['tabs'][$definition_name]['new'] = array(
       '#type' => 'radios',
       '#title' => t('Please select a style from the following options:'),
       '#options' => $new_effect_options,
       '#default_value' => isset($media_style['styles'][$definition_name]) ? $media_style['styles'][$definition_name] : ' ',
     );
     if (isset($definition['add-new-link'])) {
-      $form['effects'][$definition_name]['new']['#description'] = filter_xss($definition['add-new-link']);
+      $form['effects']['tabs'][$definition_name]['new']['#description'] = filter_xss($definition['add-new-link']);
     }
     if (isset($definition['preview-theme'])) {
       // theme_image_style_preview is not properly registered.
       module_load_include('inc', 'image', 'image.admin');
       // Show the thumbnail preview.
-      $form['effects'][$definition_name]['preview'] = array(
+      $form['effects']['tabs'][$definition_name]['preview'] = array(
         '#type' => 'item',
         '#title' => t('Preview'),
         '#markup' => theme($definition['preview-theme'], array('style' => $definition['styles']['thumbnail'])),// $media_style['styles'][$definition_name])),
       );
     }
-//     $form['effects'][$definition_name]['weight'] = array(
+//     $form['effects']['tabs'][$definition_name]['weight'] = array(
 //       '#type' => 'weight',
-//       '#default_value' => count($form['effects'][$definition_name]) - 1,
+//       '#default_value' => count($form['effects']['tabs'][$definition_name]) - 1,
 //     );
   }
 

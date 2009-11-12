@@ -2,6 +2,7 @@
 
 CHANGELOG for Media: Styles
 
+by aaron: Use vertical tabs on admin style edit page.
 by aaron: Create previews on admin style edit page.
 by aaron: Pull in default styles and image styles.
 by aaron: Remove bundles; create admin list & add style form.
