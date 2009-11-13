@@ -55,8 +55,9 @@
   padding: 10px;
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
-  width: 180px;
-  height: 220px;
+  width: 120px;
+  height: auto;
+  text-align: center;
 }
 /* Cut off long filenames to prevent a messed up layout. */
 .media-display-thumbnails div.media-thumbnail label.option {
@@ -90,14 +91,14 @@ div.media-thumbnail.selected {
 
 
 /* Hide the checkboxes on the browser display */
-#media_content_browser .media-thumbnail .form-item.form-type-checkbox .form-checkbox {
+.pane_content  .media-thumbnail .form-item.form-type-checkbox .form-checkbox {
   display: none;
 }
 
 /* Set the height to auto */
 #media_content_browser .media-thumbnail {
   height: auto;
-  width: 140px;
+  width: 120px;
 }
 
 

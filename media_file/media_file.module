@@ -10,6 +10,7 @@
 
 /**
  * Implementation of hook_media_register
+ * @TODO please see notes in the hook for revising this
  *
  * @return array
  *   Form array items
@@ -21,16 +22,56 @@ function media_file_media_register() {
   $items['media_file_user_files'] = array(
     'tab' => 'My files',
     'subtab' => 'Files I have uploaded',
-    'name' => t('User files'),
-    'uri'         => 'file',
-    'kind'        => 'resource',
+    // Do we need a name for this?
+    'name' => 'User files',
+    // Is a type necessary, or can we just exploit this
+    // in the callbacks section?
+    'kind' => 'resource',
+    // Shouldn't this be a mimetype?
     'types'       => '*',
-    'description'  => t("Displays all of current user's files."),
+    'description'  => 'Displays all of current user\'s files.',
     'callbacks'   => array(
       'resource'    => 'media_file_user_files_select',
     ),
+    // Won't this be define d in the widget
+    // rather than here?
     'fields'      => array('file'),
   );
+
+  // Register all uploaded files
+  $items['media_file_all_uploaded_files'] = array(
+    'tab' => 'Filesystem',
+    'subtab' => 'All files uploaded',
+    // Do we need a name for this?
+    'name' => 'User files',
+    // Is a type necessary, or can we just exploit this
+    // in the callbacks section?
+    'kind' => 'resource',
+    // Shouldn't this be a mimetype?
+    'types'       => '*',
+    'description'  => 'Displays all uploaded files.',
+    'callbacks'   => array(
+      'resource'    => 'media_file_uploaded_files_select',
+    ),
+    // Won't this be define d in the widget
+    // rather than here?
+    'fields'      => array('file'),
+  );
+
+  // Register User files display
+  $items['media_file_directory_files'] = array(
+    'tab' => 'Filesystem',
+    'subtab' => 'Files in a directory',
+    'name' => 'Files in a directory',
+    'kind'        => 'resource',
+    'types'       => '*',
+    'description'  => 'All files in a directory',
+    'callbacks'   => array(
+      'resource'    => 'media_file_filesystem_select',
+    ),
+    'fields'      => array('file'),
+  );
+
 
   // Register Add/File file functionality
   $items['media_file_resource_add_file'] = array(
@@ -85,38 +126,164 @@ function media_file_media_register() {
   return $items;
 }
 
+
+/* ***************************************** */
+/* Media Callbacks                           */
+/* ***************************************** */
+
+
 /**
- * Implementation of callback media_file_media_user_files_select().
+ * Fetches all files associated with the current user
+ * Provides standard file navigation system.
  *
- * @TODO: We'll need to investigate performance mechanisms (lazy loading etc.)
- * rather than dumping ALL files in a single go.
- *
- * @param string $node_type
- * @param string $field
- * @param int $uid
+ * @param $options
+ *   array options which define current navigation states
+ * @param $invoke
+ *   boolean is the first invocation- add specific data that
+ *   is required for additional ajax callbacks
  */
-function media_file_user_files_select($node_type, $field, $uid) {
-  $files = array();
-
-  // Select all files owned by this user.
-  $results = db_query('SELECT uri, filename FROM {file} WHERE uid = :uid', array(':uid' => $uid));
-
-  foreach ($results as $file) {
-    $files[] = array(
-      'uri'      => $file->uri,
-      'filename' => $file->filename,
-      'meta'     => '',
-    );
+function media_file_user_files_select($parameters) {
+	global $user;
+  // Use a default value for limit
+  if (!isset($parameters['limit']) ) {
+    $parameters['limit'] = 10;
   }
 
-  $return = array(
-    t('My files') => array(
-      t('Local')    => media_resource_display_user_files_form($files, t('Your files')),
-    )
-  );
+  if (isset($parameters['object-type']) && isset($parameters['field-name']) && isset($parameters['bundle'])) {
+    $instance = field_info_instance($parameters['object-type'], $parameters['field-name'], $parameters['bundle']);
+    $field = field_info_field($parameters['field-name']);
+  }
 
-  return $return;
+  if (empty($instance) || empty($field)) {
+    // Invalid parameters.
+    // @TODO another arthur hack to make things "work"
+    // return;
+  }
+  $allowed_schemes = $instance['widget']['settings']['allowed_schemes'];
+  $directory = $instance['settings']['file_directory'];
+  $extensions = $instance['settings']['file_extensions'];
+  $scheme = $field['settings']['uri_scheme'];
+
+  // Get all files in the system
+  $query =  db_select('file', 'f')->extend('PagerDefault');
+  $query->fields('f', array('fid'));
+  $query->condition('f.uid', $user->uid, '=');
+  /*
+      @TODO sorry peter, this was bombing things for me
+            I need to figure out why my data coming back to
+            you is not valid....
+
+      $or = db_or();
+      foreach ($allowed_schemes as $scheme) {
+        $or->condition('f.uri', $scheme . '://%', 'LIKE');
+      }
+      $query->condition($or);*/
+  // TODO: filter by mimetype.
+  $fids = $query->limit($parameters['limit'])->execute()->fetchCol();
+  // Now load all the files as objects
+  $files = file_load_multiple($fids);
+  return theme('media_browser_content_frame', array('files' => $files, 'parameters' => $parameters, 'invoke' => $invoke));
 }
+
+
+/**
+ * Fetches all uploaded files
+ * Provides standard file navigation system.
+ *
+ * @param $options
+ *   array options which define current navigation states
+ * @param $invoke
+ *   boolean is the first invocation- add specific data that
+ *   is required for additional ajax callbacks
+ */
+function media_file_uploaded_files_select($parameters) {
+  // Use a default value for limit
+  if (!isset($parameters['limit']) ) {
+    $parameters['limit'] = 10;
+  }
+
+  if (isset($parameters['object-type']) && isset($parameters['field-name']) && isset($parameters['bundle'])) {
+    $instance = field_info_instance($parameters['object-type'], $parameters['field-name'], $parameters['bundle']);
+    $field = field_info_field($parameters['field-name']);
+  }
+
+  if (empty($instance) || empty($field)) {
+    // Invalid parameters.
+    // @TODO another arthur hack to make things "work"
+    // return;
+  }
+  $allowed_schemes = $instance['widget']['settings']['allowed_schemes'];
+  $directory = $instance['settings']['file_directory'];
+  $extensions = $instance['settings']['file_extensions'];
+  $scheme = $field['settings']['uri_scheme'];
+
+  // Get all files in the system
+  // TODO: allow this to use a View.
+  $query =  db_select('file', 'f')->extend('PagerDefault');
+  $query->fields('f', array('fid'));
+
+  /*
+      @TODO sorry peter, this was bombing things for me
+            I need to figure out why my data coming back to
+            you is not valid....
+
+      $or = db_or();
+      foreach ($allowed_schemes as $scheme) {
+        $or->condition('f.uri', $scheme . '://%', 'LIKE');
+      }
+      $query->condition($or);*/
+  // TODO: filter by mimetype.
+  $fids = $query->limit($parameters['limit'])->execute()->fetchCol();
+  // Now load all the files as objects
+  $files = file_load_multiple($fids);
+  return theme('media_browser_content_frame', array('files' => $files, 'parameters' => $parameters, 'invoke' => $invoke));
+}
+
+/**
+ * Fetches all files on the file system
+ * Provides standard file navigation system.
+ *
+ * @param $options
+ *   array options which define current navigation states
+ * @param $invoke
+ *   boolean is the first invocation- add specific data that
+ *   is required for additional ajax callbacks
+ */
+function media_file_filesystem_select($parameters) {
+  // Use a default value for limit
+  if (!isset($parameters['limit']) ) {
+    $parameters['limit'] = 10;
+  }
+
+  if (isset($parameters['object-type']) && isset($parameters['field-name']) && isset($parameters['bundle'])) {
+    $instance = field_info_instance($parameters['object-type'], $parameters['field-name'], $parameters['bundle']);
+    $field = field_info_field($parameters['field-name']);
+  }
+
+  if (empty($instance) || empty($field)) {
+    // Invalid parameters.
+    // @TODO another arthur hack to make things "work"
+    // return;
+  }
+  $allowed_schemes = $instance['widget']['settings']['allowed_schemes'];
+  $directory = $instance['settings']['file_directory'];
+  $extensions = $instance['settings']['file_extensions'];
+  $scheme = $field['settings']['uri_scheme'];
+  // set our directory
+  $regex = '/[^.]+\.(' . preg_replace('/ +/', '|', preg_quote($extensions)) . ')$/i';
+  $files = file_scan_directory($scheme . '://' . $directory, $regex, array('recurse' => true));
+
+  // @TODO testing for now, sorry peter
+  $files = file_scan_directory(file_directory_path(), "/.*/");
+
+  foreach($files as $id => $file) {
+    $file->filemime = file_get_mimetype($file->uri);
+  }
+
+   // TODO: scan again and add directories.  file_scan_directory() sucks.
+   return theme('media_browser_content_frame', array('files' => $files, 'parameters' => $parameters, 'invoke' => $invoke));
+}
+
 
 /**
  * Format Media File form

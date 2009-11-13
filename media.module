@@ -217,9 +217,74 @@ function media_theme() {
 }
 
 
+
 /* ***************************************** */
-/* Media hook calls                          */
+/* Media Menu Callbacks                      */
 /* ***************************************** */
+
+/**
+ * This is the ajax callback to reload data into the media
+ * content browser.
+ * @pram $object_type
+ *   string, kind of object- node
+ * @param $bundle
+ *   string, name of the bundle
+ * @param $field_name
+ *   string, name of the field we are loading content for
+ * @pararm $item
+ *   string, one of subtabs, pane, ...
+ * @return unknown
+ */
+function media_browser_dispatch($object_type = null, $bundle = null, $field_name = null, $item = null, $tabname = null) {
+  // Create an array of parameters from our data
+  $parameters = array(
+    'object-type' => $object_type,
+    'bundle' => $bundle,
+    'field-name' => $field_name,
+  );
+
+  // If there is a tabname, pull it through
+  if ($tabname) {
+    $parameters['tabname'] = $tabname;
+  }
+
+  // What kind of thing are we rendering?
+  switch ($item) {
+
+    // SubTabs arethe content on the side of the content browser. They
+    // are elements grouped under a main tab, defined in their registration.
+    case 'subtabs':
+      $return = drupal_render(drupal_get_form('media_browser_subtabs_form', $parameters));
+    break;
+
+    // Our default case just returns the requested data
+    case 'pane':
+    default:
+      $query = drupal_get_query_parameters();
+
+      // We need to be careful as this is not sanitized data.
+      // @TODO can somebody check me here on this method
+      // of cleaning the URL data?
+      foreach ($query as $key => $value) {
+        $url_args[check_plain($key)] = check_plain($value);
+      }
+      // Merge the parameters into the url args
+      $parameters = array_merge($url_args, $parameters);
+      // Get the registration responsible for this subpane content
+      $function = media_get_registered_modules_get_callback($parameters['identifier']);
+      // Return the callback data
+      $return = $function($parameters);
+    break;
+  }
+
+  return drupal_json_output($return);
+}
+
+
+/* ***************************************** */
+/* Media API Functions                       */
+/* ***************************************** */
+
 
 /**
  * Gets all of the modules which register with Media.
@@ -257,8 +322,8 @@ function media_get_registered_modules($ids = NULL, $reset = FALSE) {
       $registration['tab'] = isset($registration['tab']) ? t($registration['tab']) : null;
       // We need to build a machine name for the tab
       if ($registration['tab']) {
-      	$pattern = "/[^a-zA-Z-0-9]/";
-      	$registration['tab_machine'] = preg_replace($pattern, '_',  $registration['tab']);
+        $pattern = "/[^a-zA-Z-0-9]/";
+        $registration['tab_machine'] = preg_replace($pattern, '_',  $registration['tab']);
       }
 
       $registration['subtab'] = isset( $registration['subtab']) ? t($registration['subtab']) : null;
@@ -291,10 +356,6 @@ function media_get_registered_modules($ids = NULL, $reset = FALSE) {
   return $registrations;
 }
 
-
-/* ***************************************** */
-/* Media API Functions                       */
-/* ***************************************** */
 
 /**
  *  Build a list of possible registration types.
@@ -342,8 +403,24 @@ function media_get_registered_modules_get_subtabs($tab_name) {
 
 
 /**
+ * Helper function to get callback for the specified
+ * identifier
+ * @param $identifier
+ *   string, identifier of this registration
+ * @param $type
+ *   string, which callback to return
+ * @return array
+ */
+function media_get_registered_modules_get_callback($identifier, $type = 'resource') {
+  $registrations = media_get_registered_modules();
+  return $registrations[$identifier]['callbacks'][$type];
+}
+
+
+
+/**
  * Get all fields that can be enabled on a field type.
- *
+ * @NOTE is this in use ? AF 11/13/09
  *  @TODO: Cache the results and retrieve from cache.
  *
  * @param string $field_type
@@ -393,6 +470,7 @@ function media_get_fields($field_type, $function_type = 'resource') {
 
 /**
  * Select registrations for use by matching against uri and file extension.
+ * @TODO is this in use? AF 11/13/09
  *
  * @param array $registrations
  *   Array of extensions.
@@ -429,6 +507,7 @@ function media_get_applicable_formatters($registrations, $file_extension) {
 /**
  * Parsing function for the registrations to hand back the kinds of modules
  * registering. Used to select all formatters, resources, etc.
+ * @NOTE is this in use? AF 11/13/09
  *
  * @param string $kinds
  *   Return all the matching registrations of this kind.
@@ -457,6 +536,7 @@ function media_get_registration_kinds($kind = NULL) {
 
 /**
  * Return a set of formatters which can format the specified item.
+ * @NOTE is this in use? AF 11/13/09
  *
  * If $description is NULL, all formatters will be returned. A set of
  * registered modules can be passed in to narrow the formatter options.
@@ -485,26 +565,6 @@ function media_registration_item_formatters($description = '*', $registrations =
   }
 
   return $formatters;
-}
-
-/**
- * Parsing function for the registrations to hand back the kinds of modules
- * registering.
- *
- * @param string $type
- *   Only hand back data for the specified type.
- * @return array
- * @TODO: finish this function.
- */
-function media_registration_types($type = NULL) {
-  // get the registered modules
-  $registrations = media_get_registered_modules();
-  // parse the registrations
-  foreach ($registrations as $registration) {
-    // @TODO
-  }
-
-  // return
 }
 
 
@@ -592,402 +652,8 @@ function media_get_resources($registration_ids, $node_type, $field, $uid) {
 }
 
 
-/**
- * Get a list of fields for the requested node type.
- *
- * @param string $type_name
- *   Drupal {node} type.
- * @param string $function
- *   Either 'resource' or 'formatter'.
- * @return array
- *   An array of field names.
- */
-function media_active_fields_for_node_type($type_name, $function = 'resource') {
-  // Need to know if the type-specific or global settings are going to be used.
-  // At least one of them is enabled at this point.
-  $type_override = variable_get('media_' . $type_name . '_override', FALSE);
-
-  $items = array();
-//   $type = _media_content_field_types($type_name);
-
-  // Get all available file fields.
-  $fields = field_info_fields(NULL, NULL, NULL);
-//   drupal_set_message(print_r($fields, TRUE));
-//   return;
-//   $fields = file_get_field_list($type_name);
-
-  // Extract the fields for this node type.
-  foreach ($fields as $field_name => $field) {
-    // Ignore the content-type specific per-field setting unless the override is set
-    $fields_enabled = FALSE;
-
-    if ($type_override) {
-      $fields_enabled = variable_get('media_' . $type_name . '_' . $field['field_name'] . '_' . $function, FALSE);
-    }
-    else {
-      //@TODO: Right now, if it's using the default it will be enabled for all fields.
-      // Eventually it will probably be better to allow per-field controls at a global level as well.
-      // However, this line will probably just work once the actual variables exist.
-      $fields_enabled = variable_get('media_global_' . $field['field_name'] . '_' . $function, 'default');
-      // Handle the default special, because we want the default to be on for all fields but don't know what the fields are yet.
-      if ($fields_enabled === 'default') {
-        $fields_enabled = array();
-        foreach (media_registration_kinds() as $kind) {
-          // get all the kinds that match this field
-          if ($registrations = media_get_fields($field['type'], $kind)) {
-            foreach ($registrations as $id => $registration) {
-              $compound_id = $field['field_name'] . '--' . $id;
-              $fields_enabled[$compound_id] = $compound_id;
-            }
-          }
-        }
-      }
-    }
-
-    if (!empty($fields_enabled)) {
-      $items[] = $fields_enabled;
-    }
-  }
-
-  $data = array();
-  foreach ($items as $item) {
-    foreach ($item as $id => $value) {
-      // we need to split the $id into $field_name and $media registration id
-      if ($value) {
-        $id = explode('--', $id);
-        $data[$id[0]][] = $id[1];
-      }
-    }
-  }
-
-  return $data;
-}
-
-
-
-/**
- * Get a list of content field types.
- *  @TODO: not necessary?
- *
- * @param string $type_name
- *  A string representing the content type.
- * @return array
- *  A form structured array is returned.
- */
-function _media_content_field_types($type_name) {
-//   if (module_exists('content')) {
-//     // Use CCK if available
-//     $type = content_types($type_name);
-//   }
-//   else {
-//     // Get the specific content type.
-//     $type = (array)node_get_types('type', $type_name);
-//   }
-
-  $types = node_type_get_types();
-  $type = $types[$type_name]; // node_type_get_name($type_name);
-// print_r($type);
-// print_r(node_type_get_types());
-  // Recognize the upload/attachment form and create an artificial field.
-  // This should be the only one we ever have to do this for.
-//   if (module_exists('upload')) {
-//     $type['fields']['attachments'] = array(
-//       'field_name'  => 'attachments',
-//       'type'        => 'attachments',
-//       'widget'      => array(
-//         'label'       => $type['extra']['attachments']['label'],
-//       ),
-//     );
-//   }
-
-  return $type;
-}
-
-
-/* *************************************************** */
-/* Media forms                                         */
-/* *************************************************** */
-
-/**
- * Build data for the media browser display.
- *
- * @TODO Clean this form up and use a form theme function.
- *
- * Note: The FAPI docs say a submit element event defaults to 'click',
- * but as of d6.10, it defaults to 'mousedown', so we need to override.
- *   'event' => 'click',
- *
- * @param array $registration_ids
- *   Array of registrations to call.
- * @param string $node_type
- * @param string $field
- * @param uid $uid
- * @return array
- *   Drupal FAPI form array.
- */
-function media_build_browser(&$form) {
-  return ;
-  $form['media_browser'] = array(
-   '#type' => 'markup'
-  );
-
-  // Load our css.
-  $form['media_browser']['#attached']['css'] = array(
-    drupal_get_path('module', 'media') . '/media.css',
-    'misc/ui/ui.all.css',
-  );
-  // Load all our jQuery UI
-  $form['media_browser']['#attached']['js'] = array(
-    drupal_get_path('module', 'media') . '/javascript/media.js',
-    'misc/ui/ui.core.js',
-    'misc/ui/ui.draggable.js',
-    'misc/ui/ui.resizable.js',
-    'misc/ui/ui.dialog.js',
-  );
-
-  // Add a URL setting for the AJAX load
-  //drupal_add_js(array('media' => array('media_browser_content_load_url' => base_path() . 'media/browser/dispatch')), array('type' => 'setting'));
-
-  // dummy params for now
-  $parameters = array(
-    'module' => 'media',
-    'identifier' => 'files',
-    'limit' => 10,
-  );
-
-  // when we fist load the module data into the frame, we allow the module
-  // to load items (eg CSS, JS) that they may need for future ajax requests
-  $dialog = module_invoke($parameters['module'], 'media_browser_content', $parameters, true);
-
-  $form['media_browser']['#value'] =
-     '<div class="media browser activation">' . t('Add files') . '</div>
-    <div id="dialog" style="display: block;">' . $dialog . '</div>';
-
-  return;
-
-  // We are using a tab form type.
-  $form['media_browser'] = array(
-    '#type'       => 'fieldset',
-    '#attributes' => array('class' => array('media browser wrapper')),
-  );
-
-  // Get all the active resources
-  $resources = media_get_resources($registration_ids, $node_type, $field, $uid);
-
-  // loop through the form and start pulling out the data to
-  // create tabs -> panes -> drawers
-  foreach ($resources as $tab_name => $data) {
-    // create a tab id
-    $tab_id = strtolower(str_replace(' ', '_', $tab_name));
-    // create tab
-    $form['media_browser'][$tab_id] = array(
-      '#type'  => 'fieldset',
-      '#title' => $tab_name,
-      '#theme' => 'media_browser_pane',
-    );
-
-    $drawer_options[$tab_id] = $tab_name;
-
-    // build the drawers for this tab
-    $drawer_list   = array();
-    $active_drawer = TRUE;
-
-    // check to see if we do have children- we should, but just in case
-    if (is_array($data)) {
-      $drawer_options = array();
-
-      foreach ($data as $drawer_name => $drawer_data) {
-        // @TODO check drawer access permissions here to make sure we should present this to the user
-
-        // The drawer id needs to have additional data on it to prevent
-        // name space conflicts with ids
-        $drawer_id = strtolower(str_replace(' ', '_', $drawer_name)) . '_display';
-
-        // create a link with a specific id to call
-        $drawers_link  = '<a onclick="javascript: return FALSE;" href="#' . $drawer_id . '">' . $drawer_name . '</a>';
-        $drawer_list[] = array('data' => $drawers_link, 'class' =>  array(($active_drawer ? 'active' : '')) );
-
-        // add the drawer form element
-        $form['media_browser'][$tab_id][$drawer_name] = $drawer_data;
-
-        // add classes to the drawer display item
-        $form['media_browser'][$tab_id][$drawer_name]['#prefix'] = '<div id="' . $drawer_id . '" class="drawer display ' . ($active_drawer ? ' active' : NULL) . '">';
-        $form['media_browser'][$tab_id][$drawer_name]['#suffix'] = '</div>';
-
-        // no longer on the first drawer
-        $active_drawer = FALSE;
-
-        $drawer_options[$tab_id . '|' . $drawer_id] = '- ' . $drawer_name;
-      }
-
-      // change the drawers to a list for easer display
-      $form['media_browser'][$tab_id]['drawers'] = array(
-        '#type'  => 'markup',
-        '#value' => theme('item_list', array($drawer_list, array('attributes' => array('class' => array('drawers'))))),
-      );
-
-    }
-  }
-
-  $form['media_browser']['drawer_select'] = array(
-    '#type'        => 'select',
-    '#title'       => t('Drawer select'),
-    '#description' => t('Oh bother, you really should have JavaScript enabled, you know...'),
-    '#options'     => $drawer_options,
-    '#prefix'      => '<div class="media-browser-drawer-select">',
-    '#suffix'      => '</div>',
-  );
-
-  // Container for the progress indicator.
-  $form['media_browser']['media_browser_file_progress'] = array(
-    '#prefix' => '<div id="media-browser-file-progress-' . $id . '" class="media-browser-file-progress">',
-    '#suffix' => '</div>',
-  );
-  $form['media_browser']['media_browser_file_progress']['file_progress_message'] = array(
-    '#type'  => 'item',
-    '#title' => theme('image', array('path' => variable_get('media_file_progress_image', $path . '/images/uploading-gradient.gif'))) . t('Please wait while your file is attached...'),
-  );
-
-  // AHAH enabled submit button.
-  $form['media_browser']['media_browser_submit'] = array(
-    '#type'        => 'submit',
-    '#value'       => t('Add file'),
-    '#description' => t("Add the selected file."),
-    '#submit'      => array('media_browser_submit'), // If no javascript action.
-    '#validate'    => array('media_browser_validate'),
-    '#attributes'  => array('class' => array('media-browser-submit')),
-    '#ahah'        => array(
-      'path'         => 'media/js',
-      'wrapper'      => 'media-browser-file-progress-' . $id,
-      'method'       => 'replace',
-      'effect'       => 'fade',
-      'event'        => 'click',
-    ),
-  );
-
-
-
-  // @TODO: This all goes in the form creation, actually,
-  // to create our metadata form...
-//   $uri = $form_state['values']['media_files'];
-//   $file_extension = pathinfo($uri, PATHINFO_EXTENSION);
-//
-//   // Get the file creator for this item.
-//   $file_creator = media_get_registered_modules(array($registration_id));
-//
-//   // Get the formaters for this node type.
-//   $formatters = media_active_fields_for_node_type($node_type, 'formatter');
-//
-//   // Get the registrations.
-//   $registrations = media_get_registered_modules($formatters[$field]);
-//
-//   // Remove any non-applying registrations.
-//   $registrations = media_get_applicable_formatters($registrations, $file_extension);
-//
-//   // Get all the formatting forms.
-//   $formatter_options = array();
-//   $forms = array();
-//   foreach ($registrations as $id => $registration) {
-//     $formatter_options[$id] = $registration['name'];
-//     $function = $registration['callbacks']['form'];
-//     if (function_exists($function)) {
-//       $forms[$id] = $function($node_type, $field, $file_extension, $uri);
-//     }
-//   }
-
-  // @TODO: This is placeholder only.
-  foreach (array('Video', 'Image', 'Audio', 'PDF') as $mime_type) {
-    $form['media_browser']['media_browser_metadata'][$mime_type] = array(
-      '#type'  => 'fieldset',
-      '#title' => $mime_type,
-    );
-    $form['media_browser']['media_browser_metadata'][$mime_type][$mime_type . '_title'] = array(
-      '#type'  => 'textfield',
-      '#title' => t('Title'),
-    );
-  }
-
-  // Our AHAH enabled submit button for the metadata.
-  $form['media_browser']['media_browser_metadata_submit'] = array(
-    '#type'        => 'submit',
-    '#value'       => t('Add metadata'),
-    '#description' => t("Add the selected file."),
-    '#submit'      => array('media_browser_metadata_submit'), // If no javascript action.
-    '#validate'    => array('media_browser_metadata_validate'),
-    '#attributes'  => array('class' => array('media-browser-metadata-submit')),
-    '#ahah'        => array(
-      'path'         => 'media/metadata/js',
-      'wrapper'      => 'media-browser-metadata-message-' . $id,
-      'method'       => 'replace',
-      'effect'       => 'fade',
-      'event'        => 'click',
-    ),
-  );
-
-  // build the tabs into a single form element
-  // @TODO make sure we have children for each tab and remove any that
-  //       we don't have data for
-//   $form['tabs'] = array(
-//     '#type'  => 'markup',
-//     '#value' => theme('item_list', array($drawers, array('attributes' => array('class' => 'tabs')))),
-//   );
-
-  return $form;
-}
-
-/**
- * Display files in a form element.
- *
- * This is a generic for other modules to make use of.
- *
- * @param array $files
- *   array of (uri => uri, filename => filename, meta => array(key => value))
- * @param string $title
- *   option title argument
- * @return array
- *   Form array containing a select list populated with files.
- */
-function media_resource_display_user_files_form($files, $title = NULL) {
-  // Pass files into options array.
-  $options = array();
-
-  foreach ($files as $file) {
-    // TODO: Use FID rather than URI
-    $options[$file['uri']] = $file['filename'];
-  }
-
-  // Parse files into form element.
-  $form['media_files'] = array(
-    '#type'       => 'select',
-    '#options'    => $options,
-    '#title'      => $title ? $title : '',
-    '#attributes' => array('class' => array('resource select')),
-    '#size'       => variable_get('media_file_list_size', 10),
-  );
-
-  return $form;
-}
-
-/**
- * Display the upload form for the tab.
- *
- * @return array
- *   Form array containing a file field.
- */
-function media_resource_display_upload_form() {
-  $form['media_upload']['upload'] = array(
-    '#type'       => 'file',
-    '#title'      => t('Upload your file'),
-    '#size'       => 30,
-    '#attributes' => array('class' => array('resource select')),
-  );
-
-  return $form;
-}
-
-
 /* ***************************************** */
-/* Media Hook Implementations                */
+/*  Hook Implementations                     */
 /* ***************************************** */
 
 /**
@@ -1207,6 +873,7 @@ function media_field_widget_settings_form($field, $instance) {
   return $form;
 }
 
+
 /**
  * Implementation of hook_field_widget().
  */
@@ -1304,6 +971,7 @@ function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, 
 
   return $elements;
 }
+
 
 /**
  * An element #process callback for the media_managed_file type.
@@ -1476,69 +1144,9 @@ function media_image_default_styles() {
 }
 
 
-
-/* ***************************************************** */
-/* NAVIGATOR TESTING; PLEASE IGNORE                      */
-
-
-/**
- * This is the ajax callback to reload data into the media
- * content browser.
- * @pram $object_type
- *   string, kind of object- node
- * @param $bundle
- *   string, name of the bundle
- * @param $field_name
- *   string, name of the field we are loading content for
- * @pararm $item
- *   string, one of subtabs, pane, ...
- * @return unknown
- */
-function media_browser_dispatch($object_type = null, $bundle = null, $field_name = null, $item = null, $tabname = null) {
-	// Create an array of parameters from our data
-	$parameters = array(
-	  'object-type' => $object_type,
-	  'bundle' => $bundle,
-    'field-name' => $field_name,
-	);
-
-	// If there is a tabname, pull it through
-	if ($tabname) {
-		$parameters['tabname'] = $tabname;
-	}
-
-	// What kind of thing are we rendering?
-	switch ($item) {
-
-		// SubTabs arethe content on the side of the content browser. They
-		// are elements grouped under a main tab, defined in their registration.
-		case 'subtabs':
-      $return = drupal_render(drupal_get_form('media_browser_subtabs_form', $parameters));
-    break;
-
-	  // Our default case just returns the requested data
-		case 'pane':
-	  default:
-		  $query = drupal_get_query_parameters();
-		  // We need to be careful as this is not sanitized data.
-		  // @TODO can somebody check me here on this method
-		  // of cleaning the URL data?
-		  foreach ($query as $key => $value) {
-		    $url_args[check_plain($key)] = check_plain($value);
-		  }
-		  // Merge the parameters into the url args
-		  $parameters = array_merge($url_args, $parameters);
-		  // Get the registration responsible for this subpane content
-		  $registration = media_get_registered_modules(array($url_args['identifer']));
-      // Now we need to fire the correct call back
-      // @TODO move peters's code over to the media_file module
-
-
-		break;
-	}
-
-  return drupal_json_output($return);
-}
+/* *************************************************** */
+/* Media display forms                                 */
+/* *************************************************** */
 
 
 /**
@@ -1552,9 +1160,7 @@ function media_browser_subtabs_form($form, &$form_state, $parameters) {
   $form['subtabs'] = array('#type' => 'vertical_tabs');
   // Load all the subtabs for this tab
   foreach(media_get_registered_modules_get_subtabs($parameters['tabname']) as $subtab) {
-
-   	$id = $subtab['attributes']['module'] . '_' . $subtab['attributes']['identifier'];
-  	$form[$id] = array(
+  	$form[$subtab['identifier']] = array(
   	  '#type' => 'fieldset',
   	  '#title' => $subtab['subtab'],
   	  '#group' => 'subtabs',
@@ -1563,86 +1169,17 @@ function media_browser_subtabs_form($form, &$form_state, $parameters) {
   	$element_params = array_merge(array('identifier' => $subtab['identifier']), $parameters);
   	$element_params['class'] .= ' subtab_data';
 
-  	$form[$id]['data'] = array(
+  	$form[$subtab['identifier']]['data'] = array(
   	  '#type' => 'hidden',
   	  '#attributes' => $element_params,
   	  '#value' => $id,
   	);
 
   	// This provides a place to render our content
-  	$form[$id]['markup'] = array('#markup' => '<div class="pane_content"></div>');
+  	$form[$subtab['identifier']]['markup'] = array('#markup' => '<div class="pane_content"></div>');
   }
 
   return $form;
-}
-
-
-/**
- * Implementation of hook_media_browser_content().
- * Provides standard file navigation system.
- *
- * @param $options
- *   array options which define current navigation states
- * @param $invoke
- *   boolean is the first invocation- add specific data that
- *   is required for additional ajax callbacks
- */
-function media_media_browser_content($parameters, $invoke = false) {
-  // Use a default value for limit
-  if (!isset($parameters['limit']) ) {
-    $parameters['limit'] = 10;
-  }
-
-  if (isset($parameters['object-type']) && isset($parameters['field-name']) && isset($parameters['bundle'])) {
-    $instance = field_info_instance($parameters['object-type'], $parameters['field-name'], $parameters['bundle']);
-    $field = field_info_field($parameters['field-name']);
-  }
-
-  if (empty($instance) || empty($field)) {
-    // Invalid parameters.
-    // @TODO another arthur hack to make things "work"
-    // return;
-  }
-  $allowed_schemes = $instance['widget']['settings']['allowed_schemes'];
-  $directory = $instance['settings']['file_directory'];
-  $extensions = $instance['settings']['file_extensions'];
-  $scheme = $field['settings']['uri_scheme'];
-
-  // Which identfier is in use?
-  switch ($parameters['identifier']) {
-    case 'files':
-      // Get all files in the system
-      // TODO: allow this to use a View.
-      $query =  db_select('file', 'f')->extend('PagerDefault');
-      $query->fields('f', array('fid'));
-  /*
-      @TODO sorry peter, this was bombing things for me
-            I need to figure out why my data coming back to
-            you is not valid....
-
-      $or = db_or();
-      foreach ($allowed_schemes as $scheme) {
-        $or->condition('f.uri', $scheme . '://%', 'LIKE');
-      }
-      $query->condition($or);*/
-      // TODO: filter by mimetype.
-      $fids = $query->limit($parameters['limit'])->execute()->fetchCol();
-      // Now load all the files as objects
-      $files = file_load_multiple($fids);
-      return theme('media_browser_content_frame', array('files' => $files, 'parameters' => $parameters, 'invoke' => $invoke));
-    break;
-
-    case 'local_files':
-      // set our directory
-      $regex = '/[^.]+\.(' . preg_replace('/ +/', '|', preg_quote($extensions)) . ')$/i';
-      $files = file_scan_directory($scheme . '://' . $directory, $regex, array('recurse' => FALSE));
-      foreach($files as $id => $file) {
-      	$file->filemime = file_get_mimetype($file->uri);
-      }
-      // TODO: scan again and add directories.  file_scan_directory() sucks.
-      return theme('media_browser_content_frame', array('files' => $files, 'parameters' => $parameters, 'invoke' => $invoke));
-    break;
-  }
 }
 
 

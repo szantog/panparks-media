@@ -64,7 +64,7 @@ Drupal.behaviors.mediaBrowserLaunch ={
           resizable: false,
           minWidth: 600,
           width: 800,
-          position: 'center',
+          position: 'top',
           overlay: {
             backgroundColor: '#000000',
             opacity: 0.4
