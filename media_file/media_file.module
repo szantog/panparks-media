@@ -21,7 +21,7 @@ function media_file_media_register() {
   $items['media_file_user_files'] = array(
     'tab' => 'My files',
     'subtab' => 'Files I have uploaded',
-    'name'        => t('User files'),
+    'name' => t('User files'),
     'uri'         => 'file',
     'kind'        => 'resource',
     'types'       => '*',

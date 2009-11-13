@@ -5,6 +5,32 @@
  *  This file handles the JS for Media Module functions.
  */
 
+/*
+
+The naming convetion for items in this file revolves around three different 
+components: tabs, subtabs and panes. Tabs are a primary navigation or grouping
+mechanism. Subtabs are related to a specific tab. Panes are the content 
+related to the subtab.
+
+   ---------------------------------------
+   |                  |tab | tab2 | tab3 |
+   |                  --------------------
+   |__________ __________________________|
+   | Subtab  |                           |
+   -----------                           |
+   | Subtab2 |        Pane for           |
+   -----------      active subtab        |
+   | Subtab3 |                           |
+   -----------                           |
+   |                                     |
+   |                                     |
+   |                                     |
+   ---------------------------------------
+
+
+
+*/
+
 (function ($) {
 
 
@@ -12,32 +38,114 @@
 /* Content browser navigation                           */
 /* **************************************************** */
 
-  
-/**
- * Render the main tabs across the top of the 
- * media browser
+ 
+/** 
+ * Load the Media Browser for the first time
  */
-Drupal.behaviors.TabsRender ={
+Drupal.behaviors.mediaBrowserLaunch ={
+  attach: function (context, settings) {
+    $('input.media-file-uri ', context).once('mediaBrowserLaunch', function () {
+      $(this).bind('click', function () {
+        // Add the dialog box to the page using this file field id
+        $(this).append(media_render_dialog());
+        
+        // Now we set the current data state for the media browser by storing
+        // the data in a hidden field
+        $('#media_browser_data_store').attr('tabname', $('#media_content_browser_tabs .item-list a.active').attr('tabname')).attr('object-type', $(this).attr('object-type')).attr('bundle', $(this).attr('bundle')).attr('field-name', $(this).attr('field-name'));
+        
+        // Render the subtabs for the current active tab
+        renderSubTabs(); 
+      
+        // Now we can launch our modal window
+        $('#dialog').dialog({
+          buttons: { "Ok": function() { $(this).dialog("close"); } }, 
+          modal: true,
+          draggable: false,
+          resizable: false,
+          minWidth: 600,
+          width: 800,
+          position: 'center',
+          overlay: {
+            backgroundColor: '#000000',
+            opacity: 0.4
+          }
+        });
+
+        return false;
+      });
+    });
+  }
+};
+  
+
+/**
+ * Render the modal dialog box
+ */
+function media_render_dialog(field_id) {
+  // If the dialog box already exists, we need to remove it from the DOM
+  if ($('#dialog.ui-dialog-content')) {
+    $('#dialog').dialog('destroy');
+    $('#dialog').remove('#dialog');
+  }
+  // Build out the full HTML structure for the dialog box
+  var html = '<div id="dialog" style="display: none;" title="Select your files"> \
+    <div id="media_content_browser_throbber"></div> \
+    <div id="media_content_browser_tabs">'+Drupal.settings.media.media_browser_tabs+'</div> \
+    <div id="media_content_browser_subtabs"></div> \
+    <input type="hidden" id="media_browser_data_store" /> \
+  </div>';
+  return html;
+}
+
+
+/**
+ * Attach the behaviors to the main tabs across the top
+ * of the browser 
+ */
+Drupal.behaviors.tabsClick ={
   attach: function (context, settings) {
     // Enable our tabs
-    $('#media_content_browser_tabs .item-list a', context).once('tabsRender', function () {
+    $('#media_content_browser_tabs .item-list a', context).once('tabsClick', function () {
       $(this).bind('click', function () {
-        // Get all of the attributes here so we can load the correct subTabs
-        /*
-        var active_tab = '#'+$('#edit-subtabs--active-tab').attr('value');
-        var bundle = $(active_tab+' input').attr('bundle');
-        var object_type = $(active_tab+' input').attr('object-type');
-        var field_name = $(active_tab+' input').attr('field-name');
-        */
-        
+        // The first thing we need to do is to update the data store with this tab data
+        $('#media_browser_data_store').attr('tabname', $(this).attr('tabname'));
+                
         // Unset other active tabs
         $('#media_content_browser_tabs .item-list li.active, #media_content_browser_tabs .item-list a.active').removeClass('active');
         // Make this tab active
         $(this).addClass('active');
         $(this).parents('li').addClass('active');
+        
+        // Unload content in the subtabs
+        $('#media_content_browser_subtabs').html();        
+        // Get content the subtabs for this tab
+        renderSubTabs();                
       });
     });
   }
+}
+
+
+/**
+ * Load the subtabs based on what tab has been clicked
+ * @param tabname
+ * @param bundle
+ * @param field_name
+ * @return
+ */
+function renderSubTabs() {
+  // Build our callback data
+  var params = 'subtabs/'+$('#media_browser_data_store').attr('tabname');
+  // We need to get the subtabs for the currently selected tab
+  $.getJSON(build_callback_url(params),
+    function(data) {
+      $('#media_content_browser_subtabs').html(data);
+      // Reattach behaviors to the content in the dialog box
+      Drupal.attachBehaviors($('#dialog'));
+      // Make sure the active subtab renders its content      
+      renderSubTabPane();
+    }       
+  ); 
 }
 
 
@@ -46,10 +154,14 @@ Drupal.behaviors.TabsRender ={
  *  to be run each time that a new set of sub tabs is rendered 
  *  in the dialog box
  */
-Drupal.behaviors.subTabsPaneLoad ={
+Drupal.behaviors.subTabsClick ={
   attach: function (context, settings) {
-    $('#media_content_browser_subtabs li.vertical-tab-button a', context).once('subTabsPaneLoad', function() {
-      $(this).bind('click', function () {render_subTab_pane_content();});
+    $('#media_content_browser_subtabs li.vertical-tab-button a', context).once('subTabsClick', function() {
+      $(this).bind('click', function () {
+        // Store the current subtab identifier 
+        $('#media_browser_data_store').attr('identifier', $(this).attr('identifier'));
+        renderSubTabPane();
+      });
     });
   }
 }
@@ -57,29 +169,50 @@ Drupal.behaviors.subTabsPaneLoad ={
 
 /**
  * This does the actual render of content into the subTab pane
+ * We do not pass params to this so that it can be a generalized
+ * function. 
  * @TODO add a throbber to alert the user we are loading content
  */
-function render_subTab_pane_content() {
-   // @TODO we have to pull in the pane content via ajax when the active tab is clicked
-   // we can find it with something like:
-   var active_tab = '#'+$('#edit-subtabs--active-tab').attr('value');
-   var bundle = $(active_tab+' input').attr('bundle');
-   var object_type = $(active_tab+' input').attr('object-type');
-   var field_name = $(active_tab+' input').attr('field-name');
- 
+function renderSubTabPane() {
+   // The current active tab id is here
+   var active_subtab = '#'+$('#edit-subtabs--active-tab').attr('value');
+
    // Now we have to build a query which the dispatcher uses to get the correct content
-   // for this subtab
-   var query = '?module='+$(active_tab+' input').attr('module')+'&identifier='+$(active_tab+' input').attr('identifier');
+   // for this subtab pane
+   var query = '?identifier='+$('#media_browser_data_store').attr('identifier');
    // This populates the pane with the proper settings
-   $.getJSON(Drupal.settings.media.media_browser_content_load_url+'/'+object_type+'/'+bundle+'/'+field_name+'/pane'+query,
+   $.getJSON(build_callback_url('pane', query),
      function(data) { 
        // Remove any exisiting pane content
        $('div.pane_content.active').removeClass('active').html('');
-       $(active_tab+' div.pane_content').html(data);
+       $(active_subtab+' div.pane_content').html(data);
        // Make this pane active
-       $(active_tab+' div.pane_content').addClass('active');
+       $(active_subtab+' div.pane_content').addClass('active');
      }
   );
+}
+
+
+/**
+ * Build a callback url from the data store
+ */
+function build_callback_url(params, query) {
+  var bundle = $('#media_browser_data_store').attr('bundle');
+  var object_type = $('#media_browser_data_store').attr('object-type');
+  var field_name = $('#media_browser_data_store').attr('field-name');
+  var identifier = $('#media_browser_data_store').attr('identifier');
+  var url = Drupal.settings.media.media_browser_content_load_url+'/'+object_type+'/'+bundle+'/'+field_name;
+  
+  // Do we have parameters to add?
+  if (typeof(params) != 'undefined') {
+    url += '/'+params;
+  }
+  // Any queries?
+  if (typeof(query) != 'undefined') {
+    url += query;
+  }
+  
+  return url;
 }
 
 
@@ -92,35 +225,7 @@ function render_subTab_pane_content() {
 
 $(document).ready(function () {
 
-  /** 
-   * Load the Media Browser for the first time
-   */
-  $('input.media-file-uri ').bind('click', function() {
-           
-    // Add the dialog box to the page using this file field id
-    media_render_dialog($(this).attr('id'), $(this).attr('object-type'), $(this).attr('bundle'), $(this).attr('field-name'));
 
-    $('#dialog').dialog({
-      buttons: { "Ok": function() { $(this).dialog("close"); } }, 
-      modal: true,
-      draggable: false,
-      resizable: false,
-      minWidth: 600,
-      width: 800,
-      position: 'center',
-      overlay: {
-        backgroundColor: '#000000',
-        opacity: 0.4
-      }
-    });
-    
-
-    // Get the current query string    
-  //  var query = $(this).attr('href').replace(/.*\?/, '')+'&file_field_id='+$(this).attr('id');
-    // Load our content from ajax and style 
-  //  media_load_content_display(query);
-    return false;
-  });
    
     
   /**
@@ -191,38 +296,7 @@ $(document).ready(function () {
      });
   
    
-   /**
-    * Render the modal dialog box
-    */
-   function media_render_dialog(field_id, object_type, bundle, field_name) {
-     // If the dialog box already exists, we need to remove it from the DOM
-     if ($('#dialog.ui-dialog-content')) {
-       $('#dialog').dialog('destroy');
-       $('#dialog').remove('#dialog');
-     }
-     // Build out the full HTML structure for the dialog box
-     var html = '<div id="dialog" style="display: none;" title="Select your files"> \
-       <div id="media_content_browser_throbber"></div> \
-       <div id="media_content_browser_tabs">'+Drupal.settings.media.media_browser_tabs+'</div> \
-       <div id="media_content_browser_subtabs"></div> \
-     </div>';
-   
-     // Add the html to the page
-     $('#'+field_id).append(html);
-     // activate the tabs?
-     
-     // We need to get the subtabs for the currently selected tab
-     // @TODO this needs to be dynamic based on above
-     $.getJSON(Drupal.settings.media.media_browser_content_load_url+'/'+object_type+'/'+bundle+'/'+field_name+'/subtabs',
-       function(data) {
-         $('#media_content_browser_subtabs').html(data);
-         // Reattach behaviors to the content in the dialog box
-         Drupal.attachBehaviors($('#dialog'));
-         // Make sure the active subtab renders its content
-         render_subTab_pane_content();
-       }       
-     );
-   }
+
    
 }); // $(document).ready
 

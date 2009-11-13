@@ -249,37 +249,37 @@ function media_get_registered_modules($ids = NULL, $reset = FALSE) {
   if (is_NULL($registrations) || $reset) {
     $registrations = array();
     // Get all the modules which implement hook_media_register().
-    // We use module_implements so that we have access to the module name
-    foreach (module_implements('media_register') as $module) {
-      // Get all the registrations defined by the module.
-      $function = $module . '_media_register';
+    // Iterate through each registration defined by the implementing module.
+    foreach (module_invoke_all('media_register') as $identifier => $registration) {
+      // Unique identifier for this registration
+      $registration['identifier'] = $identifier;
+      // Translate strings now
+      $registration['tab'] = isset($registration['tab']) ? t($registration['tab']) : null;
+      // We need to build a machine name for the tab
+      if ($registration['tab']) {
+      	$pattern = "/[^a-zA-Z-0-9]/";
+      	$registration['tab_machine'] = preg_replace($pattern, '_',  $registration['tab']);
+      }
 
-      // Iterate through each registration defined by the implementing module.
-      foreach ($function() as $identifier => $registration) {
-        // Add the module name to each registration.
-        // Default the 'module' key of the registration to the implementing module.
-        $registration['module'] = isset($registration['module']) ? $registration['module'] : $module;
-        // Translate strings now
-        $registration['tab'] = isset($registration['tab']) ? t($registration['tab']) : null;
-        $registration['subtab'] = isset( $registration['subtab']) ? t($registration['subtab']) : null;
-        $registration['name'] = isset($registration['name']) ? t($registration['name']) : null;
-        $registration['description'] = isset($registration['description']) ? t($registration['description']) : null;
+      $registration['subtab'] = isset( $registration['subtab']) ? t($registration['subtab']) : null;
+      $registration['name'] = isset($registration['name']) ? t($registration['name']) : null;
+      $registration['description'] = isset($registration['description']) ? t($registration['description']) : null;
 
-        // Default the URI to public://.
-        if (! isset($registration['uri']) || ! $registration['uri']) {
-          $registration['uri'] = MEDIA_RESOURCE_URI_DEFAULT;
-        }
+      // Default the URI to public://.
+      if (! isset($registration['uri']) || ! $registration['uri']) {
+        $registration['uri'] = MEDIA_RESOURCE_URI_DEFAULT;
+      }
 
-        // Default 'types' to * (all).
-        if (!isset($registration['types']) || !$registration['types']) {
-          $registration['types'] = MEDIA_TYPES_DEFAULT;
-        }
+      // Default 'types' to * (all).
+      if (!isset($registration['types']) || !$registration['types']) {
+        $registration['types'] = MEDIA_TYPES_DEFAULT;
+      }
 
         // Add the new registration
         $registrations[$identifier] = $registration;
       }
     }
-  }
+
 
   // Return requested registrations.
   if ($ids) {
@@ -318,7 +318,7 @@ function media_get_registered_modules_get_tabs() {
 	$tabs = array();
 	foreach(media_get_registered_modules() as $registration) {
 		if (isset($registration['tab']) && $registration['tab']) {
-		  $tabs[] = $registration['tab'];
+		  $tabs[$registration['tab_machine']] = $registration['tab'];
 		}
 	}
 	return $tabs;
@@ -333,7 +333,7 @@ function media_get_registered_modules_get_tabs() {
 function media_get_registered_modules_get_subtabs($tab_name) {
   $subtabs = array();
   foreach(media_get_registered_modules() as $registration) {
-  	if ($registration['tab'] == $tab_name) {
+  	if ($registration['tab_machine'] == $tab_name) {
       $subtabs[] = $registration;
   	}
   }
@@ -1342,14 +1342,23 @@ function media_generic_widget_process($element, &$form_state, $form) {
 
   $i = false;
   // Fetch all defined tabs
-  foreach (media_get_registered_modules_get_tabs() as $tabname) {
+  foreach (media_get_registered_modules_get_tabs() as $tab_machine => $tabname) {
+  	$options = array('attributes' => array(
+      'class' => ($i ? null : 'active'),
+      'tabname' => $tab_machine,
+      'field-name' => $element['#field_name'],
+      'bundle' => $element['#bundle'],
+      'object-type' => $element['#object_type']
+    ));
+
 	  $items[] = array(
-	    'data' => l($tabname, '#', ($i ? array('attributes' => array('tabname' => $tabname)): array('attributes' => array('class' => 'active', 'tabname' => $tabname))) ),
+	    'data' => l($tabname, '#', $options),
 	    'class' => $i ? null : array('active'),
 	  );
 	  $i = true;
   }
-   // Add a URL setting for the AJAX load
+
+  // Add a URL setting for the AJAX load
   drupal_add_js(array('media' => array(
     'media_browser_content_load_url' => base_path() . 'media/browser/dispatch',
     'media_browser_tabs' => theme('item_list', array('items' => $items, 'attributes' => array('class' => 'tabs primary', 'onclick' => 'javascript: return false;')))
@@ -1485,20 +1494,26 @@ function media_image_default_styles() {
  *   string, one of subtabs, pane, ...
  * @return unknown
  */
-function media_browser_dispatch($object_type = null, $bundle = null, $field_name = null, $item = null) {
+function media_browser_dispatch($object_type = null, $bundle = null, $field_name = null, $item = null, $tabname = null) {
 	// Create an array of parameters from our data
 	$parameters = array(
 	  'object-type' => $object_type,
 	  'bundle' => $bundle,
-    'field-name' => $field_name
+    'field-name' => $field_name,
 	);
+
+	// If there is a tabname, pull it through
+	if ($tabname) {
+		$parameters['tabname'] = $tabname;
+	}
 
 	// What kind of thing are we rendering?
 	switch ($item) {
 
+		// SubTabs arethe content on the side of the content browser. They
+		// are elements grouped under a main tab, defined in their registration.
 		case 'subtabs':
       $return = drupal_render(drupal_get_form('media_browser_subtabs_form', $parameters));
-     // $return = module_invoke('media', 'media_browser_content',  $parameters);
     break;
 
 	  // Our default case just returns the requested data
@@ -1511,8 +1526,14 @@ function media_browser_dispatch($object_type = null, $bundle = null, $field_name
 		  foreach ($query as $key => $value) {
 		    $url_args[check_plain($key)] = check_plain($value);
 		  }
-		  // Invoke the module and identifier being requested
-		  $return = module_invoke($url_args['module'], 'media_browser_content', $url_args);
+		  // Merge the parameters into the url args
+		  $parameters = array_merge($url_args, $parameters);
+		  // Get the registration responsible for this subpane content
+		  $registration = media_get_registered_modules(array($url_args['identifer']));
+      // Now we need to fire the correct call back
+      // @TODO move peters's code over to the media_file module
+
+
 		break;
 	}
 
@@ -1527,44 +1548,29 @@ function media_browser_dispatch($object_type = null, $bundle = null, $field_name
  * @return unknown_type
  */
 function media_browser_subtabs_form($form, &$form_state, $parameters) {
-	$subtabs = media_get_registered_modules_get_subtabs($parameters['tabname']);
-	// This is some stub content. We need to look at the registration
-	// hook to see what kind of data we can pull in here that makes sense
-  $subtabs = array(
-    array(
-      'title' => 'Add existing files',
-      'attributes' => array (
-        'module' => 'media',
-        'identifier' => 'files'
-      )
-    ),
-    array(
-      'title' => 'Add files from local file system',
-      'attributes' => array (
-        'module' => 'media',
-        'identifier' => 'local_files'
-      )
-    ),
-  );
-
+	// We are making vertical tabs
   $form['subtabs'] = array('#type' => 'vertical_tabs');
-  foreach($subtabs as $subtab) {
+  // Load all the subtabs for this tab
+  foreach(media_get_registered_modules_get_subtabs($parameters['tabname']) as $subtab) {
+
    	$id = $subtab['attributes']['module'] . '_' . $subtab['attributes']['identifier'];
   	$form[$id] = array(
   	  '#type' => 'fieldset',
-  	  '#title' => $subtab['title'],
+  	  '#title' => $subtab['subtab'],
   	  '#group' => 'subtabs',
   	);
-  	$element_params = array_merge($subtab['attributes'], $parameters);
+  	// Clean this little mess up
+  	$element_params = array_merge(array('identifier' => $subtab['identifier']), $parameters);
   	$element_params['class'] .= ' subtab_data';
+
   	$form[$id]['data'] = array(
   	  '#type' => 'hidden',
   	  '#attributes' => $element_params,
   	  '#value' => $id,
-  	  // This provides a place to render our content
-  	  '#suffix' => '<div class="pane_content"></div>',
   	);
 
+  	// This provides a place to render our content
+  	$form[$id]['markup'] = array('#markup' => '<div class="pane_content"></div>');
   }
 
   return $form;
