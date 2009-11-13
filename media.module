@@ -49,16 +49,13 @@ function media_menu() {
     'access arguments' => array('access content'),
   );
 
-  /* this is for dummy content right now */
-  $items['media/test'] = array(
-    'page callback'    => 'media_test',
-    'access arguments' => array('access content'),
-  );
+  // Handles all the callbacks from the media content browser
   $items['media/browser/dispatch'] = array(
     'page callback'    => 'media_browser_dispatch',
     'access arguments' => array('access content'),
   );
 
+  // Admin settings
   $items['admin/content/media'] = array(
     'title' => 'Media',
     'description' => 'Manage files used on your site.',
@@ -217,7 +214,6 @@ function media_theme() {
 }
 
 
-
 /* ***************************************** */
 /* Media Menu Callbacks                      */
 /* ***************************************** */
@@ -345,7 +341,6 @@ function media_get_registered_modules($ids = NULL, $reset = FALSE) {
       }
     }
 
-
   // Return requested registrations.
   if ($ids) {
     foreach ($ids as $id) {
@@ -403,7 +398,7 @@ function media_get_registered_modules_get_subtabs($tab_name) {
 
 
 /**
- * Helper function to get callback for the specified
+ * Helper function to get callback function for the specified
  * identifier
  * @param $identifier
  *   string, identifier of this registration
@@ -466,189 +461,6 @@ function media_get_fields($field_type, $function_type = 'resource') {
   }
 
   return $data[$field_type][$function_type];
-}
-
-/**
- * Select registrations for use by matching against uri and file extension.
- * @TODO is this in use? AF 11/13/09
- *
- * @param array $registrations
- *   Array of extensions.
- * @param string $uri
- *   The kind of uri being used.
- * @param string $file_extension
- *   The current file extension.
- * @return array
- *   An array of applicable formatters.
- */
-function media_get_applicable_formatters($registrations, $file_extension) {
-  // Do we have a file extension?
-  if ($file_extension) {
-    foreach ($registrations as $id => $formatter) {
-      // Does this formatter use any file type? If not, then we have to dig.
-      if (!$formatter['types'] == MEDIA_TYPES_DEFAULT) {
-        // We need to see if this file type is supported specifically.
-        if (!in_array($file_extension, $registration['types'])) {
-          // This registration is not useful.
-          unset($registrations[$id]);
-        }
-      }
-    }
-  }
-
-  return $registrations;
-}
-
-
-/* ***************************************** */
-/* Media Internal Functions                  */
-/* ***************************************** */
-
-/**
- * Parsing function for the registrations to hand back the kinds of modules
- * registering. Used to select all formatters, resources, etc.
- * @NOTE is this in use? AF 11/13/09
- *
- * @param string $kinds
- *   Return all the matching registrations of this kind.
- * @return array
- *   An array of matching registrations.
- */
-function media_get_registration_kinds($kind = NULL) {
-  $kinds = array();
-  // Get the registered modules.
-  $registrations = media_get_registered_modules();
-  // Parse the registrations.
-  foreach ($registrations as $id => $registration) {
-    if ($kind) {
-      // Get the kind that is being looked for.
-      if ($registration['kind'][$kind]) {
-        $kinds[$id] = $registration;
-      }
-    }
-    else {
-      $kinds[$id] = $registration;
-    }
-  }
-
-  return $kinds;
-}
-
-/**
- * Return a set of formatters which can format the specified item.
- * @NOTE is this in use? AF 11/13/09
- *
- * If $description is NULL, all formatters will be returned. A set of
- * registered modules can be passed in to narrow the formatter options.
- *
- * @param string $description
- *   File extension to return.
- * @param array $registrations
- *   (Optional) If specified, then match only against these registrations.
- * @return array
- *   An array of formatter ids keyed by module.
- */
-function media_registration_item_formatters($description = '*', $registrations = NULL) {
-  $formatters = array();
-  // Get all the registrations if we don't have any.
-  if (is_NULL($registrations)) {
-    $registrations = media_get_registered_modules();
-  }
-  // Iterate through each of the registered modules and find the formatters.
-  foreach ($registrations as  $id => $registration) {
-    // Look for the formatter, or just take all (wildcard being *).
-    if ((is_array($registration['kind']['formatter']['types']) && in_array($registration['kind']['formatter']['types'], $description))
-          || $description == '*'
-          || $registration['kind']['formatter']['types'] == '*') {
-      $formatters[$registration['module']] = $id;
-    }
-  }
-
-  return $formatters;
-}
-
-
-/**
- * Parsing function for the registrations to hand back the kinds of modules
- * registering.
- *
- * @param string $array
- *   Name of the element we want to get data from.
- * @return array
- */
-function media_registration_data($name) {
-  $data = array();
-
-  // Get the registered modules.
-  $registrations = media_get_registered_modules();
-
-  // Parse the registrations.
-  foreach ($registrations as $id => $registration) {
-    // Do we have this data in this registration?
-    if ($registration[$name]) {
-      // Get the item that was requested.
-      $data[$registration['module']] = array(
-        $id => array(
-          $name => $registration[$name],
-          'description' => $registration['description']
-        )
-      );
-    }
-  }
-
-  return $data;
-}
-
-
-/**
- * Fetch all resources registered and call the specified callback. I
- *
- * Also add item to the media browser as a horizontal tab.
- *
- * @TODO Implement admin weighting here somehow.
- *
- * @param array $registration_ids
- *   Array of registration ids to be loaded.
- * @param string $node_type
- *   Drupal node type.
- * @param field $field
- *   CCK field name.
- * @param int $uid
- *   Drupal {user} id.
- * @return array
- */
-function media_get_resources($registration_ids, $node_type, $field, $uid) {
-  // Get all the registrations that define the resources.
-  $registrations = media_get_registered_modules($registration_ids);
-
-  foreach ($registrations as $id => $registration) {
-    // Get the callback function.
-    $function = isset($registration['callbacks']['resource']) ? $registration['callbacks']['resource'] : NULL;
-
-    if (function_exists($function)) {
-      // Get the results of the callback function.
-      $item     = $function($node_type, $field, $uid);
-      $tab_name = check_plain(key($item));
-
-      // Add a resource_id to the item.
-      $item[$tab_name][key($item[$tab_name])]['resource_id'] = array(
-        '#type'  => 'value',
-        '#value' => $id,
-      );
-
-      // Add a resource module to the item so that we don't have to figure it out later
-      $item[$tab_name][key($item[$tab_name])]['registered_module'] = array(
-        '#type'  => 'value',
-        '#value' => $registration['module'],
-      );
-
-      // Add tabs under the tab name.
-      $items[$tab_name][key($item[$tab_name])] = $item[$tab_name][key($item[$tab_name])];
-    }
-
-  }
-
-  return $items;
 }
 
 
@@ -1101,16 +913,6 @@ function media_uri_value($element, &$input) {
   }
 }
 
-function theme_media_managed_file($variables) {
-  $element = $variables['element'];
-
-  // This wrapper is required to apply JS behaviors and CSS styling.
-  $output = '';
-  $output .= '<div class="form-managed-file">';
-  $output .= drupal_render_children($element);
-  $output .= '</div>';
-  return $output;
-}
 
 /**
  * Implement hook_file_references().
@@ -1129,7 +931,6 @@ function media_file_references($file) {
  */
 function media_image_default_styles() {
   $styles = array();
-
   $styles['square_thumbnail'] = array(
     'effects' => array(
       array(
@@ -1223,4 +1024,22 @@ function media_file_listing_form($form, $form_state, $files, $parameters) {
   // require_once('media.admin.inc');
   // $form = media_admin_display_switch($form, array('active_display' => 'thumbnails'));
   return $form;
+}
+
+
+/**
+ * @TODO can somebody document this?
+ *
+ * @param unknown_type $variables
+ * @return unknown
+ */
+function theme_media_managed_file($variables) {
+  $element = $variables['element'];
+
+  // This wrapper is required to apply JS behaviors and CSS styling.
+  $output = '';
+  $output .= '<div class="form-managed-file">';
+  $output .= drupal_render_children($element);
+  $output .= '</div>';
+  return $output;
 }
