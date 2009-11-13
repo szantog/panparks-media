@@ -81,7 +81,7 @@ Drupal.behaviors.mediaBrowserLaunch ={
 /**
  * Render the modal dialog box
  */
-function media_render_dialog(field_id) {
+function media_render_dialog() {
   // If the dialog box already exists, we need to remove it from the DOM
   if ($('#dialog.ui-dialog-content')) {
     $('#dialog').dialog('destroy');
@@ -142,7 +142,7 @@ function renderSubTabs() {
       $('#media_content_browser_subtabs').html(data);
       // Reattach behaviors to the content in the dialog box
       Drupal.attachBehaviors($('#dialog'));
-      // Make sure the active subtab renders its content      
+      // Make the active subtab render its content
       renderSubTabPane();
     }       
   ); 
@@ -176,10 +176,12 @@ Drupal.behaviors.subTabsClick ={
 function renderSubTabPane() {
    // The current active tab id is here
    var active_subtab = '#'+$('#edit-subtabs--active-tab').attr('value');
-
+   // Derive the identifier for this pane
+   var identifier = $(active_subtab+' input.subtab_data').attr('identifier');
+   
    // Now we have to build a query which the dispatcher uses to get the correct content
    // for this subtab pane
-   var query = '?identifier='+$('#media_browser_data_store').attr('identifier');
+   var query = '?identifier='+identifier;
    // This populates the pane with the proper settings
    $.getJSON(build_callback_url('pane', query),
      function(data) { 
