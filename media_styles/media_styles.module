@@ -357,7 +357,7 @@ function media_styles_theme() {
 
     // Display a image style preset.
     'media_styles_image_style_preview' => array(
-      'variables' => array('style_name' => NULL),
+      'variables' => array('field_type' => NULL, 'container_name' => NULL, 'style_name' => NULL),
     ),
   );
 }
