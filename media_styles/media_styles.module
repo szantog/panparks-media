@@ -6,6 +6,45 @@
  *  Media widget formatter definitions.
  */
 
+function media_styles_styles_containers() {
+  return array(
+    'media_styles_image' => array(
+      'label' => t('Image Styles'),
+      'preview theme' => 'image_style_preview',
+      'data' => array(
+        'streams' => array(
+          'public://',
+          'private://',
+        ),
+        'mimetypes' => array(
+          'image/png',
+          'image/gif',
+          'image/jpeg',
+        ),
+      ),
+      'help' => t('Image Styles will transform images to your choosing, such as by scaling and cropping. You can !manage.', array('!manage' => l(t('manage your image styles here'), 'admin/config/image/image-styles'))),
+    ),
+  );
+}
+
+function media_styles_styles_styles() {
+  $styles = array();
+  foreach (image_styles() as $style_name => $style) {
+    $styles[$style_name] = $style;
+  }
+  return array(
+    'media_styles_image' => $styles,
+  );
+}
+
+function theme_media_styles_image_style_preview($variables) {
+  module_load_include('inc', 'image', 'image.admin');
+  dpm(drupal_add_css(drupal_get_path('module', 'image') . '/image.admin.css'));
+  $style_name = $variables['style_name'];
+  $styles = styles_containers_available_styles('media_styles');
+  return theme('image_style_preview', array('style' => $styles[$style_name]));
+}
+
 /**
  * Media constant for user styles in the database.
  */
@@ -152,6 +191,10 @@ function media_styles_field_formatter_info() {
 
   return $styles;
 }
+
+// function media_styles() {
+//   return styles_containers_available_styles('media_styles');
+// }
 
 /**
  * Get an array of all styles and their settings.
