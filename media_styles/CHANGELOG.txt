@@ -2,6 +2,7 @@
 
 CHANGELOG for Media: Styles
 
+by aaron: Key by media field.
 by aaron: Begin dependency on Styles module.
 by aaron: Use vertical tabs on admin style edit page.
 by aaron: Create previews on admin style edit page.
