@@ -29,6 +29,18 @@ function media_styles_styles_containers() {
   );
 }
 
+function media_styles_styles_presets() {
+  $styles = array();
+  foreach (image_styles() as $style_name => $style) {
+    $styles[] = $style_name;
+  }
+  return array(
+    'media' => array(
+      'image' => $styles,
+    ),
+  );
+}
+
 function media_styles_styles_styles() {
   $styles = array();
   foreach (image_styles() as $style_name => $style) {

@@ -2,6 +2,7 @@
 
 CHANGELOG for Media: Styles
 
+by aaron: Implement hook_styles_presets().
 by aaron: Add variables to preview theme.
 by aaron: Key by media field.
 by aaron: Begin dependency on Styles module.
