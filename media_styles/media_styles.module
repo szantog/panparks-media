@@ -44,6 +44,9 @@ function media_styles_styles_presets() {
 function media_styles_styles_styles() {
   $styles = array();
   foreach (image_styles() as $style_name => $style) {
+    // Save the module & storage for the Image module namespace.
+    $style['image_module'] = $style['module'];
+    $style['image_storage'] = $style['storage'];
     $styles[$style_name] = $style;
   }
   return array(
@@ -59,6 +62,11 @@ function theme_media_styles_image_style_preview($variables) {
   if (isset($styles[$style_name])) {
     module_load_include('inc', 'image', 'image.admin');
     drupal_add_css(drupal_get_path('module', 'image') . '/image.admin.css');
+
+    // Ensure we revert the module & storage namespace for the Image module.
+    $styles[$style_name]['module'] = $styles[$style_name]['image_module'];
+    $styles[$style_name]['storage'] = $styles[$style_name]['image_storage'];
+
     return theme('image_style_preview', array('style' => $styles[$style_name]));
   }
 }
