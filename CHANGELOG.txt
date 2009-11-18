@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+by aaron: Add get_parameters to remote stream wrapper.
 by aaron: Allow saving existing streams.
 by aaron: Implement ->url_stat() for filesize().
 by aaron: Save remote streams.

@@ -44,6 +44,10 @@ abstract class MediaReadOnlyStreamWrapper implements MediaReadOnlyStreamWrapperI
   protected $base_url = NULL;
   private $_DEBUG_MODE = NULL;
 
+  public function get_parameters() {
+    return $this->parameters;
+  }
+
   /**
    * "Template" for stat calls. All elements must be initialized.
    * @var array
