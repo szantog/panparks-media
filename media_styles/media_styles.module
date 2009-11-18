@@ -40,8 +40,13 @@ function media_styles_styles_formatter_filter($element, $container) {
 }
 
 function theme_media_styles_styles($variables) {
-  $variables['element']['#formatter'] = $variables['style']['name'];
+  // The formatter name needs to match what theme_field_formatter_image expects.
+  $variables['element']['#formatter'] = '__' . $variables['style']['name'];
+
+  // Add Alt & Title to the element.
   $variables['element']['#item']['alt'] = $variables['element']['#item']['title'] = $variables['element']['#item']['description'];
+
+  // Defer to Image Styles for the rest.
   return theme('field_formatter_image', $variables);
 }
 
