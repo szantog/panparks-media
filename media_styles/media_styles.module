@@ -11,14 +11,14 @@
  */
 function media_styles_styles_containers() {
   return array(
-    'media' => array(
+    'file' => array(
       'image' => array(
         'label' => t('Image Styles'),
         'preview theme' => 'image_style_preview',
         'data' => array(
           'streams' => array(
-            'public://',
-            'private://',
+            'public',
+            'private',
           ),
           'mimetypes' => array(
             'image/png',
@@ -26,10 +26,23 @@ function media_styles_styles_containers() {
             'image/jpeg',
           ),
         ),
+        'filter callback' => 'media_styles_styles_formatter_filter',
+        'theme' => 'media_styles_styles',
         'help' => t('Image Styles will transform images to your choosing, such as by scaling and cropping. You can !manage.', array('!manage' => l(t('manage your image styles here'), 'admin/config/image/image-styles'))),
       ),
     ),
   );
+}
+
+function media_styles_styles_formatter_filter($element, $container) {
+  $item = $element['#item'];
+  return (in_array(file_uri_scheme($item['uri']), $container['data']['streams'])) && (in_array($item['filemime'], $container['data']['mimetypes']));
+}
+
+function theme_media_styles_styles($variables) {
+  $variables['element']['#formatter'] = $variables['style']['name'];
+  $variables['element']['#item']['alt'] = $variables['element']['#item']['title'] = $variables['element']['#item']['description'];
+  return theme('field_formatter_image', $variables);
 }
 
 /**
@@ -38,7 +51,7 @@ function media_styles_styles_containers() {
 function media_styles_styles_presets() {
   $presets = array();
   foreach (image_styles() as $style_name => $style) {
-    $presets['media'][$style_name]['image'] = array($style_name);
+    $presets['file'][$style_name]['image'] = array($style_name);
   }
   return $presets;
 }
@@ -55,7 +68,7 @@ function media_styles_styles_styles() {
     $styles[$style_name] = $style;
   }
   return array(
-    'media' => array(
+    'file' => array(
       'image' => $styles,
     ),
   );
@@ -207,22 +220,22 @@ function media_styles_menu() {
 /**
  *  Implement hook_field_formatter_info().
  */
-function media_styles_field_formatter_info() {
-  $styles = array();
-
-  // Each Media Style becomes a new formatter for File (media) fields.
-  foreach (media_styles() as $style_name => $style) {
-    $styles[$style_name] = array(
-      'label' => $style['label'],
-      'field types' => array('media_generic', 'file', 'image'),
-      'behaviors' => array(
-        'multiple values' => FIELD_BEHAVIOR_DEFAULT,
-      ),
-    );
-  }
-
-  return $styles;
-}
+// function media_styles_field_formatter_info() {
+//   $styles = array();
+//
+//   // Each Media Style becomes a new formatter for File (media) fields.
+//   foreach (media_styles() as $style_name => $style) {
+//     $styles[$style_name] = array(
+//       'label' => $style['label'],
+//       'field types' => array('media_generic', 'file', 'image'),
+//       'behaviors' => array(
+//         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+//       ),
+//     );
+//   }
+//
+//   return $styles;
+// }
 
 /**
  * Get an array of all styles and their settings.
@@ -383,6 +396,10 @@ function media_styles_theme() {
     // Display a image style preset.
     'media_styles_image_style_preview' => array(
       'variables' => array('field_type' => NULL, 'container_name' => NULL, 'style_name' => NULL),
+    ),
+
+    'media_styles_styles' => array(
+      'variables' => array('element' => NULL, 'style' => NULL),
     ),
   );
 }
