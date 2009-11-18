@@ -6,6 +6,9 @@
  *  Media widget formatter definitions.
  */
 
+/**
+ *  Implements hook_styles_containers().
+ */
 function media_styles_styles_containers() {
   return array(
     'media' => array(
@@ -29,18 +32,20 @@ function media_styles_styles_containers() {
   );
 }
 
+/**
+ *  Implements hook_styles_presets().
+ */
 function media_styles_styles_presets() {
-  $styles = array();
+  $presets = array();
   foreach (image_styles() as $style_name => $style) {
-    $styles[] = $style_name;
+    $presets['media'][$style_name]['image'] = array($style_name);
   }
-  return array(
-    'media' => array(
-      'image' => $styles,
-    ),
-  );
+  return $presets;
 }
 
+/**
+ *  Implements hook_styles_styles().
+ */
 function media_styles_styles_styles() {
   $styles = array();
   foreach (image_styles() as $style_name => $style) {

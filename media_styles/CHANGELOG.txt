@@ -2,6 +2,7 @@
 
 CHANGELOG for Media: Styles
 
+by aaron: Fix return value for hook_styles_presets().
 by aaron: Preserve Image namespace.
 by aaron: Implement hook_styles_presets().
 by aaron: Add variables to preview theme.
