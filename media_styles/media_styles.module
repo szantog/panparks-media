@@ -27,19 +27,26 @@ function media_styles_styles_containers() {
           ),
         ),
         'filter callback' => 'media_styles_styles_formatter_filter',
-        'theme' => 'media_styles_styles',
+        'themes' => array(
+          'field_formatter_styles' => 'media_styles_field_formatter_styles',
+          'styles' => 'media_styles_styles',
+          'preview' => 'image_style_preview',
+        ),
         'help' => t('Image Styles will transform images to your choosing, such as by scaling and cropping. You can !manage.', array('!manage' => l(t('manage your image styles here'), 'admin/config/image/image-styles'))),
       ),
     ),
   );
 }
 
-function media_styles_styles_formatter_filter($element, $container) {
-  $item = $element['#item'];
-  return (in_array(file_uri_scheme($item['uri']), $container['data']['streams'])) && (in_array($item['filemime'], $container['data']['mimetypes']));
+function media_styles_styles_formatter_filter($variables) {
+  if (isset($variables['object'])) {
+    $object = $variables['object'];
+    $container = $variables['container'];
+    return (in_array(file_uri_scheme($object->uri), $container['data']['streams'])) && (in_array($object->filemime, $container['data']['mimetypes']));
+  }
 }
 
-function theme_media_styles_styles($variables) {
+function theme_media_styles_field_formatter_styles($variables) {
   // The formatter name needs to match what theme_field_formatter_image expects.
   $variables['element']['#formatter'] = '__' . $variables['style']['name'];
 
@@ -48,6 +55,20 @@ function theme_media_styles_styles($variables) {
 
   // Defer to Image Styles for the rest.
   return theme('field_formatter_image', $variables);
+}
+
+function theme_media_styles_styles($variables) {
+  $style_name = $variables['style_name'];
+  $path = $variables['uri'];
+  $alt = $title = $variables['description'];
+  return theme('image_style',
+    array(
+      'style_name' => $style_name,
+      'path' => $path,
+      'alt' => $alt,
+      'title' => $title,
+    )
+  );
 }
 
 /**
@@ -403,8 +424,12 @@ function media_styles_theme() {
       'variables' => array('field_type' => NULL, 'container_name' => NULL, 'style_name' => NULL),
     ),
 
-    'media_styles_styles' => array(
+    'media_styles_field_formatter_styles' => array(
       'variables' => array('element' => NULL, 'style' => NULL),
+    ),
+
+    'media_styles_styles' => array(
+      'variables' => array('style_name' => NULL, 'uri' => NULL),
     ),
   );
 }
