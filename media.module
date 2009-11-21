@@ -808,6 +808,7 @@ function media_generic_widget_process($element, &$form_state, $form) {
     $element['file_uri']['#attributes']['object-type'] = array($element['#object_type']);
   }
 
+  // @TODO: Use the currently undocumented #attached property to load js & css.
   // Load up all of our necessary jQuery
   drupal_add_library('system', 'vertical-tabs');
   drupal_add_library('system', 'ui');
@@ -819,6 +820,14 @@ function media_generic_widget_process($element, &$form_state, $form) {
   drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
   // Load the custom JS
   drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.js');
+
+  // @TODO: This is a hack to get the Media: YouTube js attached to the form.
+  // I wasn't able to get the #attached property to be respected during AJAX;
+  // it may not be possible. I suppose we can alter the form; this is just to
+  // see if it works at all. - aaron
+  if (module_exists('media_youtube')) {
+    drupal_add_js(drupal_get_path('module', 'media_youtube') . '/js/media_youtube.js');
+  }
 
   $i = false;
   // Fetch all defined tabs
