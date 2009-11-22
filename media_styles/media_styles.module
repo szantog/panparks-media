@@ -14,6 +14,7 @@ function media_styles_styles_containers() {
     'file' => array(
       'image' => array(
         'label' => t('Image Styles'),
+        'weight' => 0,
         'preview theme' => 'image_style_preview',
         'data' => array(
           'streams' => array(
@@ -34,8 +35,40 @@ function media_styles_styles_containers() {
         ),
         'help' => t('Image Styles will transform images to your choosing, such as by scaling and cropping. You can !manage.', array('!manage' => l(t('manage your image styles here'), 'admin/config/image/image-styles'))),
       ),
+      'default' => array(
+        'label' => t('Default Media Styles'),
+        'weight' => 10,
+        'preview theme' => 'media_styles_preview_default',
+        'data' => array(),
+        'filter callback' => 'media_styles_styles_formatter_filter_default',
+        'themes' => array(
+          'field_formatter_styles' => 'media_styles_field_formatter_styles_default',
+          'styles' => 'media_styles_styles_default',
+          'preview' => 'media_styles_preview_default',
+        ),
+      ),
     ),
   );
+}
+
+function theme_media_styles_styles_default($variables) {
+  return 'default';
+}
+
+function theme_media_styles_preview_default($variables) {
+  return 'default';
+}
+
+function theme_media_styles_field_formatter_styles_default($variables) {
+  return 'default';
+}
+
+/**
+ *  The 'Default' file style is a fallback when nothing else resolves.
+ */
+function media_styles_styles_formatter_filter_default() {
+  // @TODO: Change to TRUE once weights are resolved.
+  return FALSE;
 }
 
 function media_styles_styles_formatter_filter($variables) {
@@ -75,7 +108,13 @@ function theme_media_styles_styles($variables) {
  *  Implements hook_styles_presets().
  */
 function media_styles_styles_presets() {
-  $presets = array();
+  $presets = array(
+    'file' => array(
+      'thumbnail' => array(
+        'default' => array('thumbnail'),
+      ),
+    ),
+  );
   foreach (image_styles() as $style_name => $style) {
     $presets['file'][$style_name]['image'] = array($style_name);
   }
@@ -430,6 +469,15 @@ function media_styles_theme() {
 
     'media_styles_styles' => array(
       'variables' => array('style_name' => NULL, 'uri' => NULL),
+    ),
+    'media_styles_field_formatter_styles_default' => array(
+      'variables' => array('element' => NULL, 'style' => NULL),
+    ),
+    'media_styles_styles_default' => array(
+      'variables' => array('style_name' => NULL, 'uri' => NULL),
+    ),
+    'media_styles_preview_default' => array(
+      'variables' => array('field_type' => NULL, 'container_name' => NULL, 'style_name' => NULL),
     ),
   );
 }
