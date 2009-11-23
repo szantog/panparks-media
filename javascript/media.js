@@ -7,9 +7,9 @@
 
 /*
 
-The naming convetion for items in this file revolves around three different 
+The naming convetion for items in this file revolves around three different
 components: tabs, subtabs and panes. Tabs are a primary navigation or grouping
-mechanism. Subtabs are related to a specific tab. Panes are the content 
+mechanism. Subtabs are related to a specific tab. Panes are the content
 related to the subtab.
 
    ---------------------------------------
@@ -38,8 +38,8 @@ related to the subtab.
 /* Content browser navigation                           */
 /* **************************************************** */
 
- 
-/** 
+
+/**
  * Load the Media Browser for the first time
  */
 Drupal.behaviors.mediaBrowserLaunch ={
@@ -48,17 +48,17 @@ Drupal.behaviors.mediaBrowserLaunch ={
       $(this).bind('click', function () {
         // Add the dialog box to the page using this file field id
         $(this).append(media_render_dialog());
-        
+
         // Now we set the current data state for the media browser by storing
         // the data in a hidden field
         $('#media_browser_data_store').attr('tabname', $('#media_content_browser_tabs .item-list a.active').attr('tabname')).attr('object-type', $(this).attr('object-type')).attr('bundle', $(this).attr('bundle')).attr('field-name', $(this).attr('field-name'));
-        
+
         // Render the subtabs for the current active tab
-        renderSubTabs(); 
-      
+        renderSubTabs();
+
         // Now we can launch our modal window
         $('#dialog').dialog({
-          buttons: { "Ok": function() { $(this).dialog("close"); } }, 
+          buttons: { "Ok": function() { $(this).dialog("close"); } },
           modal: true,
           draggable: false,
           resizable: false,
@@ -76,7 +76,7 @@ Drupal.behaviors.mediaBrowserLaunch ={
     });
   }
 };
-  
+
 
 /**
  * Render the modal dialog box
@@ -100,7 +100,7 @@ function media_render_dialog() {
 
 /**
  * Attach the behaviors to the main tabs across the top
- * of the browser 
+ * of the browser
  */
 Drupal.behaviors.tabsClick ={
   attach: function (context, settings) {
@@ -109,17 +109,17 @@ Drupal.behaviors.tabsClick ={
       $(this).bind('click', function () {
         // The first thing we need to do is to update the data store with this tab data
         $('#media_browser_data_store').attr('tabname', $(this).attr('tabname'));
-                
+
         // Unset other active tabs
         $('#media_content_browser_tabs .item-list li.active, #media_content_browser_tabs .item-list a.active').removeClass('active');
         // Make this tab active
         $(this).addClass('active');
         $(this).parents('li').addClass('active');
-        
+
         // Unload content in the subtabs
-        $('#media_content_browser_subtabs').html();        
+        $('#media_content_browser_subtabs').html();
         // Get content the subtabs for this tab
-        renderSubTabs();                
+        renderSubTabs();
       });
     });
   }
@@ -144,21 +144,21 @@ function renderSubTabs() {
       Drupal.attachBehaviors($('#dialog'));
       // Make the active subtab render its content
       renderSubTabPane();
-    }       
-  ); 
+    }
+  );
 }
 
 
 /**
  *  This loads pane content based on subtab clicks. It needs
- *  to be run each time that a new set of sub tabs is rendered 
+ *  to be run each time that a new set of sub tabs is rendered
  *  in the dialog box
  */
 Drupal.behaviors.subTabsClick ={
   attach: function (context, settings) {
     $('#media_content_browser_subtabs li.vertical-tab-button a', context).once('subTabsClick', function() {
       $(this).bind('click', function () {
-        // Store the current subtab identifier 
+        // Store the current subtab identifier
         $('#media_browser_data_store').attr('identifier', $(this).attr('identifier'));
         renderSubTabPane();
       });
@@ -170,7 +170,7 @@ Drupal.behaviors.subTabsClick ={
 /**
  * This does the actual render of content into the subTab pane
  * We do not pass params to this so that it can be a generalized
- * function. 
+ * function.
  * @TODO add a throbber to alert the user we are loading content
  */
 function renderSubTabPane() {
@@ -178,18 +178,20 @@ function renderSubTabPane() {
    var active_subtab = '#'+$('#edit-subtabs--active-tab').attr('value');
    // Derive the identifier for this pane
    var identifier = $(active_subtab+' input.subtab_data').attr('identifier');
-   
+
    // Now we have to build a query which the dispatcher uses to get the correct content
    // for this subtab pane
    var query = '?identifier='+identifier;
    // This populates the pane with the proper settings
    $.getJSON(build_callback_url('pane', query),
-     function(data) { 
+     function(data) {
        // Remove any exisiting pane content
        $('div.pane_content.active').removeClass('active').html('');
        $(active_subtab+' div.pane_content').html(data);
        // Make this pane active
        $(active_subtab+' div.pane_content').addClass('active');
+       // Attach any subtab behaviors.
+       Drupal.attachBehaviors($(active_subtab+' div.pane_content'));
      }
   );
 }
@@ -204,7 +206,7 @@ function build_callback_url(params, query) {
   var field_name = $('#media_browser_data_store').attr('field-name');
   var identifier = $('#media_browser_data_store').attr('identifier');
   var url = Drupal.settings.media.media_browser_content_load_url+'/'+object_type+'/'+bundle+'/'+field_name;
-  
+
   // Do we have parameters to add?
   if (typeof(params) != 'undefined') {
     url += '/'+params;
@@ -213,7 +215,7 @@ function build_callback_url(params, query) {
   if (typeof(query) != 'undefined') {
     url += query;
   }
-  
+
   return url;
 }
 
@@ -228,15 +230,15 @@ function build_callback_url(params, query) {
 $(document).ready(function () {
 
 
-   
-    
+
+
   /**
    *  Catch the clicks on the result limiters and pager queries
-   *  and modify the links to have the options in their URL so   
+   *  and modify the links to have the options in their URL so
    *  they can be parsed. Note that we are using the live function
    *  so that updates to the media_content_browser still have
    *  jquery functionality
-   */  
+   */
   $('ul.result_limit li a, ul.pager li a').live('click', function() {
     // Get the current query string
     var query = $(this).attr('href').replace(/.*\?/, '');
@@ -244,62 +246,62 @@ $(document).ready(function () {
     // Make sure to stop the click
     return false;
   });
-  
-  
+
+
   function media_load_content_display(query) {
     // Start visual effects
     // Show the throbber
-    $('#media_content_browser_throbber').fadeIn('fast');    
-    $('div.pane_content.active').fadeTo('slow', 0.23, function() {      
-      // Fetch content data with the new parameters    
-      media_load_content_navigator_reload(query);      
+    $('#media_content_browser_throbber').fadeIn('fast');
+    $('div.pane_content.active').fadeTo('slow', 0.23, function() {
+      // Fetch content data with the new parameters
+      media_load_content_navigator_reload(query);
       // Hide throbber
       $('#media_content_browser_throbber').fadeOut('slow', function () {
         // fade back the content
         $('div.pane_content.active').fadeTo('slow', 1);
-        });      
-        
-    }); // fade    
+        });
+
+    }); // fade
   }
-  
+
   /**
    * Stub function to get the current active pager
    * and reload the content based on this navigators
    * query string
    */
   function media_load_content_navigator_reload(query) {
-    $.getJSON(Drupal.settings.media.media_browser_content_load_url+'?'+query,     
+    $.getJSON(Drupal.settings.media.media_browser_content_load_url+'?'+query,
       function(data) { $('div.pane_content.active').html(data);}
     );
   }
-  
-  
+
+
   /**
-   * Handle the clicks on actual images and transfer those values 
+   * Handle the clicks on actual images and transfer those values
    * to the submission form
    */
    // Catch the clicks on the images in the modal window
    $('.media-thumbnail ul.media_content_navigator.results a').live('click', function () {
      // Remove any current selections
-     $('.media-thumbnail').removeClass('selected');     
+     $('.media-thumbnail').removeClass('selected');
      // Select this thumbnail
-     $(this).parents('.media-thumbnail').addClass('selected');     
+     $(this).parents('.media-thumbnail').addClass('selected');
      // We need to get the value of the checkbox for this selected file
      var uri = $('.media-thumbnail.selected input.form-checkbox').val();
      // Get the enclosing div and then the file input field and change its value
      // @TODO this does not support multiple file fields currently because
      //       the modal window appends to the bottom of the page. We need
      //       to come up with a mechanism to snif the current field- placing
-     //       a hiden element into the modal dailog with the filefield id 
+     //       a hiden element into the modal dailog with the filefield id
      //       might work well
-     $('input.media-file-uri').val(uri);   
+     $('input.media-file-uri').val(uri);
      // Deactivate the click
      return false;
      });
-  
-   
 
-   
+
+
+
 }); // $(document).ready
 
 
