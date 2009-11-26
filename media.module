@@ -826,6 +826,7 @@ function media_generic_widget_process($element, &$form_state, $form) {
   // it may not be possible. I suppose we can alter the form; this is just to
   // see if it works at all. - aaron
   if (module_exists('media_youtube')) {
+    drupal_add_js(array('mediaYoutube' => array('parse_url' => url('media-youtube/parse'))), 'setting');
     drupal_add_js(drupal_get_path('module', 'media_youtube') . '/js/media_youtube.js');
   }
 
@@ -895,6 +896,18 @@ function media_uri_value($element, &$input) {
     }
     else {
       // TODO: check a list of allowed scheme per field instance.
+      // @TODO: This is just so we can get YouTube working, which still doesn't
+      // seem to work w/ file_exists.
+      $wrapper = file_stream_wrapper_get_instance_by_uri($input['file_uri']);
+      $file->uri = $input['file_uri'];
+      $file->status = FILE_STATUS_PERMANENT;
+      $file->uid = $GLOBALS['user']->uid;
+      $file->filemime = $wrapper->getMimeType($input['file_uri']);
+      $file = file_save($file);
+      if (isset($file->fid)) {
+        $input['fid'] = $file->fid;
+        return;
+      }
     }
 
     $files = file_load_multiple(array(), array('uri' => $input['file_uri']));
