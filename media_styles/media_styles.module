@@ -67,8 +67,8 @@ function theme_media_styles_field_formatter_styles_default($variables) {
  *  The 'Default' file style is a fallback when nothing else resolves.
  */
 function media_styles_styles_formatter_filter_default() {
-  // @TODO: Change to TRUE once weights are resolved.
-  return FALSE;
+  // This is a fallback to handle all generic files.
+  return TRUE;
 }
 
 function media_styles_styles_formatter_filter($variables) {

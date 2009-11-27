@@ -2,6 +2,7 @@
 
 CHANGELOG for Media: Styles
 
+by aaron: Begin 'default' style.
 by aaron: Add a weight to style containers.
 by aaron: New themes for styles.
 by aaron: Image theme callbacks.
