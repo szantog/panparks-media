@@ -52,15 +52,26 @@ function media_styles_styles_containers() {
 }
 
 function theme_media_styles_styles_default($variables) {
-  return 'default';
+  $file = $variables['object'];
+  $path = drupal_get_path('module', 'media');
+  $thumbnail = theme('image',
+    array(
+      'path' => $path . '/images/file-unknown.png',
+      'alt' => t('Thumbnail for !filename.', array('!filename' => $file->filename)),
+      'attributes' => array('class' => 'file-unknown'),
+    )
+  );
+  return $thumbnail;
 }
 
 function theme_media_styles_preview_default($variables) {
-  return 'default';
+  return 'default: theme_media_styles_preview_default';
 }
 
 function theme_media_styles_field_formatter_styles_default($variables) {
-  return 'default';
+  $file = $variables['object'];
+  $file_url = file_create_url($file->uri);
+  return l($file->filename, $file_url);
 }
 
 /**
@@ -110,8 +121,17 @@ function theme_media_styles_styles($variables) {
 function media_styles_styles_presets() {
   $presets = array(
     'file' => array(
+      'square_thumbnail' => array(
+        'default' => array('square_thumbnail'),
+      ),
       'thumbnail' => array(
         'default' => array('thumbnail'),
+      ),
+      'large' => array(
+        'default' => array('large'),
+      ),
+      'medium' => array(
+        'default' => array('medium'),
       ),
     ),
   );
@@ -132,9 +152,11 @@ function media_styles_styles_styles() {
     $style['image_storage'] = $style['storage'];
     $styles[$style_name] = $style;
   }
+  $default_styles = $styles;
   return array(
     'file' => array(
       'image' => $styles,
+      'default' => $default_styles,
     ),
   );
 }
