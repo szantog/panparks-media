@@ -502,19 +502,25 @@ function media_edit_submit($form, &$form_state) {
  * Display the list or thumbnails media admin display.
  */
 function media_add_files($form, $form_state) {
+  $validators = array(
+   'file_validate_extensions' => array(variable_get('media_file_extensions', '')),
+   'file_validate_size' => array(parse_size(variable_get('media_max_filesize', ''))),
+  );
   
-  $description = '';
-  $extensions = variable_get('media_file_extensions', '');
-  if ($extensions) {
-    $description = t('Files of extension %extensions are permitted.', array('%extensions' => $extensions)) . ' ';
+  // A blank set of allowed file extensions means no need to validate.
+  if (!$validators['file_validate_extensions'][0]) {
+    unset($validators['file_validate_extensions']);
   }
-  $max_filesize = variable_get('media_max_filesize', '') ? variable_get('media_max_filesize', '') : file_upload_max_size();
-  $description .= t('Files up to %size are permitted.', array('%size' => format_size($max_filesize)));
-
+  // Use the PHP limit for filesize if no variable was set.
+  if (!$validators['file_validate_size']) {
+    $validators['file_validate_size'] = file_upload_max_size();
+  }
+  $form['#validators'] = $validators;
+  
   $form['upload'] = array(
     '#type' => 'file',
     '#title' => t('Upload a new file'),
-    '#description' => $description,
+    '#description' => theme('file_upload_help', array('description' => '', 'upload_validators' => $validators)),
   );
 
   $form['submit'] = array(
@@ -529,22 +535,9 @@ function media_add_files($form, $form_state) {
  * Validate the generic file upload with the global media settings.
  */
 function media_add_files_validate($form, &$form_state) {
-
-  $validators = array(
-   'file_validate_extensions' => array(variable_get('media_file_extensions', '')),
-   'file_validate_size' => array(parse_size(variable_get('media_max_filesize', ''))),
-  );
   
-  // A blank set of allowed file extensions means no need to validate.
-  if (!$validators['file_validate_extensions'][0]) {
-    unset($validators['file_validate_extensions']);
-  }
-  // Use the PHP limit for filesize if no variable was set.
-  if (!$validators['file_validate_size']) {
-    $validators['file_validate_size'] = file_upload_max_size();
-  }
   // Save the file as a temporary file.
-  $file = file_save_upload('upload', $validators);
+  $file = file_save_upload('upload', $form['#validators']);
   if ($file === FALSE) {
     form_set_error('upload', t("Failed to upload the file."));
   }

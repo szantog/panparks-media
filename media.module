@@ -93,13 +93,6 @@ function media_menu() {
     'weight' => 20,
   );
   */
-  $items['admin/content/media/add/external'] = array(
-    'title' => 'Add new external source',
-    'page callback' => 'media_add_external',
-    'access arguments' => array('administer media'),
-    'type' => MENU_LOCAL_ACTION,
-    'file' => 'media.admin.inc',
-  );
 
   // Default settings, for content types that do not have their own.
   $items['admin/config/media/media'] = array(
