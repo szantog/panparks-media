@@ -24,7 +24,7 @@ function media_settings_content_type(&$form, $type_name = NULL) {
     '#group'       => 'additional_settings',
   );
 
-  $type = _media_content_field_types($type_name);
+  $type = node_type_get_type($type_name);
 
   // Master settings override.
   $form['media']['media_' . $type_name . '_override'] = array(
@@ -41,6 +41,7 @@ function media_settings_content_type(&$form, $type_name = NULL) {
   );
 
   // Extract the fields for this node type
+  /* Commented out because _media_content_field_types is missing. This should all be removed? 
   if (isset($type->fields)) {
     foreach ((array)$type->fields as $field_name => $field) {
       // Create the field identifier
@@ -77,6 +78,7 @@ function media_settings_content_type(&$form, $type_name = NULL) {
       unset($form['media'][$field['field_name']]);
     }
   }
+  */
 }
 
 /**
