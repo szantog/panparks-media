@@ -139,7 +139,7 @@ function media_admin($form, $form_state, $display = NULL) {
 
   // Load our CSS and JS.
   drupal_add_css($path . '/media.css');
-  drupal_add_js($path . '/media.js');
+  drupal_add_js($path . '/javascript/media-admin.js');
 
   if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
     return media_multiple_delete_confirm($form, $form_state, array_filter($form_state['values']['files']));
