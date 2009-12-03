@@ -11,5 +11,6 @@ files[] = media_ahah.inc
 files[] = media.admin.inc
 files[] = media_theme.inc
 files[] = MediaReadOnlyStreamWrapper.inc
+files[] = MediaEntityController.php
 dependencies[] = file
 dependencies[] = image
