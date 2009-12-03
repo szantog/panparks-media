@@ -3,6 +3,8 @@
 CHANGELOG for Media module.
 ===========================
 
+by JacobSingh: MediaEntityController.php.
+by JacobSingh: Add media.fields.inc.
 by aaron: Add hacks so that Media: YouTube can work.
 by aaron: Attach subtab behaviors.
 by aaron: Temporarily hardcode load media youtube js in browser.
