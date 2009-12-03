@@ -1,4 +1,6 @@
 <?php
+// $Id$
+
 /**
  * Implement hook_entity_info().
  */
