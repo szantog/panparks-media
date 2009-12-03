@@ -136,15 +136,13 @@ function hook_media_default_style_bundles() {
 @TODO
 convert existing file fields to media_generic on hook_install
 convert existing media_generic to file fields on hook_uninstall
-write a patch to add directory to theme_file_icon
 allow theme_file_icon file directory override in widget display settings
+  (Requires http://drupal.org/node/650732)
 create new default file icons and set its folder as the new default
 maybe instead/in addition have fallbacks if icon not present?
 rename image style square_thumbnail to use the media_ namespace
 review Media Styles for feasibility, usability, and architecture
-complete Media Styles (started in media.styles.inc)
 create Media Styles UI .inc file
-expose Image styles to Media styles by default, registered to image mimetypes
 look at hook_field_info_alter to see if we can affect file widget that way
 CLEAN CRUFT (lots of functions that no longer apply or need to be rethought)
 why do we want to override the file field widget again?
