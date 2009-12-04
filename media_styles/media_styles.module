@@ -12,39 +12,41 @@
 function media_styles_styles_containers() {
   return array(
     'file' => array(
-      'image' => array(
-        'label' => t('Image Styles'),
-        'weight' => 0,
-        'preview theme' => 'image_style_preview',
-        'data' => array(
-          'streams' => array(
-            'public',
-            'private',
+      'containers' => array(
+        'image' => array(
+          'label' => t('Image Styles'),
+          'weight' => 0,
+          'preview theme' => 'image_style_preview',
+          'data' => array(
+            'streams' => array(
+              'public',
+              'private',
+            ),
+            'mimetypes' => array(
+              'image/png',
+              'image/gif',
+              'image/jpeg',
+            ),
           ),
-          'mimetypes' => array(
-            'image/png',
-            'image/gif',
-            'image/jpeg',
+          'filter callback' => 'media_styles_styles_formatter_filter',
+          'themes' => array(
+            'field_formatter_styles' => 'media_styles_field_formatter_styles',
+            'styles' => 'media_styles_styles',
+            'preview' => 'image_style_preview',
           ),
+          'help' => t('Image Styles will transform images to your choosing, such as by scaling and cropping. You can !manage.', array('!manage' => l(t('manage your image styles here'), 'admin/config/image/image-styles'))),
         ),
-        'filter callback' => 'media_styles_styles_formatter_filter',
-        'themes' => array(
-          'field_formatter_styles' => 'media_styles_field_formatter_styles',
-          'styles' => 'media_styles_styles',
-          'preview' => 'image_style_preview',
-        ),
-        'help' => t('Image Styles will transform images to your choosing, such as by scaling and cropping. You can !manage.', array('!manage' => l(t('manage your image styles here'), 'admin/config/image/image-styles'))),
-      ),
-      'default' => array(
-        'label' => t('Default Media Styles'),
-        'weight' => 10,
-        'preview theme' => 'media_styles_preview_default',
-        'data' => array(),
-        'filter callback' => 'media_styles_styles_formatter_filter_default',
-        'themes' => array(
-          'field_formatter_styles' => 'media_styles_field_formatter_styles_default',
-          'styles' => 'media_styles_styles_default',
-          'preview' => 'media_styles_preview_default',
+        'default' => array(
+          'label' => t('Default Media Styles'),
+          'weight' => 10,
+          'preview theme' => 'media_styles_preview_default',
+          'data' => array(),
+          'filter callback' => 'media_styles_styles_formatter_filter_default',
+          'themes' => array(
+            'field_formatter_styles' => 'media_styles_field_formatter_styles_default',
+            'styles' => 'media_styles_styles_default',
+            'preview' => 'media_styles_preview_default',
+          ),
         ),
       ),
     ),
@@ -155,8 +157,10 @@ function media_styles_styles_styles() {
   $default_styles = $styles;
   return array(
     'file' => array(
-      'image' => $styles,
-      'default' => $default_styles,
+      'containers' => array(
+        'image' => array('styles' => $styles),
+        'default' => array('styles' => $default_styles),
+      ),
     ),
   );
 }
