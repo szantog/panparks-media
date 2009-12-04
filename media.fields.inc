@@ -128,31 +128,3 @@ function media_media_types() {
   return $types;
 }
 
-
-/**
- * Menu argument handler.  Loads a media type definition when %media_type is in the path.
- *
- * @param string $type
- * @return StdClass
- */
-function media_type_load($type) {
-  return $type;
-  $media_types = module_invoke_all('media_types');
-  return $media_types[$type];
-}
-
-function media_load($fid) {
-  return entity_load('media', array($fid));
-}
-
-/**
- * Implement hook_permission().
- */
-function media_permission() {
-  return array(
-    'administer media' => array(
-      'title' => t('Administer media'),
-      'description' => t('Add, edit or delete media.'),
-    ),
-  );
-}
