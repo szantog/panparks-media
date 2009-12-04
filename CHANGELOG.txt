@@ -3,6 +3,11 @@
 CHANGELOG for Media module.
 ===========================
 
+by JacobSingh: Implement of hook_wysiwyg_plugin().
+by JacobSingh: Remove hook_permission implementation.
+by JacobSingh: Display content type admin overview page: admin/structure/media
+by JacobSingh: Tie in MediaEntityController to media_add_files_submit.
+by JacobSingh: Add menu callback for media_page_edit.
 by JacobSingh: MediaEntityController.php.
 by JacobSingh: Add media.fields.inc.
 by aaron: Add hacks so that Media: YouTube can work.

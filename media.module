@@ -55,12 +55,22 @@ function media_menu() {
     'access arguments' => array('access content'),
   );
 
+  // For managing different types of media and the fields associated with them.
+  $items['admin/structure/media'] = array(
+    'title' => 'Media',
+    'description' => 'Manage files used on your site.',
+    'page callback' => 'media_admin_type_list',
+    'access arguments' => array('administer media'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'media.admin.inc',
+  );
+
   // Admin settings
   $items['admin/content/media'] = array(
     'title' => 'Media',
     'description' => 'Manage files used on your site.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('media_admin'),
+    'page callback' => 'media_page_edit',
+    'page arguments' => array(3),
     'access arguments' => array('administer media'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'media.admin.inc',
@@ -107,20 +117,6 @@ function media_menu() {
 
   return $items;
 }
-
-
-/**
- * Implement hook_permission().
- */
-function media_permission() {
-  return array(
-    'administer media' => array(
-      'title' => t('Administer media'),
-      'description' => t('Add, edit or delete media.'),
-    ),
-  );
-}
-
 
 /**
  * Implementation of hook_form_alter().
@@ -640,7 +636,7 @@ function media_field_widget_info() {
   return array(
     'media_generic' => array(
       'label' => t('File (media)'),
-      'field types' => array('file'),
+      'field types' => array('file', 'media'),
       'settings' => array(
         'progress_indicator' => 'throbber',
         'allowed_schemes' => array('public', 'private'),
@@ -1041,6 +1037,46 @@ function media_file_listing_form($form, $form_state, $files, $parameters) {
   return $form;
 }
 
+/**
+ * Implementation of hook_wysiwyg_plugin().
+ */
+function media_wysiwyg_plugin($editor, $version) {
+  switch ($editor) {
+    case 'tinymce':
+      if ($version > 3) {
+        return array(
+          'media' => array(
+            'path' => drupal_get_path('module', 'media') .'/drupalimage/editor_plugin.js',
+            'buttons' => array('media' => t('Add Media')),
+            'url' => 'http://drupal.org/project/media',
+            'extended_valid_elements' => array(
+              'img[class|src|border=0|alt|title|width|height|align|name|style]',
+              'object[class|src]',
+              'param[class|src]',
+            ),
+            'load' => TRUE,
+          ),
+        );
+      }
+      break;
+
+     case 'ckeditor':
+          return array(
+            'media' => array(
+              'path' => drupal_get_path('module', 'media') .'/javascript/ckeditor/plugin.js',
+              'buttons' => array('media' => t('Add Media')),
+              'url' => 'http://drupal.org/project/media',
+              'extended_valid_elements' => array(
+                'img[class|src|border=0|alt|title|width|height|align|name|style]',
+                'object[class|src]',
+                'param[class|src]',
+              ),
+              'load' => TRUE,
+            ),
+          );
+          break;
+  }
+}
 
 /**
  * @TODO can somebody document this?

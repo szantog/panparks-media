@@ -41,7 +41,7 @@ function media_settings_content_type(&$form, $type_name = NULL) {
   );
 
   // Extract the fields for this node type
-  /* Commented out because _media_content_field_types is missing. This should all be removed? 
+  /* Commented out because _media_content_field_types is missing. This should all be removed?
   if (isset($type->fields)) {
     foreach ((array)$type->fields as $field_name => $field) {
       // Create the field identifier
@@ -461,17 +461,18 @@ function media_media_operations() {
 }
 
 /**
+ * Menu callback; presents the node editing form, or redirects to delete confirmation.
+ */
+function media_page_edit($file) {
+  drupal_set_title(t('Edit @title', array('@title' => drupal_set_title($file->filename))));
+  return drupal_get_form('media_edit', $file);
+}
+
+/**
  * Form builder: Builds the edit file form.
  */
-function media_edit($form, $files) {
-  $file = $files['args'][0];
+function media_edit($form, $form_state, $file) {
   drupal_set_title($file->filename);
-  $form['title'] = array(
-    '#title' => t('Title'),
-    '#type' => 'textfield',
-    '#required' => TRUE,
-    '#default_value' => $file->filename,
-  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -480,6 +481,10 @@ function media_edit($form, $files) {
     '#type' => 'hidden',
     '#value' => $file->fid,
   );
+  // I don't know wtf we're going to do here....'
+  $media = media_load($file->fid);
+  field_attach_form('media', $media, $form, $form_state, FIELD_LANGUAGE_NONE);
+
   $form['#redirect'] = 'admin/content/media';
   return $form;
 }
@@ -506,7 +511,7 @@ function media_add_files($form, $form_state) {
    'file_validate_extensions' => array(variable_get('media_file_extensions', '')),
    'file_validate_size' => array(parse_size(variable_get('media_max_filesize', ''))),
   );
-  
+
   // A blank set of allowed file extensions means no need to validate.
   if (!$validators['file_validate_extensions'][0]) {
     unset($validators['file_validate_extensions']);
@@ -516,7 +521,7 @@ function media_add_files($form, $form_state) {
     $validators['file_validate_size'] = file_upload_max_size();
   }
   $form['#validators'] = $validators;
-  
+
   $form['upload'] = array(
     '#type' => 'file',
     '#title' => t('Upload a new file'),
@@ -535,7 +540,7 @@ function media_add_files($form, $form_state) {
  * Validate the generic file upload with the global media settings.
  */
 function media_add_files_validate($form, &$form_state) {
-  
+
   // Save the file as a temporary file.
   $file = file_save_upload('upload', $form['#validators']);
   if ($file === FALSE) {
@@ -557,8 +562,64 @@ function media_add_files_submit($form, &$form_state) {
   if ($file = file_move($file, $destination, FILE_EXISTS_REPLACE)) {
     file_save($file);
     drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
+    $form_state['redirect'] = url('admin/content/media/' . $file->fid . '/edit');
+
+    $file->type = MediaEntityController::getBundleName($file->filemime);
+
+    $file->field_title[FIELD_LANGUAGE_NONE][0]['value'] = $file->fielname;
+    field_attach_insert('media', $file);
   }
   else {
     drupal_set_message(t('An error occurred and no file was uploaded.'), 'error');
   }
+}
+
+/**
+ * Displays the content type admin overview page.
+ */
+function media_admin_type_list() {
+  $types = module_invoke_all('media_types');
+  $field_ui = module_exists('field_ui');
+  $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => $field_ui ? '4' : '2'));
+  $rows = array();
+
+  foreach ($types as $key => $info) {
+    $type = $types[$key];
+    $type_url_str = str_replace('_', '-', $key);
+    $row = array();
+    $label = $info->label;
+
+    // Set the name column.
+    $row[] = array('data' => t($info->label));
+
+    // Set the edit column.
+    $row[] = array('data' => l(t('edit'), 'admin/structure/media/manage/' . $type_url_str));
+
+    if ($field_ui) {
+      // Manage fields.
+      $row[] = array('data' => l(t('manage fields'), 'admin/structure/media/manage/' . $type_url_str . '/fields'));
+
+      // Display fields.
+      $row[] = array('data' => l(t('manage display'), 'admin/structure/media/manage/' . $type_url_str . '/display'));
+    }
+
+    // Set the delete column.
+    if (empty($type->base)) {
+      $row[] = array('data' => l(t('delete'), 'admin/structure/media/manage/' . $type_url_str . '/delete'));
+    }
+    else {
+      $row[] = array('data' => '');
+    }
+
+    $rows[] = $row;
+
+  }
+
+  $build['media_type_table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows
+  );
+
+  return $build;
 }
