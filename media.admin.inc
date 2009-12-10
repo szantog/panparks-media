@@ -461,7 +461,7 @@ function media_media_operations() {
 }
 
 /**
- * Menu callback; presents the node editing form, or redirects to delete confirmation.
+ * Menu callback; presents the Media editing form, or redirects to delete confirmation.
  */
 function media_page_edit($file) {
   drupal_set_title(t('Edit @title', array('@title' => drupal_set_title($file->filename))));
@@ -472,35 +472,47 @@ function media_page_edit($file) {
  * Form builder: Builds the edit file form.
  */
 function media_edit($form, $form_state, $file) {
+
   drupal_set_title($file->filename);
+
+  field_attach_form('media', $file, $form, $form_state);
+
+  $form['preview'] = array(
+    '#type' => 'markup',
+    '#markup' => 'PREVIEW GOES HERE',
+    '#prefix' => '<div style="padding:10px; border:3px solid #CCC; width:200px; height:200px">',
+    '#suffix' => '</div>',
+    '#weight' => -10,
+  );
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
   );
-  $form['file'] = array(
+
+
+
+  $form['fid'] = array(
     '#type' => 'hidden',
     '#value' => $file->fid,
   );
-  // I don't know wtf we're going to do here....'
-  $media = media_load($file->fid);
-  field_attach_form('media', $media, $form, $form_state, FIELD_LANGUAGE_NONE);
 
   $form['#redirect'] = 'admin/content/media';
   return $form;
 }
 
 function media_edit_validate($form, &$form_state) {
-  // TODO: validate the edit form.
+  $media = media_load($form_state['values']['fid']);
+  field_attach_form_validate('media', $media, $form, $form_state);
 }
 
 /**
  * Process media_edit form submissions.
  */
 function media_edit_submit($form, &$form_state) {
-  $file = file_load($form_state['values']['file']);
-  print_r($file);
-  $file->filename = $form_state['values']['title'];
-  file_save($file);
+  $media = media_load($form_state['values']['fid']);
+  field_attach_submit('media', $media, $form, $form_state);
+  media_save($media);
 }
 
 /**
@@ -563,10 +575,6 @@ function media_add_files_submit($form, &$form_state) {
     file_save($file);
     drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
     $form_state['redirect'] = url('admin/content/media/' . $file->fid . '/edit');
-
-    $file->type = MediaEntityController::getBundleName($file->filemime);
-
-    $file->field_title[FIELD_LANGUAGE_NONE][0]['value'] = $file->fielname;
     field_attach_insert('media', $file);
   }
   else {
@@ -578,7 +586,7 @@ function media_add_files_submit($form, &$form_state) {
  * Displays the content type admin overview page.
  */
 function media_admin_type_list() {
-  $types = module_invoke_all('media_types');
+  $types = media_type_get_types();
   $field_ui = module_exists('field_ui');
   $header = array(t('Name'), array('data' => t('Operations'), 'colspan' => $field_ui ? '4' : '2'));
   $rows = array();

@@ -7,10 +7,92 @@
 * Install, update and uninstall functions for the Media module.
 */
 
+function media_install() {
+  /**
+   * DISCLAIMER:
+   * Yes I am altering a core table.
+   * No I am not on crack.
+   * Basically, the problem we're facing is the media "type" which is not the mime type
+   * but is probably computed from it.
+   *
+   * the file table has no type field.  As a result, we would have to either:
+   *
+   * 1). Create a media_files table to join them.  This is nice and clean, however
+   * it requires keeping the tables in sync, and it also means we have to write our
+   * own SQL instead of using BaseEntityController, and that's kinda scary.
+   *
+   * 2). Make the media type a "computed" field.  Wherein, everytime we loaded a piece
+   * of media, we would need to compute its type from the mime-type.  This is unacceptable
+   * from a performance standpoint and also requires us override the Controller in ways
+   * we probably don't want to.
+   *
+   * I know it's a sin, but I think it is also excusable because:
+   *
+   * 1). This is hoping to be a core addition, so think of it as a core patch
+   * that will eventually go in.
+   *
+   * 2). It is adding a new field, so it shouldn't cause any conflicts.  If it does
+   * that INSERT / SELECT code is badly written and should use complete INSERTS or column names.
+   */
+
+  $keys = array('index' => array('type'));
+  db_add_field('file', 'type', _media_type_field_spec());
+  db_add_index('file', 'file_type', array('type'));
+
+  // Add the common media types.
+  $types = array();
+  $types['image'] = new StdClass();
+  $types['image']->machine_name = 'image';
+  $types['image']->label = "Image";
+  $types['image']->base = TRUE;
+  $types['image']->extensions = array('jpg', 'jpeg', 'gif', 'png', 'tiff');
+  // @todo:not implemented
+  $types['image']->mimeTypes = array('/^image/');
+
+  $types['audio'] = new StdClass();
+  $types['audio']->machine_name = 'audio';
+  $types['audio']->label = "Audio";
+  $types['audio']->base = TRUE;
+  $types['audio']->extensions = array('mp3', 'ogg', 'wma');
+  $types['audio']->mimeTypes = array('/^audio/');
+
+  $types['video'] = new StdClass();
+  $types['video']->machine_name = 'video';
+  $types['video']->label = "Video";
+  $types['video']->base = TRUE;
+  $types['video']->extensions = array('mov', 'mp4', 'avi');
+  $types['video']->mimeTypes = array('/^video/');
+
+  foreach ($types as $name => $type) {
+    media_type_save($type);
+  }
+}
+
+function _media_type_field_spec() {
+  return array(
+    'description' => 'Type of file for use in Media Bundles',
+    'type' => 'varchar',
+    'length' => 50,
+    'not null' => FALSE,
+  );
+}
+
+
+/**
+ * Implement hook_schema_alter();
+ */
+function media_schema_alter(&$schema) {
+  $schema['file']['fields']['type'] = _media_type_field_spec();
+}
+
 /**
  * Implement hook_uninstall().
  */
 function media_uninstall() {
+  /**
+   * See comment above in media_install.
+   */
+  db_drop_field('file', 'type');
   $types = node_type_get_types();
   $global = new stdClass;
   $global->fields = field_info_instances();
