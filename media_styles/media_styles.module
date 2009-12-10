@@ -105,8 +105,8 @@ function theme_media_styles_field_formatter_styles($variables) {
 
 function theme_media_styles_styles($variables) {
   $style_name = $variables['style_name'];
-  $path = $variables['uri'];
-  $alt = $title = $variables['description'];
+  $path = $variables['object']->uri;
+  $alt = $title = $variables['object']->description;
   return theme('image_style',
     array(
       'style_name' => $style_name,
