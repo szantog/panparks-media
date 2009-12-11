@@ -640,7 +640,7 @@ function _media_content_field_types($type_name) {
   }
   else {
     // Get the specific content type.
-    $type = (array)node_get_types('type', $type_name);
+    $type = (array)node_type_get_type($type_name);
   }
 
   // Recognize the upload/attachment form and create an artificial field.
@@ -905,7 +905,7 @@ function media_resource_display_user_files_form($files, $title = NULL) {
   $options = array();
 
   foreach ($files as $file) {
-		// TODO: Use FID rather than URI
+    // TODO: Use FID rather than URI
     $options[$file['uri']] = $file['filename'];
   }
 
@@ -1277,7 +1277,7 @@ function media_generic_widget_process($element, &$form_state, $form) {
   $i = false;
   // Fetch all defined tabs
   foreach (media_get_registered_modules_get_tabs() as $tab_machine => $tabname) {
-  	$options = array('attributes' => array(
+    $options = array('attributes' => array(
       'class' => ($i ? null : 'active'),
       'tabname' => $tab_machine,
       'field-name' => $element['#field_name'],
@@ -1285,11 +1285,11 @@ function media_generic_widget_process($element, &$form_state, $form) {
       'object-type' => $element['#object_type']
     ));
 
-	  $items[] = array(
-	    'data' => l($tabname, '#', $options),
-	    'class' => $i ? null : array('active'),
-	  );
-	  $i = true;
+    $items[] = array(
+      'data' => l($tabname, '#', $options),
+      'class' => $i ? null : array('active'),
+    );
+    $i = true;
   }
 
   // Add a URL setting for the AJAX load
@@ -1423,27 +1423,27 @@ function media_image_default_styles() {
  * @return unknown_type
  */
 function media_browser_subtabs_form($form, &$form_state, $parameters) {
-	// We are making vertical tabs
+  // We are making vertical tabs
   $form['subtabs'] = array('#type' => 'vertical_tabs');
   // Load all the subtabs for this tab
   foreach(media_get_registered_modules_get_subtabs($parameters['tabname']) as $subtab) {
-  	$form[$subtab['identifier']] = array(
-  	  '#type' => 'fieldset',
-  	  '#title' => $subtab['subtab'],
-  	  '#group' => 'subtabs',
-  	);
-  	// Clean this little mess up
-  	$element_params = array_merge(array('identifier' => $subtab['identifier']), $parameters);
-  	$element_params['class'] .= ' subtab_data';
+    $form[$subtab['identifier']] = array(
+      '#type' => 'fieldset',
+      '#title' => $subtab['subtab'],
+      '#group' => 'subtabs',
+    );
+    // Clean this little mess up
+    $element_params = array_merge(array('identifier' => $subtab['identifier']), $parameters);
+    $element_params['class'] .= ' subtab_data';
 
-  	$form[$subtab['identifier']]['data'] = array(
-  	  '#type' => 'hidden',
-  	  '#attributes' => $element_params,
-  	  '#value' => $id,
-  	);
+    $form[$subtab['identifier']]['data'] = array(
+      '#type' => 'hidden',
+      '#attributes' => $element_params,
+      '#value' => $id,
+    );
 
-  	// This provides a place to render our content
-  	$form[$subtab['identifier']]['markup'] = array('#markup' => '<div class="pane_content"></div>');
+    // This provides a place to render our content
+    $form[$subtab['identifier']]['markup'] = array('#markup' => '<div class="pane_content"></div>');
   }
 
   return $form;
