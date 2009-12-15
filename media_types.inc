@@ -1,10 +1,20 @@
 <?php
+// $Id$
+
+/**
+ *  @file
+ *  Define Media entity types.
+ */
+
 /**
  * Implement hook_entity_info().
  *
  * @todo: This has a pretty serious flaw.  In the case someone uploads
  * a file without a known "type" fields will puke.  We need to provide
  * some "default type in the install probably".
+ *
+ * @note: We might want to consider using filter callbacks rather than mimetype
+ * extensions instead.
  */
 function media_entity_info() {
   $return = array(
@@ -39,14 +49,6 @@ function media_entity_info() {
 
 /**
  * Implement hook_field_info().
- *
- * Field settings:
- * - allowed_values: a list array of one or more vocabulary trees:
- *   - vid: a vocabulary ID.
- *   - parent: a term ID of a term whose children are allowed. This should be
- *     '0' if all terms in a vocabulary are allowed. The allowed values do not
- *     include the parent term.
- *
  */
 function media_field_info() {
   return array(
@@ -55,6 +57,8 @@ function media_field_info() {
       'description' => t('This field stores a reference to a multimedia asset.'),
       'default_widget' => 'media_generic',
       'default_formatter' => 'media_generic',
+      'settings' => array(),
+      'instance_settings' => array(),
     ),
   );
 }
@@ -62,8 +66,14 @@ function media_field_info() {
 /**
  * Update an existing media type or create a new one.
  *
- * @param object $type
- * @return void;
+ *  @param object $type
+ *    $type is an object with the following fields:
+ *      ->machine_name => The name of the media asset type;
+ *      ->label => The human readable name;
+ *      ->base => @TODO: What's this?
+ *      ->extensions => An array of allowed extensions; @TODO:replace w/ callback
+ *      ->mimeTypes => (obsolete).
+ *  @return void;
  */
 function media_type_save($type) {
   $types = variable_get('media_types', array());
@@ -90,7 +100,6 @@ function media_type_load($machine_name) {
 /**
  * Loads all media types into an array keyed by machine name.
  *
-
  * @return array
  *  Media types keyed by machine name.
  */
@@ -104,15 +113,16 @@ function media_type_get_types() {
 }
 
 /**
- * Returns a an associative array mapping mimeType patterns to media types.
+ *  Returns a an associative array mapping mimeType patterns to media types.
+ *  @TODO: Replace this functionality with a filter callback instead.
  *
- * Example:
- * return array(
- *   'image/gif' => 'image',
- *   'image/png' => 'image,
- * );
+ *  Example:
+ *  return array(
+ *    'image/gif' => 'image',
+ *    'image/png' => 'image,
+ *  );
  *
- * @return array
+ *  @return array
  */
 function media_type_get_mime_map() {
   $map =& drupal_static(__FUNCTION__);

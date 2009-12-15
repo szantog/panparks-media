@@ -2,11 +2,14 @@
 // $Id$
 
 /**
-* @file
-*
-* Install, update and uninstall functions for the Media module.
-*/
+ *  @file
+ *
+ *  Install, update and uninstall functions for the Media module.
+ */
 
+/**
+ *  Implements hook_install().
+ */
 function media_install() {
   /**
    * DISCLAIMER:
@@ -88,9 +91,8 @@ function _media_type_field_spec() {
   );
 }
 
-
 /**
- * Implement hook_schema_alter();
+ *  Implement hook_schema_alter();
  */
 function media_schema_alter(&$schema) {
   // Alter {file}.type.
@@ -98,7 +100,7 @@ function media_schema_alter(&$schema) {
 }
 
 /**
- * Implement hook_uninstall().
+ *  Implement hook_uninstall().
  */
 function media_uninstall() {
   /**
