@@ -59,6 +59,15 @@ function media_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'media.admin.inc',
   );
+  $items['admin/structure/media/manage/%media_type'] = array(
+    'title' => 'Manage media',
+    'description' => 'Manage files used on your site.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_admin_type_manage_form', 4),
+    'access arguments' => array('administer media'),
+    'type' => MENU_CALLBACK,
+    'file' => 'media.admin.inc',
+  );
 
   // Admin settings
   $items['admin/content/media'] = array(

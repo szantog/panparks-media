@@ -631,3 +631,12 @@ function media_admin_type_list() {
 
   return $build;
 }
+
+function media_admin_type_manage_form($form, &$form_state, $media_type) {
+  $form = array();
+  $form['media_type'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('@media media type', array('@media' => $media_type->label)),
+  );
+  return $form;
+}
