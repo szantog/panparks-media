@@ -161,7 +161,7 @@ function media_form_alter(&$form, $form_state, $form_id) {
 
   // Load content-type settings
   if ($form_id == 'node_type_form') {
-    include_once('media_settings.inc');
+    module_load_include('inc', 'media', 'media_settings');
     media_settings_content_type($form, $form['#node_type']->type);
   }
 
