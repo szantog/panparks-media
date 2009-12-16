@@ -3,6 +3,11 @@
 CHANGELOG for Media module.
 ===========================
 
+by aaron: Implement hook_field_schema().
+by aaron: Fix error on content type admin page.
+by aaron: Begin menu callback for admin/structure/media/.
+by aaron: Fix Warning: include_once(): Failed opening 'media_settings.inc' for
+  inclusion.
 by JacobSingh: Implement of hook_wysiwyg_plugin().
 by JacobSingh: Remove hook_permission implementation.
 by JacobSingh: Display content type admin overview page: admin/structure/media

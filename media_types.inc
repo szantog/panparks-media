@@ -64,6 +64,24 @@ function media_field_info() {
 }
 
 /**
+ *  Implement hook_field_schema().
+ */
+function media_field_schema($field) {
+  return array(
+    'columns' => array(
+      'fid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+    ),
+    'indexes' => array(
+      'fid' => array('fid'),
+    ),
+  );
+}
+
+/**
  * Update an existing media type or create a new one.
  *
  *  @param object $type
