@@ -479,7 +479,7 @@ function media_edit($form, $form_state, $file) {
 
   $form['preview'] = array(
     '#type' => 'markup',
-    '#markup' => 'PREVIEW GOES HERE',
+    '#markup' => theme('media_admin_thumbnail', array('file' => $file, 'style_name' => 'medium')),
     '#prefix' => '<div style="padding:10px; border:3px solid #CCC; width:200px; height:200px">',
     '#suffix' => '</div>',
     '#weight' => -10,

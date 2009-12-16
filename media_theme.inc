@@ -110,9 +110,10 @@ function theme_media_browser_content_frame($variables) {
  */
 function theme_media_browser_thumbnails($variables) {
   $files = $variables['files'];
+  $style_name = $variables['style_name'];
   $thumbnails = array();
   foreach ($files as $file) {
-    $thumbnails[] = theme('media_admin_thumbnail', array('file' => $file));
+    $thumbnails[] = theme('media_admin_thumbnail', array('file' => $file, 'style_name' => $style_name));
   }
   return theme('item_list', array('items' => $thumbnails, 'attributes' => array('class' => 'media_content_navigator results')));
 }
@@ -126,13 +127,14 @@ function theme_media_browser_thumbnails($variables) {
 function theme_media_admin_thumbnail($variables) {
   $path = drupal_get_path('module', 'media');
   $file = $variables['file'];
+  $style_name = $variables['style_name'];
   $file_url = file_create_url($file->uri);
   $output = '';
   if (module_exists('styles')) {
     $thumbnail = theme('styles',
       array(
         'field_type' => 'file',
-        'style_name' => 'thumbnail',
+        'style_name' => $style_name,
         'uri' => $file->uri,
         'description' => t('Thumbnail for !filename.', array('!filename' => $file->filename)),
         'object' => $variables['file'],

@@ -227,13 +227,13 @@ function media_theme() {
 
     // A preview of the uploaded file.
     'media_admin_thumbnail' => array(
-      'variables' => array('file' => NULL),
+      'variables' => array('file' => NULL, 'style_name' => 'thumbnail'),
       'file' => 'media_theme.inc',
     ),
 
     // Administrative thumbnail previews.
     'media_admin_thumbnail' => array(
-      'variables' => array('files' => array()),
+      'variables' => array('files' => array(), 'style_name' => 'thumbnail'),
       'file' => 'media_theme.inc',
     ),
   );
