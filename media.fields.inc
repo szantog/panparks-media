@@ -68,6 +68,34 @@ function media_field_widget_info() {
   );
 }
 
+function media_field_formatter_info() {
+  return array(
+    'media_default' => array(
+      'label' => t('Default (link to file)'),
+      'field types' => array('media'),
+    ),
+  );
+}
+
+function media_field_formatter($obj_type, $object, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+
+  switch ($display['type']) {
+    case 'media_default':
+      // Common case: each value is displayed individually in a sub-element
+      // keyed by delta. The field.tpl.php template specifies the markup
+      // wrapping each value.
+      foreach ($items as $delta => $item) {
+        $file = media_load($item['fid']);
+        $element[$delta] = array('#markup' => l($file->filename, file_create_url($file->uri)));
+      }
+      break;
+  }
+
+  return $element;
+}
+
+
 /**
  * Implement hook_field_widget_settings_form().
  */
@@ -133,7 +161,7 @@ function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, 
   // Update order according to weight.
   $items = _field_sort_items($field, $items);
 
-  $element = array(
+  $element += array(
     '#type' => 'media_managed_file',
     '#default_value' => isset($items[$delta]) ? $items[$delta] : 0,
     '#required' => $instance['required'],
@@ -196,6 +224,7 @@ function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, 
  */
 function media_generic_widget_process($element, &$form_state, $form) {
   $fid = isset($element['#default_value']['fid']) ? $element['#default_value']['fid'] : 0;
+  $file = media_load($fid);
 
   if (variable_get('media_debug', TRUE)) {
     $element['file_info'] = array (
@@ -203,14 +232,14 @@ function media_generic_widget_process($element, &$form_state, $form) {
       '#rows' => 5,
       '#title' => 'File Info',
       '#attributes' => array('style' => 'font-size:.75em; font-family:courier'),
-      '#default_value' => print_r(media_load($fid),1),
+      '#default_value' => print_r($file, 1),
     );
   }
 
   $element['preview'] = array (
     '#type' => 'markup',
     '#title' => 'Preview',
-    '#markup' => theme('media_admin_thumbnail', array('file' => media_load($fid))),
+    '#markup' => theme('media_admin_thumbnail', array('file' => $file)),
   );
 
   if (variable_get('media_debug', TRUE)) {
