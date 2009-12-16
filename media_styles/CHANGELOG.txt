@@ -2,6 +2,7 @@
 
 CHANGELOG for Media: Styles
 
+by aaron: Require dependency of the Styles module.
 by aaron: Allow description variable.
 by aaron: Fix badly named file.
 by aaron: Move theme functions to external file.
