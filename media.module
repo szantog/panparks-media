@@ -17,6 +17,7 @@
 /* ***************************************** */
 
 include_once('media_types.inc');
+include_once('media.fields.inc');
 
 /* ***************************************** */
 /* CONSTANTS                                 */
@@ -1087,62 +1088,63 @@ function media_field_info_alter(&$info) {
   $info['file']['default_widget'] = 'media_generic';
 }
 
-function media_field_widget_info_alter(&$info) {
-  // Don't allow users to choose the generic file upload widget
-  // for new fields.
-  unset($info['file_generic']);
-}
 
-/**
- * Implement hook_field_widget_info().
- */
-function media_field_widget_info() {
-  return array(
-    'media_generic' => array(
-      'label' => t('File (media)'),
-      'field types' => array('file', 'media'),
-      'settings' => array(
-        'progress_indicator' => 'throbber',
-        'allowed_schemes' => array('public', 'private'),
-      ),
-      'behaviors' => array(
-        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
-        'default value' => FIELD_BEHAVIOR_NONE,
-      ),
-    ),
-  );
-}
+function media_attach_browser() {
+  // @TODO: Use the currently undocumented #attached property to load js & css.
+  // Load up all of our necessary jQuery
+  drupal_add_library('system', 'vertical-tabs');
+  drupal_add_library('system', 'ui');
+  drupal_add_library('system', 'ui.draggable');
+  drupal_add_library('system', 'ui.resizable');
+  drupal_add_library('system', 'ui.dialog');
+  drupal_add_library('system', 'ui.tabs');
+  // Load our css.
+  drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
+  // Load the custom JS
+  drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.js');
 
-/**
- * Implement hook_field_widget_settings_form().
- */
-function media_field_widget_settings_form($field, $instance) {
-
-  // Get form for upload progress.
-  $form = file_field_widget_settings_form($field, $instance);
-  $widget = $instance['widget'];
-  $settings = $widget['settings'];
-  $streams = file_get_stream_wrappers();
-  unset($streams['temporary']);
-  foreach ($streams as $scheme => $data) {
-    $options[$scheme] = t('@scheme (@name)', array('@scheme' => $scheme . '://', '@name' => $data['name']));
+  // @TODO: This is a hack to get the Media: YouTube js attached to the form.
+  // I wasn't able to get the #attached property to be respected during AJAX;
+  // it may not be possible. I suppose we can alter the form; this is just to
+  // see if it works at all. - aaron
+  if (module_exists('media_youtube')) {
+    drupal_add_js(array('mediaYoutube' => array('parse_url' => url('media-youtube/parse'))), 'setting');
+    drupal_add_js(drupal_get_path('module', 'media_youtube') . '/js/media_youtube.js');
   }
-  $form['allowed_schemes'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Allowed URI schemes'),
-    '#options' => $options,
-    '#default_value' => $settings['allowed_schemes'],
-    '#description' => t('URI schemes include public:// and private:// which are the Drupal files directories, and may also refer to remote sites.'),
-    '#weight' => 1,
-  );
-  return $form;
+
+  $i = false;
+  // Fetch all defined tabs
+  //foreach (media_get_registered_modules_get_tabs() as $tab_machine => $tabname) {
+  foreach (array('onething' => "One thing", 'otherthing' => "other Thing") as $tab_machine => $tabname) {
+//    $options = array('attributes' => array(
+//      'class' => ($i ? null : 'active'),
+//      'tabname' => $tab_machine,
+//      'field-name' => $element['#field_name'],
+//      'bundle' => $element['#bundle'],
+//      'object-type' => $element['#object_type']
+//    ));
+    $options = array();
+
+    $items[] = array(
+      'data' => l($tabname, '#', $options),
+      'class' => $i ? null : array('active'),
+    );
+    $i = true;
+  }
+
+  // Add a URL setting for the AJAX load
+  drupal_add_js(array('media' => array(
+    'media_browser_content_load_url' => base_path() . 'media/browser/dispatch',
+    'media_browser_tabs' => theme('item_list', array('items' => $items, 'attributes' => array('class' => 'tabs primary', 'onclick' => 'javascript: return false;')))
+  )),
+  array('type' => 'setting'));
 }
 
 
 /**
  * Implementation of hook_field_widget().
  */
-function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
+function amedia_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
   // This code was originally copied from file.field.inc.
   $form['#attributes'] = array('enctype' => 'multipart/form-data');
 
@@ -1175,7 +1177,8 @@ function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, 
   $items = _field_sort_items($field, $items);
 
   // Essentially we use the managed_file type, extended with some enhancements.
-  $element_info = element_info('media_managed_file');
+  $element_info = element_info('managed_file');
+
   $element = array(
     '#type' => 'media_managed_file',
     '#default_value' => isset($items[$delta]) ? $items[$delta] : $defaults,
@@ -1237,79 +1240,6 @@ function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, 
   return $elements;
 }
 
-
-/**
- * An element #process callback for the media_managed_file type.
- *
- * Expands the media_managed_file type to include the uri field.
- */
-function media_generic_widget_process($element, &$form_state, $form) {
-  $fid = isset($element['fid']['#value']) ? $element['fid']['#value'] : 0;
-
-  if (empty($fid)) {
-    $element['file_uri'] = array(
-      '#title' => t('File uri (for existing files)'),
-      '#type' => 'textfield',
-      '#maxlength' => 240,
-      '#size' => 60,
-    );
-
-    // Provide attributes to allow us to pick up this field via jQuery
-    $element['file_uri']['#attributes']['class'] = array('media-file-uri');
-    $element['file_uri']['#attributes']['field-name'] = array($element['#field_name']);
-    $element['file_uri']['#attributes']['bundle'] = array($element['#bundle']);
-    $element['file_uri']['#attributes']['object-type'] = array($element['#object_type']);
-  }
-
-  // @TODO: Use the currently undocumented #attached property to load js & css.
-  // Load up all of our necessary jQuery
-  drupal_add_library('system', 'vertical-tabs');
-  drupal_add_library('system', 'ui');
-  drupal_add_library('system', 'ui.draggable');
-  drupal_add_library('system', 'ui.resizable');
-  drupal_add_library('system', 'ui.dialog');
-  drupal_add_library('system', 'ui.tabs');
-  // Load our css.
-  drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
-  // Load the custom JS
-  drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.js');
-
-  // @TODO: This is a hack to get the Media: YouTube js attached to the form.
-  // I wasn't able to get the #attached property to be respected during AJAX;
-  // it may not be possible. I suppose we can alter the form; this is just to
-  // see if it works at all. - aaron
-  if (module_exists('media_youtube')) {
-    drupal_add_js(array('mediaYoutube' => array('parse_url' => url('media-youtube/parse'))), 'setting');
-    drupal_add_js(drupal_get_path('module', 'media_youtube') . '/js/media_youtube.js');
-  }
-
-  $i = false;
-  // Fetch all defined tabs
-  foreach (media_get_registered_modules_get_tabs() as $tab_machine => $tabname) {
-    $options = array('attributes' => array(
-      'class' => ($i ? null : 'active'),
-      'tabname' => $tab_machine,
-      'field-name' => $element['#field_name'],
-      'bundle' => $element['#bundle'],
-      'object-type' => $element['#object_type']
-    ));
-
-    $items[] = array(
-      'data' => l($tabname, '#', $options),
-      'class' => $i ? null : array('active'),
-    );
-    $i = true;
-  }
-
-  // Add a URL setting for the AJAX load
-  drupal_add_js(array('media' => array(
-    'media_browser_content_load_url' => base_path() . 'media/browser/dispatch',
-    'media_browser_tabs' => theme('item_list', array('items' => $items, 'attributes' => array('class' => 'tabs primary', 'onclick' => 'javascript: return false;')))
-  )),
-  array('type' => 'setting'));
-
-  return $element;
-}
 
 /**
  * A #file_value_callbacks for the media_managed_file type.
@@ -1529,20 +1459,18 @@ function media_add_type_to_file($file) {
 }
 
 /**
- * From the looks of other parts of the code.
- * This is not needed, but it was simpler to code up for now.
- *
- * @todo: integrate this properly with other APIs in media when fields is done
- * @param unknown_type $file
- * @return unknown_type
+ * Implements hook_field_build_modes().
  */
-function media_get_type($file) {
-  $map = media_type_get_mime_map();
-  foreach ($map as $expression => $type) {
-    if (preg_match($expression, $file->filemime)) {
-      return $type;
-    }
+function media_field_build_modes($obj_type) {
+  $modes = array();
+  if ($obj_type == 'media') {
+    $modes = array(
+      'teaser' => t('Teaser'),
+      'full' => t('Full'),
+      'rss' => t('RSS (Podcasting, etc)'),
+    );
   }
+  return $modes;
 }
 
 /**

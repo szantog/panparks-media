@@ -48,40 +48,6 @@ function media_entity_info() {
 }
 
 /**
- * Implement hook_field_info().
- */
-function media_field_info() {
-  return array(
-    'media' => array(
-      'label' => t('Multimedia asset'),
-      'description' => t('This field stores a reference to a multimedia asset.'),
-      'default_widget' => 'media_generic',
-      'default_formatter' => 'media_generic',
-      'settings' => array(),
-      'instance_settings' => array(),
-    ),
-  );
-}
-
-/**
- *  Implement hook_field_schema().
- */
-function media_field_schema($field) {
-  return array(
-    'columns' => array(
-      'fid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => FALSE,
-      ),
-    ),
-    'indexes' => array(
-      'fid' => array('fid'),
-    ),
-  );
-}
-
-/**
  * Update an existing media type or create a new one.
  *
  *  @param object $type
@@ -95,7 +61,9 @@ function media_field_schema($field) {
  */
 function media_type_save($type) {
   $types = variable_get('media_types', array());
+  $type = media_type_set_defaults($type);
   $types[$type->machine_name] = $type;
+
   variable_set('media_types', $types);
   // Clear the caches
   drupal_static_reset('media_type_get_types');
@@ -126,31 +94,80 @@ function media_type_get_types() {
 
   if (!$types) {
     $types = variable_get('media_types', array());
+    uasort($types, 'drupal_sort_weight');
   }
   return $types;
 }
 
-/**
- *  Returns a an associative array mapping mimeType patterns to media types.
- *  @TODO: Replace this functionality with a filter callback instead.
- *
- *  Example:
- *  return array(
- *    'image/gif' => 'image',
- *    'image/png' => 'image,
- *  );
- *
- *  @return array
- */
-function media_type_get_mime_map() {
-  $map =& drupal_static(__FUNCTION__);
+function media_type_set_defaults($info) {
 
-  if (!$map) {
-    $map = array();
-    $types = media_type_get_types();
-    foreach ($types as $name => $type) {
-      $map += array_fill_keys($type->mimeTypes, $name);
+  $type = new StdClass();
+  $type->type_callback = 'media_is_type';
+  $type->type_callback_args = array();
+  $type->weight = 0;
+
+  foreach ($info as $k => $v) {
+    $type->{$k} = $v;
+  }
+
+  return $type;
+}
+
+
+
+/**
+ * From the looks of other parts of the code.
+ * This is not needed, but it was simpler to code up for now.
+ *
+ * @todo: integrate this properly with other APIs in media when fields is done
+ * @param unknown_type $file
+ * @return unknown_type
+ */
+function media_get_type($file) {
+  $types = media_type_get_types();
+  foreach ($types as $name => $type) {
+    dpr($type);
+    if (call_user_func_array($type->type_callback, array($file, $type->type_callback_args))) {
+      return $name;
     }
   }
-  return $map;
+}
+
+/**
+ * Default callback used to determine if a piece of media is of a given type
+ *
+ * @return unknown_type
+ */
+function media_is_type($media, $args) {
+  $match_type = !empty($args['match_type']) ? 'any' : $args['match_type'];
+  $match_all = $match_type == 'all';
+  if (!empty($args['mimetypes'])) {
+    foreach ($args['mimetypes'] as $expression) {
+      if (preg_match($expression, $media->filemime)) {
+        if (!$match_all) {
+          return TRUE;
+        }
+      }
+    }
+    // Was not matched, so return
+    if ($match_all) {
+      return FALSE;
+    }
+  }
+
+  if (!empty($args['extensions'])) {
+    if (in_array(pathinfo($media->uri, PATHINFO_EXTENSION), $args['extensions'])) {
+      if (!$match_all) {
+        return TRUE;
+      }
+    }
+    // Was not matched, so return
+    if ($match_all) {
+      return FALSE;
+    }
+  }
+
+  if (!empty($args['streams'])) {
+    // @TODO: Write this.
+  }
 }

@@ -40,39 +40,65 @@ function media_install() {
    * INSERTS or column names.
    */
 
-  // @TODO: This variable isn't currently used.
-  $keys = array('index' => array('type'));
-
   // Alter {file}.type and add it as an index.
   db_add_field('file', 'type', _media_type_field_spec());
   db_add_index('file', 'file_type', array('type'));
 
-  // Add the common media types.
+
   // @TODO: Revisit the default types to provide. For instance, PDFs and text.
   $types = array();
+
+  // This is the default type which will be used if no other type is found
+  $types['default'] = new StdClass();
+  $types['default']->machine_name = 'default';
+  $types['default']->label = "Other";
+  $types['default']->base = TRUE;
+  $types['default']->weight = 1000;
+  // This is the default.
+  $types['default']->type_callback_args = array(
+    'match_type' => 'any',
+    'mimetypes' => array('/.*/'),
+  );
+
+  // Add the common media types.
   $types['image'] = new StdClass();
   $types['image']->machine_name = 'image';
   $types['image']->label = "Image";
   $types['image']->base = TRUE;
-  // @TODO: We discussed using callbacks rather than mimetype/extension mapping
-  // for types.
-  $types['image']->extensions = array('jpg', 'jpeg', 'gif', 'png', 'tiff');
-  // @TODO: Not implemented.
-  $types['image']->mimeTypes = array('/^image/');
+  $types['image']->type_callback_args =
+  array(
+    'match_type' => 'all',
+    'mimetypes' => array('/^image/'),
+    'extensions' => array('jpg', 'jpeg', 'gif', 'png', 'tiff'),
+    'streams' => array(),
+  );
 
   $types['audio'] = new StdClass();
   $types['audio']->machine_name = 'audio';
   $types['audio']->label = "Audio";
   $types['audio']->base = TRUE;
-  $types['audio']->extensions = array('mp3', 'ogg', 'wma');
-  $types['audio']->mimeTypes = array('/^audio/');
+  $types['audio']->type_callback_args = array(
+    'match_type' => 'all',
+    'mimetypes' => array('/^audio/'),
+    'extensions' => array('mp3', 'ogg', 'wma'),
+    'streams' => array(),
+  );
 
   $types['video'] = new StdClass();
   $types['video']->machine_name = 'video';
   $types['video']->label = "Video";
   $types['video']->base = TRUE;
-  $types['video']->extensions = array('mov', 'mp4', 'avi');
-  $types['video']->mimeTypes = array('/^video/');
+
+  $types['video']->callbacks = array();
+  // This is the default, otherwise could provide
+  //$types['video']->type_callback = 'media_default_is_type';
+  $types['video']->type_callback_args =
+  array(
+    'match_type' => 'all',
+    'mimetypes' => array('/^video/'),
+    'extensions' => array('mov', 'mp4', 'avi'),
+    'streams' => array(),
+  );
 
   foreach ($types as $name => $type) {
     media_type_save($type);

@@ -488,9 +488,8 @@ function media_edit($form, $form_state, $file) {
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
+    '#weight' => 100,
   );
-
-
 
   $form['fid'] = array(
     '#type' => 'hidden',

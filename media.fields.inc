@@ -1,0 +1,280 @@
+<?php
+
+/**
+ * Implement hook_field_info().
+ *
+ */
+function media_field_info() {
+  return array(
+    'media' => array(
+      'label' => t('Multimedia asset'),
+      'description' => t('This field stores a reference to a multimedia asset.'),
+      'default_widget' => 'media_generic',
+      'default_formatter' => 'media_generic',
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_schema().
+ */
+function media_field_schema($field) {
+  dpr($field);
+  return array(
+    'columns' => array(
+      'fid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+    ),
+    'indexes' => array(
+      'fid' => array('fid'),
+    ),
+  );
+}
+
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function media_field_is_empty($item, $field) {
+  if (!is_array($item) || (empty($item['fid']) && (string) $item['fid'] !== '0')) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+
+/**
+ * Implement hook_field_widget_info().
+ */
+function media_field_widget_info() {
+  return array(
+    'media_generic' => array(
+      'label' => t('File (media)'),
+      'field types' => array('file', 'media'),
+      'settings' => array(
+        'progress_indicator' => 'throbber',
+        'allowed_types' => array('image'),
+        'allowed_schemes' => array('public', 'private'),
+      ),
+      'behaviors' => array(
+        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
+        'default value' => FIELD_BEHAVIOR_NONE,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implement hook_field_widget_settings_form().
+ */
+function media_field_widget_settings_form($field, $instance) {
+
+  $widget = $instance['widget'];
+  $settings = $widget['settings'];
+  $form = array();
+
+  // Setup type selection form
+  $types = media_type_get_types();
+  $options = array();
+  foreach ($types as $key => $definition) {
+    $options[$key] = $definition->label;
+  }
+
+  $form['allowed_types'] = array (
+    '#type' => 'checkboxes',
+    '#title' => t('Allowed media types'),
+    '#options' => $options,
+    '#default_value' => $settings['allowed_types'],
+    '#description' => t('Media types which are allowed for this field'),
+    '#weight' => 1,
+  );
+
+  $streams = file_get_stream_wrappers();
+  $options = array();
+  unset($streams['temporary']);
+  foreach ($streams as $scheme => $data) {
+    $options[$scheme] = t('@scheme (@name)', array('@scheme' => $scheme . '://', '@name' => $data['name']));
+  }
+  $form['allowed_schemes'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Allowed URI schemes'),
+    '#options' => $options,
+    '#default_value' => $settings['allowed_schemes'],
+    '#description' => t('URI schemes include public:// and private:// which are the Drupal files directories, and may also refer to remote sites.'),
+    '#weight' => 2,
+  );
+  return $form;
+}
+
+
+function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
+  $widget_settings = $instance['widget']['settings'];
+
+  $permission = user_access('use media browser');
+  if (!$permission) {
+    // @todo: show the default file upload field.
+    return;
+  }
+
+  // Retrieve any values set in $form_state, as will be the case during AJAX
+  // rebuilds of this form.
+  if (isset($form_state['values'][$field['field_name']][$langcode])) {
+    $items = $form_state['values'][$field['field_name']][$langcode];
+    unset($form_state['values'][$field['field_name']][$langcode]);
+  }
+
+  // Re-index deltas after removing empty items.
+  $items = array_values($items);
+
+  // Update order according to weight.
+  $items = _field_sort_items($field, $items);
+
+  $element = array(
+    '#type' => 'media_managed_file',
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : 0,
+    '#required' => $instance['required'],
+    //'#media_file_extensions' => $instance['settings']['file_extensions'],
+    '#media_allowed_types' => $instance['widget']['settings']['allowed_types'],
+    '#media_allowed_schemes' => $instance['widget']['settings']['allowed_schemes'],
+    '#process' => array('media_generic_widget_process'),
+    // Add extra Field properties.
+    '#field_name' => $field['field_name'],
+    '#bundle' => $instance['bundle'],
+    '#object_type' => $instance['object_type'],
+  );
+
+  if ($field['cardinality'] == 1) {
+    // If there's only one field, return it as delta 0.
+    $element['#title'] = $instance['label'];
+    $elements = array($element);
+  }
+  else {
+    // If there are multiple values, add an element for each existing one.
+    $delta = -1;
+    foreach ($items as $delta => $item) {
+      $elements[$delta] = $element;
+      $elements[$delta]['#default_value'] = $item;
+      $elements[$delta]['#weight'] = $delta;
+    }
+    // And then add one more empty row for new uploads.
+    $delta++;
+    if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED || $delta < $field['cardinality']) {
+      $elements[$delta] = $element;
+      $elements[$delta]['#default_value'] = 0;
+      $elements[$delta]['#weight'] = $delta;
+      $elements[$delta]['#required'] = ($instance['required'] && $delta == 0);
+    }
+    // The group of elements all-together need some extra functionality
+    // after building up the full list (like draggable table rows).
+    $elements['#file_upload_delta'] = $delta;
+    $elements['#theme'] = 'file_widget_multiple';
+    $elements['#theme_wrappers'] = array('fieldset');
+    $elements['#attributes']['class'] = array('media-file-widget');
+
+    $elements['#title'] = $instance['label'];
+    $elements['#description'] = $instance['description'];
+
+    // Add some properties that will eventually be added to the file upload
+    // field. These are added here so that they may be referenced easily through
+    // a hook_form_alter().
+    $elements['#file_upload_title'] = t('Add a new file');
+    $elements['#file_upload_description'] = theme('file_upload_help', array('description' => '', 'upload_validators' => $elements[0]['#upload_validators']));
+  }
+
+  return $elements;
+}
+
+
+/**
+ * An element #process callback for the media_managed_file type.
+ *
+ * Expands the media_managed_file type to include the uri field.
+ */
+function media_generic_widget_process($element, &$form_state, $form) {
+  $fid = isset($element['#default_value']['fid']) ? $element['#default_value']['fid'] : 0;
+
+  if (variable_get('media_debug', TRUE)) {
+    $element['file_info'] = array (
+      '#type' => 'textarea',
+      '#rows' => 5,
+      '#title' => 'File Info',
+      '#attributes' => array('style' => 'font-size:.75em; font-family:courier'),
+      '#default_value' => print_r(media_load($fid),1),
+    );
+  }
+
+  $element['preview'] = array (
+    '#type' => 'markup',
+    '#title' => 'Preview',
+    '#markup' => 'I SHOULD BE A PREVIEW'
+  );
+
+  if (variable_get('media_debug', TRUE)) {
+    $element['fid'] = array (
+      '#type' => 'textfield',
+      '#title' => 'File Id',
+      '#default_value' => $fid,
+    );
+  } else {
+    $element['fid'] = array (
+      '#type' => 'hidden',
+      '#value' => $fid
+    );
+  }
+
+  // @todo: make me launch a simple iframe
+
+  // JS: This is just 1/2 written code of what launching the browser might look like
+  $element['launcher'] = array (
+    '#type' => 'markup',
+    '#value' => '<a class="media_browser_launcher" href="#">Pick something!</a>',
+  );
+
+  // Add some JS Settings
+  $browser_settings = array(
+    'media_items_callback' => url('media/service/get/for/fields'),
+    // These params are passed on every callback
+    'extra_params' => array (
+      'bundle' => $element['#bundle'],
+      'field-name' => $element['#field-name'],
+      'object-type' => $element['#object-type'],
+    ),
+  );
+
+  // Old Media browser attach code.
+  media_attach_browser();
+
+  return $element;
+}
+
+
+
+/**
+ * Implements hook_field_validate().
+ *
+ * Possible error codes:
+ * - 'media_fid_illegal_value': The value is not part of the list of allowed values.
+ */
+function media_field_validate($obj_type, $object, $field, $instance, $langcode, $items, &$errors) {
+
+  $allowed_types = array_keys(array_filter($instance['widget']['settings']['allowed_types']));
+
+  // @TODO: merge in stuff from media_uri_value
+  foreach ($items as $delta => $item) {
+    $result = db_select('file', 'f')
+      ->fields('f')
+      ->condition('fid', $item['fid'])
+      ->condition('type', $allowed_types, 'IN')
+      ->execute()
+      ->fetchField();
+    if (!$result) {
+      $errors[$field['field_name']][$langcode][$delta][] = array(
+        'error' => 'media_fid_illegal_value',
+        'message' => t('%name: illegal value.', array('%name' => t($instance['label']))),
+      );
+    }
+  }
+}
