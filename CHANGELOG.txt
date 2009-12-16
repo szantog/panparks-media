@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+by aaron: Check for existance of data in media_get_fields().
 by aaron: Grab proper fields in _media_content_fields().
 by aaron: Implement hook_field_schema().
 by aaron: Fix error on content type admin page.

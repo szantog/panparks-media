@@ -357,7 +357,9 @@ function media_get_fields($field_type, $function_type = 'resource') {
     }
   }
 
-  return $data[$field_type][$function_type];
+  if (isset($data[$field_type]) && isset($data[$field_type][$function_type])) {
+    return $data[$field_type][$function_type];
+  }
 }
 
 /**
