@@ -128,7 +128,12 @@ function theme_media_admin_thumbnail($variables) {
   $path = drupal_get_path('module', 'media');
   $file = $variables['file'];
   $style_name = $variables['style_name'];
-  $file_url = file_create_url($file->uri);
+  if (isset($file)) {
+    $file_url = file_create_url($file->uri);
+  }
+  else {
+    return '';
+  }
   $output = '';
   if (module_exists('styles')) {
     $thumbnail = theme('styles',

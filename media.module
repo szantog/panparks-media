@@ -283,19 +283,19 @@ function media_get_registered_modules($ids = NULL, $reset = FALSE) {
       foreach (array_keys($function()) as $key) {
         // Add the module name to each registration.
         // Default the 'module' key of the registration to the implementing module.
-        $registration[$key]['module'] = $registration[$key]['module'] ? $registration[$key]['module'] : $module;
+        $registration[$key]['module'] = isset($registration[$key]['module']) ? $registration[$key]['module'] : $module;
 
         // translate strings now
         $registration[$key]['name']        = t($registration[$key]['name']);
         $registration[$key]['description'] = t($registration[$key]['description']);
 
         // Default the URI to public://.
-        if (!$registration[$key]['uri']) {
+        if (!isset($registration[$key]['uri'])) {
           $registration[$key]['uri'] = MEDIA_RESOURCE_URI_DEFAULT;
         }
 
         // Default 'types' to * (all).
-        if (!$registration[$key]['types']) {
+        if (!isset($registration[$key]['types'])) {
           $registration[$key]['types'] = MEDIA_TYPES_DEFAULT;
         }
       }

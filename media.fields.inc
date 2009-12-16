@@ -161,7 +161,7 @@ function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, 
   // Update order according to weight.
   $items = _field_sort_items($field, $items);
 
-  $element += array(
+  $element = array(
     '#type' => 'media_managed_file',
     '#default_value' => isset($items[$delta]) ? $items[$delta] : 0,
     '#required' => $instance['required'],
