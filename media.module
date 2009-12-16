@@ -230,6 +230,12 @@ function media_theme() {
       'variables' => array('file' => NULL),
       'file' => 'media_theme.inc',
     ),
+
+    // Administrative thumbnail previews.
+    'media_admin_thumbnail' => array(
+      'variables' => array('files' => array()),
+      'file' => 'media_theme.inc',
+    ),
   );
 }
 

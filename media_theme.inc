@@ -108,7 +108,8 @@ function theme_media_browser_content_frame($variables) {
  *    An array of file objects to display.
  *  @return
  */
-function theme_media_browser_thumbnails($files = array()) {
+function theme_media_browser_thumbnails($variables) {
+  $files = $variables['files'];
   $thumbnails = array();
   foreach ($files as $file) {
     $thumbnails[] = theme('media_admin_thumbnail', array('file' => $file));
