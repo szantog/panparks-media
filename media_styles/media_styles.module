@@ -10,7 +10,7 @@
  *  Implements hook_styles_containers().
  */
 function media_styles_styles_containers() {
-  return array(
+  $containers = array(
     'file' => array(
       'containers' => array(
         'image' => array(
@@ -51,29 +51,7 @@ function media_styles_styles_containers() {
       ),
     ),
   );
-}
-
-function theme_media_styles_styles_default($variables) {
-  $file = $variables['object'];
-  $path = drupal_get_path('module', 'media');
-  $thumbnail = theme('image',
-    array(
-      'path' => $path . '/images/file-unknown.png',
-      'alt' => t('Thumbnail for !filename.', array('!filename' => $file->filename)),
-      'attributes' => array('class' => 'file-unknown'),
-    )
-  );
-  return $thumbnail;
-}
-
-function theme_media_styles_preview_default($variables) {
-  return 'default: theme_media_styles_preview_default';
-}
-
-function theme_media_styles_field_formatter_styles_default($variables) {
-  $file = $variables['object'];
-  $file_url = file_create_url($file->uri);
-  return l($file->filename, $file_url);
+  return $containers;
 }
 
 /**
@@ -90,31 +68,6 @@ function media_styles_styles_formatter_filter($variables) {
     $container = $variables['container'];
     return (in_array(file_uri_scheme($object->uri), $container['data']['streams'])) && (in_array($object->filemime, $container['data']['mimetypes']));
   }
-}
-
-function theme_media_styles_field_formatter_styles($variables) {
-  // The formatter name needs to match what theme_field_formatter_image expects.
-  $variables['element']['#formatter'] = '__' . $variables['style']['name'];
-
-  // Add Alt & Title to the element.
-  $variables['element']['#item']['alt'] = $variables['element']['#item']['title'] = $variables['element']['#item']['description'];
-
-  // Defer to Image Styles for the rest.
-  return theme('field_formatter_image', $variables);
-}
-
-function theme_media_styles_styles($variables) {
-  $style_name = $variables['style_name'];
-  $path = $variables['object']->uri;
-  $alt = $title = $variables['object']->description;
-  return theme('image_style',
-    array(
-      'style_name' => $style_name,
-      'path' => $path,
-      'alt' => $alt,
-      'title' => $title,
-    )
-  );
 }
 
 /**
@@ -165,10 +118,16 @@ function media_styles_styles_styles() {
   );
 }
 
+/**
+ *  A wrapper for the image style preview.
+ */
 function theme_media_styles_image_style_preview($variables) {
   $style_name = $variables['style_name'];
   $styles = image_styles();
   if (isset($styles[$style_name])) {
+    // The theme_image_style_preview function is in image.admin,
+    // but not properly referenced in hook_theme.
+    // @TODO: File a bug report and fix this in core.
     module_load_include('inc', 'image', 'image.admin');
     drupal_add_css(drupal_get_path('module', 'image') . '/image.admin.css');
 
@@ -180,31 +139,58 @@ function theme_media_styles_image_style_preview($variables) {
   }
 }
 
+function theme_media_styles_styles_default($variables) {
+  $file = $variables['object'];
+  $path = drupal_get_path('module', 'media');
+  $thumbnail = theme('image',
+    array(
+      'path' => $path . '/images/file-unknown.png',
+      'alt' => t('Thumbnail for !filename.', array('!filename' => $file->filename)),
+      'attributes' => array('class' => 'file-unknown'),
+    )
+  );
+  return $thumbnail;
+}
 
-/**
- * Media constant for user styles in the database.
- */
-define('MEDIA_STORAGE_NORMAL', 1);
+function theme_media_styles_preview_default($variables) {
+  return 'default: theme_media_styles_preview_default';
+}
 
-/**
- * Media constant for user styles that override module-defined styles.
- */
-define('MEDIA_STORAGE_OVERRIDE', 2);
+function theme_media_styles_field_formatter_styles_default($variables) {
+  $file = $variables['object'];
+  $file_url = file_create_url($file->uri);
+  return l($file->filename, $file_url);
+}
 
-/**
- * Media constant for module-defined styles in code.
- */
-define('MEDIA_STORAGE_DEFAULT', 4);
+function theme_media_styles_field_formatter_styles($variables) {
+  // The formatter name needs to match what theme_field_formatter_image expects.
+  $variables['element']['#formatter'] = '__' . $variables['style']['name'];
 
-/**
- * Media constant to represent an editable preset.
- */
-define('MEDIA_STORAGE_EDITABLE', MEDIA_STORAGE_NORMAL | MEDIA_STORAGE_OVERRIDE);
+  // Add Alt & Title to the element.
+  $variables['element']['#item']['alt'] = $variables['element']['#item']['title'] = $variables['element']['#item']['description'];
 
-/**
- * Media constant to represent any module-based preset.
- */
-define('MEDIA_STORAGE_MODULE', MEDIA_STORAGE_OVERRIDE | MEDIA_STORAGE_DEFAULT);
+  // Defer to Image Styles for the rest.
+  return theme('field_formatter_image', $variables);
+}
+
+function theme_media_styles_styles($variables) {
+  $style_name = $variables['style_name'];
+  $path = $variables['object']->uri;
+  $alt = $title = $variables['object']->description;
+  return theme('image_style',
+    array(
+      'style_name' => $style_name,
+      'path' => $path,
+      'alt' => $alt,
+      'title' => $title,
+    )
+  );
+}
+
+/**********************************
+ * @TODO: Everything below here is legacy cruft.
+ * Examine for utility for styles ui, then discard.
+ **********************************/
 
 /**
  * Implement hook_menu().
@@ -309,26 +295,6 @@ function media_styles_menu() {
 }
 
 /**
- *  Implement hook_field_formatter_info().
- */
-// function media_styles_field_formatter_info() {
-//   $styles = array();
-//
-//   // Each Media Style becomes a new formatter for File (media) fields.
-//   foreach (media_styles() as $style_name => $style) {
-//     $styles[$style_name] = array(
-//       'label' => $style['label'],
-//       'field types' => array('media_generic', 'file', 'image'),
-//       'behaviors' => array(
-//         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
-//       ),
-//     );
-//   }
-//
-//   return $styles;
-// }
-
-/**
  * Get an array of all styles and their settings.
  *
  * @return
@@ -391,78 +357,6 @@ function media_styles() {
 }
 
 /**
- *  Build a list of all registered Media styles.
- *
- *  Each effect within a style will be attached to a specific mimetype, and
- *  will be invoked as required when displaying a file field instance.
- *
- *  To register a new display formatter for a specific mimetype to be made
- *  available to the system, you will need to implement
- *  hook_media_styles($mimetype).
- *
- *  To register a default, module-defined style of Media effects, you will
- *  need to implement hook_media_styles_default_styles().
- *
- *  See API.txt for more information.
- *
- *  @return
- *    This returns an array of all media styles, keyed by the style names.
- */
-function hhhmedia_styles() {
-  $styles = &drupal_static(__FUNCTION__);
-
-  // Grab from cache or build the array.
-  if (!isset($styles)) {
-    if ($cache = cache_get('media_styles', 'cache')) {
-      $styles = $cache->data;
-    }
-    else {
-      $styles = array();
-
-      // Select the module-defined styles.
-      foreach (module_implements('media_styles_default_styles') as $module) {
-        $module_styles = module_invoke($module, 'media_styles_default_styles');
-        foreach ($module_styles as $style_name => $style) {
-          $style['name'] = $style_name;
-          $style['module'] = $module;
-          $style['storage'] = MEDIA_STORAGE_DEFAULT;
-          $styles[$style_name] = $style;
-        }
-      }
-
-      // Select all the user-defined styles.
-      $user_styles = db_select('media_styles', NULL, array('fetch' => PDO::FETCH_ASSOC))
-        ->fields('media_styles')
-        ->orderBy('name')
-        ->execute()
-        ->fetchAllAssoc('name', PDO::FETCH_ASSOC);
-
-      // Allow the user styles to override the module styles.
-      foreach ($user_styles as $style_name => $style) {
-        $style['module'] = NULL;
-        $style['storage'] = MEDIA_STORAGE_NORMAL;
-
-        // Formatters will be an array of module-defined formatters keyed by
-        // mimetype.
-//         $style['formatters'] = unserialize($style['formatters']);
-        if (isset($styles[$style_name]['module'])) {
-          $style['module'] = $styles[$style_name]['module'];
-          $style['storage'] = MEDIA_STORAGE_OVERRIDE;
-        }
-        $styles[$style_name] = $style;
-      }
-
-      // Allow any module implementing hook_media_style_bundles to alter the styles.
-      drupal_alter('media_styles', $styles);
-      cache_set('media_styles', $styles);
-    }
-  }
-
-  return $styles;
-}
-
-
-/**
  * Implement hook_theme().
  */
 function media_styles_theme() {
@@ -507,6 +401,52 @@ function media_styles_theme() {
     ),
   );
 }
+
+
+/**
+ * Media constant for user styles in the database.
+ */
+define('MEDIA_STORAGE_NORMAL', 1);
+
+/**
+ * Media constant for user styles that override module-defined styles.
+ */
+define('MEDIA_STORAGE_OVERRIDE', 2);
+
+/**
+ * Media constant for module-defined styles in code.
+ */
+define('MEDIA_STORAGE_DEFAULT', 4);
+
+/**
+ * Media constant to represent an editable preset.
+ */
+define('MEDIA_STORAGE_EDITABLE', MEDIA_STORAGE_NORMAL | MEDIA_STORAGE_OVERRIDE);
+
+/**
+ * Media constant to represent any module-based preset.
+ */
+define('MEDIA_STORAGE_MODULE', MEDIA_STORAGE_OVERRIDE | MEDIA_STORAGE_DEFAULT);
+
+/**
+ *  Implement hook_field_formatter_info().
+ */
+// function media_styles_field_formatter_info() {
+//   $styles = array();
+//
+//   // Each Media Style becomes a new formatter for File (media) fields.
+//   foreach (media_styles() as $style_name => $style) {
+//     $styles[$style_name] = array(
+//       'label' => $style['label'],
+//       'field types' => array('media_generic', 'file', 'image'),
+//       'behaviors' => array(
+//         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+//       ),
+//     );
+//   }
+//
+//   return $styles;
+// }
 
 /**
  * Implement hook_permission().
@@ -678,4 +618,80 @@ function media_effect_definitions() {
  */
 function _media_effect_definitions_sort($a, $b) {
   return strcasecmp($a['name'], $b['name']);
+}
+
+
+/**
+ *  @TODO: The following is entirely cruft.
+ */
+
+/**
+ *  Build a list of all registered Media styles.
+ *
+ *  Each effect within a style will be attached to a specific mimetype, and
+ *  will be invoked as required when displaying a file field instance.
+ *
+ *  To register a new display formatter for a specific mimetype to be made
+ *  available to the system, you will need to implement
+ *  hook_media_styles($mimetype).
+ *
+ *  To register a default, module-defined style of Media effects, you will
+ *  need to implement hook_media_styles_default_styles().
+ *
+ *  See API.txt for more information.
+ *
+ *  @return
+ *    This returns an array of all media styles, keyed by the style names.
+ */
+function hhhmedia_styles() {
+  $styles = &drupal_static(__FUNCTION__);
+
+  // Grab from cache or build the array.
+  if (!isset($styles)) {
+    if ($cache = cache_get('media_styles', 'cache')) {
+      $styles = $cache->data;
+    }
+    else {
+      $styles = array();
+
+      // Select the module-defined styles.
+      foreach (module_implements('media_styles_default_styles') as $module) {
+        $module_styles = module_invoke($module, 'media_styles_default_styles');
+        foreach ($module_styles as $style_name => $style) {
+          $style['name'] = $style_name;
+          $style['module'] = $module;
+          $style['storage'] = MEDIA_STORAGE_DEFAULT;
+          $styles[$style_name] = $style;
+        }
+      }
+
+      // Select all the user-defined styles.
+      $user_styles = db_select('media_styles', NULL, array('fetch' => PDO::FETCH_ASSOC))
+        ->fields('media_styles')
+        ->orderBy('name')
+        ->execute()
+        ->fetchAllAssoc('name', PDO::FETCH_ASSOC);
+
+      // Allow the user styles to override the module styles.
+      foreach ($user_styles as $style_name => $style) {
+        $style['module'] = NULL;
+        $style['storage'] = MEDIA_STORAGE_NORMAL;
+
+        // Formatters will be an array of module-defined formatters keyed by
+        // mimetype.
+//         $style['formatters'] = unserialize($style['formatters']);
+        if (isset($styles[$style_name]['module'])) {
+          $style['module'] = $styles[$style_name]['module'];
+          $style['storage'] = MEDIA_STORAGE_OVERRIDE;
+        }
+        $styles[$style_name] = $style;
+      }
+
+      // Allow any module implementing hook_media_style_bundles to alter the styles.
+      drupal_alter('media_styles', $styles);
+      cache_set('media_styles', $styles);
+    }
+  }
+
+  return $styles;
 }
