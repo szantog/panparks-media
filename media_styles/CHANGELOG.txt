@@ -2,6 +2,7 @@
 
 CHANGELOG for Media: Styles
 
+by aaron: Move theme functions to external file.
 by aaron: Begin cleaning module.
 by aaron: Grab style URL directly from object.
 by aaron: Modify style containers to match new styles API.
