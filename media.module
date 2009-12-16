@@ -334,32 +334,35 @@ function media_registration_kinds() {
 function media_get_fields($field_type, $function_type = 'resource') {
   static $data;
 
-  // Do we have cached version?
-  if ($data[$field_type][$function_type]) {
-    return $data[$field_type][$function_type];
+  // @TODO: Use drupal_static instead...
+  // Static cache for our data.
+  if (!isset($data)) {
+    $data = array();
+  }
+  if (!isset($data[$field_type])) {
+    $data[$field_type] = array();
   }
 
-  $data = array();
-  // Get all the registered modules.
-  foreach (media_get_registered_modules() as $id => $registration) {
-    // Check to see if this registration supports this function type.
-    if ($registration['kind'] == $function_type) {
-      // Now look for the fields.
-      if ($registration['fields']) {
-        foreach ($registration['fields'] as $field) {
-          // If this registration supports this field type, add it to the
-          // returned array.
-          if ($field == $field_type) {
-            $data[$field_type][$function_type][$id] = $registration;
+  if (!isset($data[$field_type][$function_type])) {
+    $data[$field_type][$function_type] = array();
+    foreach (media_get_registered_modules() as $id => $registration) {
+      // Check to see if this registration supports this function type.
+      if ($registration['kind'] == $function_type) {
+        // Now look for the fields.
+        if ($registration['fields']) {
+          foreach ($registration['fields'] as $field) {
+            // If this registration supports this field type, add it to the
+            // returned array.
+            if ($field == $field_type) {
+              $data[$field_type][$function_type][$id] = $registration;
+            }
           }
         }
       }
     }
   }
 
-  if (isset($data[$field_type]) && isset($data[$field_type][$function_type])) {
-    return $data[$field_type][$function_type];
-  }
+  return $data[$field_type][$function_type];
 }
 
 /**
