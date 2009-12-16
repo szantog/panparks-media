@@ -575,10 +575,10 @@ function media_active_fields_for_node_type($type_name, $function = 'resource') {
   $type_override = variable_get('media_'. $type_name .'_override', FALSE);
 
   $items  = array();
-  $type   = _media_content_field_types($type_name);
+  $type   = _media_content_fields($type_name);
 
-  // extract the fields for this node type
-  foreach ((array)$type['fields'] as $field_name => $field) {
+  // Extract the fields for this node type.
+  foreach ($type as $field_name => $field) {
     // Ignore the content-type specific per-field setting unless the override is set
     $fields_enabled = FALSE;
 
@@ -636,14 +636,31 @@ function media_create_id($drawer_name) {
 }
 
 /**
- * Get a list of content field types.
+ * Get a list of media field types attached to a specific content type.
  *
  * @param string $type_name
  *  A string representing the content type.
  * @return array
- *  A form structured array is returned.
+ *  A form structured array of $field_name => $field is returned.
  */
-function _media_content_field_types($type_name) {
+function _media_content_fields($type_name) {
+  static $types;
+  if (!isset($types)) {
+    $types = array();
+  }
+  foreach (field_info_fields() as $field_name => $field) {
+    if ($field['type'] == 'media' && ($field['type'] == $field['module'])) {
+      foreach ($field['bundles']['node'] as $content_type) {
+        if (!isset($types[$content_type])) {
+          $types[$content_type] = array();
+        }
+        $types[$content_type][$field_name] = $field;
+      }
+    }
+  }
+  return isset($types[$type_name]) ? $types[$type_name] : array();
+
+  // @TODO: Below is legacy. Remove when we know this is correct.
   if (module_exists('content')) {
     // Use CCK if available
     $type = content_types($type_name);

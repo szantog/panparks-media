@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+by aaron: Grab proper fields in _media_content_fields().
 by aaron: Implement hook_field_schema().
 by aaron: Fix error on content type admin page.
 by aaron: Begin menu callback for admin/structure/media/.
