@@ -19,7 +19,7 @@ function media_field_info() {
  * Implements hook_field_schema().
  */
 function media_field_schema($field) {
-  dpr($field);
+//   dpr($field);
   return array(
     'columns' => array(
       'fid' => array(
@@ -239,8 +239,8 @@ function media_generic_widget_process($element, &$form_state, $form) {
     // These params are passed on every callback
     'extra_params' => array (
       'bundle' => $element['#bundle'],
-      'field-name' => $element['#field-name'],
-      'object-type' => $element['#object-type'],
+      'field_name' => $element['#field_name'],
+      'object_type' => $element['#object_type'],
     ),
   );
 
