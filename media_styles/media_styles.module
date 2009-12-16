@@ -11,7 +11,7 @@
  */
 function media_styles_styles_containers() {
   $containers = array(
-    'file' => array(
+    'media' => array(
       'containers' => array(
         'image' => array(
           'label' => t('Image Styles'),
@@ -51,6 +51,7 @@ function media_styles_styles_containers() {
       ),
     ),
   );
+  $containers['file'] = $containers['image'] = $containers['media'];
   return $containers;
 }
 
@@ -64,7 +65,7 @@ function media_styles_styles_formatter_filter_default() {
 
 function media_styles_styles_formatter_filter($variables) {
   if (isset($variables['object'])) {
-    $object = $variables['object'];
+    $object = media_load($variables['object']->fid);
     $container = $variables['container'];
     return (in_array(file_uri_scheme($object->uri), $container['data']['streams'])) && (in_array($object->filemime, $container['data']['mimetypes']));
   }
@@ -75,7 +76,7 @@ function media_styles_styles_formatter_filter($variables) {
  */
 function media_styles_styles_presets() {
   $presets = array(
-    'file' => array(
+    'media' => array(
       'square_thumbnail' => array(
         'default' => array('square_thumbnail'),
       ),
@@ -91,8 +92,9 @@ function media_styles_styles_presets() {
     ),
   );
   foreach (image_styles() as $style_name => $style) {
-    $presets['file'][$style_name]['image'] = array($style_name);
+    $presets['media'][$style_name]['image'] = array($style_name);
   }
+  $presets['file'] = $presets['image'] = $presets['media'];
   return $presets;
 }
 
@@ -108,14 +110,16 @@ function media_styles_styles_styles() {
     $styles[$style_name] = $style;
   }
   $default_styles = $styles;
-  return array(
-    'file' => array(
+  $all_styles = array(
+    'media' => array(
       'containers' => array(
         'image' => array('styles' => $styles),
         'default' => array('styles' => $default_styles),
       ),
     ),
   );
+  $all_styles['file'] = $all_styles['image'] = $all_styles['media'];
+  return $all_styles;
 }
 
 /**

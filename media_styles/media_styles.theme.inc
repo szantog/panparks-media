@@ -62,6 +62,7 @@ function theme_media_styles_field_formatter_styles($variables) {
 }
 
 function theme_media_styles_styles($variables) {
+  $variables['object'] = media_load($variables['object']->fid);
   $file = $variables['object'];
   $style_name = $variables['style_name'];
   $path = $file->uri;
