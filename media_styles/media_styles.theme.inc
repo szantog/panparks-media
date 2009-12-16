@@ -62,9 +62,10 @@ function theme_media_styles_field_formatter_styles($variables) {
 }
 
 function theme_media_styles_styles($variables) {
+  $file = $variables['object'];
   $style_name = $variables['style_name'];
-  $path = $variables['object']->uri;
-  $alt = $title = $variables['object']->description;
+  $path = $file->uri;
+  $alt = $title = isset($variables['description']) ? $variables['description'] : (isset($file->description) ? $file->description : '');
   return theme('image_style',
     array(
       'style_name' => $style_name,

@@ -133,41 +133,41 @@ function media_styles_theme() {
         'attributes' => array(),
         'getsize' => TRUE,
       ),
-      'file' => 'media_sytles.theme.inc',
+      'file' => 'media_styles.theme.inc',
     ),
 
     // Theme functions in media_styles.admin.inc.
     'media_style_list' => array(
       'variables' => array('styles' => NULL),
-      'file' => 'media_sytles.theme.inc',
+      'file' => 'media_styles.theme.inc',
     ),
 
     // Display a image style preset.
     'media_styles_image_style_preview' => array(
       'variables' => array('field_type' => NULL, 'container_name' => NULL, 'style_name' => NULL),
-      'file' => 'media_sytles.theme.inc',
+      'file' => 'media_styles.theme.inc',
     ),
 
     'media_styles_field_formatter_styles' => array(
       'variables' => array('element' => NULL, 'style' => NULL),
-      'file' => 'media_sytles.theme.inc',
+      'file' => 'media_styles.theme.inc',
     ),
 
     'media_styles_styles' => array(
       'variables' => array('style_name' => NULL, 'uri' => NULL),
-      'file' => 'media_sytles.theme.inc',
+      'file' => 'media_styles.theme.inc',
     ),
     'media_styles_field_formatter_styles_default' => array(
       'variables' => array('element' => NULL, 'style' => NULL),
-      'file' => 'media_sytles.theme.inc',
+      'file' => 'media_styles.theme.inc',
     ),
     'media_styles_styles_default' => array(
       'variables' => array('style_name' => NULL, 'uri' => NULL),
-      'file' => 'media_sytles.theme.inc',
+      'file' => 'media_styles.theme.inc',
     ),
     'media_styles_preview_default' => array(
       'variables' => array('field_type' => NULL, 'container_name' => NULL, 'style_name' => NULL),
-      'file' => 'media_sytles.theme.inc',
+      'file' => 'media_styles.theme.inc',
     ),
   );
 }
