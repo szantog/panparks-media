@@ -212,17 +212,23 @@ function media_theme() {
   return array(
     // The media file browser form.
     'media_file_browser' => array(
-      'arguments'          => array('element' => NULL),
+      'variables'          => array('element' => NULL),
     ),
 
     // The default media file list form element.
     'media_file_list' => array(
-      'arguments'       => array('element' => NULL),
+      'variables'       => array('element' => NULL),
     ),
 
     // The media browser pane.
     'media_browser_pane' => array(
-      'arguments'         => array('form' => array()),
+      'variables'         => array('form' => array()),
+    ),
+
+    // A preview of the uploaded file.
+    'media_admin_thumbnail' => array(
+      'variables' => array('file' => NULL),
+      'file' => 'media_theme.inc',
     ),
   );
 }

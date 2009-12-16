@@ -210,7 +210,7 @@ function media_generic_widget_process($element, &$form_state, $form) {
   $element['preview'] = array (
     '#type' => 'markup',
     '#title' => 'Preview',
-    '#markup' => 'I SHOULD BE A PREVIEW'
+    '#markup' => theme('media_admin_thumbnail', array('file' => media_load($fid))),
   );
 
   if (variable_get('media_debug', TRUE)) {
