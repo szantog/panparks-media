@@ -119,6 +119,26 @@ function media_menu() {
     'weight'           => 3,
   );
 
+  $items['media/browser'] = array(
+    'title'            => 'Media browser',
+    'description'      => 'Media Browser for picking media and uploading new media',
+    'page callback'    => 'media_browser',
+    'access arguments' => array('use media browser'),
+    'weight'           => 3,
+    'type'             => MENU_CALLBACK,
+    'file'             => 'media.admin.inc',
+  );
+
+  $items['media/browser/list'] = array(
+    'title'            => 'Media browser list',
+    'description'      => 'Ajax Callback for getting media',
+    'page callback'    => 'media_browser_list',
+    'access arguments' => array('use media browser'),
+    'weight'           => 3,
+    'type'             => MENU_CALLBACK,
+    'file'             => 'media.admin.inc',
+  );
+
   return $items;
 }
 
@@ -210,6 +230,10 @@ function media_form_alter(&$form, $form_state, $form_id) {
  */
 function media_theme() {
   return array(
+    'media_managed_file' => array(
+      'render element' => 'element',
+    ),
+
     // The media file browser form.
     'media_file_browser' => array(
       'variables'          => array('element' => NULL),
@@ -1107,10 +1131,13 @@ function media_attach_browser() {
   drupal_add_library('system', 'ui.resizable');
   drupal_add_library('system', 'ui.dialog');
   drupal_add_library('system', 'ui.tabs');
+  // Load the jQuery Plugin to launch / configure it.
+  drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.jquery.js');
   // Load our css.
   drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
-  // Load the custom JS
+  // Load the custom JS to bind elements and handle fields.
   drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.js');
+
 
   // @TODO: This is a hack to get the Media: YouTube js attached to the form.
   // I wasn't able to get the #attached property to be respected during AJAX;
@@ -1153,7 +1180,7 @@ function media_attach_browser() {
 /**
  * Implementation of hook_field_widget().
  */
-function amedia_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
+function DISABLED_media_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
   // This code was originally copied from file.field.inc.
   $form['#attributes'] = array('enctype' => 'multipart/form-data');
 
@@ -1518,6 +1545,19 @@ function media_wysiwyg_plugin($editor, $version) {
   }
 }
 
+function media_page_alter(&$page) {
+  // This sucks, no way to remove the header in garland. :(
+
+  if (!isset($page['content']['system_main']['media_browser'])) {
+    return;
+  }
+  foreach (element_children($page) as $element_name) {
+    if ($element_name != 'content') {
+      unset($page[$element_name]);
+    }
+  }
+}
+
 /**
  * @TODO can somebody document this?
  *
@@ -1526,10 +1566,9 @@ function media_wysiwyg_plugin($editor, $version) {
  */
 function theme_media_managed_file($variables) {
   $element = $variables['element'];
-
   // This wrapper is required to apply JS behaviors and CSS styling.
   $output = '';
-  $output .= '<div class="form-managed-file">';
+  $output .= '<div class="form-media-file">';
   $output .= drupal_render_children($element);
   $output .= '</div>';
   return $output;

@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+by JacobSingh: Begin work on new browser concept.
 by aaron: Toggle 'match type' value on media type administrative form.
 by aaron: Display administrative options only if we're handling the callback.
 by aaron: Add administrative options for match type.

@@ -741,3 +741,135 @@ function media_admin_type_manage_form_submit($form, &$form_state) {
   media_type_save($media_type);
   drupal_set_message(t('The @label media type has been saved.', array('@label' => $media_type->label)));
 }
+
+/* *********************/
+/*   BROWSER RELATED
+/* *********************/
+
+
+function media_browser() {
+  $rows = array();
+  $path = drupal_get_path('module', 'media');
+  $attached = array (
+    'js' => array(
+      $path . '/javascript/media-browser.js',
+      $path . '/javascript/util/json2.js',
+      $path . '/javascript/util/ba-debug.min.js',
+      ),
+
+    'css' => array($path . '/media_browser.css'),
+  );
+
+  // Here we will return the basic structure of the browser.
+  $build['media_browser'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<div id="media-browser">',
+    '#suffix' => '</div>',
+    '#attached' => $attached,
+  );
+
+  $build['media_browser']['center'] = array(
+    '#theme' => 'table',
+    '#attributes' => array('id' => 'media-browser-list'),
+    '#header' => array('Preview', 'Info'),
+    '#rows' => $rows,
+    '#prefix' => t('Pick something!'),
+  );
+
+  $build['media_browser']['info'] = array (
+    '#type' => 'markup',
+    '#markup' => '<div id="media-browser-info"></div>',
+  );
+//
+//  $build['media_browser']['top'] = array (
+//    '#type' => 'markup',
+//    '#markup' => '<div style="height:100px; text-align:center; border:1px solid black;">TOP REGION</div>',
+//  );
+//  $build['media_browser']['left'] = array (
+//    '#type' => 'markup',
+//    '#markup' => '<div style="width:100px; float-left; text-align:center; border:1px solid black;">LEFT REGION</div>',
+//  );
+//
+
+
+  //media_browser_add_library();
+
+  //$build['media_pager'] = array('#theme' => 'pager');
+
+  return $build;
+}
+
+/**
+ * AJAX Callback for a list of media with some basic filters.
+ *
+ * @return unknown_type
+ */
+function media_browser_list($conditions = array()) {
+
+  $medias = entity_load('media', FALSE, $conditions);
+
+  foreach ($medias as &$media) {
+    $media->preview = theme('media_admin_thumbnail', array('file' => $media, 'style_name' => 'medium'));
+//
+//    //@ Todo: We will not be returning a table format in the future.
+//    $row = array();
+//    $row[] = theme('media_admin_thumbnail', array('file' => $media, 'style_name' => 'medium'));
+//    $link_options = array(
+//      'attributes' => array('class' => array('media-select-link'), 'fid' => $media->fid),
+//      'fragment' => '#' . $media->fid,
+//    );
+//    $row[] = l('Pick me', '', $link_options);
+//    $media_on_page[$media->fid] = $media;
+//    $rows[] = $row;
+  }
+  print drupal_json_encode($medias);
+  die();
+  drupal_add_js(array('mediaStore' => $media_on_page), 'setting');
+}
+
+function media_browser_include_plugin($name) {
+  $path = drupal_get_path('module', 'media');
+  drupal_add_js($path . '/javascript/plugins/' . $name . '.js');
+}
+
+function media_browser_add_library() {
+  // JS: THis is old code which is not in use
+  // Will deprecate / transition at some point.
+  $path = drupal_get_path('module', 'media');
+  drupal_add_js($path . '/javascript/core/Core.js');
+  drupal_add_js($path . '/javascript/core/Sandbox.js');
+  drupal_add_js($path . '/javascript/core/jquery.plugin.js');
+  drupal_add_js($path . '/javascript/util/ba-debug.min.js');
+  media_browser_include_plugin('Browser');
+  media_browser_include_plugin('Tabs');
+  media_browser_include_plugin('Loader');
+
+  drupal_add_js($path . '/javascript/etc/examples.js');
+
+  // Load up all of our necessary jQuery
+  drupal_add_library('system', 'vertical-tabs');
+  drupal_add_library('system', 'ui');
+  drupal_add_library('system', 'ui.draggable');
+  drupal_add_library('system', 'ui.resizable');
+  drupal_add_library('system', 'ui.dialog');
+  drupal_add_library('system', 'ui.tabs');
+  return;
+
+
+  $examples = array();
+  $examples['simple'] = <<<EOF
+  jQuery(document).ready(function() {
+    debug.debug(jQuery('body'));
+    jQuery('#launchSimple').bind('click', function () {Drupal.MediaBrowser.Examples.simple()});
+  });
+EOF;
+
+  foreach ($examples as $example) {
+    $build['media_browser'] = array(
+      //'#theme' => 'table',
+    );
+    drupal_add_js($example, array('type' => 'inline'));
+  }
+
+  return "<a href='#' onClick='return false' id='launchSimple'> Simple inline </a> <div id='simple'></div>";
+}

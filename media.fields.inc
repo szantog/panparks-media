@@ -162,6 +162,7 @@ function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, 
   $items = _field_sort_items($field, $items);
 
   $element = array(
+    '#theme' => 'media_managed_file',
     '#type' => 'media_managed_file',
     '#default_value' => isset($items[$delta]) ? $items[$delta] : 0,
     '#required' => $instance['required'],
@@ -199,7 +200,7 @@ function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, 
     // The group of elements all-together need some extra functionality
     // after building up the full list (like draggable table rows).
     $elements['#file_upload_delta'] = $delta;
-    $elements['#theme'] = 'file_widget_multiple';
+
     $elements['#theme_wrappers'] = array('fieldset');
     $elements['#attributes']['class'] = array('media-file-widget');
 
@@ -227,19 +228,23 @@ function media_generic_widget_process($element, &$form_state, $form) {
   $file = media_load($fid);
 
   if (variable_get('media_debug', TRUE)) {
-    $element['file_info'] = array (
+    $element['file_info'] = array(
       '#type' => 'textarea',
       '#rows' => 5,
       '#title' => 'File Info',
-      '#attributes' => array('style' => 'font-size:.75em; font-family:courier'),
+      '#attributes' => array('class' => array('debug'), 'style' => 'font-size:.75em; font-family:courier'),
       '#default_value' => print_r($file, 1),
     );
   }
 
-  $element['preview'] = array (
-    '#type' => 'markup',
+  $path = drupal_get_path('module', 'media');
+
+  $element['preview'] = array(
+    '#type' => 'item',
     '#title' => 'Preview',
     '#markup' => theme('media_admin_thumbnail', array('file' => $file)),
+    '#prefix' => '<div class="preview">',
+    '#suffix' => '</div>',
   );
 
   if (variable_get('media_debug', TRUE)) {
@@ -249,18 +254,20 @@ function media_generic_widget_process($element, &$form_state, $form) {
       '#default_value' => $fid,
     );
   } else {
-    $element['fid'] = array (
+    $element['fid'] = array(
       '#type' => 'hidden',
       '#value' => $fid
     );
   }
+
+  $element['fid']['#attributes'] = array('class' => array('fid'));
 
   // @todo: make me launch a simple iframe
 
   // JS: This is just 1/2 written code of what launching the browser might look like
   $element['launcher'] = array (
     '#type' => 'markup',
-    '#value' => '<a class="media_browser_launcher" href="#">Pick something!</a>',
+    '#markup' => '<a class="launcher" href="#">Pick something!</a>',
   );
 
   // Add some JS Settings
@@ -274,7 +281,7 @@ function media_generic_widget_process($element, &$form_state, $form) {
     ),
   );
 
-  // Old Media browser attach code.
+  // Media browser attach code.
   media_attach_browser();
 
   return $element;

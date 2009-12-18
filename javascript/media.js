@@ -40,42 +40,35 @@ related to the subtab.
 
 
 /**
- * Load the Media Browser for the first time
+ * Loads media browsers and callbacks, specifically for media as a field.
  */
-Drupal.behaviors.mediaBrowserLaunch ={
+Drupal.behaviors.mediaBrowserFieldsLaunch ={
   attach: function (context, settings) {
-    $('input.media-file-uri ', context).once('mediaBrowserLaunch', function () {
-      $(this).bind('click', function () {
-        // Add the dialog box to the page using this file field id
-        $(this).append(media_render_dialog());
-
-        // Now we set the current data state for the media browser by storing
-        // the data in a hidden field
-        $('#media_browser_data_store').attr('tabname', $('#media_content_browser_tabs .item-list a.active').attr('tabname')).attr('object-type', $(this).attr('object-type')).attr('bundle', $(this).attr('bundle')).attr('field-name', $(this).attr('field-name'));
-
-        // Render the subtabs for the current active tab
-        renderSubTabs();
-
-        // Now we can launch our modal window
-        $('#dialog').dialog({
-          buttons: { "Ok": function() { $(this).dialog("close"); } },
-          modal: true,
-          draggable: false,
-          resizable: false,
-          minWidth: 600,
-          width: 800,
-          position: 'top',
-          overlay: {
-            backgroundColor: '#000000',
-            opacity: 0.4
-          }
-        });
-
+    $('.form-media-file', context).once('mediaBrowserLaunch', function () {
+      var fidField = $('.fid', this);
+      var previewField = $('.preview', this);
+      var debugField = $('.debug', this);
+      $('.launcher', this).bind('click', function () {
+        options = {};
+        $().mediaBrowser(
+          function(mediaFiles) {
+            if (mediaFiles.length > 0) {
+              mediaFile = mediaFiles[0];
+            }
+            fidField.val(mediaFile.fid);
+            previewField.html(mediaFile.preview);
+            debugField.html(JSON.stringify(mediaFile));
+          },
+          options
+        );
+        // open the iframe, and implement the onLoad
+        //@todo make the url a variable.
         return false;
       });
     });
   }
 };
+
 
 
 /**
@@ -303,6 +296,5 @@ $(document).ready(function () {
 
 
 }); // $(document).ready
-
 
 })(jQuery);

@@ -1,0 +1,22 @@
+@CHARSET "UTF-8";
+#header, .breadcrumb {
+  display:none;
+}
+
+/** This is stupid **/
+
+#wrapper, .right-corner, #squeeze, .left-corner {
+	background: none !important;
+}
+
+.media-file {
+  padding:10px;
+  height:100px;
+  width:100px;
+  overflow: hidden;
+  background-color:none;
+}
+
+.media-file.selected {
+  background-color:blue;
+}
