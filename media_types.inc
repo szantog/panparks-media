@@ -134,9 +134,13 @@ function media_get_type($file) {
 }
 
 /**
- * Default callback used to determine if a piece of media is of a given type
+ *  Default callback used to determine if a piece of media is of a given type.
  *
- * @return unknown_type
+ *  @param $media
+ *    The media file asset object.
+ *  @param $args
+ *
+ *  @return unknown_type
  */
 function media_is_type($media, $args) {
   $match_type = !empty($args['match_type']) ? 'any' : $args['match_type'];
