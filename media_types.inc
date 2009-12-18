@@ -11,10 +11,7 @@
  *
  * @todo: This has a pretty serious flaw.  In the case someone uploads
  * a file without a known "type" fields will puke.  We need to provide
- * some "default type in the install probably".
- *
- * @note: We might want to consider using filter callbacks rather than mimetype
- * extensions instead.
+ * some "default type in the install probably". @TODO: done using other now?
  */
 function media_entity_info() {
   $return = array(
@@ -99,9 +96,13 @@ function media_type_get_types() {
   return $types;
 }
 
+/**
+ *  Create the basic class and defaults for a media entity bundle type.
+ */
 function media_type_set_defaults($info) {
-
   $type = new StdClass();
+
+  // This is used to filter a file to the proper bundle.
   $type->type_callback = 'media_is_type';
   $type->type_callback_args = array();
   $type->weight = 0;
@@ -112,8 +113,6 @@ function media_type_set_defaults($info) {
 
   return $type;
 }
-
-
 
 /**
  * From the looks of other parts of the code.
