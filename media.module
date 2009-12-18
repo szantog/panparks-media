@@ -676,30 +676,6 @@ function _media_content_fields($type_name) {
     }
   }
   return isset($types[$type_name]) ? $types[$type_name] : array();
-
-  // @TODO: Below is legacy. Remove when we know this is correct.
-  if (module_exists('content')) {
-    // Use CCK if available
-    $type = content_types($type_name);
-  }
-  else {
-    // Get the specific content type.
-    $type = (array)node_type_get_type($type_name);
-  }
-
-  // Recognize the upload/attachment form and create an artificial field.
-  // This should be the only one we ever have to do this for.
-  if (module_exists('upload')) {
-    $type['fields']['attachments'] = array(
-      'field_name'  => 'attachments',
-      'type'        => 'attachments',
-      'widget'      => array(
-        'label'       => $type['extra']['attachments']['label'],
-      ),
-    );
-  }
-
-  return $type;
 }
 
 
