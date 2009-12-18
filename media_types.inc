@@ -135,6 +135,8 @@ function media_get_type($file) {
 /**
  *  Default callback used to determine if a piece of media is of a given type.
  *
+ * @TODO: document 'any' and 'all' matching.
+ *
  *  @param $media
  *    The media file asset object.
  *  @param $args

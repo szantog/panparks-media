@@ -3,6 +3,8 @@
 CHANGELOG for Media module.
 ===========================
 
+by aaron: Allow administrator to edit existing bundles.
+by aaron: Filter media type bundles by stream.
 by aaron: Fix various errors.
 by aaron: Begin work on formatters.
 by aaron: Add medium admin style.

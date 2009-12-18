@@ -631,11 +631,76 @@ function media_admin_type_list() {
   return $build;
 }
 
+/**
+ *  The administration form for managing media types.
+ */
 function media_admin_type_manage_form($form, &$form_state, $media_type) {
   $form = array();
   $form['media_type'] = array(
+    '#type' => 'value',
+    '#value' => $media_type->machine_name,
+  );
+  $form['type'] = array(
     '#type' => 'fieldset',
     '#title' => t('@media media type', array('@media' => $media_type->label)),
   );
+  $options = array('public' => t('Public files'), 'private' => t('Private files'));
+  foreach(file_get_stream_wrappers() as $stream => $wrapper) {
+    $options[$stream] = $wrapper['name'];
+  }
+  unset($options['temporary']);
+  $default_value = array();
+  if (isset($media_type->type_callback_args['streams'])) {
+    foreach ($media_type->type_callback_args['streams'] as $stream) {
+      $default_value[$stream] = $stream;
+    }
+  }
+  $form['type']['streams'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Allowed streams'),
+    '#options' => $options,
+    '#default_value' => $default_value,
+  );
+  $form['type']['advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced settings'),
+    // @TODO: Collapsing fieldsets break the dashboard layout. File a bug w/ Drupal core.
+//     '#collapsible' => TRUE,
+//     '#collapsed' => TRUE,
+  );
+  $default_value = isset($media_type->type_callback_args['mimetypes']) ? implode(' ', $media_type->type_callback_args['mimetypes']) : '';
+  $form['type']['advanced']['mimetypes'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Allowed mimetypes'),
+    '#description' => t('You may optionally enter one or more allowed file mimetypes for this Media type, if appropriate, separating each with a space. You may use a regular expression for matching, such as %image_match (which would match any mimetype beginning with %image) or %any_match, which would match any file mimetype.', array('%image_match' => '/^image/', '%image' => t('image'), '%any_match' => '/.*/')),
+    '#default_value' => check_plain($default_value),
+  );
+  $default_value = isset($media_type->type_callback_args['extensions']) ? implode(' ', $media_type->type_callback_args['extensions']) : '';
+  $form['type']['advanced']['extensions'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Allowed extensions'),
+    '#description' => t('You may optionally enter one or more allowed file extensions for this Media type, if appropriate, separating each with a space (and no dots).'),
+    '#default_value' => check_plain($default_value),
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#weight' => 100,
+  );
   return $form;
+}
+
+function media_admin_type_manage_form_submit($form, &$form_state) {
+  $media_type = media_type_load($form_state['values']['media_type']);
+  $media_type->type_callback_args['streams'] = array();
+  foreach ($form_state['values']['streams'] as $stream) {
+    if ($stream) {
+      $media_type->type_callback_args['streams'][] = $stream;
+    }
+  }
+  $media_type->type_callback_args['mimetypes'] = explode(' ', $form_state['values']['mimetypes']);
+  $media_type->type_callback_args['extensions'] = explode(' ', $form_state['values']['extensions']);
+
+  media_type_save($media_type);
+  drupal_set_message(t('The @label media type has been saved.', array('@label' => $media_type->label)));
 }
