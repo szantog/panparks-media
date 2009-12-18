@@ -52,9 +52,10 @@ Drupal.behaviors.mediaBrowserFieldsLaunch ={
         options = {};
         $().mediaBrowser(
           function(mediaFiles) {
-            if (mediaFiles.length > 0) {
-              mediaFile = mediaFiles[0];
+            if (mediaFiles.length < 0) {
+              return;
             }
+            mediaFile = mediaFiles[0];
             fidField.val(mediaFile.fid);
             previewField.html(mediaFile.preview);
             debugField.html(JSON.stringify(mediaFile));

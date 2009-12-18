@@ -11,11 +11,12 @@
    *   Array of options for the browser.
    */
   $.fn.mediaBrowser = function(onSelect, options) {
-   options = $.extend({}, $.fn.mediaBrowser.defaults, options);
+   options = $.extend({}, $.fn.mediaBrowser.getDefaults(), options);
+   console.log(options);
    
    this.each(function() {
    // Create it as a modal window.
-    var mediaIframe = $.fn.mediaBrowser.getIframe();
+    var mediaIframe = $.fn.mediaBrowser.getIframe(options.src);
       mediaIframe.bind('load', function (e) {
         if (typeof this.contentWindow.Drupal.mediaBrowser != undefined) {
           this.contentWindow.Drupal.mediaBrowser.start(options);
@@ -50,13 +51,18 @@
    return this;
   };
   
-  $.fn.mediaBrowser.defaults = {
-    media_types: ['video', 'images']
+  
+  $.fn.mediaBrowser.getDefaults = function () {
+    debug.debug(Drupal.settings.media);
+    return {
+      media_types: ['video', 'images'],
+      src: Drupal.settings.media.browserUrl
+    };
   };
   
-  $.fn.mediaBrowser.getIframe = function () {    
-    return $('<iframe id="mediaBrowser" class="modalThing"/>')
-    .attr('src', '/media/browser')
+  $.fn.mediaBrowser.getIframe = function (src) {    
+    return $('<iframe id="mediaBrowser" class="media-modal-frame"/>')
+    .attr('src', src)
     .attr('width', '800px');
   }
 // end of closure  

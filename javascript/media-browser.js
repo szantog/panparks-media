@@ -13,21 +13,24 @@ Drupal.behaviors.mediaBrowser = {
 Drupal.mediaBrowser = Drupal.mediaBrowser || {};
 Drupal.mediaBrowser.selectedMedia = [];
 
-Drupal.mediaBrowser.defaults = {
-  viewType: 'thumbnails',
-  //@todo: use variable
-  callback: '/media/browser/list',
-  conditions: {}
+Drupal.mediaBrowser.getDefaults = function () {
+  return {
+    viewType: 'thumbnails',
+    //@todo: use variable
+    callbacks: Drupal.settings.mediaBrowser.callbacks,
+    conditions: {}
+  }
 };
   
 Drupal.mediaBrowser.start = function(options) {
-  this.settings = $.extend({}, this.defaults, options);
+  this.settings = $.extend({}, this.getDefaults(), options);
   this.browser = $('#media-browser-list tbody');
   this.getMedia();
 };
 
-Drupal.mediaBrowser.getCallbackUrl = function() {
-  return this.settings.callback;
+Drupal.mediaBrowser.getCallbackUrl = function(name) {
+  //@todo: error handling here.
+  return this.settings.callbacks[name].url;
 }
 
 Drupal.mediaBrowser.getConditions = function () {
@@ -36,7 +39,7 @@ Drupal.mediaBrowser.getConditions = function () {
 
 Drupal.mediaBrowser.getMedia = function () {
   var that = this;
-  var callback = this.getCallbackUrl();
+  var callback = this.getCallbackUrl('getMedia');
   var params = {
     conditions: this.getConditions()
   };

@@ -750,7 +750,7 @@ function media_admin_type_manage_form_submit($form, &$form_state) {
 function media_browser() {
   $rows = array();
   $path = drupal_get_path('module', 'media');
-  $attached = array (
+  $attached = array(
     'js' => array(
       $path . '/javascript/media-browser.js',
       $path . '/javascript/util/json2.js',
@@ -759,6 +759,14 @@ function media_browser() {
 
     'css' => array($path . '/media_browser.css'),
   );
+
+  $callbacks = module_invoke_all('media_browser_callbacks');
+  drupal_alter('media_browser_callbacks_alter', $callbacks);
+  $settings = array(
+    'callbacks' => $callbacks,
+  );
+
+  drupal_add_js(array('mediaBrowser' => $settings), 'setting');
 
   // Here we will return the basic structure of the browser.
   $build['media_browser'] = array(
@@ -797,6 +805,15 @@ function media_browser() {
   //$build['media_pager'] = array('#theme' => 'pager');
 
   return $build;
+}
+
+function media_media_browser_callbacks() {
+  return array (
+    'getMedia' => array(
+      'url' => url('media/browser/list'),
+      'token' => drupal_get_token('media/browser/list'),
+    ),
+  );
 }
 
 /**

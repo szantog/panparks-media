@@ -1123,6 +1123,11 @@ function media_field_info_alter(&$info) {
 
 
 function media_attach_browser() {
+  static $attached;
+  if ($attached) {
+    return;
+  }
+  $attached = TRUE;
   // @TODO: Use the currently undocumented #attached property to load js & css.
   // Load up all of our necessary jQuery
   drupal_add_library('system', 'vertical-tabs');
@@ -1131,12 +1136,27 @@ function media_attach_browser() {
   drupal_add_library('system', 'ui.resizable');
   drupal_add_library('system', 'ui.dialog');
   drupal_add_library('system', 'ui.tabs');
+  $path = drupal_get_path('module', 'media');
+  // DEBUG - logging framework
   // Load the jQuery Plugin to launch / configure it.
-  drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.jquery.js');
+  drupal_add_js($path . '/javascript/media.jquery.js');
+  // Load the jQuery Plugin to launch / configure it.
+  drupal_add_js($path . '/javascript/util/ba-debug.min.js');
   // Load our css.
-  drupal_add_css(drupal_get_path('module', 'media') . '/media.css');
+  drupal_add_css($path . '/media.css');
   // Load the custom JS to bind elements and handle fields.
-  drupal_add_js(drupal_get_path('module', 'media') . '/javascript/media.js');
+  drupal_add_js($path . '/javascript/media.js');
+
+
+  $settings = array(
+    'browserUrl' => url('media/browser'),
+    // @Todo: rip this down and make a callback API structure with tokens, etc
+    // this is temporary.
+  );
+  drupal_add_js(array('media' => $settings), 'setting');
+
+  //@todo: re-integrate the code below
+  return;
 
 
   // @TODO: This is a hack to get the Media: YouTube js attached to the form.
@@ -1167,6 +1187,7 @@ function media_attach_browser() {
     );
     $i = true;
   }
+
 
   // Add a URL setting for the AJAX load
   drupal_add_js(array('media' => array(
