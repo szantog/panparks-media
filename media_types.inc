@@ -52,8 +52,8 @@ function media_entity_info() {
  *      ->machine_name => The name of the media asset type;
  *      ->label => The human readable name;
  *      ->base => @TODO: What's this?
- *      ->extensions => An array of allowed extensions; @TODO:replace w/ callback
- *      ->mimeTypes => (obsolete).
+ *      ->type_callback => Function call to filter an instance to its bundle.
+ *      ->type_callback_args => An array of args to be passed to type_callback.
  *  @return void;
  */
 function media_type_save($type) {

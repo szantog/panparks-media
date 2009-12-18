@@ -245,6 +245,7 @@ function media_theme() {
 
 /**
  * Gets all of the modules which register with Media.
+ * @TODO: Are we doing away with this now?
  *
  * @param array $ids
  *   (Optional) If this contains an array of id strings, then return only the
@@ -315,7 +316,6 @@ function media_get_registered_modules($ids = NULL, $reset = FALSE) {
 
   return $registrations;
 }
-
 
 /* ***************************************** */
 /* Media API Functions                       */
@@ -677,7 +677,6 @@ function _media_content_fields($type_name) {
   }
   return isset($types[$type_name]) ? $types[$type_name] : array();
 }
-
 
 /* *************************************************** */
 /* Media forms                                         */
@@ -1250,7 +1249,6 @@ function amedia_field_widget(&$form, &$form_state, $field, $instance, $langcode,
   return $elements;
 }
 
-
 /**
  * A #file_value_callbacks for the media_managed_file type.
  *
@@ -1328,7 +1326,6 @@ function media_uri_value($element, &$input) {
   }
 }
 
-
 /**
  * Implement hook_file_references().
  *
@@ -1339,7 +1336,6 @@ function media_uri_value($element, &$input) {
 function media_file_references($file) {
   return 1;
 }
-
 
 /**
  * Implement hook_image_default_styles().
@@ -1363,7 +1359,6 @@ function media_image_default_styles() {
 /* *************************************************** */
 /* Media display forms                                 */
 /* *************************************************** */
-
 
 /**
  * Build the tabs across the media browser
@@ -1397,7 +1392,6 @@ function media_browser_subtabs_form($form, &$form_state, $parameters) {
 
   return $form;
 }
-
 
 /**
  * Creates the file list display form
