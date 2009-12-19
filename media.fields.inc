@@ -40,7 +40,7 @@ function media_field_schema($field) {
  * Implements hook_field_is_empty().
  */
 function media_field_is_empty($item, $field) {
-  if (!is_array($item) || (empty($item['fid']) && (string) $item['fid'] !== '0')) {
+  if (!is_array($item) || ($item['fid'] == 0)) {
     return TRUE;
   }
   return FALSE;
@@ -287,8 +287,6 @@ function media_generic_widget_process($element, &$form_state, $form) {
   return $element;
 }
 
-
-
 /**
  * Implements hook_field_validate().
  *
@@ -301,6 +299,10 @@ function media_field_validate($obj_type, $object, $field, $instance, $langcode, 
 
   // @TODO: merge in stuff from media_uri_value
   foreach ($items as $delta => $item) {
+    if ($item['fid'] == 0) {
+      return TRUE;
+      //@TODO: make support for submiting with just a URI here?
+    }
     $result = db_select('file', 'f')
       ->fields('f')
       ->condition('fid', $item['fid'])

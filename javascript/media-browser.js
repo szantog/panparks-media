@@ -6,7 +6,11 @@
  */
 Drupal.behaviors.mediaBrowser = {
   attach: function(context, settings) {
-    
+    // The problem is, we don't want to start this when it loads
+    // Because, the parent (if in an iframe)
+    // Wants to pass options and tell it to start :(
+    // We should be starting here IF the parent doesn't
+    // initiate the process.
   }
 };
 
