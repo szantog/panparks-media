@@ -34,7 +34,7 @@ function theme_media_styles_styles_default($variables) {
     array(
       'path' => $path . '/images/file-unknown.png',
       'alt' => t('Thumbnail for !filename.', array('!filename' => $file->filename)),
-      'attributes' => array('class' => 'file-unknown'),
+      'attributes' => array('width' => 100, 'height' => 75, 'class' => 'file-unknown'),
     )
   );
   return $thumbnail;
@@ -59,6 +59,7 @@ function theme_media_styles_field_formatter_styles($variables) {
 
   // Defer to Image Styles for the rest.
   return theme('field_formatter_image', $variables);
+
 }
 
 function theme_media_styles_styles($variables) {
@@ -67,6 +68,8 @@ function theme_media_styles_styles($variables) {
   $style_name = $variables['style_name'];
   $path = $file->uri;
   $alt = $title = isset($variables['description']) ? $variables['description'] : (isset($file->description) ? $file->description : '');
+
+  //@TODO: How to add fields here?
   return theme('image_style',
     array(
       'style_name' => $style_name,

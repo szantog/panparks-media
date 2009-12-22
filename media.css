@@ -131,3 +131,9 @@ div.media-thumbnail.selected {
   height: 100%;
   background: transparent url(images/throbber.gif) no-repeat  center center;
 }
+
+/** This is a massive hack. There must be a better way. See media.fields.inc **/
+
+.fid.form-text {
+  display:none;
+}

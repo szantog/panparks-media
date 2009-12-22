@@ -35,6 +35,7 @@ function media_entity_info() {
   foreach ($media_types as $type => $bundle_info) {
     $return['media']['bundles'][$type] = (array)$bundle_info;
     $return['media']['bundles'][$type]['admin'] = array(
+      'label' => $bundle_info->label,
       'path' => 'admin/structure/media/manage/%media_type',
       'real path' => 'admin/structure/media/manage/' . $type,
       'bundle argument' => 4,

@@ -53,11 +53,10 @@ function media_menu() {
 
   // For managing different types of media and the fields associated with them.
   $items['admin/structure/media'] = array(
-    'title' => 'Media',
+    'title' => 'Media Types',
     'description' => 'Manage files used on your site.',
     'page callback' => 'media_admin_type_list',
     'access arguments' => array('administer media'),
-    'type' => MENU_LOCAL_TASK,
     'file' => 'media.admin.inc',
   );
   $items['admin/structure/media/manage/%media_type'] = array(
@@ -85,7 +84,7 @@ function media_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_edit', 3),
     'access arguments' => array('administer media'),
-    'type' => MENU_CALLBACK,
+    'type' => MENU_LOCAL_TASK,
     'file' => 'media.admin.inc',
   );
 
@@ -137,6 +136,49 @@ function media_menu() {
     'weight'           => 3,
     'type'             => MENU_CALLBACK,
     'file'             => 'media.admin.inc',
+  );
+
+  //@todo: make this more like node?  (End user facing)
+
+  $items['media'] = array(
+    'title' => 'Media',
+    'page callback' => 'media_file_view',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $item['media/%media'] = array(
+    'title'           => 'Media view',
+    'description'     => 'aa',
+    'page callback'   => 'media_file_view',
+    'access arguments' => array('access content'), //array('view media'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['media/%media/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
+  $items['media/%media/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'media_page_edit',
+    'page arguments' => array(1),
+    'weight' => 0,
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+
+  /**
+   * Ajax callback to handle viewing an individual piece of media.
+   */
+  $items['media/%media/print'] = array(
+    'title' => 'Media view callback',
+    'page callback' => 'media_print',
+  iie();
+    'page_arguments' => array(1, 3),
+    'type' => MENU_CALLBACK,
   );
 
   return $items;
@@ -247,6 +289,12 @@ function media_theme() {
     // The media browser pane.
     'media_browser_pane' => array(
       'variables'         => array('form' => array()),
+    ),
+
+    // A link for a file w/ an icon to the media/$fid page.
+    'media_link' => array(
+      'variables'         => array('file' => NULL),
+      'file'              => 'media_theme.inc',
     ),
 
     // A preview of the uploaded file.
@@ -1403,6 +1451,70 @@ function media_image_default_styles() {
   return $styles;
 }
 
+/**
+ * Callback to return an individual piece of media
+ * For use in WYSIWYG or previews
+ * @todo: this
+ * @param unknown_type $media
+ * @param unknown_type $build_mode
+ * @return unknown_type
+ */
+function media_print($media, $build_mode) {
+  // What style to use?  This will require a descussion I suppose
+  // Problem is, the file itself is not a field of media
+  // should it be?  Isn't this a performance bottleneck?
+  // @todo: figure this out.  For now, we hack.
+
+  $style = 'default';
+
+  $render[$delta] = array('#markup' => l($file->filename, file_create_url($file->uri)));
+  $build_mode = 'full';
+  $render += field_attach_view('media', $file, $build_mode, $langcode);
+
+}
+
+
+/**
+ * Menu callback; view a single piece of media.
+ * @todo: this.
+ */
+function media_file_view($media) {
+  return "not yet implemented" . dpr($media, TRUE);
+  // Need to get a handle on build modes
+  $m = media_build_multiple(array($media->fid => $media), 'full');
+  dpr($m);
+  dpr($media);
+  die();
+  drupal_set_title($media->title[$langcode][0]['value']);
+
+  return $return;
+}
+
+/**
+ * Construct a drupal_render() style array from an array of loaded media files.
+ *
+ * @param $files
+ *   An array of nodes as returned by node_load_multiple().
+ * @param $build_mode
+ *   Build mode, e.g. 'full', 'teaser'...
+ * @param $weight
+ *   An integer representing the weight of the first node in the list.
+ * @return
+ *   An array in the format expected by drupal_render().
+ */
+function media_build_multiple($files, $build_mode = 'teaser', $weight = 0) {
+  field_attach_prepare_view('media', array($files), $build_mode);
+  $build = array();
+  foreach ($media as $file) {
+    //@todo: How do we display this based on the build mode?
+    $build['media'][$file->fid] = array('#markup' => theme('media_admin_thumbnail', array('file' => $file)));
+    //$build['media'][$file->fid] = array('#file' => );
+    $build['media'][$file->fid]['#weight'] = $weight;
+    $weight++;
+  }
+  $build['media']['#sorted'] = TRUE;
+  return $build;
+}
 
 /* *************************************************** */
 /* Media display forms                                 */
@@ -1511,21 +1623,6 @@ function media_add_type_to_file($file) {
 }
 
 /**
- * Implements hook_field_build_modes().
- */
-function media_field_build_modes($obj_type) {
-  $modes = array();
-  if ($obj_type == 'media') {
-    $modes = array(
-      'teaser' => t('Teaser'),
-      'full' => t('Full'),
-      'rss' => t('RSS (Podcasting, etc)'),
-    );
-  }
-  return $modes;
-}
-
-/**
  * Implementation of hook_wysiwyg_plugin().
  */
 function media_wysiwyg_plugin($editor, $version) {
@@ -1549,20 +1646,20 @@ function media_wysiwyg_plugin($editor, $version) {
       break;
 
      case 'ckeditor':
-          return array(
-            'media' => array(
-              'path' => drupal_get_path('module', 'media') .'/javascript/ckeditor/plugin.js',
-              'buttons' => array('media' => t('Add Media')),
-              'url' => 'http://drupal.org/project/media',
-              'extended_valid_elements' => array(
-                'img[class|src|border=0|alt|title|width|height|align|name|style]',
-                'object[class|src]',
-                'param[class|src]',
-              ),
-              'load' => TRUE,
+        return array(
+          'media' => array(
+            'path' => drupal_get_path('module', 'media') .'/javascript/ckeditor/plugin.js',
+            'buttons' => array('media' => t('Add Media')),
+            'url' => 'http://drupal.org/project/media',
+            'extended_valid_elements' => array(
+              'img[class|src|border=0|alt|title|width|height|align|name|style]',
+              'object[class|src]',
+              'param[class|src]',
             ),
-          );
-          break;
+            'load' => TRUE,
+          ),
+        );
+        break;
   }
 }
 

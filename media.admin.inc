@@ -7,141 +7,15 @@
  */
 
 /**
- * Provide per content type settings.
- *
- * @param array &form
- *  A form structured array.
- * @param string $type_name
- *  A string representing the content type.
- * @return
- *  Nothing is returned.
- */
-function media_settings_content_type(&$form, $type_name = NULL) {
-  $form['media'] = array(
-    '#type'        => 'fieldset',
-    '#title'       => t('Media settings'),
-    '#collapsible' => TRUE,
-    '#group'       => 'additional_settings',
-  );
-
-  $type = node_type_get_type($type_name);
-
-  // Master settings override.
-  $form['media']['media_' . $type_name . '_override'] = array(
-    '#title'         => t($type->name . ' overrides default values'),
-    '#type'          => 'checkbox',
-    '#description'   => t('Override the default settings for this content type.  The options below will only be used if this box is checked.'),
-    '#default_value' => variable_get('media_' . $type_name . '_override', NULL),
-  );
-  $form['media']['media_' . $type_name . '_enabled'] = array(
-    '#title'         => t('Enable Media resource browser'),
-    '#type'          => 'checkbox',
-    '#description'   => t('Enable the Media resource browser for this node type.'),
-    '#default_value' => variable_get('media_' . $type_name . '_enabled', NULL),
-  );
-
-  // Extract the fields for this node type
-  /* Commented out because _media_content_field_types is missing. This should all be removed?
-  if (isset($type->fields)) {
-    foreach ((array)$type->fields as $field_name => $field) {
-      // Create the field identifier
-      $form['media'][$field['field_name']] = array(
-        '#type'        => 'fieldset',
-        '#title'       => t('Field name: !name', array('!name' => $field['widget']['label'])),
-        '#collapsible' => 'true',
-      );
-
-      // Build a form for each type of module that we have
-      foreach (media_registration_kinds() as $kind) {
-        // Get all the kinds that match this field
-        if ($registrations = media_get_fields($field['type'], $kind)) {
-          $options = array();
-
-          foreach ($registrations as $id => $registration) {
-            $options[$field['field_name'] . '--' . $id] = $registration['name'] . ': ' . $registration['description'];
-          }
-
-          $form['media'][$field['field_name']]['media_' . $type_name . '_' . $field['field_name'] . '_' . $kind] = array(
-            '#title'         => t('Enable !kind options for this field', array('!kind' => $kind)),
-            '#description'   => t('Choose which !kind options you would like to have enabled on this field', array('!kind' => $kind)),
-            '#type'          => 'checkboxes',
-            '#options'       => $options,
-            '#default_value' => variable_get('media_' . $type_name . '_' . $field['field_name'] . '_' . $kind, array()),
-          );
-        }
-      }
-    }
-
-    // if we didn't get any additional data, remove this field form
-    // this is ugly but hey, sue me
-    if (count($form['media'][$field['field_name']]) == 3) {
-      unset($form['media'][$field['field_name']]);
-    }
-  }
-  */
-}
-
-/**
- * Provide global settings.
- *
- * Global settings are currently just defaults for content types.
- *
- * @param $form
- *  A form structure.
- * @return
- *  A form structured array.
- */
-function media_settings_global($form) {
-  $form = array();
-
-  $form['media_global_enabled'] = array(
-    '#title' => t('Media resource browser'),
-    '#type' => 'checkbox',
-    '#description' => t('Enable or Disable the Media resource browser for all types, unless specifically set for a given type.'),
-    '#default_value' => variable_get('media_global_enabled', 1),
-  );
-
-  $form['global'] = array(
-    '#title' => t('Global Settings'),
-    '#type' => 'fieldset',
-    '#description' => t('These global settings apply when uploading files at e.g. admin/content/media and will be overridden by specific fields.'),
-  );
-
-  // Make the extension list a little more human-friendly by comma-separation.
-  $extensions = str_replace(' ', ', ', variable_get('media_file_extensions', ''));
-  $form['global']['media_file_extensions'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Allowed file extensions'),
-    '#default_value' => $extensions,
-    '#description' => t('Separate extensions with a space or comma and do not include the leading dot. Leaving this blank will allow users to upload a file with any extension.'),
-    '#element_validate' => array('_file_generic_settings_extensions'),
-  );
-
-  $form['global']['media_max_filesize'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Maximum upload size'),
-    '#default_value' => variable_get('media_max_filesize', ''),
-    '#description' => t('Enter a value like "512" (bytes), "80 KB" (kilobytes) or "50 MB" (megabytes) in order to restrict the allowed file size. If left empty the file sizes will be limited only by PHP\'s maximum post and file upload sizes (current limit <strong>%limit</strong>).', array('%limit' => format_size(file_upload_max_size()))),
-    '#element_validate' => array('_file_generic_settings_max_filesize'),
-    '#size' => 10,
-  );
-
-  return system_settings_form($form);
-}
-
-/**
  * Display the list or thumbnails media admin display.
  */
 function media_admin($form, $form_state, $display = NULL) {
-  $path = drupal_get_path('module', 'media');
 
   if (!$display) {
     drupal_goto('admin/content/media/list');
   }
 
-  // Load our CSS and JS.
-  drupal_add_css($path . '/media.css');
-  drupal_add_js($path . '/javascript/media-admin.js');
+  $form['#attached'] = media_admin_get_css_and_js();
 
   if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
     return media_multiple_delete_confirm($form, $form_state, array_filter($form_state['values']['files']));
@@ -162,11 +36,19 @@ function media_admin($form, $form_state, $display = NULL) {
   return $form;
 }
 
+function media_admin_get_css_and_js() {
+  $path = drupal_get_path('module', 'media');
+  return array(
+    'js' => array($path . '/javascript/media-admin.js'),
+    'css' => array($path . '/media.css'),
+  );
+}
+
 /**
  * Form builder: Builds the media list administration overview.
  */
 function media_admin_list() {
-  $path = drupal_get_path('module', 'media');
+
 
   // Build the sortable table header.
   $header = array(
@@ -191,9 +73,10 @@ function media_admin_list() {
   $destination = drupal_get_destination();
   $files = array();
   $options = array();
+
   foreach ($result as $file) {
    $options[$file->fid] = array(
-     'title' => theme('file_link', array('file' => $file)),
+     'title' => theme('media_link', array('file' => $file)),
      'type' =>  check_plain($file->filemime),
      'size' => t('@size KB', array('@size' => number_format($file->filesize / 1000, 0))),
      'author' => theme('username', array('account' => $file)),
@@ -219,7 +102,7 @@ function media_admin_list() {
  * Form builder: Builds the media thumbnails administration overview.
  */
 function media_admin_thumbnails() {
-  $path = drupal_get_path('module', 'media');
+
 
   $query = db_select('file', 'f')->extend('PagerDefault');
   $query->join('users', 'u', 'f.uid = u.uid');
@@ -292,6 +175,7 @@ function media_admin_operations() {
  * Build the display switch portion of the file listings form.
  */
 function media_admin_display_switch($form = array(), $options = array()) {
+
   $path = drupal_get_path('module', 'media');
 
   $form_location = (isset($options['form_location'])) ? $options['form_location'] : 'admin/content/media';
@@ -476,11 +360,12 @@ function media_edit($form, $form_state, $file) {
   drupal_set_title($file->filename);
 
   field_attach_form('media', $file, $form, $form_state);
+  $form['#attached'] = media_admin_get_css_and_js();
 
   $form['preview'] = array(
     '#type' => 'markup',
     '#markup' => theme('media_admin_thumbnail', array('file' => $file, 'style_name' => 'medium')),
-    '#prefix' => '<div style="padding:10px; border:3px solid #CCC; width:200px; height:200px">',
+    '#prefix' => '<div class="media-preview">',
     '#suffix' => '</div>',
     '#weight' => -10,
   );
@@ -523,6 +408,7 @@ function media_add_files($form, $form_state) {
    'file_validate_size' => array(parse_size(variable_get('media_max_filesize', ''))),
   );
 
+
   // A blank set of allowed file extensions means no need to validate.
   if (!$validators['file_validate_extensions'][0]) {
     unset($validators['file_validate_extensions']);
@@ -531,6 +417,11 @@ function media_add_files($form, $form_state) {
   if (!$validators['file_validate_size']) {
     $validators['file_validate_size'] = file_upload_max_size();
   }
+
+  if ($validators['file_validate_size'][0] == 0) {
+    unset($validators['file_validate_size']);
+  }
+
   $form['#validators'] = $validators;
 
   $form['upload'] = array(
@@ -826,7 +717,7 @@ function media_browser_list($conditions = array()) {
   $medias = entity_load('media', FALSE, $conditions);
 
   foreach ($medias as &$media) {
-    $media->preview = theme('media_admin_thumbnail', array('file' => $media, 'style_name' => 'medium'));
+    $media->preview = theme('media_admin_thumbnail', array('file' => $media, 'style_name' => 'thumbnail'));
 //
 //    //@ Todo: We will not be returning a table format in the future.
 //    $row = array();

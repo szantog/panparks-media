@@ -40,7 +40,7 @@ function media_field_schema($field) {
  * Implements hook_field_is_empty().
  */
 function media_field_is_empty($item, $field) {
-  if (!is_array($item) || ($item['fid'] == 0)) {
+  if (!is_array($item) || (empty($item['fid']))) {
     return TRUE;
   }
   return FALSE;
@@ -68,6 +68,9 @@ function media_field_widget_info() {
   );
 }
 
+/**
+ * Implement hook_field_formatter_info
+ */
 function media_field_formatter_info() {
   return array(
     'media_default' => array(
@@ -77,6 +80,26 @@ function media_field_formatter_info() {
   );
 }
 
+
+/**
+ * Implements hook_field_build_modes().
+ */
+function media_field_build_modes($obj_type) {
+  $modes = array();
+  if ($obj_type == 'media') {
+    $modes = array(
+      'teaser' => t('Teaser'),
+      'full' => t('Full'),
+      'rss' => t('RSS (Podcasting, etc)'),
+    );
+  }
+  return $modes;
+}
+
+
+/**
+ * Implement hook_field_formatter
+ */
 function media_field_formatter($obj_type, $object, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
@@ -88,7 +111,17 @@ function media_field_formatter($obj_type, $object, $field, $instance, $langcode,
       foreach ($items as $delta => $item) {
         $file = media_load($item['fid']);
         $element[$delta] = array('#markup' => l($file->filename, file_create_url($file->uri)));
+        $build_mode = 'full';
+        $fields = field_attach_view('media', $file, $build_mode, $langcode);
+        $element[$delta] += $fields;
+        //@todo: write a proper theming function for this.
       }
+      break;
+
+    case 'media_teaser':
+      // The question here is how to we show fields along w/ media.
+      // Perhaps it should happen on every object type?
+
       break;
   }
 
@@ -207,11 +240,6 @@ function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, 
     $elements['#title'] = $instance['label'];
     $elements['#description'] = $instance['description'];
 
-    // Add some properties that will eventually be added to the file upload
-    // field. These are added here so that they may be referenced easily through
-    // a hook_form_alter().
-    $elements['#file_upload_title'] = t('Add a new file');
-    $elements['#file_upload_description'] = theme('file_upload_help', array('description' => '', 'upload_validators' => $elements[0]['#upload_validators']));
   }
 
   return $elements;
@@ -227,36 +255,55 @@ function media_generic_widget_process($element, &$form_state, $form) {
   $fid = isset($element['#default_value']['fid']) ? $element['#default_value']['fid'] : 0;
   $file = media_load($fid);
 
-  if (variable_get('media_debug', TRUE)) {
-    $element['file_info'] = array(
-      '#type' => 'textarea',
-      '#rows' => 5,
-      '#title' => 'File Info',
-      '#attributes' => array('class' => array('debug'), 'style' => 'font-size:.75em; font-family:courier'),
-      '#default_value' => print_r($file, 1),
+  $path = drupal_get_path('module', 'media');
+
+  if ($file) {
+    $element['filename'] = array(
+      '#type' => 'item',
+      '#title' => $file->filename,
+      '#markup' => '',
+      '#prefix' => '<h3 class="media-filename">',
+      '#suffix' => '</h3>',
     );
   }
 
-  $path = drupal_get_path('module', 'media');
+  //@TODO: This should be loaded from the JS in case of a failed form submission.
 
   $element['preview'] = array(
     '#type' => 'item',
-    '#title' => 'Preview',
-    '#markup' => theme('media_admin_thumbnail', array('file' => $file)),
+    '#markup' => theme('media_admin_thumbnail', array('file' => $file, 'style_name' => 'thumbnail')),
     '#prefix' => '<div class="preview">',
     '#suffix' => '</div>',
   );
 
+  //@HACK: @todo: this is so I can find it in media.js without putting every field in a settings variable.
+  // This is hidden in media.css
+  $element['fid'] = array(
+    '#type' => 'textfield',
+    '#default_value' => $fid
+  );
+
+  // JS: This is just 1/2 written code of what launching the browser might look like
+  $element['launcher'] = array (
+    '#type' => 'markup',
+    '#markup' => '<a class="launcher" href="#">Select Media</a>',
+  );
+
   if (variable_get('media_debug', TRUE)) {
-    $element['fid'] = array (
-      '#type' => 'textfield',
-      '#title' => 'File Id',
-      '#default_value' => $fid,
+    drupal_add_js(array('media' => array('debug' => TRUE)), 'setting');
+    $element['debug'] = array(
+      '#type' => 'fieldset',
+      '#title' => 'Debug information',
+      '#collapsed' => FALSE,
+      '#collapsible' => TRUE,
     );
-  } else {
-    $element['fid'] = array(
-      '#type' => 'hidden',
-      '#value' => $fid
+
+    $element['debug']['file_info'] = array(
+      '#type' => 'textarea',
+      '#rows' => 5,
+      '#title' => 'File Info',
+      '#attributes' => array('class' => array('file_info'), 'style' => 'font-size:.75em; font-family:courier'),
+      '#default_value' => drupal_json_encode($file),
     );
   }
 
@@ -264,13 +311,8 @@ function media_generic_widget_process($element, &$form_state, $form) {
 
   // @todo: make me launch a simple iframe
 
-  // JS: This is just 1/2 written code of what launching the browser might look like
-  $element['launcher'] = array (
-    '#type' => 'markup',
-    '#markup' => '<a class="launcher" href="#">Pick something!</a>',
-  );
-
   // Add some JS Settings
+  // Not currently in effect.
   $browser_settings = array(
     'media_items_callback' => url('media/service/get/for/fields'),
     // These params are passed on every callback
@@ -297,7 +339,7 @@ function media_field_validate($obj_type, $object, $field, $instance, $langcode, 
 
   $allowed_types = array_keys(array_filter($instance['widget']['settings']['allowed_types']));
 
-  // @TODO: merge in stuff from media_uri_value
+    // @TODO: merge in stuff from media_uri_value
   foreach ($items as $delta => $item) {
     if ($item['fid'] == 0) {
       return TRUE;

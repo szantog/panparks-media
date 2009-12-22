@@ -45,9 +45,13 @@ related to the subtab.
 Drupal.behaviors.mediaBrowserFieldsLaunch ={
   attach: function (context, settings) {
     $('.form-media-file', context).once('mediaBrowserLaunch', function () {
+      
       var fidField = $('.fid', this);
+      fidField.show();
       var previewField = $('.preview', this);
-      var debugField = $('.debug', this);
+      if (Drupal.settings.media.debug) {
+        var debugField = $('.file_info', this);
+      }
       $('.launcher', this).bind('click', function () {
         options = {};
         $().mediaBrowser(
@@ -58,7 +62,10 @@ Drupal.behaviors.mediaBrowserFieldsLaunch ={
             mediaFile = mediaFiles[0];
             fidField.val(mediaFile.fid);
             previewField.html(mediaFile.preview);
-            debugField.html(JSON.stringify(mediaFile));
+            if (Drupal.settings.media.debug) {
+              debugField.html(JSON.stringify(mediaFile));
+            }
+            
           },
           options
         );
