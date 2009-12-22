@@ -176,7 +176,6 @@ function media_menu() {
   $items['media/%media/print'] = array(
     'title' => 'Media view callback',
     'page callback' => 'media_print',
-  iie();
     'page_arguments' => array(1, 3),
     'type' => MENU_CALLBACK,
   );
