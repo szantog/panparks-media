@@ -14,11 +14,14 @@
  * some "default type in the install probably". @TODO: done using other now?
  */
 function media_entity_info() {
+  // @todo: change this function name now that it is no longer a hook.
+  $view_modes = media_field_view_modes('media');
   $return = array(
     'media' => array(
       'label' => t('Media'),
       'base table' => 'file',
       'fieldable' => TRUE,
+      'view modes' => $view_modes,
       'object keys' => array(
         'id' => 'fid',
         'bundle' => 'type',

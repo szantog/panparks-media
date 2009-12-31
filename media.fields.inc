@@ -74,7 +74,7 @@ function media_field_widget_info() {
  */
 function media_field_formatter_info() {
   $formatters = array();
-  $build_modes = media_field_build_modes('media');
+  $build_modes = media_field_view_modes('media');
   foreach ($build_modes as $key => $mode_name) {
     $formatters[$key] = array(
       'label' => t($mode_name),
@@ -86,27 +86,26 @@ function media_field_formatter_info() {
 
 
 /**
- * Implements hook_field_build_modes().
+ * Used to Implement hook_field_view_modes().
  */
-function media_field_build_modes($obj_type) {
+function media_field_view_modes($obj_type) {
   $modes = array();
   if ($obj_type == 'media') {
     $modes = array(
-      'preview' => t('Preview'),
-      'small' => t('Small'),
-      'large' => t('Large'),
-      'original' => t('Original'),
+      'preview' => array('label' => t('Preview')),
+      'small' => array('label' => t('Small')),
+      'large' => array('label' => t('Large')),
+      'original' => array('label' => t('Original')),
     );
   }
   return $modes;
 }
 
-function media_field_ui_build_modes_tabs() {
-  //dd(array_keys(media_field_build_modes('media')));
-  //die();
+function media_field_ui_view_modes_tabs() {
+
   $modes = array(
     'basic' => array(
-      'build modes' => array_keys(media_field_build_modes('media')),
+      'view modes' => array_keys(media_field_view_modes('media')),
     ),
   );
   return $modes;
