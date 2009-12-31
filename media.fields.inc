@@ -10,6 +10,8 @@ function media_field_info() {
     'media' => array(
       'label' => t('Multimedia asset'),
       'description' => t('This field stores a reference to a multimedia asset.'),
+      'settings' => array(),
+      'instance_settings' => array(),
       'default_widget' => 'media_generic',
       'default_formatter' => 'media_generic',
     ),
@@ -194,7 +196,7 @@ function media_field_widget_settings_form($field, $instance) {
 }
 
 
-function media_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
+function media_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
   $widget_settings = $instance['widget']['settings'];
 
   $permission = user_access('use media browser');

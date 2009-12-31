@@ -3,6 +3,8 @@
 CHANGELOG for Media module.
 ===========================
 
+by aaron: Add blank settings/instance_settings to hook_field_info.
+by aaron: Change hook_field_widget to hook_field_widget_form.
 by JacobSingh: Begin work on new browser concept.
 by aaron: Toggle 'match type' value on media type administrative form.
 by aaron: Display administrative options only if we're handling the callback.
