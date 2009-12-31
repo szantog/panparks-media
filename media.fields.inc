@@ -13,7 +13,7 @@ function media_field_info() {
       'settings' => array(),
       'instance_settings' => array(),
       'default_widget' => 'media_generic',
-      'default_formatter' => 'preview',
+      'default_formatter' => 'media_preview',
     ),
   );
 }
@@ -102,10 +102,10 @@ function media_field_view_modes($obj_type) {
   $modes = array();
   if ($obj_type == 'media') {
     $modes = array(
-      'preview' => array('label' => t('Preview')),
-      'small' => array('label' => t('Small')),
-      'large' => array('label' => t('Large')),
-      'original' => array('label' => t('Original')),
+      'media_preview' => array('label' => t('Preview')),
+      'media_small' => array('label' => t('Small')),
+      'media_large' => array('label' => t('Large')),
+      'media_original' => array('label' => t('Original')),
     );
   }
   return $modes;

@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+by aaron: Prefix formatters with 'media_'.
 by aaron: Change default formatter to 'preview'.
 by aaron: hook_field_formatter is now hook_field_formatter_view.
 by aaron: Add blank settings/instance_settings to hook_field_info.
