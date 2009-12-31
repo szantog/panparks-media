@@ -20,7 +20,6 @@ function media_field_info() {
  * Implements hook_field_schema().
  */
 function media_field_schema($field) {
-//   dpr($field);
   return array(
     'columns' => array(
       'fid' => array(
@@ -72,12 +71,15 @@ function media_field_widget_info() {
  * Implement hook_field_formatter_info
  */
 function media_field_formatter_info() {
-  return array(
-    'media_default' => array(
-      'label' => t('Default (link to file)'),
+  $formatters = array();
+  $build_modes = media_field_build_modes('media');
+  foreach ($build_modes as $key => $mode_name) {
+    $formatters[$key] = array(
+      'label' => t($mode_name),
       'field types' => array('media'),
-    ),
-  );
+    );
+  }
+  return $formatters;
 }
 
 
@@ -88,11 +90,23 @@ function media_field_build_modes($obj_type) {
   $modes = array();
   if ($obj_type == 'media') {
     $modes = array(
-      'teaser' => t('Teaser'),
-      'full' => t('Full'),
-      'rss' => t('RSS (Podcasting, etc)'),
+      'preview' => t('Preview'),
+      'small' => t('Small'),
+      'large' => t('Large'),
+      'original' => t('Original'),
     );
   }
+  return $modes;
+}
+
+function media_field_ui_build_modes_tabs() {
+  //dd(array_keys(media_field_build_modes('media')));
+  //die();
+  $modes = array(
+    'basic' => array(
+      'build modes' => array_keys(media_field_build_modes('media')),
+    ),
+  );
   return $modes;
 }
 
@@ -103,27 +117,35 @@ function media_field_build_modes($obj_type) {
 function media_field_formatter($obj_type, $object, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
-  switch ($display['type']) {
-    case 'media_default':
-      // Common case: each value is displayed individually in a sub-element
-      // keyed by delta. The field.tpl.php template specifies the markup
-      // wrapping each value.
-      foreach ($items as $delta => $item) {
-        $file = media_load($item['fid']);
-        $element[$delta] = array('#markup' => l($file->filename, file_create_url($file->uri)));
-        $build_mode = 'full';
-        $fields = field_attach_view('media', $file, $build_mode, $langcode);
-        $element[$delta] += $fields;
-        //@todo: write a proper theming function for this.
-      }
-      break;
-
-    case 'media_teaser':
-      // The question here is how to we show fields along w/ media.
-      // Perhaps it should happen on every object type?
-
-      break;
+  foreach ($items as $delta => $item) {
+    $file = media_load($item['fid']);
+    dpr($file);
+    dpr($display['type']);
+    $element[$delta] = field_attach_view('media', $file, $display['type'], $langcode);
   }
+
+//
+//  switch ($display['type']) {
+//    case 'media_default':
+//      // Common case: each value is displayed individually in a sub-element
+//      // keyed by delta. The field.tpl.php template specifies the markup
+//      // wrapping each value.
+//      foreach ($items as $delta => $item) {
+//        $file = media_load($item['fid']);
+//        $element[$delta] = array('#markup' => l($file->filename, file_create_url($file->uri)));
+//        $build_mode = 'full';
+//        $fields = field_attach_view('media', $file, $build_mode, $langcode);
+//        $element[$delta] += $fields;
+//        //@todo: write a proper theming function for this.
+//      }
+//      break;
+//
+//    case 'media_teaser':
+//      // The question here is how to we show fields along w/ media.
+//      // Perhaps it should happen on every object type?
+//
+//      break;
+//  }
 
   return $element;
 }

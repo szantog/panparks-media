@@ -61,6 +61,7 @@ function media_type_save($type) {
   $types = variable_get('media_types', array());
   $type = media_type_set_defaults($type);
   $types[$type->machine_name] = $type;
+  media_type_configure_fields($type);
 
   variable_set('media_types', $types);
   // Clear the caches
@@ -78,6 +79,57 @@ function media_type_load($machine_name) {
   $types = media_type_get_types();
   if (isset($types[$machine_name])) {
     return $types[$machine_name];
+  }
+}
+
+/**
+ * Sets up the default fields which a media type needs.
+ *
+ * Currently, this is just a "file" field which contains the reference to the actual file.
+ *
+ * @param StdClass $media_type
+ * @return void
+ */
+function media_type_configure_fields($media_type) {
+  $field = field_info_field('file');
+  $instance = field_info_instance('media', 'file', $media_type->machine_name);
+
+  if (empty($field)) {
+    $field = array(
+      'field_name' => 'file',
+      'type' => 'file',
+    );
+    $field = field_create_field($field);
+  }
+
+  // Perhaps the file field exists already, if so skip.
+  if (empty($instance)) {
+    $weight = -5;
+    $instance = array(
+      'field_name' => 'file',
+      'object_type' => 'media',
+      'bundle' => $media_type->machine_name,
+      'label' => 'File',
+      'widget_type' => 'file_file',
+      'widget' => array(
+        'weight' => $weight,
+      ),
+      'required' => TRUE,
+      'locked' => TRUE,
+      'display' => array(
+        'preview' => array(
+          'label' => 'hidden',
+          'type' => 'media_preview',
+          'weight' => $weight,
+        ),
+        'original' => array(
+          'label' => 'hidden',
+          'type' => 'media_default',
+          'weight' => $weight,
+        ),
+      ),
+    );
+    field_create_instance($instance);
   }
 }
 

@@ -45,12 +45,6 @@ function media_menu() {
     'access arguments' => array('access content'),
   );
 
-  // Handles all the callbacks from the media content browser
-  $items['media/browser/dispatch'] = array(
-    'page callback'    => 'media_browser_dispatch',
-    'access arguments' => array('access content'),
-  );
-
   // For managing different types of media and the fields associated with them.
   $items['admin/structure/media'] = array(
     'title' => 'Media Types',
@@ -142,15 +136,16 @@ function media_menu() {
 
   $items['media'] = array(
     'title' => 'Media',
-    'page callback' => 'media_file_view',
+    'page callback' => 'media_page_default',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
 
-  $item['media/%media'] = array(
+  $items['media/%media'] = array(
     'title'           => 'Media view',
-    'description'     => 'aa',
+    'description'     => '',
     'page callback'   => 'media_file_view',
+    'page arguments'  => array(1),
     'access arguments' => array('access content'), //array('view media'),
     'type' => MENU_CALLBACK,
   );
@@ -177,7 +172,7 @@ function media_menu() {
     'title' => 'Media view callback',
     'page callback' => 'media_print',
     'page_arguments' => array(1, 3),
-    'type' => MENU_CALLBACK,
+    'type' => MENU_LOCAL_TASK,
   );
 
   return $items;
@@ -185,6 +180,7 @@ function media_menu() {
 
 function media_load($fid) {
   if ($files = entity_load('media', array($fid))) {
+
     return array_shift($files);
   }
 }
@@ -219,49 +215,6 @@ function media_permission() {
     ),
   );
 }
-
-
-/**
- * Implementation of hook_form_alter().
- * @param $form
- * @param $form_state
- * @param $form_id
- */
-function media_form_alter(&$form, $form_state, $form_id) {
-  global $user;
-
-  // Load content-type settings
-  if ($form_id == 'node_type_form') {
-    module_load_include('inc', 'media', 'media.admin');
-    media_settings_content_type($form, $form['#node_type']->type);
-  }
-
-  // Add the media browser on the node add/edit screen.
-  if (strstr($form_id, 'node_form') ) {
-    // Is the media browser enabled on this node type? Type-specific options override the default.
-    if (variable_get('media_'. $form['type']['#value'] .'_override', NULL) !== NULL) {
-      $enabled = variable_get('media_'. $form['type']['#value'] .'_enabled', NULL);
-    }
-    else {
-      $enabled = variable_get('media_global_enabled', TRUE);
-    }
-    if ($enabled) {
-      // Get the fields we need to enable on this module.
-      $fields = media_active_fields_for_node_type($form['type']['#value']);
-
-      // Iterate through each field and add a browser form.
-      foreach ($fields as $field => $registration_ids) {
-
-        // Add the media browser form.
-        $form[$field]['media'] = media_build_browser_form($form_state, $registration_ids, $form['type']['#value'], $field, $user->uid);
-
-        // Add .media and .replace class to the field CSS class attributes.
-        $form[$field][0]['#attributes'] = array('class' => 'media replace');
-      }
-    }
-  }
-}
-
 
 /**
  * Implements hook_theme().
@@ -1161,13 +1114,6 @@ function media_browser_submit(&$form, $form_state) {
   // dsm($form_state['values']);
 }
 
-/**
- * Implement hook_field_info_alter().
- */
-function media_field_info_alter(&$info) {
-  $info['file']['default_widget'] = 'media_generic';
-}
-
 
 function media_attach_browser() {
   static $attached;
@@ -1242,106 +1188,6 @@ function media_attach_browser() {
     'media_browser_tabs' => theme('item_list', array('items' => $items, 'attributes' => array('class' => 'tabs primary', 'onclick' => 'javascript: return false;')))
   )),
   array('type' => 'setting'));
-}
-
-
-/**
- * Implementation of hook_field_widget().
- */
-function DISABLED_media_field_widget(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
-  // This code was originally copied from file.field.inc.
-  $form['#attributes'] = array('enctype' => 'multipart/form-data');
-
-  $defaults = array(
-    'fid' => 0,
-    'display' => !empty($field['settings']['display_default']),
-    'description' => '',
-    'file_uri' => '',
-  );
-
-  // Retrieve any values set in $form_state, as will be the case during AJAX
-  // rebuilds of this form.
-  if (isset($form_state['values'][$field['field_name']][$langcode])) {
-    $items = $form_state['values'][$field['field_name']][$langcode];
-    unset($form_state['values'][$field['field_name']][$langcode]);
-  }
-
-  foreach ($items as $delta => $item) {
-    $items[$delta] = array_merge($defaults, $items[$delta]);
-    // Remove any items from being displayed that are not needed.
-    if ($items[$delta]['fid'] == 0) {
-      unset($items[$delta]);
-    }
-  }
-
-  // Re-index deltas after removing empty items.
-  $items = array_values($items);
-
-  // Update order according to weight.
-  $items = _field_sort_items($field, $items);
-
-  // Essentially we use the managed_file type, extended with some enhancements.
-  $element_info = element_info('managed_file');
-
-  $element = array(
-    '#type' => 'media_managed_file',
-    '#default_value' => isset($items[$delta]) ? $items[$delta] : $defaults,
-    '#required' => $instance['required'],
-    '#upload_location' => file_field_widget_uri($field, $instance),
-    '#upload_validators' => file_field_widget_upload_validators($field, $instance),
-    '#media_file_extensions' => $instance['settings']['file_extensions'],
-    '#media_allowed_schemes' => $instance['widget']['settings']['allowed_schemes'],
-    '#process' => array_merge($element_info['#process'], array('file_field_widget_process', 'media_generic_widget_process')),
-    // Allows this field to return an array instead of a single value.
-    '#extended' => TRUE,
-    // Add extra Field properties.
-    '#field_name' => $field['field_name'],
-    '#bundle' => $instance['bundle'],
-    '#object_type' => $instance['object_type'],
-  );
-
-  if ($field['cardinality'] == 1) {
-    // If there's only one field, return it as delta 0.
-    $element['#title'] = $instance['label'];
-    if (empty($element['#default_value']['fid'])) {
-      $element['#description'] = theme('file_upload_help', array('description' => $instance['description'], 'upload_validators' => $element['#upload_validators']));
-    }
-    $elements = array($element);
-  }
-  else {
-    // If there are multiple values, add an element for each existing one.
-    $delta = -1;
-    foreach ($items as $delta => $item) {
-      $elements[$delta] = $element;
-      $elements[$delta]['#default_value'] = $item;
-      $elements[$delta]['#weight'] = $delta;
-    }
-    // And then add one more empty row for new uploads.
-    $delta++;
-    if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED || $delta < $field['cardinality']) {
-      $elements[$delta] = $element;
-      $elements[$delta]['#default_value'] = $defaults;
-      $elements[$delta]['#weight'] = $delta;
-      $elements[$delta]['#required'] = ($instance['required'] && $delta == 0);
-    }
-    // The group of elements all-together need some extra functionality
-    // after building up the full list (like draggable table rows).
-    $elements['#file_upload_delta'] = $delta;
-    $elements['#theme'] = 'file_widget_multiple';
-    $elements['#theme_wrappers'] = array('fieldset');
-    $elements['#attributes']['class'] = array('media-file-widget');
-    $elements['#process'] = array('file_field_widget_process_multiple');
-    $elements['#title'] = $instance['label'];
-    $elements['#description'] = $instance['description'];
-
-    // Add some properties that will eventually be added to the file upload
-    // field. These are added here so that they may be referenced easily through
-    // a hook_form_alter().
-    $elements['#file_upload_title'] = t('Add a new file');
-    $elements['#file_upload_description'] = theme('file_upload_help', array('description' => '', 'upload_validators' => $elements[0]['#upload_validators']));
-  }
-
-  return $elements;
 }
 
 /**
@@ -1472,21 +1318,19 @@ function media_print($media, $build_mode) {
 
 }
 
+function media_page_default() {
+  return "nothing to see here...";
+}
 
 /**
  * Menu callback; view a single piece of media.
  * @todo: this.
  */
 function media_file_view($media) {
-  return "not yet implemented" . dpr($media, TRUE);
-  // Need to get a handle on build modes
-  $m = media_build_multiple(array($media->fid => $media), 'full');
-  dpr($m);
-  dpr($media);
-  die();
-  drupal_set_title($media->title[$langcode][0]['value']);
-
-  return $return;
+  drupal_set_title($media->filename);
+  $ret = media_build_multiple(array($media->fid => $media), 'original');
+  dpr($ret);
+  return $ret;
 }
 
 /**
@@ -1497,21 +1341,20 @@ function media_file_view($media) {
  * @param $build_mode
  *   Build mode, e.g. 'full', 'teaser'...
  * @param $weight
- *   An integer representing the weight of the first node in the list.
+ *   An integer representing the weight of the first file in the list.
  * @return
  *   An array in the format expected by drupal_render().
  */
-function media_build_multiple($files, $build_mode = 'teaser', $weight = 0) {
-  field_attach_prepare_view('media', array($files), $build_mode);
+function media_build_multiple($files, $build_mode = 'original', $weight = 0) {
+  field_attach_prepare_view('media', $files, $build_mode);
   $build = array();
-  foreach ($media as $file) {
-    //@todo: How do we display this based on the build mode?
-    $build['media'][$file->fid] = array('#markup' => theme('media_admin_thumbnail', array('file' => $file)));
-    //$build['media'][$file->fid] = array('#file' => );
+  foreach ($files as $file) {
+    $build['media'][$file->fid] = field_attach_view('media', $file, $build_mode);
     $build['media'][$file->fid]['#weight'] = $weight;
     $weight++;
   }
   $build['media']['#sorted'] = TRUE;
+
   return $build;
 }
 
