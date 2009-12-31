@@ -195,7 +195,9 @@ function media_field_widget_settings_form($field, $instance) {
   return $form;
 }
 
-
+/**
+ *  Implement hook_field_widget_form().
+ */
 function media_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
   $widget_settings = $instance['widget']['settings'];
 
