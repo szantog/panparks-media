@@ -13,7 +13,7 @@ function media_field_info() {
       'settings' => array(),
       'instance_settings' => array(),
       'default_widget' => 'media_generic',
-      'default_formatter' => 'media_generic',
+      'default_formatter' => 'preview',
     ),
   );
 }
@@ -36,7 +36,6 @@ function media_field_schema($field) {
   );
 }
 
-
 /**
  * Implements hook_field_is_empty().
  */
@@ -47,6 +46,17 @@ function media_field_is_empty($item, $field) {
   return FALSE;
 }
 
+/**
+ *  Implements hook_field_formatter_prepare_view().
+ */
+function media_field_formatter_prepare_view($obj_type, $objects, $field, $instances, $langcode, &$items, $displays) {
+  // Load the file items here?
+  foreach ($items as $delta => $item) {
+    foreach ($item as $file_delta => $file) {
+      $items[$delta][$file_delta] = media_load($file['fid']);
+    }
+  }
+}
 
 /**
  * Implement hook_field_widget_info().
@@ -111,6 +121,12 @@ function media_field_ui_view_modes_tabs() {
   return $modes;
 }
 
+/**
+ * Implements hook_field_prepare_view().
+ */
+function media_field_prepare_view($obj_type, $objects, $field, $instances, $langcode, &$items) {
+  // @TODO: Do we wish to allow default files here?
+}
 
 /**
  * Implement hook_field_formatter_view
@@ -119,10 +135,13 @@ function media_field_formatter_view($obj_type, $object, $field, $instance, $lang
   $element = array();
 
   foreach ($items as $delta => $item) {
-    $file = media_load($item['fid']);
-    dpr($file);
-    dpr($display['type']);
-    $element[$delta] = field_attach_view('media', $file, $display['type'], $langcode);
+    // @TODO: Remove debugging code.
+    if (function_exists('dpm')) {
+      dpm($item);
+      dpm($display['type']);
+    }
+
+    $element[$delta] = field_attach_view('media', $item, $display['type'], $langcode);
   }
 
 //
