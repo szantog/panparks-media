@@ -113,9 +113,9 @@ function media_field_ui_view_modes_tabs() {
 
 
 /**
- * Implement hook_field_formatter
+ * Implement hook_field_formatter_view
  */
-function media_field_formatter($obj_type, $object, $field, $instance, $langcode, $items, $display) {
+function media_field_formatter_view($obj_type, $object, $field, $instance, $langcode, $items, $display) {
   $element = array();
 
   foreach ($items as $delta => $item) {
