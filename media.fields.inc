@@ -85,9 +85,9 @@ function media_field_widget_info() {
 function media_field_formatter_info() {
   $formatters = array();
   $build_modes = media_field_view_modes('media');
-  foreach ($build_modes as $key => $mode_name) {
+  foreach ($build_modes as $key => $mode) {
     $formatters[$key] = array(
-      'label' => t($mode_name),
+      'label' => t($mode['label']),
       'field types' => array('media'),
     );
   }
@@ -142,8 +142,11 @@ function media_field_formatter_view($obj_type, $object, $field, $instance, $lang
     }
 
     $element[$delta] = field_attach_view('media', $item, $display['type'], $langcode);
-  }
 
+  }
+dpm($element);
+dpm($display);
+dpm($field);
 //
 //  switch ($display['type']) {
 //    case 'media_default':
