@@ -135,40 +135,12 @@ function media_field_formatter_view($obj_type, $object, $field, $instance, $lang
   $element = array();
 
   foreach ($items as $delta => $item) {
-    // @TODO: Remove debugging code.
-    if (function_exists('dpm')) {
-      dpm($item);
-      dpm($display['type']);
-    }
-
     $element[$delta] = field_attach_view('media', $item, $display['type'], $langcode);
 
+    // We'll defer to the Styles module to route formatting for the 'file'.
+    $element[$delta]['file']['#theme'] = 'styles_field_formatter';
+    $element[$delta]['file']['#element'] = $element[$delta]['file'];
   }
-dpm($element);
-dpm($display);
-dpm($field);
-//
-//  switch ($display['type']) {
-//    case 'media_default':
-//      // Common case: each value is displayed individually in a sub-element
-//      // keyed by delta. The field.tpl.php template specifies the markup
-//      // wrapping each value.
-//      foreach ($items as $delta => $item) {
-//        $file = media_load($item['fid']);
-//        $element[$delta] = array('#markup' => l($file->filename, file_create_url($file->uri)));
-//        $build_mode = 'full';
-//        $fields = field_attach_view('media', $file, $build_mode, $langcode);
-//        $element[$delta] += $fields;
-//        //@todo: write a proper theming function for this.
-//      }
-//      break;
-//
-//    case 'media_teaser':
-//      // The question here is how to we show fields along w/ media.
-//      // Perhaps it should happen on every object type?
-//
-//      break;
-//  }
 
   return $element;
 }
