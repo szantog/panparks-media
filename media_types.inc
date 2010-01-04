@@ -15,6 +15,7 @@
  */
 function media_entity_info() {
   // @todo: change this function name now that it is no longer a hook.
+  // @what? hook_entity_info is still a hook.
   $view_modes = media_field_view_modes('media');
   $return = array(
     'media' => array(
@@ -49,7 +50,10 @@ function media_entity_info() {
 }
 
 /**
- * Update an existing media type or create a new one.
+ *  Update an existing media type or create a new one.
+ *
+ *  The default media types are currently 'Audio', 'Image', 'Video', and
+ *  'Other', which are defined in media_install().
  *
  *  @param object $type
  *    $type is an object with the following fields:
@@ -64,6 +68,8 @@ function media_type_save($type) {
   $types = variable_get('media_types', array());
   $type = media_type_set_defaults($type);
   $types[$type->machine_name] = $type;
+
+  // Set up the defaults for this media type bundle.
   media_type_configure_fields($type);
 
   variable_set('media_types', $types);
@@ -89,6 +95,7 @@ function media_type_load($machine_name) {
  * Sets up the default fields which a media type needs.
  *
  * Currently, this is just a "file" field which contains the reference to the actual file.
+ * @TODO Do we also want to make the file 'description/caption' a field?
  *
  * @param StdClass $media_type
  * @return void
@@ -137,7 +144,8 @@ function media_type_configure_fields($media_type) {
 }
 
 /**
- * Loads all media types into an array keyed by machine name.
+ *  Loads all media types into an array keyed by machine name and sorted
+ *  and weighted lexographically.
  *
  * @return array
  *  Media types keyed by machine name.
@@ -230,5 +238,7 @@ function media_is_type($media, $args) {
 
   if (!empty($args['streams'])) {
     // @TODO: Write this.
+    // Note that this will ultimately need to be above mimetypes and extensions
+    // so that we can allow for things like flickr photos vs. slideshows, etc.
   }
 }
