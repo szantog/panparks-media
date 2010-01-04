@@ -135,6 +135,13 @@ function media_field_formatter_view($obj_type, $object, $field, $instance, $lang
   $element = array();
 
   foreach ($items as $delta => $item) {
+    // @TODO:
+    // This works fine for Media styles, just not the default file types.
+    // Find out why this doesn't automatically already route through file.
+    // We're using a filefield in theory, created during the media_type
+    // instantiation at media_type_configure_fields().
+    // Other fields are routed properly, but not that default field...
+
     // First check if the default File formatters are sufficient.
 //     $element[$delta] = file_field_formatter_view($obj_type, $object, $field, $instance, $langcode, $items, $display);
 
@@ -150,7 +157,6 @@ function media_field_formatter_view($obj_type, $object, $field, $instance, $lang
 
   return $element;
 }
-
 
 /**
  * Implement hook_field_widget_settings_form().
