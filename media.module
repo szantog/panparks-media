@@ -1114,38 +1114,51 @@ function media_browser_submit(&$form, $form_state) {
   // dsm($form_state['values']);
 }
 
-
-function media_attach_browser() {
+/**
+ *  Add the media browser jQuery files and all required libraries.
+ *
+ *  @param array &$element
+ *    The element to add the attached libraries.
+ */
+function media_attach_browser(&$element) {
   static $attached;
   if ($attached) {
     return;
   }
   $attached = TRUE;
-  // @TODO: Use the currently undocumented #attached property to load js & css.
-  // Load up all of our necessary jQuery
-  drupal_add_library('system', 'vertical-tabs');
-  drupal_add_library('system', 'ui');
-  drupal_add_library('system', 'ui.draggable');
-  drupal_add_library('system', 'ui.resizable');
-  drupal_add_library('system', 'ui.dialog');
-  drupal_add_library('system', 'ui.tabs');
   $path = drupal_get_path('module', 'media');
-  // DEBUG - logging framework
-  // Load the jQuery Plugin to launch / configure it.
-  drupal_add_js($path . '/javascript/media.jquery.js');
-  // Load the jQuery Plugin to launch / configure it.
-  drupal_add_js($path . '/javascript/util/ba-debug.min.js');
-  // Load our css.
-  drupal_add_css($path . '/media.css');
-  // Load the custom JS to bind elements and handle fields.
-  drupal_add_js($path . '/javascript/media.js');
 
+  $element['#attached'] = isset($element['#attached']) ? $element['#attached'] : array();
+
+  // Use the currently undocumented #attached property to load js & css.
+  $element['#attached'] += array(
+    'library' => array(
+      array('system', 'vertical-tabs'),
+      array('system', 'ui'),
+      array('system', 'ui.draggable'),
+      array('system', 'ui.resizable'),
+      array('system', 'ui.dialog'),
+      array('system', 'ui.tabs'),
+    ),
+    'js' => array(
+      // Load the jQuery Plugin to launch / configure it.
+      $path . '/javascript/media.jquery.js',
+      // A debugging library.
+      $path . '/javascript/util/ba-debug.min.js',
+      // Load the custom JS to bind elements and handle fields.
+      $path . '/javascript/media.js',
+    ),
+    'css' => array(
+      $path . '/media.css',
+    ),
+  );
 
   $settings = array(
     'browserUrl' => url('media/browser'),
     // @Todo: rip this down and make a callback API structure with tokens, etc
     // this is temporary.
   );
+  // @TODO This can technically be done w/ #attached as well, with a callback.
   drupal_add_js(array('media' => $settings), 'setting');
 
   //@todo: re-integrate the code below

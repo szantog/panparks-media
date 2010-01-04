@@ -135,11 +135,17 @@ function media_field_formatter_view($obj_type, $object, $field, $instance, $lang
   $element = array();
 
   foreach ($items as $delta => $item) {
-    $element[$delta] = field_attach_view('media', $item, $display['type'], $langcode);
+    // First check if the default File formatters are sufficient.
+//     $element[$delta] = file_field_formatter_view($obj_type, $object, $field, $instance, $langcode, $items, $display);
 
-    // We'll defer to the Styles module to route formatting for the 'file'.
-    $element[$delta]['file']['#theme'] = 'styles_field_formatter';
-    $element[$delta]['file']['#element'] = $element[$delta]['file'];
+    // If this is not handled by the File module, then defer to Styles.
+//     if (!$element[$delta]) {
+      $element[$delta] = field_attach_view('media', $item, $display['type'], $langcode);
+
+      // We'll defer to the Styles module to route formatting for the 'file'.
+      $element[$delta]['file']['#theme'] = 'styles_field_formatter';
+      $element[$delta]['file']['#element'] = $element[$delta]['file'];
+//     }
   }
 
   return $element;
@@ -343,7 +349,7 @@ function media_generic_widget_process($element, &$form_state, $form) {
   );
 
   // Media browser attach code.
-  media_attach_browser();
+  media_attach_browser($element);
 
   return $element;
 }
