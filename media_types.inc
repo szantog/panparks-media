@@ -25,10 +25,10 @@ function media_entity_info() {
       'view modes' => $view_modes,
       'object keys' => array(
         'id' => 'fid',
-        'bundle' => 'type',
+        'bundle' => 'type', // @TODO: Why 'type' here...
       ),
       'bundle keys' => array(
-        'bundle' => 'machine_name',
+        'bundle' => 'machine_name', // @TODO: But 'machine_name' here?
       ),
       'bundles' => array(),
     ),
@@ -43,9 +43,12 @@ function media_entity_info() {
       'path' => 'admin/structure/media/manage/%media_type',
       'real path' => 'admin/structure/media/manage/' . $type,
       'bundle argument' => 4,
+      // @TODO: Add an 'administer media types' perm?
       'access arguments' => array('administer site configuration'),
     );
   }
+
+  // @TODO: Do we need to define search-related view modes for attached fields?
   return $return;
 }
 
@@ -57,7 +60,7 @@ function media_entity_info() {
  *
  *  @param object $type
  *    $type is an object with the following fields:
- *      ->machine_name => The name of the media asset type;
+ *      ->machine_name => The name of the media asset type, such as 'video';
  *      ->label => The human readable name;
  *      ->base => @TODO: What's this?
  *      ->type_callback => Function call to filter an instance to its bundle.
