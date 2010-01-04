@@ -2,7 +2,7 @@
 /**
  * @file: jQuery plugin for mediaBrowser
  */
-(function ($) { 
+(function ($) {
 
 /**
    * @param function onSelect
@@ -12,8 +12,8 @@
    */
   $.fn.mediaBrowser = function(onSelect, options) {
    options = $.extend({}, $.fn.mediaBrowser.getDefaults(), options);
-   console.log(options);
-   
+   debug.debug(options);
+
    this.each(function() {
    // Create it as a modal window.
     var mediaIframe = $.fn.mediaBrowser.getIframe(options.src);
@@ -21,9 +21,9 @@
         if (typeof this.contentWindow.Drupal.mediaBrowser != undefined) {
           this.contentWindow.Drupal.mediaBrowser.start(options);
         }
-        console.log('browser is loaded');
+        debug.debug('browser is loaded');
       });
-          
+
     var horizontalPadding = 30;
     var verticalPadding = 30;
     mediaIframe.dialog({
@@ -31,7 +31,7 @@
         var selected = this.contentWindow.Drupal.mediaBrowser.selectedMedia;
         onSelect(selected);
         $(this).dialog("close");
-        } 
+        }
       },
       modal: true,
       draggable: true,
@@ -46,12 +46,12 @@
       }
       })
       .width(800 - horizontalPadding)
-      .height(500 - verticalPadding);   
+      .height(500 - verticalPadding);
    });
    return this;
   };
-  
-  
+
+
   $.fn.mediaBrowser.getDefaults = function () {
     debug.debug(Drupal.settings.media);
     return {
@@ -59,11 +59,11 @@
       src: Drupal.settings.media.browserUrl
     };
   };
-  
-  $.fn.mediaBrowser.getIframe = function (src) {    
+
+  $.fn.mediaBrowser.getIframe = function (src) {
     return $('<iframe id="mediaBrowser" class="media-modal-frame"/>')
     .attr('src', src)
     .attr('width', '800px');
   }
-// end of closure  
+// end of closure
 })(jQuery);
