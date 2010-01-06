@@ -92,11 +92,3 @@ Drupal.mediaBrowser.refresh = function () {
 };
 
 })(jQuery);
-
-//
-//  var dummy = {
-//   fid: 1,
-//   uri: 'http://bs.com/bs.png',
-//   preview: '<span> I am a preview </span>'
-//  };
-//  this.selectedMedia.push(dummy);

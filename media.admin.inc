@@ -357,9 +357,11 @@ function media_page_edit($file) {
  */
 function media_edit($form, $form_state, $file) {
 
-  drupal_set_title($file->filename);
 
+  drupal_set_title($file->filename);
   field_attach_form('media', $file, $form, $form_state);
+
+
   $form['#attached'] = media_admin_get_css_and_js();
 
   $form['preview'] = array(
@@ -461,10 +463,22 @@ function media_add_files_submit($form, &$form_state) {
   $file = $form_state['values']['upload'];
   $destination = file_stream_wrapper_uri_normalize($scheme . $file->filename);
 
+  $defaults = array (
+    'display' => TRUE,
+  );
+
   if ($file = file_move($file, $destination, FILE_EXISTS_REPLACE)) {
-    file_save($file);
+    //file_save($file);
     drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
     $form_state['redirect'] = url('admin/content/media/' . $file->fid . '/edit');
+
+    field_attach_submit('media', $file, $form, $form_state);
+    // Make a copy of the file object to use as the media object
+    // (file is a field of media and the base table). This is weird.
+    $media = clone($file);
+    $file->file = array();
+    $file->file[LANGUAGE_NONE] = array();
+    $file->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
     field_attach_insert('media', $file);
   }
   else {
