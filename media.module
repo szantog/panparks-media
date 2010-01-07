@@ -835,3 +835,65 @@ function theme_media_managed_file($variables) {
   $output .= '</div>';
   return $output;
 }
+
+/**
+ * Implementation of hook_wysiwyg_include_directory()
+ */
+
+function media_wysiwyg_include_directory($type) {
+  switch($type) {
+    case 'plugins':
+      return $type;
+        break;
+    }
+}
+
+function media_filter_info() {
+  $filters['media_filter'] = array(
+    'title' => t('Converts Media tags to Markup'),
+    'description' => t('This filter will convert [[{type:media... ]] tags into markup'),
+    'process callback' => 'media_filter',
+    'tips callback' => 'media_filter_tips', // @TODO not implemented
+    'cache' => FALSE,
+  );
+  return $filters;
+}
+
+// @TODO check for security probably pass text through filter_xss
+function media_filter($text,$filter) {
+    $text = ' ' . $text . ' '; 
+    $text = preg_replace_callback("/\[\[.*?]]/s",'_media_markup',$text);
+    return $text;
+}
+
+// Replace callback to convert tag into markup
+function _media_markup($match) {
+  $match = str_replace("[[","",$match);  
+  $match = str_replace("]]","",$match);
+  $media = drupal_json_decode($match[0]);
+  $file = file_load($media['fid']);
+  return theme('media_admin_thumbnail',array('file' => $file));       
+}
+
+/**
+ * Implementation of hook_node_load()
+ * This would ensure that tagmap is added to Drupal.settings on node/edit,
+ * there could be a better way to do this.
+ */
+
+function media_node_load($nodes, $types) {
+  foreach ($nodes as $node) {
+    $text = $node->body[LANGUAGE_NONE][0]['value'];
+    $tagmap = _media_generate_tagMap($text);     
+  } 
+  drupal_add_js(array('tagmap' => $tagmap),'setting');
+}
+  
+function _media_generate_tagMap($text) {
+  $tagmap = array();
+  preg_match_all("/\[\[.*?]]/s",$text,$matches,PREG_SET_ORDER);
+  foreach($matches as $match) {
+    $tagmap[$match[0]] = _media_markup($match);
+  }
+  return $tagmap;
+}
