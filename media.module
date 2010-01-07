@@ -859,39 +859,55 @@ function media_filter_info() {
   return $filters;
 }
 
-// @TODO check for security probably pass text through filter_xss
-function media_filter($text,$filter) {
-    $text = ' ' . $text . ' '; 
-    $text = preg_replace_callback("/\[\[.*?]]/s",'_media_markup',$text);
-    return $text;
+//
+/**
+ * Implement hook_filter();
+ * @TODO check for security probably pass text through filter_xss
+ * @return unknown_type
+ */
+function media_filter($text, $filter) {
+  $text = ' ' . $text . ' ';
+  $text = preg_replace_callback("/\[\[.*?]]/s",'_media_markup', $text);
+  return $text;
 }
 
-// Replace callback to convert tag into markup
+/**
+ * Replace callback to convert tag into markup
+ */
 function _media_markup($match) {
-  $match = str_replace("[[","",$match);  
+  $match = str_replace("[[","",$match);
   $match = str_replace("]]","",$match);
   $media = drupal_json_decode($match[0]);
-  $file = file_load($media['fid']);
-  return theme('media_admin_thumbnail',array('file' => $file));       
+  $view_mode = $media['view_mode'];
+  return drupal_render(field_view_field('media', $media, 'file', $view_mode));
+
+  // @todo: this obviously will need to use the real build mode.
+  return theme('media_admin_thumbnail', array('file' => $file));
 }
 
 /**
  * Implementation of hook_node_load()
  * This would ensure that tagmap is added to Drupal.settings on node/edit,
  * there could be a better way to do this.
+ * @todo: This will not work, needs to work with every textarea w/ wysiwyg.
  */
 
 function media_node_load($nodes, $types) {
   foreach ($nodes as $node) {
     $text = $node->body[LANGUAGE_NONE][0]['value'];
-    $tagmap = _media_generate_tagMap($text);     
-  } 
-  drupal_add_js(array('tagmap' => $tagmap),'setting');
+    $tagmap = _media_generate_tagMap($text);
+  }
+  drupal_add_js(array('tagmap' => $tagmap), 'setting');
 }
-  
+
+/**
+ * Generates an array of [inline tags] => <html> to display them.
+ * @param unknown_type $text
+ * @return unknown_type
+ */
 function _media_generate_tagMap($text) {
   $tagmap = array();
-  preg_match_all("/\[\[.*?]]/s",$text,$matches,PREG_SET_ORDER);
+  preg_match_all("/\[\[.*?]]/s", $text, $matches, PREG_SET_ORDER);
   foreach($matches as $match) {
     $tagmap[$match[0]] = _media_markup($match);
   }
