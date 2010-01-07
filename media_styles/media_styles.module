@@ -11,7 +11,7 @@
  */
 function media_styles_styles_containers() {
   $containers = array(
-    'media' => array(
+    'file' => array(
       'containers' => array(
         'image' => array(
           'label' => t('Image Styles'),
@@ -51,7 +51,7 @@ function media_styles_styles_containers() {
       ),
     ),
   );
-  $containers['file'] = $containers['image'] = $containers['media'];
+  $containers['image'] = $containers['file'];
   return $containers;
 }
 
@@ -76,7 +76,7 @@ function media_styles_styles_formatter_filter($variables) {
  */
 function media_styles_styles_presets() {
   $presets = array(
-    'media' => array(
+    'file' => array(
       'square_thumbnail' => array(
         'default' => array('square_thumbnail'),
       ),
@@ -92,9 +92,9 @@ function media_styles_styles_presets() {
     ),
   );
   foreach (image_styles() as $style_name => $style) {
-    $presets['media'][$style_name]['image'] = array($style_name);
+    $presets['file'][$style_name]['image'] = array($style_name);
   }
-  $presets['file'] = $presets['image'] = $presets['media'];
+  $presets['image'] = $presets['file'];
   return $presets;
 }
 

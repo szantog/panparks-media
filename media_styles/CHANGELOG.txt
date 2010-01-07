@@ -2,6 +2,7 @@
 
 CHANGELOG for Media: Styles
 
+by aaron: Remove 'media' styles in favor of file.
 by aaron: Define styles for media, file, and image fields.
 by aaron: Require dependency of the Styles module.
 by aaron: Allow description variable.
