@@ -40,16 +40,17 @@ Drupal.wysiwyg.plugins.media = {
   detach: function(content, settings, instanceId) {
     var $content = jQuery('<div>' + content + '</div>');
     jQuery('a.media-thumbnail',$content).each(function (elem){
+      var imgNode = jQuery("img",this);
     	var $foo = {
     		"type": 'media',
     		"view_mode": 'thumbnail',
-    		"fid" : jQuery("img.media-img-thumbnail",this).attr('fid'),
+    		"fid" : imgNode.attr('fid'),
     		"attributes": { 
-    			"width" : jQuery("img.media-img-thumbnail",this).attr('width'),
-    			"height" : jQuery("img.media-img-thumbnail",this).attr('height'),
-    	},
+    			"width" : imgNode.attr('width'),
+    			"height" : imgNode.attr('height'),
+    	  }
     	}
-    	console.debug(jQuery("img.media-img-thumbnail").attr('width'));
+    	debug.debug(jQuery("img.media-img-thumbnail").attr('width'));
     	$foo = '[[' + JSON.stringify($foo) + ']]';
     	jQuery(this).replaceWith($foo);
     });
