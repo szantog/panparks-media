@@ -732,17 +732,6 @@ function media_browser_list($conditions = array()) {
 
   foreach ($medias as &$media) {
     $media->preview = theme('media_admin_thumbnail', array('file' => $media, 'style_name' => 'thumbnail'));
-//
-//    //@ Todo: We will not be returning a table format in the future.
-//    $row = array();
-//    $row[] = theme('media_admin_thumbnail', array('file' => $media, 'style_name' => 'medium'));
-//    $link_options = array(
-//      'attributes' => array('class' => array('media-select-link'), 'fid' => $media->fid),
-//      'fragment' => '#' . $media->fid,
-//    );
-//    $row[] = l('Pick me', '', $link_options);
-//    $media_on_page[$media->fid] = $media;
-//    $rows[] = $row;
   }
   print drupal_json_encode($medias);
   die();
@@ -752,6 +741,34 @@ function media_browser_list($conditions = array()) {
 function media_browser_include_plugin($name) {
   $path = drupal_get_path('module', 'media');
   drupal_add_js($path . '/javascript/plugins/' . $name . '.js');
+}
+
+/**
+ *
+ * @param unknown_type $form
+ * @param unknown_type $media
+ * @return unknown_type
+ */
+function media_browser_format_form($form, $media) {
+  $options = array();
+  foreach (media_field_view_modes() as $key => $mode) {
+    //@TODO: Get the file formatter, and display that here too.
+    $options[$key] = $mode['label'];
+    $formats[$key] = field_view_field('media', $media, 'file', $key);
+  }
+
+  $media->formats = $formats;
+  drupal_add_js(array('media' => $media), 'setting');
+
+  $form['formats'] = array(
+    '#type' => 'radios',
+    '#options' => $options,
+  );
+
+  // Depending on the media type, we will be adding a field here.
+
+  return $form;
+
 }
 
 function media_browser_add_library() {

@@ -42,7 +42,8 @@ related to the subtab.
 /**
  * Loads media browsers and callbacks, specifically for media as a field.
  */
-Drupal.behaviors.mediaBrowserFieldsLaunch ={
+  
+Drupal.behaviors.mediaBrowserFields ={
   attach: function (context, settings) {
     $('.form-media-file', context).once('mediaBrowserLaunch', function () {
       
@@ -65,7 +66,6 @@ Drupal.behaviors.mediaBrowserFieldsLaunch ={
             if (Drupal.settings.media.debug) {
               debugField.html(JSON.stringify(mediaFile));
             }
-            
           },
           options
         );

@@ -14,6 +14,7 @@ Drupal.behaviors.mediaBrowser = {
   }
 };
 
+
 Drupal.mediaBrowser = Drupal.mediaBrowser || {};
 Drupal.mediaBrowser.selectedMedia = [];
 
