@@ -152,7 +152,6 @@ function theme_media_admin_thumbnail($variables) {
         array(
           'style_name' => 'thumbnail',
           'path' => $file->uri,
-          'attributes' => array('class' => 'media-img-thumbnail', 'fid' => $file->fid),
           'alt' => t('Thumbnail for !filename.', array('!filename' => $file->filename)),
         )
       );

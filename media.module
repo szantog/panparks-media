@@ -879,7 +879,8 @@ function _media_markup($match) {
   $match = str_replace("]]","",$match);
   $media = drupal_json_decode($match[0]);
   $view_mode = $media['view_mode'];
-  return drupal_render(field_view_field('media', $media, 'file', $view_mode));
+  $media_obj = media_load($media['fid']);
+  return  '<div class="media-embedded">'. drupal_render(field_view_field('media', $media_obj, 'file', $view_mode)). '</div>' ;
 
   // @todo: this obviously will need to use the real build mode.
   return theme('media_admin_thumbnail', array('file' => $file));
