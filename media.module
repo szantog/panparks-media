@@ -894,10 +894,14 @@ function _media_markup($match) {
 
 function media_node_load($nodes, $types) {
   foreach ($nodes as $node) {
-    $text = $node->body[LANGUAGE_NONE][0]['value'];
-    $tagmap = _media_generate_tagMap($text);
+    if (isset($node->body[LANGUAGE_NONE])) {
+      $text = $node->body[LANGUAGE_NONE][0]['value'];
+      $tagmap = _media_generate_tagMap($text);
+    }
   }
-  drupal_add_js(array('tagmap' => $tagmap), 'setting');
+  if (!empty($tagmap)) {
+    drupal_add_js(array('tagmap' => $tagmap), 'setting');
+  }
 }
 
 /**

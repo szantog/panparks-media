@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+#678588 by aaron: Fix undefined index error on node view.
 by aaron: Use the currently undocumented #attached property to load js & css.
 by aaron: Defer to the Styles module to route formatting for the 'file'.
 by aaron: Fix formatter build modes.
