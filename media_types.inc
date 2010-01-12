@@ -130,14 +130,14 @@ function media_type_configure_fields($media_type) {
       'required' => TRUE,
       'locked' => TRUE,
       'display' => array(
-        'preview' => array(
+        'media_preview' => array(
           'label' => 'hidden',
-          'type' => 'media_preview',
+          'type' => 'file_default',
           'weight' => $weight,
         ),
-        'original' => array(
+        'media_original' => array(
           'label' => 'hidden',
-          'type' => 'media_default',
+          'type' => 'file_default',
           'weight' => $weight,
         ),
       ),
