@@ -693,21 +693,6 @@ function media_browser() {
     '#type' => 'markup',
     '#markup' => '<div id="media-browser-info"></div>',
   );
-//
-//  $build['media_browser']['top'] = array (
-//    '#type' => 'markup',
-//    '#markup' => '<div style="height:100px; text-align:center; border:1px solid black;">TOP REGION</div>',
-//  );
-//  $build['media_browser']['left'] = array (
-//    '#type' => 'markup',
-//    '#markup' => '<div style="width:100px; float-left; text-align:center; border:1px solid black;">LEFT REGION</div>',
-//  );
-//
-
-
-  //media_browser_add_library();
-
-  //$build['media_pager'] = array('#theme' => 'pager');
 
   return $build;
 }
@@ -737,7 +722,6 @@ function media_browser_list($conditions = array()) {
   }
   print drupal_json_encode($medias);
   die();
-  drupal_add_js(array('mediaStore' => $media_on_page), 'setting');
 }
 
 function media_browser_include_plugin($name) {

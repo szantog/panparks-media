@@ -230,19 +230,19 @@ function media_theme() {
     // A link for a file w/ an icon to the media/$fid page.
     'media_link' => array(
       'variables'         => array('file' => NULL),
-      'file'              => 'media_theme.inc',
+      'file'              => 'media.theme.inc',
     ),
 
     // A preview of the uploaded file.
     'media_admin_thumbnail' => array(
       'variables' => array('file' => NULL, 'style_name' => 'thumbnail'),
-      'file' => 'media_theme.inc',
+      'file' => 'media.theme.inc',
     ),
 
     // Administrative thumbnail previews.
     'media_admin_thumbnail' => array(
       'variables' => array('files' => array(), 'style_name' => 'thumbnail'),
-      'file' => 'media_theme.inc',
+      'file' => 'media.theme.inc',
     ),
   );
 }
@@ -709,6 +709,24 @@ function media_file_update(&$file) {
 function media_add_type_to_file($file) {
   $file->type = media_get_type($file);
   drupal_write_record('file', $file, array('fid'));
+}
+
+function media_process_html(&$variables) {
+  // This sucks, but don't know how else to know it is a request for the browser
+  $trail = menu_get_active_trail();
+  $active = array_pop($trail);
+  if ($active['page_callback'] == 'media_browser') {
+    //@todo: make this actually work (it doesn't right now).
+    $variables['directory'] = 'sites/all/modules/media/tpl';
+    //array_unshift($variables['template_files'], 'media-browser.page');
+    $variables['template_file'] = 'media-browser.page';
+  }
+  //dpr($variables);
+}
+
+function media_html_alter(&$html) {
+
+
 }
 
 function media_page_alter(&$page) {
