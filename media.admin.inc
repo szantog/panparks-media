@@ -662,7 +662,7 @@ function media_browser() {
       $path . '/javascript/util/ba-debug.min.js',
       ),
 
-    'css' => array($path . '/media_browser.css'),
+    'css' => array($path . '/media.browser.css'),
   );
 
   $callbacks = module_invoke_all('media_browser_callbacks');

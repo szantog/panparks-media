@@ -16,7 +16,7 @@
 /* INCLUDES                                  */
 /* ***************************************** */
 
-include_once('media_types.inc');
+include_once('media.types.inc');
 include_once('media.fields.inc');
 include_once('media.filter.inc'); // Code related to [[inline tags]] and wysiwyg
 
