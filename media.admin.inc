@@ -479,6 +479,7 @@ function media_add_files_submit($form, &$form_state) {
     $file->file = array();
     $file->file[LANGUAGE_NONE] = array();
     $file->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
+    $file->is_new = TRUE;
     field_attach_insert('media', $file);
   }
   else {
