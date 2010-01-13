@@ -43,9 +43,14 @@ function media_install() {
   // Alter {file}.type and add it as an index.
   db_add_field('file', 'type', _media_type_field_spec());
   db_add_index('file', 'file_type', array('type'));
+}
 
-
+/**
+ *  Implement hook_enable().
+ */
+function media_enable() {
   // @TODO: Revisit the default types to provide. For instance, PDFs and text.
+  // @TODO: We may need to disable the media bundle & field in hook_disable.
   $types = array();
 
   // This is the default type which will be used if no other type is found
@@ -81,7 +86,7 @@ function media_install() {
   );
 
   if (module_exists('file_styles')) {
-
+    // @TODO: Not sure why this placeholder is here.
   }
 
   $types['image']->type_callback_args =
