@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+#673998 by aaron: Fix typo (s/view/video).
 #673998 by aaron: Move media type defs to hook_enable.
 #678588 by aaron: Fix undefined index error on node view.
 by aaron: Use the currently undocumented #attached property to load js & css.

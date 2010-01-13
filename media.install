@@ -118,7 +118,7 @@ function media_enable() {
   $types['video']->machine_name = 'video';
   $types['video']->label = "Video";
   $types['video']->base = TRUE;
-  $types['view']->view_mode_defaults = array(
+  $types['video']->view_mode_defaults = array(
     'preview' => 'file_default',
     'original' => 'file_default',
     'small'   => 'file_none',
