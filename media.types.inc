@@ -58,27 +58,57 @@ function media_entity_info() {
  *  The default media types are currently 'Audio', 'Image', 'Video', and
  *  'Other', which are defined in media_install().
  *
- *  @param object $type
+ *  @param object &$type
  *    $type is an object with the following fields:
  *      ->machine_name => The name of the media asset type, such as 'video';
  *      ->label => The human readable name;
- *      ->base => @TODO: What's this?
+ *      ->base => boolean: If the media type cannot be removed.
  *      ->type_callback => Function call to filter an instance to its bundle.
  *      ->type_callback_args => An array of args to be passed to type_callback.
+ *      ->view_mode_defaults => An array of view_mode_key => format.
  *  @return void;
  */
-function media_type_save($type) {
+function media_type_save(&$type) {
   $types = variable_get('media_types', array());
   $type = media_type_set_defaults($type);
   $types[$type->machine_name] = $type;
 
   // Set up the defaults for this media type bundle.
   media_type_configure_fields($type);
-
+  media_type_configure_formatters($type->machine_name, $type->view_mode_defaults);
+  // We don't need to save this information
+  unset($type->view_mode_defaults);
   variable_set('media_types', $types);
   // Clear the caches
   drupal_static_reset('media_type_get_types');
   drupal_static_reset('media_type_get_mime_map');
+}
+
+/**
+ * Assigns formatters to view_modes for the file field of a media type.
+ *
+ * Each media type contains a field called "file" and certain stock view modes.
+ * This function will assign a format to each view mode. For instance, images
+ * would want to use a thumbnail format for files when in the "preview"
+ * view_mode.  The called would pass in 'image' for $machine_name and
+ * array('preview' => 'styles_file_square_thumbnail') to $view_modes_to_formatters.
+ *
+ * @param string $machine_name
+ * @param array $view_modes_to_formatters
+ * @throws Exception
+ * @return void
+ */
+function media_type_configure_formatters($machine_name, $view_modes_to_formatters) {
+  $instance = field_info_instance('media', 'file', $machine_name);
+  if (!$instance) {
+    throw new Exception('Unable to set formatter preferences for '. $machine_name);
+  }
+  foreach ($instance['display'] as $view_mode => $display) {
+    if (isset($view_modes_to_formatters[$view_mode])) {
+      $instance['display'][$view_mode]['type'] = $view_modes_to_formatters[$view_mode];
+    }
+  }
+  field_update_instance($instance);
 }
 
 /**

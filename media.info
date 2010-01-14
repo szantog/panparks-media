@@ -11,5 +11,8 @@ files[] = media.admin.inc
 files[] = media.theme.inc
 files[] = media.types.inc
 files[] = MediaReadOnlyStreamWrapper.inc
+; Tests
+files[] = test/media.types.test
 dependencies[] = file
 dependencies[] = image
+dependencies[] = file_styles
