@@ -21,6 +21,16 @@
       var embeddedMedia = $('<div>' + formattedMedia + '</div>');
       // add the fid attribute to the image
       $('img', embeddedMedia).attr('fid', mediaFile.fid);
+      tagContent = Drupal.wysiwyg.plugins.media.createTag(embeddedMedia);
+      // When tagmap is defined such as node/edit, block/configure
+      if(Drupal.settings.tagmap) {
+        Drupal.settings.tagmap[tagContent] = Drupal.wysiwyg.plugins.media.addWrapper(embeddedMedia.html());
+      }
+      // When tagmap is not defined such as node/add/, block/add
+      else {
+        Drupal.settings.tagmap = { };
+        Drupal.settings.tagmap[tagContent] = Drupal.wysiwyg.plugins.media.addWrapper(embeddedMedia.html());
+      }
       wysiwygInstance.insert(Drupal.wysiwyg.plugins.media.addWrapper(embeddedMedia.html()));
     },
     
@@ -33,7 +43,6 @@
     attach: function(content, settings, instanceId) {    
       matches = content.match(/\[\[.*?\]\]/g);
   	tagmap = Drupal.settings.tagmap;
-  	console.debug(tagmap);
   	  if(matches) {
   	    for (i=0; i< matches.length; i++) {
   		  for (var tagContent in tagmap ) {
@@ -60,18 +69,7 @@
     detach: function(content, settings, instanceId) {
       var content = $('<div>' + content + '</div>');
       $('div.media-embedded',content).each(function (elem){
-        var imgNode = $("img",this);
-        tagContent = {
-          "type": 'media',
-        	//@todo: This will be selected from the format form
-        	"view_mode": 'media_original',
-        	"fid" : imgNode.attr('fid'),
-        	"attributes": {
-        	  "width" : imgNode.attr('width'),
-        	  "height" : imgNode.attr('height')
-        	}
-        };
-        tagContent = '[[' + JSON.stringify(tagContent) + ']]';
+    	tagContent = Drupal.wysiwyg.plugins.media.createTag(this);
         $(this).replaceWith(tagContent);
       });
       return content.html();
@@ -79,7 +77,22 @@
     
     addWrapper: function(htmlContent) {
       return '<div class="media-embedded">' + htmlContent + '</div>';  
-    }
+    },
+    
+    createTag: function(mediaObj) {
+        var imgNode = $("img",mediaObj);
+        tagContent = {
+          "type": 'media',
+          //@todo: This will be selected from the format form
+          "view_mode": 'media_original',
+          "fid" : imgNode.attr('fid'),
+          "attributes": {
+      	  "width" : imgNode.attr('width'),
+      	  "height" : imgNode.attr('height')
+          },
+        };
+        return '[[' + JSON.stringify(tagContent) + ']]';
+      },
   };
   
   Drupal.media = Drupal.media || {};
