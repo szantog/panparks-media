@@ -6,10 +6,10 @@ Drupal.wysiwyg.plugins.media = {
   invoke: function(data, settings, instanceId) {
     if (data.format == 'html') {
       options = {};
-      jQuery().mediaBrowser( function (mediaFiles, options) {
+      $().mediaBrowser( function (mediaFiles, options) {
     	// Insert the preview of the file returned into the editor.
-        preview = jQuery(mediaFiles[0].preview);
-    	jQuery('img',preview).attr('fid',mediaFiles[0].fid);
+        preview = $(mediaFiles[0].preview);
+    	$('img',preview).attr('fid',mediaFiles[0].fid);
     	Drupal.wysiwyg.instances[instanceId].insert(Drupal.wysiwyg.plugins.media.addWrapper(preview.html()));
       },options);
     }    
@@ -21,9 +21,12 @@ Drupal.wysiwyg.plugins.media = {
    * that needs to show in the editor.
    * 
    */
-  attach: function(content, settings, instanceId) {
+  attach: function(content, settings, instanceId) {  
+	//@TODO Lost $ reference for some reason :(, restoring it with jQuery obj
+	$ = jQuery;  
     matches = content.match(/\[\[.*?\]\]/g);
 	tagmap = Drupal.settings.tagmap;
+	console.debug(tagmap);
 	  if(matches) {
 	    for (i=0; i< matches.length; i++) {
 		  for (var tagContent in tagmap ) {
@@ -34,8 +37,8 @@ Drupal.wysiwyg.plugins.media = {
 			  matches[i] = matches[i].replace('[[','');
 			  matches[i] = matches[i].replace(']]','');
 			  mediaObj = JSON.parse(matches[i]);
-			  imgMarkup = jQuery(tagmap[tagContent]);
-			  jQuery('img',imgMarkup).attr('fid',mediaObj.fid);
+			  imgMarkup = $(tagmap[tagContent]);
+			  $('img',imgMarkup).attr('fid',mediaObj.fid);
 			  content = content.replace(tagContent,this.addWrapper(imgMarkup.html()));
 			}
 		  }
@@ -48,9 +51,9 @@ Drupal.wysiwyg.plugins.media = {
    * Detach function, called when a rich text editor detaches
    */
   detach: function(content, settings, instanceId) {
-    var $content = jQuery('<div>' + content + '</div>');
-    jQuery('div.media-embedded',$content).each(function (elem){
-      var imgNode = jQuery("img",this);
+    var content = $('<div>' + content + '</div>');
+    $('div.media-embedded',content).each(function (elem){
+      var imgNode = $("img",this);
       tagContent = {
         "type": 'media',
     	//@todo: This will be selected from the format form
@@ -62,12 +65,12 @@ Drupal.wysiwyg.plugins.media = {
     	}
       }
       tagContent = '[[' + JSON.stringify(tagContent) + ']]';
-      jQuery(this).replaceWith(tagContent);
+      $(this).replaceWith(tagContent);
     });
-    return $content.html();
+    return content.html();
   },
   
   addWrapper: function(htmlContent) {
-	  return '<div class="media-embedded">' + htmlContent + '</div>';  
+    return '<div class="media-embedded">' + htmlContent + '</div>';  
   },  
 };

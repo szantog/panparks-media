@@ -742,3 +742,17 @@ function media_page_alter(&$page) {
     }
   }
 }
+
+/**
+ * Implementation of hook_form_alter().
+ * We assign a form #after_build processing callback that is executed
+ * on all forms after they have been completely built, so that we can
+ * take the content of the textarea to inject our tagMap in Drupal.settings
+ * to access on node/edit/<nid> or block/configure forms.
+ *
+ * @see media_process_form()
+ */
+
+function media_form_alter(&$form, &$form_state) {
+  $form['#after_build'][] = 'media_process_form';
+}
