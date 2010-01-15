@@ -8,8 +8,9 @@
       if (data.format == 'html') {
         options = {};
         $().mediaBrowser( function (mediaFiles, options) {
-      	// Insert the preview of the file returned into the editor.
-          preview = $(mediaFiles[0].preview);
+          // Insert the preview of the file returned into the editor.
+          // Wrap it in a div
+          preview = $('<div>' + mediaFiles[0].preview + '</div>');
           $('img',preview).attr('fid',mediaFiles[0].fid);
           Drupal.wysiwyg.instances[instanceId].insert(Drupal.wysiwyg.plugins.media.addWrapper(preview.html()));
         },options);

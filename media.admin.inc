@@ -716,7 +716,7 @@ function media_browser_list($conditions = array()) {
   foreach ($medias as &$media) {
     // Generate a preview of the file
     // @todo: Should generate placeholders for audio/video
-    $media->preview = '<div class="media-embedded">' . drupal_render(field_view_field('media', $media, 'file', 'media_preview')) . '</div>';
+    $media->preview = drupal_render(field_view_field('media', $media, 'file', 'media_preview'));
   }
   print drupal_json_encode($medias);
   die();

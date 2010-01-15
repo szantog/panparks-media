@@ -56,16 +56,16 @@ function _media_markup($match) {
   // errors. @TODO return something when fid is not found.
   if(isset($media['fid'])) {
     $media_obj = media_load($media['fid']);
-    return  '<div class="media-embedded">'. drupal_render(field_view_field('media', $media_obj, 'file', $view_mode)). '</div>' ;
-  }  
+    return drupal_render(field_view_field('media', $media_obj, 'file', $view_mode));
+  }
 }
 
 /**
  * Process callback which will be called when form is completely built
- * This function will scan all textareas with text_format enabled and 
+ * This function will scan all textareas with text_format enabled and
  * add associative array of tag code => markup to Drupal.settings in JS
  * @param $form
- * 
+ *
  * @see
  * _media_generate_tagMap
  */
@@ -100,7 +100,7 @@ function media_wysiwyg_attach_alter(&$element) {
  * The String containing text and html markup of textarea
  * @return
  * An associative array with tag code as key and html markup as the value.
- * 
+ *
  * @see
  * media_process_form
  * _media_markup
@@ -118,7 +118,7 @@ function _media_generate_tagMap($text) {
   foreach($matches as $match) {
     // We see if tagContent is already in $tagMap, if not we add it
     // to $tagmap otherwise return a empty error
-    if(empty($tagmap[$match[0]])) {  
+    if(empty($tagmap[$match[0]])) {
       $tagmap[$match[0]] = _media_markup($match);
     }
     else {
