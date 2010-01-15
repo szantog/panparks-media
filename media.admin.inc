@@ -356,11 +356,8 @@ function media_page_edit($file) {
  * Form builder: Builds the edit file form.
  */
 function media_edit($form, $form_state, $file) {
-
-
   drupal_set_title($file->filename);
   field_attach_form('media', $file, $form, $form_state);
-
 
   $form['#attached'] = media_admin_get_css_and_js();
 
@@ -719,7 +716,7 @@ function media_browser_list($conditions = array()) {
   foreach ($medias as &$media) {
     // Generate a preview of the file
     // @todo: Should generate placeholders for audio/video
-    $media->preview = '<div class="media-embedded">' . drupal_render(field_view_field('media', $media, 'file', 'preview')) . '</div>';
+    $media->preview = '<div class="media-embedded">' . drupal_render(field_view_field('media', $media, 'file', 'media_preview')) . '</div>';
   }
   print drupal_json_encode($medias);
   die();
