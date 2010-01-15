@@ -9,17 +9,19 @@
         $().mediaBrowser( function (mediaFiles) {
           var mediaFile = mediaFiles[0];
           //@todo: turn this into a non-anonymous bind
-          Drupal.media.formatForm.launch(mediaFiles[0], function(formattedMedia) {
-            this.insertMediaFile(mediaFile, formattedMedia)
+          Drupal.media.formatForm.launch(mediaFile, function(formattedMedia) {
+            Drupal.wysiwyg.plugins.media.insertMediaFile(mediaFile, formattedMedia, Drupal.wysiwyg.instances[instanceId]);
           });
         });
       }    
     },
     
-    insertMediaFile: function(mediaFile, formattedMedia) {
-      preview = $('<div>' + formatted + '</div>');
-      $('img',preview).attr('fid',mediaFiles[0].fid);
-      Drupal.wysiwyg.instances[instanceId].insert(Drupal.wysiwyg.plugins.media.addWrapper(preview.html()));
+    insertMediaFile: function(mediaFile, formattedMedia, wysiwygInstance) {
+      // Hack to allow for use of .html()
+      var embeddedMedia = $('<div>' + formattedMedia + '</div>');
+      // add the fid attribute to the image
+      $('img', embeddedMedia).attr('fid', mediaFile.fid);
+      wysiwygInstance.insert(Drupal.wysiwyg.plugins.media.addWrapper(embeddedMedia.html()));
     },
     
     /**
@@ -82,8 +84,9 @@
   
   Drupal.media = Drupal.media || {};
   Drupal.media.formatForm = {
-    launch: function(mediaFile) {
-      
+    launch: function(mediaFile, callback) {
+      callback($(mediaFile.preview).html());
+      //$('<div id="format_form"></div>').dialog()
     }
   }
 
