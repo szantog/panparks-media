@@ -70,7 +70,7 @@ function _media_markup($match) {
  * _media_generate_tagMap
  */
 
-function media_process_form(&$form) {
+function media_process_form(&$form, $form_state = array()) {
   foreach(element_children($form) as $item) {
     if(isset($form[$item]['#text_format'])) {
       if(isset($form[$item]['#default_value'])) {

@@ -6,15 +6,20 @@
      */
     invoke: function(data, settings, instanceId) {
       if (data.format == 'html') {
-        options = {};
-        $().mediaBrowser( function (mediaFiles, options) {
-          // Insert the preview of the file returned into the editor.
-          // Wrap it in a div
-          preview = $('<div>' + mediaFiles[0].preview + '</div>');
-          $('img',preview).attr('fid',mediaFiles[0].fid);
-          Drupal.wysiwyg.instances[instanceId].insert(Drupal.wysiwyg.plugins.media.addWrapper(preview.html()));
-        },options);
+        $().mediaBrowser( function (mediaFiles) {
+          var mediaFile = mediaFiles[0];
+          //@todo: turn this into a non-anonymous bind
+          Drupal.media.formatForm.launch(mediaFiles[0], function(formattedMedia) {
+            this.insertMediaFile(mediaFile, formattedMedia)
+          });
+        });
       }    
+    },
+    
+    insertMediaFile: function(mediaFile, formattedMedia) {
+      preview = $('<div>' + formatted + '</div>');
+      $('img',preview).attr('fid',mediaFiles[0].fid);
+      Drupal.wysiwyg.instances[instanceId].insert(Drupal.wysiwyg.plugins.media.addWrapper(preview.html()));
     },
     
     /**
@@ -23,9 +28,7 @@
      * that needs to show in the editor.
      * 
      */
-    attach: function(content, settings, instanceId) {  
-  	//@TODO Lost $ reference for some reason :(, restoring it with jQuery obj
-  	$ = jQuery;  
+    attach: function(content, settings, instanceId) {    
       matches = content.match(/\[\[.*?\]\]/g);
   	tagmap = Drupal.settings.tagmap;
   	console.debug(tagmap);
@@ -79,7 +82,9 @@
   
   Drupal.media = Drupal.media || {};
   Drupal.media.formatForm = {
-    
+    launch: function(mediaFile) {
+      
+    }
   }
 
 })(jQuery);

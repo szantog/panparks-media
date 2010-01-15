@@ -54,7 +54,8 @@ function media_enable() {
 
   $view_mode_defaults = array(
     'media_preview' => 'styles_file_square_thumbnail',
-    'original' => 'file_default',
+    //@TODO: We need a real "original" formatter
+    'original' => 'styles_file_large',
     'small'   => 'styles_file_small',
     'large'   => 'styles_file_large',
   );
