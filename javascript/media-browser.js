@@ -12,9 +12,9 @@ Drupal.behaviors.mediaBrowser = {
     // We should be starting here IF the parent doesn't
     // initiate the process.
     // For testing
-    var startLink = $('<a href="#">Start browser</a>');
-    $('h1').append(startLink);
-    startLink.bind('click', function() {Drupal.media.browser.launch()});
+    //var startLink = $('<a href="#">Start browser</a>');
+    //$('h1').append(startLink);
+    //startLink.bind('click', function() {Drupal.media.browser.launch()});
 
     // This method is called when the popup appears.  Use this opportunity to
     // construct the tabs.

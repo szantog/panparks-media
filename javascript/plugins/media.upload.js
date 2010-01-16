@@ -9,8 +9,7 @@
         tabset.tabs('add', '#upload', 'Upload');
         mediaBrowser.listen('tabs.tabSelected', function (e, id) {
           if (id == 'upload') {
-            // This is me.
-            mediaBrowser.getContentArea().html('I am an upload form.');
+            mediaBrowser.getContentArea().load(Drupal.settings.basePath + 'admin/content/media/add/files?destination=' + window.location.href +' form');
           }
         });
       }
