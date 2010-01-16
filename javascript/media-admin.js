@@ -49,16 +49,16 @@ Drupal.behaviors.mediaAdmin = {
     // Only show update options if anything gets checked.
     $('input[type=checkbox]').bind('change.media', function() {
       if (!$('input[type=checkbox]:checked').size()) {
-        fieldset.slideUp('slow');
+        fieldset.slideUp('fast');
       }
       else {
-        fieldset.slideDown('slow');
+        fieldset.slideDown('fast');
       }
     });
     fieldset.hide();
     // Replace the link with a form.
     $('ul.action-links a').click(function() {
-      $('ul.action-links').slideUp('slow').parent().prepend($(Drupal.settings.mediaAddFileForm).hide()).children('form').slideDown('slow');
+      $('ul.action-links').slideUp('fast').parent().prepend($(Drupal.settings.mediaAddFileForm).hide()).children('form').slideDown('fast');
       return false;
     });
   }
