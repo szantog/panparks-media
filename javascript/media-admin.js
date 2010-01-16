@@ -44,7 +44,14 @@ Drupal.behaviors.mediaAdmin = {
           checkbox.parents('div.media-thumbnail-checked').removeClass('media-thumbnail-checked');
         }
       });
-    }); 
+    });
+    var fieldset = $('#edit-options');
+    // Only show update options if anything gets checked.
+    $('input[type=checkbox]').bind('change.media', function() {
+      fieldset.slideDown('fast');
+      $('input[type=checkbox]').unbind('change.media');
+    });
+    fieldset.hide();
   }
 };
   
