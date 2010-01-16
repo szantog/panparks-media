@@ -44,6 +44,7 @@ function media_menu() {
     'access arguments' => array('administer media'),
     'file' => 'media.admin.inc',
   );
+
   $items['admin/structure/media/manage/%media_type'] = array(
     'title' => 'Manage media',
     'description' => 'Manage files used on your site.',
@@ -52,6 +53,12 @@ function media_menu() {
     'access arguments' => array('administer media'),
     'type' => MENU_CALLBACK,
     'file' => 'media.admin.inc',
+  );
+
+  $items['admin/structure/media/manage/%media_type/settings'] = array(
+    'title' => 'Settings',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
   );
 
   // Admin settings

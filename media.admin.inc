@@ -501,7 +501,7 @@ function media_admin_type_list() {
     $row[] = array('data' => t($info->label));
 
     // Set the edit column.
-    $row[] = array('data' => l(t('edit'), 'admin/structure/media/manage/' . $type_url_str));
+    $row[] = array('data' => l(t('settings'), 'admin/structure/media/manage/' . $type_url_str));
 
     if ($field_ui) {
       // Manage fields.
