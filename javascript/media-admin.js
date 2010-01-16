@@ -21,10 +21,10 @@ Drupal.behaviors.mediaAdmin = {
         var link = $(this);
         switch ($(this).text()) {
           case Drupal.t('all'):
-            link.parents('.media-display-thumbnails').find('div.media-thumbnail :checkbox').attr('checked', true);
+            link.parents('.media-display-thumbnails').find('div.media-thumbnail :checkbox').attr('checked', true).change();
             break;
           case Drupal.t('none'):
-            link.parents('.media-display-thumbnails').find('div.media-thumbnail :checkbox').attr('checked', false);
+            link.parents('.media-display-thumbnails').find('div.media-thumbnail :checkbox').attr('checked', false).change();
             break;
         }
         return false;
