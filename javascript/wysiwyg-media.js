@@ -89,17 +89,42 @@
           "attributes": {
       	  "width" : imgNode.attr('width'),
       	  "height" : imgNode.attr('height')
-          },
+          }
         };
         return '[[' + JSON.stringify(tagContent) + ']]';
-      },
+      }
   };
   
   Drupal.media = Drupal.media || {};
   Drupal.media.formatForm = {
     launch: function(mediaFile, callback) {
-      callback($(mediaFile.preview).html());
-      //$('<div id="format_form"></div>').dialog()
+    
+      // Really, we should be doing what's happening below.
+      // For now, we're just retutning the preview
+    
+      callback(mediaFile.preview);
+      return;
+    
+      $('<div id="format_form"></div>')
+        .load(Drupal.settings.basePath + 'media/' + mediaFile.fid + '/format-form')
+        .dialog({
+          buttons: { 
+            "Ok": function() {
+              callback(mediaFile.preview);
+            }
+          },
+          modal: true,
+          draggable: true,
+          resizable: true,
+          minWidth: 600,
+          width: 800,
+          height:500,
+          position: 'top',
+          overlay: {
+            backgroundColor: '#000000',
+            opacity: 0.4
+          }
+        });
     }
   }
 

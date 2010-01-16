@@ -1,6 +1,6 @@
 
 /**
- * @file: jQuery plugin for mediaBrowser
+ * @file: jQuery plugin for media.browser
  */
 (function ($) {
 
@@ -18,17 +18,20 @@
    // Create it as a modal window.
     var mediaIframe = $.fn.mediaBrowser.getIframe(options.src);
       mediaIframe.bind('load', function (e) {
-        if (typeof this.contentWindow.Drupal.mediaBrowser != undefined) {
-          this.contentWindow.Drupal.mediaBrowser.start(options);
+        if (this.contentWindow.Drupal.media.browser) {
+          this.contentWindow.Drupal.media.browser.launch(options);
+          debug.debug('browser is loaded');
         }
-        debug.debug('browser is loaded');
       });
 
     var horizontalPadding = 30;
     var verticalPadding = 30;
     mediaIframe.dialog({
       buttons: { "Ok": function() {
-        var selected = this.contentWindow.Drupal.mediaBrowser.selectedMedia;
+        debug.debug(this.contentWindow);
+        debug.debug(this.contentWindow.Drupal);
+        var selected = this.contentWindow.Drupal.media.browser.selectedMedia;
+        debug.debug(selected);
         onSelect(selected);
         $(this).dialog("close");
         }

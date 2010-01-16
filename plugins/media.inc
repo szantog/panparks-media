@@ -16,7 +16,8 @@ function media_media_plugin() {
   drupal_add_css(drupal_get_path('module','media').'/media-browser.css');
   // copied directly from media module to get Drupal.settings.media object
   $settings = array(
-  'browserUrl' => url('media/browser'),
+    'browserUrl' => url('media/browser',
+      array('query' => array('render' => 'media-browser'))),
   // @Todo: rip this down and make a callback API structure with tokens, etc
   // this is temporary.
   );

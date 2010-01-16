@@ -48,8 +48,6 @@ function media_admin_get_css_and_js() {
  * Form builder: Builds the media list administration overview.
  */
 function media_admin_list() {
-
-
   // Build the sortable table header.
   $header = array(
    'title' => array('data' => t('Title'), 'field' => 'f.filename'),
@@ -333,6 +331,7 @@ function media_multiple_delete_confirm_submit($form, &$form_state) {
 
 /**
  * Implement hook_media_operations().
+ * @todo: shouldn't this be using actions or something?
  */
 function media_media_operations() {
   $operations = array(
@@ -650,18 +649,9 @@ function media_admin_type_manage_form_submit($form, &$form_state) {
 /* *********************/
 
 
-function media_browser() {
+function media_browser_library() {
   $rows = array();
   $path = drupal_get_path('module', 'media');
-  $attached = array(
-    'js' => array(
-      $path . '/javascript/media-browser.js',
-      $path . '/javascript/util/json2.js',
-      $path . '/javascript/util/ba-debug.min.js',
-      ),
-
-    'css' => array($path . '/media.browser.css'),
-  );
 
   $callbacks = module_invoke_all('media_browser_callbacks');
   drupal_alter('media_browser_callbacks_alter', $callbacks);
@@ -670,13 +660,11 @@ function media_browser() {
   );
 
   drupal_add_js(array('mediaBrowser' => $settings), 'setting');
-
   // Here we will return the basic structure of the browser.
   $build['media_browser'] = array(
     '#type' => 'markup',
-    '#prefix' => '<div id="media-browser">',
+    '#prefix' => '<div id="media-browser-library">',
     '#suffix' => '</div>',
-    '#attached' => $attached,
   );
 
   $build['media_browser']['center'] = array(
@@ -693,6 +681,91 @@ function media_browser() {
   );
 
   return $build;
+}
+
+function media_browser() {
+  $rows = array();
+  $path = drupal_get_path('module', 'media');
+  $attached = array(
+    'js' => array(
+      'misc/ui/ui.core.js',
+      'misc/ui/ui.tabs.js',
+      $path . '/javascript/media.core.js',
+      $path . '/javascript/media.pluginbase.js',
+      $path . '/javascript/media-browser.js',
+      $path . '/javascript/util/json2.js',
+      $path . '/javascript/util/ba-debug.min.js',
+    ),
+
+    'css' => array(
+      '/misc/ui/ui.all.css',
+      $path . '/media.browser.css'
+    ),
+  );
+
+  $plugins = module_invoke_all('media_browser_plugins');
+  foreach ($plugins as $name => $plugin) {
+    // Add their JS and CSS
+    if ($plugin['#attached']) {
+      $attached = array_merge_recursive($attached, $plugin['#attached']);
+    }
+
+  }
+
+  $callbacks = module_invoke_all('media_browser_callbacks');
+  drupal_alter('media_browser_callbacks_alter', $callbacks);
+  $settings = array(
+    'callbacks' => $callbacks,
+    'plugins' => $plugins,
+  );
+
+  drupal_add_js(array('media' => array('browser' => $settings)), 'setting');
+
+//  drupal_add_js(array('mediaBrowser' => $settings), 'setting');
+  // Here we will return the basic structure of the browser.
+  $build['media_browser'] = array(
+    '#prefix' => '<div id="media-browser">',
+    '#suffix' => '</div>',
+    '#attached' => $attached,
+  );
+
+  //@todo: this should wrap inside of the parent.
+  $build['media_browser']['tabs'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<div id="media-browser-tabs">',
+    '#suffix' => '</div>',
+    '#markup' => '<ul></ul>',
+  );
+
+  return $build;
+}
+
+/**
+ * Implement hook_media_browser_plugins
+ * @return unknown_type
+ */
+function media_media_browser_plugins() {
+  $plugins = array();
+  $path = drupal_get_path('module', 'media');
+
+  $plugins['upload'] = array(
+    '#attached' => array(
+      'js' => array($path . '/javascript/plugins/media.upload.js'),
+      ),
+  );
+
+  $plugins['library'] = array(
+    '#attached' => array(
+      'js' => array(
+        $path . '/javascript/plugins/media.library.js',
+      ),
+      'css' => array(
+        $path . '/javascript/plugins/media.library.css',
+      ),
+    ),
+    'settings' => array('viewMode' => 'thumbnails'),
+  );
+  return $plugins;
 }
 
 function media_media_browser_callbacks() {
@@ -733,66 +806,48 @@ function media_browser_include_plugin($name) {
  * @param unknown_type $media
  * @return unknown_type
  */
-function media_browser_format_form($form, $media) {
+function media_browser_format_form($form, $form_state, $media) {
+  $form = array();
   $options = array();
-  foreach (media_field_view_modes() as $key => $mode) {
+  foreach (media_field_view_modes('media') as $key => $mode) {
     //@TODO: Get the file formatter, and display that here too.
     $options[$key] = $mode['label'];
     $formats[$key] = field_view_field('media', $media, 'file', $key);
   }
 
-  $media->formats = $formats;
-  drupal_add_js(array('media' => $media), 'setting');
+  // This won't work :( poo.
+  // We are printing the form, so no chance there
+  //drupal_add_js(array('media' => array('formats' => $formats)), 'setting');
+
+  $form['preview'] = array(
+    '#type' => 'markup',
+    '#title' => basename($media->uri),
+    '#markup' => drupal_render(field_view_field('media', $media, 'file', 'media_preview'))
+  );
 
   $form['formats'] = array(
     '#type' => 'radios',
+    '#title' => 'Format',
     '#options' => $options,
   );
 
-  // Depending on the media type, we will be adding a field here.
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'select',
+    '#ajax' => array(
+      'callback' => 'media_browser_format_select',
+    ),
+  );
 
   return $form;
-
 }
 
-function media_browser_add_library() {
-  // JS: THis is old code which is not in use
-  // Will deprecate / transition at some point.
-  $path = drupal_get_path('module', 'media');
-  drupal_add_js($path . '/javascript/core/Core.js');
-  drupal_add_js($path . '/javascript/core/Sandbox.js');
-  drupal_add_js($path . '/javascript/core/jquery.plugin.js');
-  drupal_add_js($path . '/javascript/util/ba-debug.min.js');
-  media_browser_include_plugin('Browser');
-  media_browser_include_plugin('Tabs');
-  media_browser_include_plugin('Loader');
+function media_browser_format_select($form, &$form_state) {
+  dpr($form_state);
+  return "blah blah";
+}
 
-  drupal_add_js($path . '/javascript/etc/examples.js');
-
-  // Load up all of our necessary jQuery
-  drupal_add_library('system', 'vertical-tabs');
-  drupal_add_library('system', 'ui');
-  drupal_add_library('system', 'ui.draggable');
-  drupal_add_library('system', 'ui.resizable');
-  drupal_add_library('system', 'ui.dialog');
-  drupal_add_library('system', 'ui.tabs');
-  return;
-
-
-  $examples = array();
-  $examples['simple'] = <<<EOF
-  jQuery(document).ready(function() {
-    debug.debug(jQuery('body'));
-    jQuery('#launchSimple').bind('click', function () {Drupal.MediaBrowser.Examples.simple()});
-  });
-EOF;
-
-  foreach ($examples as $example) {
-    $build['media_browser'] = array(
-      //'#theme' => 'table',
-    );
-    drupal_add_js($example, array('type' => 'inline'));
-  }
-
-  return "<a href='#' onClick='return false' id='launchSimple'> Simple inline </a> <div id='simple'></div>";
+function media_browser_format($media) {
+  print drupal_render(drupal_get_form('media_browser_format_form', $media));
+  die();
 }

@@ -108,6 +108,16 @@ function media_menu() {
     'file'             => 'media.admin.inc',
   );
 
+  $items['media/browser/library'] = array(
+    'title'            => 'Media browser library',
+    'description'      => 'Media Browser for picking media and uploading new media',
+    'page callback'    => 'media_browser_library',
+    'access arguments' => array('use media browser'),
+    'weight'           => 3,
+    'type'             => MENU_CALLBACK,
+    'file'             => 'media.admin.inc',
+  );
+
   //@todo: make this more like node?  (End user facing)
 
   $items['media'] = array(
@@ -139,6 +149,17 @@ function media_menu() {
     'weight' => 0,
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
+
+  $items['media/%media/format-form'] = array(
+    'title' => 'Format form',
+    'description' => 'Used as an AJAX callback',
+    'page callback' => 'media_browser_format',
+    'page arguments' => array(1),
+    'access arguments' => array('administer media'),
+    'weight' => 0,
+    'type' => MENU_CALLBACK,
+    'file' => 'media.admin.inc',
   );
 
   return $items;
@@ -242,6 +263,11 @@ function media_theme() {
     // Administrative thumbnail previews.
     'media_admin_thumbnail' => array(
       'variables' => array('files' => array(), 'style_name' => 'thumbnail'),
+      'file' => 'media.theme.inc',
+    ),
+
+    // Tabs in the media browser.
+    'media_browser_tabs' => array(
       'file' => 'media.theme.inc',
     ),
   );
@@ -726,13 +752,11 @@ function media_process_page(&$variables) {
 function media_page_alter(&$page) {
   // This sucks, no way to remove the header in garland. :(
   // @todo: this needs to be a template
-
-  if (!isset($page['content']['system_main']['media_browser'])) {
-    return;
-  }
-  foreach (element_children($page) as $element_name) {
-    if ($element_name != 'content') {
-      unset($page[$element_name]);
+  if (isset($_GET['render']) && $_GET['render'] == 'media-browser') {
+    foreach (element_children($page) as $element_name) {
+      if ($element_name != 'content') {
+        unset($page[$element_name]);
+      }
     }
   }
 }
