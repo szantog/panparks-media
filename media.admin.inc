@@ -10,12 +10,15 @@
  * Display the list or thumbnails media admin display.
  */
 function media_admin($form, $form_state, $display = NULL) {
-
   if (!$display) {
     drupal_goto('admin/content/media/list');
   }
 
   $form['#attached'] = media_admin_get_css_and_js();
+  $form['#attached']['js'][] = array(
+    'data' => array('mediaAddFileForm' => drupal_render(drupal_get_form('media_add_files'))),
+    'type' => 'setting',
+  );
 
   if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
     return media_multiple_delete_confirm($form, $form_state, array_filter($form_state['values']['files']));
