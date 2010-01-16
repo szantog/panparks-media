@@ -81,7 +81,7 @@ function media_menu() {
   );
 
   $items['admin/content/media/add/files'] = array(
-    'title' => 'Upload new files',
+    'title' => 'Upload new file',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_add_files'),
     'access arguments' => array('administer media'),
