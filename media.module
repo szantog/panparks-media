@@ -72,14 +72,6 @@ function media_menu() {
     'file' => 'media.admin.inc',
   );
 
-  $items['admin/content/media/%media/edit'] = array(
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('media_edit', 3),
-    'access arguments' => array('administer media'),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'media.admin.inc',
-  );
-
   $items['admin/content/media/add/files'] = array(
     'title' => 'Upload new file',
     'page callback' => 'drupal_get_form',

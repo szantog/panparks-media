@@ -9,9 +9,29 @@
 /**
  * Display the list or thumbnails media admin display.
  */
-function media_admin($form, $form_state, $display = NULL) {
-  if (!$display) {
-    drupal_goto('admin/content/media/list');
+function media_admin($form, $form_state) {
+  global $user;
+  if (arg(3)) {
+    $display = arg(3);
+    if ($display != 'list' && $display != 'thumbnails') {
+      exit(drupal_not_found());
+    }
+    // Save their preference.
+    db_merge('media_list_type')
+      ->key(array('uid' => $user->uid))
+      ->fields(array(
+          'type' => $display,
+      ))
+      ->execute();
+  }
+  else {
+    $display = db_query("SELECT type FROM {media_list_type} WHERE uid = :uid", array(':uid' => $user->uid))->fetch();
+    if (!$display) {
+      $display = 'list';
+    }
+    else {
+      $display = $display->type;
+    }
   }
 
   $form['#attached'] = media_admin_get_css_and_js();
@@ -202,9 +222,11 @@ function media_admin_display_switch($form = array(), $options = array()) {
   // Build the item list.
   $display_items = array();
   foreach ($display_types as $delta => $item) {
+    $attributes = array('title' => $item['description']);
     // Set a seperate icon for the active item.
     if ($delta == $active_display) {
       $icon = $item['icon_active'];
+      $attributes['class'][] = 'active';
     }
     else {
       $icon = $item['icon'];
@@ -215,7 +237,7 @@ function media_admin_display_switch($form = array(), $options = array()) {
         $form_location . '/' . $delta,
         array(
           'html' => TRUE,
-          'attributes' => array('title' => $item['description']),
+          'attributes' => $attributes,
         )),
     );
   }
@@ -483,6 +505,7 @@ function media_add_files_submit($form, &$form_state) {
   else {
     drupal_set_message(t('An error occurred and no file was uploaded.'), 'error');
   }
+  $form_state['redirect'] = 'admin/content/media';
 }
 
 /**

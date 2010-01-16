@@ -2,13 +2,12 @@
 // $Id$
 
 /**
- *  @file
- *
- *  Install, update and uninstall functions for the Media module.
+ * @file
+ * Install, update and uninstall functions for the Media module.
  */
 
 /**
- *  Implements hook_install().
+ * Implements hook_install().
  */
 function media_install() {
   /**
@@ -143,7 +142,35 @@ function _media_type_field_spec() {
 }
 
 /**
- *  Implement hook_schema_alter();
+ * Implement hook_schema().
+ */
+function media_schema() {
+  $schema['media_list_type'] = array(
+    'description' => 'Stores the user preference for whether to list as table or images.',
+    'fields' => array(
+      'uid' => array(
+        'description' => 'The {user}.uid of the user.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'type' => array(
+        'description' => 'The type of display (table or images).',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('uid'),
+  );
+  
+  return $schema;
+}
+
+/**
+ * Implement hook_schema_alter().
  */
 function media_schema_alter(&$schema) {
   // Alter {file}.type.
@@ -151,7 +178,7 @@ function media_schema_alter(&$schema) {
 }
 
 /**
- *  Implement hook_uninstall().
+ * Implement hook_uninstall().
  */
 function media_uninstall() {
   /**
@@ -178,4 +205,17 @@ function media_uninstall() {
   variable_del('media_file_progress_image');
   variable_del('media_file_list_size');
   variable_del('media_file_progress_success');
+}
+
+/**
+ * Create the {media_list_type} table.
+ */
+function media_update_7000() {
+  db_create_table('media_list_type', array(
+    'fields' => array(
+      'uid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
+      'type' => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => ''),
+    ),
+    'primary key' => array('uid'),
+  ));
 }
