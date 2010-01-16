@@ -33,7 +33,6 @@ function media_admin($form, $form_state, $display = NULL) {
       break;
     case 'thumbnails':
       $form['admin'] = media_admin_thumbnails();
-      // $form['#theme] = 'media_admin_thumbnails';
       break;
   }
   return $form;
@@ -57,7 +56,7 @@ function media_admin_list() {
    'type' => array('data' => t('Type'), 'field' => 'f.filemime'),
    'size' => array('data' => t('Size'), 'field' => 'f.filesize'),
    'author' => array('data' => t('Author'), 'field' => 'u.name'),
-   'timestamp' => array('data' => t('Updated'), 'field' => 'f.timestamp', 'sort' => 'desc'),
+   'timestamp' => array('data' => t('Updated'), 'field' => 'f.timestamp', 'sort' => 'asc'),
    'operations' => array('data' => t('Operations')),
   );
 
@@ -112,6 +111,7 @@ function media_admin_thumbnails() {
    ->fields('f')
    ->fields('u', array('name'))
    ->limit(50)
+   ->orderBy('f.timestamp', 'desc')
    ->execute();
 
   $destination = drupal_get_destination();
