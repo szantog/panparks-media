@@ -27,13 +27,19 @@
     var horizontalPadding = 30;
     var verticalPadding = 30;
     mediaIframe.dialog({
-      buttons: { "Ok": function() {
-        debug.debug(this.contentWindow);
-        debug.debug(this.contentWindow.Drupal);
-        var selected = this.contentWindow.Drupal.media.browser.selectedMedia;
-        debug.debug(selected);
-        onSelect(selected);
-        $(this).dialog("close");
+      //@Todo: i18n this
+      buttons: { 
+        "Ok": function() {
+          var selected = this.contentWindow.Drupal.media.browser.selectedMedia;
+          if (selected.length < 1) {
+            alert('You have not selected anything!');
+            return;
+          }
+          onSelect(selected);
+          $(this).dialog("close");
+        },
+        "Cancel": function() {
+          $(this).dialog("close");
         }
       },
       modal: true,
@@ -49,8 +55,10 @@
       }
       })
       .width(800 - horizontalPadding)
-      .height(500 - verticalPadding);
-   });
+      .height(500 - verticalPadding)
+      // Remove the title bar.
+      .parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
+   })
    return this;
   };
 
