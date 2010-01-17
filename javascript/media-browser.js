@@ -45,8 +45,8 @@ Drupal.media.browser.launch = function(options) {
   this.setupTabs();
   this.startAll();
   // This is retarded.  Can't figure out how to make it call onload
-  // when on tab 0.
-  this.getTabset().tabs('select', 1);
+  // when on tab 0, so we'll just switch to 2 :)
+  this.getTabset().tabs('select', 2);
   //this.getTabset().tabs('select', this.settings.defaultTab);
 };
 
