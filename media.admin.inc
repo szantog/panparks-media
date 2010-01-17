@@ -486,7 +486,7 @@ function media_add_files_submit($form, &$form_state) {
   if ($file = file_move($file, $destination, FILE_EXISTS_REPLACE)) {
     //file_save($file);
     drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
-    $form_state['redirect'] = 'admin/content/media/' . $file->fid . '/edit';
+    $form_state['redirect'] = 'media/' . $file->fid . '/edit';
     field_attach_submit('media', $file, $form, $form_state);
     // Make a copy of the file object to use as the media object
     // (file is a field of media and the base table). This is weird.
@@ -921,7 +921,7 @@ function media_add_fromurl_submit($form, &$form_state) {
   file_save($file);
 
   if ($file) {
-    $form_state['redirect'] = 'admin/content/media/' . $file->fid . '/edit';
+    $form_state['redirect'] = 'media/' . $file->fid . '/edit';
     field_attach_submit('media', $file, $form, $form_state);
     // Make a copy of the file object to use as the media object
     // (file is a field of media and the base table). This is weird.
