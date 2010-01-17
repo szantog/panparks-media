@@ -839,6 +839,8 @@ function media_browser_format_form($form, $form_state, $media) {
     //@TODO: Get the file formatter, and display that here too.
     $options[$key] = $mode['label'];
     $formats[$key] = field_view_field('media', $media, 'file', $key);
+    $formats[$key]['#prefix'] = '<div id="' . $key . '"/>';
+    $formats[$key]['#suffix'] = '</div>';
   }
 
   // This won't work :( poo.
@@ -856,6 +858,13 @@ function media_browser_format_form($form, $form_state, $media) {
     '#title' => 'Format',
     '#options' => $options,
   );
+
+  $form['formats_rendered'] = array(
+    '#prefix' => '<div id="formats-rendered" style="display:none">',
+    '#suffix' => '</div>',
+  );
+
+  $form['formats_rendered'] += $formats;
 
   $form['submit'] = array(
     '#type' => 'submit',
