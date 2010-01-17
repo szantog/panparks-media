@@ -779,6 +779,12 @@ function media_media_browser_plugins() {
       ),
   );
 
+  $plugins['fromurl'] = array(
+    '#attached' => array(
+      'js' => array($path . '/javascript/plugins/media.fromurl.js'),
+      ),
+  );
+
   $plugins['library'] = array(
     '#attached' => array(
       'js' => array(
@@ -876,3 +882,65 @@ function media_browser_format($media) {
   print drupal_render(drupal_get_form('media_browser_format_form', $media));
   die();
 }
+
+function media_add_fromurl($form, &$form_state = array()) {
+  $form['url'] = array(
+    '#type' => 'textfield',
+    '#title' => 'URL',
+    '#description' => 'Input any url which Drupal can handle',
+  );
+
+  $form['url'] = array(
+    '#type' => 'textfield',
+    '#title' => 'URL',
+    '#description' => 'Input any url which Drupal can handle',
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+
+  return $form;
+}
+
+function media_add_fromurl_validate($form, &$form_state) {
+
+}
+
+/**
+ * Upload a file from a URL
+ */
+function media_add_fromurl_submit($form, &$form_state) {
+  $url = $form_state['values']['url'];
+  $scheme = variable_get('file_default_scheme', 'public') . '://';
+  $destination = file_stream_wrapper_uri_normalize($scheme . basename($url));
+
+  $defaults = array (
+    'display' => TRUE,
+  );
+
+  copy($url, $destination);
+
+  $file = file_uri_to_object($destination);
+  file_save($file);
+
+  if ($file) {
+    $form_state['redirect'] = 'admin/content/media/' . $file->fid . '/edit';
+    field_attach_submit('media', $file, $form, $form_state);
+    // Make a copy of the file object to use as the media object
+    // (file is a field of media and the base table). This is weird.
+    $media = clone($file);
+    $file->file = array();
+    $file->file[LANGUAGE_NONE] = array();
+    $file->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
+    $file->is_new = TRUE;
+    field_attach_insert('media', $file);
+  }
+  else {
+    drupal_set_message(t('An error occurred and no file was saved.'), 'error');
+  }
+  $form_state['redirect'] = 'admin/content/media';
+}
+
+

@@ -82,6 +82,16 @@ function media_menu() {
     'weight' => -1,
   );
 
+  $items['admin/content/media/add/from_url'] = array(
+    'title' => 'Add media from URL',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_add_fromurl'),
+    'access arguments' => array('administer media'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'media.admin.inc',
+    'weight' => -1,
+  );
+
   /**
    * Media Browser related callbacks
    * @var unknown_type
