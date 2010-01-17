@@ -97,9 +97,8 @@ function media_menu() {
     'page callback' => 'media_browser',
     'access callback' => 'media_access',
     'access arguments' => array('view'),
-    'weight' => 3,
     'type' => MENU_CALLBACK,
-    'file' => 'media.admin.inc',
+    'file' => 'media.browser.inc',
   );
 
   $items['media/browser/list'] = array(
@@ -108,9 +107,8 @@ function media_menu() {
     'page callback' => 'media_browser_list',
     'access callback' => 'media_access',
     'access arguments' => array('view'),
-    'weight' => 3,
     'type' => MENU_CALLBACK,
-    'file' => 'media.admin.inc',
+    'file' => 'media.browser.inc',
   );
 
   $items['media/browser/library'] = array(
@@ -119,9 +117,8 @@ function media_menu() {
     'page callback' => 'media_browser_library',
     'access callback' => 'media_access',
     'access arguments' => array('view'),
-    'weight' => 3,
     'type' => MENU_CALLBACK,
-    'file' => 'media.admin.inc',
+    'file' => 'media.browser.inc',
   );
 
   // @TODO: make this more like node?  (End user facing)
