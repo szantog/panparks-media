@@ -540,31 +540,33 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
 
   // @TODO: This all goes in the form creation, actually,
   // to create our metadata form...
-//   $uri = $form_state['values']['media_files'];
-//   $file_extension = pathinfo($uri, PATHINFO_EXTENSION);
-//
-//   // Get the file creator for this item.
-//   $file_creator = media_get_registered_modules(array($registration_id));
-//
-//   // Get the formaters for this node type.
-//   $formatters = media_active_fields_for_node_type($node_type, 'formatter');
-//
-//   // Get the registrations.
-//   $registrations = media_get_registered_modules($formatters[$field]);
-//
-//   // Remove any non-applying registrations.
-//   $registrations = media_get_applicable_formatters($registrations, $file_extension);
-//
-//   // Get all the formatting forms.
-//   $formatter_options = array();
-//   $forms = array();
-//   foreach ($registrations as $id => $registration) {
-//     $formatter_options[$id] = $registration['name'];
-//     $function = $registration['callbacks']['form'];
-//     if (function_exists($function)) {
-//       $forms[$id] = $function($node_type, $field, $file_extension, $uri);
-//     }
-//   }
+  /*
+  $uri = $form_state['values']['media_files'];
+  $file_extension = pathinfo($uri, PATHINFO_EXTENSION);
+  
+  // Get the file creator for this item.
+  $file_creator = media_get_registered_modules(array($registration_id));
+  
+  // Get the formaters for this node type.
+  $formatters = media_active_fields_for_node_type($node_type, 'formatter');
+  
+  // Get the registrations.
+  $registrations = media_get_registered_modules($formatters[$field]);
+  
+  // Remove any non-applying registrations.
+  $registrations = media_get_applicable_formatters($registrations, $file_extension);
+  
+  // Get all the formatting forms.
+  $formatter_options = array();
+  $forms = array();
+  foreach ($registrations as $id => $registration) {
+    $formatter_options[$id] = $registration['name'];
+    $function = $registration['callbacks']['form'];
+    if (function_exists($function)) {
+      $forms[$id] = $function($node_type, $field, $file_extension, $uri);
+    }
+  }
+  */
 
   // @TODO: This is placeholder only.
   foreach (array('Video', 'Image', 'Audio', 'PDF') as $mime_type) {
@@ -635,31 +637,10 @@ function media_file_list_element_process($element, $edit, $form_state, $form) {
  */
 function media_file_view($media) {
   drupal_set_title($media->filename);
-  $ret = media_build_multiple(array($media->fid => $media), 'media_original');
-  return $ret;
-}
 
-/**
- * Construct a drupal_render() style array from an array of loaded media files.
- *
- * @param $files
- *   An array of nodes as returned by node_load_multiple().
- * @param $view_mode
- *   Build mode, e.g. 'full', 'teaser'...
- * @param $weight
- *   An integer representing the weight of the first file in the list.
- * @return
- *   An array in the format expected by drupal_render().
- */
-function media_build_multiple($files, $view_mode = 'media_original', $weight = 0) {
-  field_attach_prepare_view('media', $files, $view_mode);
-  $build = array();
-  foreach ($files as $file) {
-    $build['media'][$file->fid] = field_attach_view('media', $file, $view_mode);
-    $build['media'][$file->fid]['#weight'] = $weight;
-    $weight++;
-  }
-  $build['media']['#sorted'] = TRUE;
+  // @TODO maybe something more elegant... ?
+  field_attach_prepare_view('media', array($media->fid => $media), 'media_original');
+  $build['media'][$media->fid] = field_attach_view('media', $media, 'media_original');
 
   return $build;
 }
