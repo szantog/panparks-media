@@ -361,6 +361,20 @@ function media_media_display_types() {
   return $display_types;
 }
 
+/**
+ * Implement hook_media_operations().
+ * @todo: shouldn't this be using actions or something?
+ */
+function media_media_operations() {
+  $operations = array(
+    'delete' => array(
+      'label' => t('Delete'),
+      'callback' => NULL,
+    ),
+  );
+  return $operations;
+}
+
 /* ***************************************** */
 /* API FUNCTIONS                             */
 /* ***************************************** */

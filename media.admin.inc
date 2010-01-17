@@ -47,7 +47,28 @@ function media_admin($form, $form_state) {
   }
 
   // Build the 'Update options' form.
-  $form[] = media_admin_operations();
+  $form['options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Update options'),
+    '#prefix' => '<div class="container-inline">',
+    '#suffix' => '</div>',
+  );
+  $options = array();
+  foreach (module_invoke_all('media_operations') as $operation => $array) {
+    $options[$operation] = $array['label'];
+  }
+  $form['options']['operation'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => 'delete',
+  );
+  $options = array();
+  $form['options']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+    '#submit' => array('media_admin_submit'),
+    '#validate' => array('media_admin_validate'),
+  );
 
   include_once $types[$display]['file'];
 
@@ -88,14 +109,14 @@ function media_admin_list() {
   $options = array();
 
   foreach ($result as $file) {
-   $options[$file->fid] = array(
-     'title' => theme('media_link', array('file' => $file)),
-     'type' =>  check_plain($file->filemime),
-     'size' => format_size($file->filesize),
-     'author' => theme('username', array('account' => $file)),
-     'timestamp' => format_date($file->timestamp, 'short'),
-   );
-   $options[$file->fid]['operations'] = l(t('edit'), 'media/' . $file->fid . '/edit', array('query' => $destination));
+    $options[$file->fid] = array(
+      'title' => theme('media_link', array('file' => $file)),
+      'type' =>  check_plain($file->filemime),
+      'size' => format_size($file->filesize),
+      'author' => theme('username', array('account' => $file)),
+      'timestamp' => format_date($file->timestamp, 'short'),
+    );
+    $options[$file->fid]['operations'] = l(t('edit'), 'media/' . $file->fid . '/edit', array('query' => $destination));
   }
 
   $form['files'] = array(
@@ -145,36 +166,6 @@ function media_admin_thumbnails() {
 
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
 
-  return $form;
-}
-
-/**
- * Build the operations portion of the file listing forms.
- */
-function media_admin_operations() {
-  // Build the 'Update options' form.
-  $form['options'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Update options'),
-    '#prefix' => '<div class="container-inline">',
-    '#suffix' => '</div>',
-  );
-  $options = array();
-  foreach (module_invoke_all('media_operations') as $operation => $array) {
-    $options[$operation] = $array['label'];
-  }
-  $form['options']['operation'] = array(
-    '#type' => 'select',
-    '#options' => $options,
-    '#default_value' => 'delete',
-  );
-  $options = array();
-  $form['options']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Update'),
-    '#submit' => array('media_admin_submit'),
-    '#validate' => array('media_admin_validate'),
-  );
   return $form;
 }
 
@@ -319,21 +310,6 @@ function media_multiple_delete_confirm_submit($form, &$form_state) {
       }
     }
   }
-}
-
-
-/**
- * Implement hook_media_operations().
- * @todo: shouldn't this be using actions or something?
- */
-function media_media_operations() {
-  $operations = array(
-    'delete' => array(
-      'label' => t('Delete'),
-      'callback' => NULL,
-    ),
-  );
-  return $operations;
 }
 
 /**
