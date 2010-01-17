@@ -38,7 +38,7 @@ function media_admin($form, $form_state) {
 
   $form['#attached'] = media_attached_files();
   $form['#attached']['js'][] = array(
-    'data' => array('mediaAddFileForm' => drupal_render(drupal_get_form('media_add_files'))),
+    'data' => array('mediaAddFileForm' => drupal_render(drupal_get_form('media_add_file'))),
     'type' => 'setting',
   );
 
@@ -315,7 +315,7 @@ function media_multiple_delete_confirm_submit($form, &$form_state) {
 /**
  * Display the list or thumbnails media admin display.
  */
-function media_add_files($form, $form_state) {
+function media_add_file($form, $form_state) {
   $validators = array(
    'file_validate_extensions' => array(variable_get('media_file_extensions', '')),
    'file_validate_size' => array(parse_size(variable_get('media_max_filesize', ''))),
@@ -354,8 +354,7 @@ function media_add_files($form, $form_state) {
 /**
  * Validate the generic file upload with the global media settings.
  */
-function media_add_files_validate($form, &$form_state) {
-
+function media_add_file_validate($form, &$form_state) {
   // Save the file as a temporary file.
   $file = file_save_upload('upload', $form['#validators']);
   if ($file === FALSE) {
@@ -369,7 +368,7 @@ function media_add_files_validate($form, &$form_state) {
 /**
  * Upload a file.
  */
-function media_add_files_submit($form, &$form_state) {
+function media_add_file_submit($form, &$form_state) {
   $scheme = variable_get('file_default_scheme', 'public') . '://';
   $file = $form_state['values']['upload'];
   $destination = file_stream_wrapper_uri_normalize($scheme . $file->filename);
@@ -398,7 +397,7 @@ function media_add_files_submit($form, &$form_state) {
 }
 
 /**
- * Displays the content type admin overview page.
+ * Display all media types.
  */
 function media_admin_type_list() {
   $types = media_type_get_types();
