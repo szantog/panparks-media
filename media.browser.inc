@@ -115,11 +115,6 @@ function media_browser_list($conditions = array()) {
   die();
 }
 
-function media_browser_include_plugin($name) {
-  $path = drupal_get_path('module', 'media');
-  drupal_add_js($path . '/javascript/plugins/' . $name . '.js');
-}
-
 /**
  *
  * @param unknown_type $form
