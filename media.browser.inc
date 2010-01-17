@@ -1,44 +1,5 @@
 <?php
 
-/**
- * @file
- * Media browser.
- */
-
-function media_browser_library() {
-  $rows = array();
-  $path = drupal_get_path('module', 'media');
-
-  $callbacks = module_invoke_all('media_browser_callbacks');
-  drupal_alter('media_browser_callbacks_alter', $callbacks);
-  $settings = array(
-    'callbacks' => $callbacks,
-  );
-
-  drupal_add_js(array('mediaBrowser' => $settings), 'setting');
-  // Here we will return the basic structure of the browser.
-  $build['media_browser'] = array(
-    '#type' => 'markup',
-    '#prefix' => '<div id="media-browser-library">',
-    '#suffix' => '</div>',
-  );
-
-  $build['media_browser']['center'] = array(
-    '#theme' => 'table',
-    '#attributes' => array('id' => 'media-browser-list'),
-    '#header' => array('Preview', 'Info'),
-    '#rows' => $rows,
-    '#prefix' => t('Pick something!'),
-  );
-
-  $build['media_browser']['info'] = array (
-    '#type' => 'markup',
-    '#markup' => '<div id="media-browser-info"></div>',
-  );
-
-  return $build;
-}
-
 function media_browser() {
   $rows = array();
   $path = drupal_get_path('module', 'media');
@@ -84,7 +45,6 @@ function media_browser() {
     '#attached' => $attached,
   );
 
-  //@todo: this should wrap inside of the parent.
   $build['media_browser']['tabs'] = array(
     '#type' => 'markup',
     '#prefix' => '<div id="media-browser-tabs">',
@@ -144,7 +104,6 @@ function media_media_browser_callbacks() {
  * @return unknown_type
  */
 function media_browser_list($conditions = array()) {
-
   $medias = entity_load('media', FALSE, $conditions);
 
   foreach ($medias as &$media) {
