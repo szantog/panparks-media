@@ -27,15 +27,15 @@ include_once('media.filter.inc'); // Code related to [[inline tags]] and wysiwyg
 define('MEDIA_RESOURCE_URI_DEFAULT', 'public://');
 define('MEDIA_TYPES_DEFAULT', '*');
 
+
 /* ***************************************** */
-/* DRUPAL API FUNCTIONS                      */
+/* Hook Implementations                      */
 /* ***************************************** */
 
 /**
- * Implementation of hook_menu().
+ * Implement of hook_menu().
  */
 function media_menu() {
-
   // For managing different types of media and the fields associated with them.
   $items['admin/structure/media'] = array(
     'title' => 'Media Types',
@@ -169,56 +169,6 @@ function media_menu() {
   return $items;
 }
 
-/** 
- * Access callback for media assets.
- */
-function media_access($op) {
-  return (user_access('administer media') || user_access($op . ' media'));
-}
-
-/**
- * Loads a Media Asset
- *
- * @param $fid
- * @return StdClass
- */
-function media_load($fid) {
-  if ($files = entity_load('media', array($fid))) {
-    return array_shift($files);
-  }
-}
-
-/**
- * Save a Media Asset
- *
- * @param $media
- * @return StdClass
- */
-function media_save($media) {
-  field_attach_presave('media', $media);
-  if ($media->fid) {
-    $op = 'update';
-  }
-  else {
-    $op = 'insert';
-  }
-  // Do something here for insert update
-  if ($op == 'insert') {
-    // should never happen I think, except perhaps on import.
-    // @todo: validate bundle, etc
-    field_attach_insert('media', $media);
-  }
-  else {
-    field_attach_update('media', $media);
-  }
-}
-
-
-/* ***************************************** */
-/* Media Hook Implementations                */
-/* ***************************************** */
-
-
 /**
  * Implement hook_permission().
  */
@@ -295,13 +245,13 @@ function media_theme() {
 }
 
 /**
- *  Implementation of hook_media_elements().
- *
- *  A Media File List element is created with the following FAPI:
- *    '#type' => 'media_file_list',
- *    '#options' => $options,         // An associative array of filepaths, keyed by FID.
- *    '#title' => $title,             // The translated title, displayed in the tab.
- *    '#description' => $description, // A translated description, to be displayed below the title.
+ * Implement of hook_media_elements().
+ * 
+ * A Media File List element is created with the following FAPI:
+ *   '#type' => 'media_file_list',
+ *   '#options' => $options,         // An associative array of filepaths, keyed by FID.
+ *   '#title' => $title,             // The translated title, displayed in the tab.
+ *   '#description' => $description, // A translated description, to be displayed below the title.
  */
 function media_elements() {
   $elements = array();
@@ -334,6 +284,97 @@ function media_image_default_styles() {
   return $styles;
 }
 
+/**
+ * Implement hook_file_insert().
+ */
+function media_file_insert(&$file) {
+  media_add_type_to_file($file);
+}
+
+/**
+ * Implement hook_file_update().
+ */
+function media_file_update(&$file) {
+  media_add_type_to_file($file);
+}
+
+/**
+ * Implement hook_page_alter().
+ */
+function media_page_alter(&$page) {
+  // This sucks, no way to remove the header in garland. :(
+  // @todo: this needs to be a template
+  if (isset($_GET['render']) && $_GET['render'] == 'media-browser') {
+    $page['#theme'] = 'media_dialog_page';
+    foreach (element_children($page) as $key) {
+      if ($key != 'content') {
+        unset($page[$key]);
+      }
+    }
+  }
+}
+
+/**
+ * Implement of hook_form_alter().
+ * We assign a form #after_build processing callback that is executed
+ * on all forms after they have been completely built, so that we can
+ * take the content of the textarea to inject our tagMap in Drupal.settings
+ * to access on node/edit/<nid> or block/configure forms.
+ *
+ * @see media_process_form()
+ */
+
+function media_form_alter(&$form, &$form_state) {
+  $form['#after_build'][] = 'media_process_form';
+}
+
+/* ***************************************** */
+/* API FUNCTIONS                             */
+/* ***************************************** */
+
+/**
+ * Loads a Media Asset
+ *
+ * @param $fid
+ * @return StdClass
+ */
+function media_load($fid) {
+  if ($files = entity_load('media', array($fid))) {
+    return array_shift($files);
+  }
+}
+
+/**
+ * Save a Media Asset
+ *
+ * @param $media
+ * @return StdClass
+ */
+function media_save($media) {
+  field_attach_presave('media', $media);
+  if ($media->fid) {
+    $op = 'update';
+  }
+  else {
+    $op = 'insert';
+  }
+  // Do something here for insert update
+  if ($op == 'insert') {
+    // should never happen I think, except perhaps on import.
+    // @todo: validate bundle, etc
+    field_attach_insert('media', $media);
+  }
+  else {
+    field_attach_update('media', $media);
+  }
+}
+
+/**
+ * Access callback for media assets.
+ */
+function media_access($op) {
+  return (user_access('administer media') || user_access($op . ' media'));
+}
 
 /* *************************************************** */
 /* Media forms                                         */
@@ -623,20 +664,6 @@ function media_build_multiple($files, $view_mode = 'media_original', $weight = 0
 }
 
 /**
- * Implement hook_file_insert();
- */
-function media_file_insert(&$file) {
-  media_add_type_to_file($file);
-}
-
-/**
- * Implement hook_file_update();
- */
-function media_file_update(&$file) {
-  media_add_type_to_file($file);
-}
-
-/**
  * Adds the media type field to the files table.
  *
  * This currently depends on the mimetype of the file.
@@ -658,19 +685,6 @@ function media_process_page(&$variables) {
   if ($active['page_callback'] == 'media_browser') {
     //@todo: make this actually work (it doesn't right now).
     //array_unshift($variables['template_files'], 'media-browser.page');
-  }
-}
-
-function media_page_alter(&$page) {
-  // This sucks, no way to remove the header in garland. :(
-  // @todo: this needs to be a template
-  if (isset($_GET['render']) && $_GET['render'] == 'media-browser') {
-    $page['#theme'] = 'media_dialog_page';
-    foreach (element_children($page) as $key) {
-      if ($key != 'content') {
-        unset($page[$key]);
-      }
-    }
   }
 }
 
@@ -699,18 +713,4 @@ if (!function_exists('file_uri_to_object')) {
     $file->status = FILE_STATUS_PERMANENT;
     return $file;
   }
-}
-
-/**
- * Implementation of hook_form_alter().
- * We assign a form #after_build processing callback that is executed
- * on all forms after they have been completely built, so that we can
- * take the content of the textarea to inject our tagMap in Drupal.settings
- * to access on node/edit/<nid> or block/configure forms.
- *
- * @see media_process_form()
- */
-
-function media_form_alter(&$form, &$form_state) {
-  $form['#after_build'][] = 'media_process_form';
 }
