@@ -61,7 +61,6 @@ function media_menu() {
     'weight' => -1,
   );
 
-  // Admin settings
   $items['admin/content/media'] = array(
     'title' => 'Media',
     'description' => 'Manage files used on your site.',
@@ -91,11 +90,6 @@ function media_menu() {
     'file' => 'media.admin.inc',
     'weight' => -1,
   );
-
-  /**
-   * Media Browser related callbacks
-   * @var unknown_type
-   */
 
   $items['media/browser'] = array(
     'title' => 'Media browser',
@@ -127,21 +121,19 @@ function media_menu() {
     'file'             => 'media.admin.inc',
   );
 
-  //@todo: make this more like node?  (End user facing)
-
+  // @TODO: make this more like node?  (End user facing)
   $items['media'] = array(
     'title' => 'Media',
     'page callback' => 'media_page_default',
-    'access arguments' => array('access content'),
+    'access arguments' => array('view media'),
     'type' => MENU_CALLBACK,
   );
 
   $items['media/%media'] = array(
-    'title'           => 'Media view',
-    'description'     => 'View an individual media item',
-    'page callback'   => 'media_file_view',
-    'page arguments'  => array(1),
-    'access arguments' => array('access content'), //array('view media'),
+    'page callback' => 'media_file_view',
+    'page arguments' => array(1),
+    'access callback' => 'media_access',
+    'access arguments' => array('view'),
     'type' => MENU_CALLBACK,
   );
 
@@ -155,11 +147,12 @@ function media_menu() {
     'title' => 'Edit',
     'page callback' => 'media_page_edit',
     'page arguments'  => array(1),
-    'access arguments' => array('edit media'), //@todo: add this permission
+    'access callback' => 'media_access',
+    'access arguments' => array('edit'),
     'weight' => 0,
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    'file' => 'media.admin.inc'
+    'file' => 'media.admin.inc',
   );
 
   $items['media/%media/format-form'] = array(
@@ -174,6 +167,13 @@ function media_menu() {
   );
 
   return $items;
+}
+
+/** 
+ * Access callback for media assets.
+ */
+function media_access($op) {
+  return (user_access('administer media') || user_access($op . ' media'));
 }
 
 /**
@@ -227,6 +227,14 @@ function media_permission() {
     'administer media' => array(
       'title' => t('Administer media'),
       'description' => t('Add, edit or delete media.'),
+    ),
+    'view media' => array(
+      'title' => t('View media'),
+      'description' => t('View media.'), // @TODO better description
+    ),
+    'edit media' => array(
+      'title' => t('Edit media'),
+      'description' => t('Edit media.'), // @TODO better description
     ),
   );
 }
