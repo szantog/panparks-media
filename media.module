@@ -135,6 +135,7 @@ function media_menu() {
     'access callback' => 'media_access',
     'access arguments' => array('view'),
     'type' => MENU_CALLBACK,
+    'file' => 'media.pages.inc',
   );
 
   $items['media/%media/view'] = array(
@@ -153,6 +154,7 @@ function media_menu() {
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'media.admin.inc',
+    'file' => 'media.pages.inc',
   );
 
   $items['media/%media/format-form'] = array(
@@ -631,20 +633,6 @@ function media_file_list_element_process($element, $edit, $form_state, $form) {
   return $element;
 }
 
-/**
- * Menu callback; view a single piece of media.
- * @todo: this.
- */
-function media_file_view($media) {
-  drupal_set_title($media->filename);
-
-  // @TODO maybe something more elegant... ?
-  field_attach_prepare_view('media', array($media->fid => $media), 'media_original');
-  $build['media'][$media->fid] = field_attach_view('media', $media, 'media_original');
-
-  return $build;
-}
-
 if (!function_exists('file_uri_to_object')) {
   // @todo: get this committed http://drupal.org/node/685818
 
@@ -670,4 +658,15 @@ if (!function_exists('file_uri_to_object')) {
     $file->status = FILE_STATUS_PERMANENT;
     return $file;
   }
+}
+
+/**
+ * Returns the files attached to administration pages.
+ */
+function media_attached_files() {
+  $path = drupal_get_path('module', 'media');
+  return array(
+    'js' => array($path . '/javascript/media-admin.js'),
+    'css' => array($path . '/media.css'),
+  );
 }

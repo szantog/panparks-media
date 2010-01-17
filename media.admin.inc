@@ -34,7 +34,7 @@ function media_admin($form, $form_state) {
     }
   }
 
-  $form['#attached'] = media_admin_get_css_and_js();
+  $form['#attached'] = media_attached_files();
   $form['#attached']['js'][] = array(
     'data' => array('mediaAddFileForm' => drupal_render(drupal_get_form('media_add_files'))),
     'type' => 'setting',
@@ -56,14 +56,6 @@ function media_admin($form, $form_state) {
       break;
   }
   return $form;
-}
-
-function media_admin_get_css_and_js() {
-  $path = drupal_get_path('module', 'media');
-  return array(
-    'js' => array($path . '/javascript/media-admin.js'),
-    'css' => array($path . '/media.css'),
-  );
 }
 
 /**
@@ -366,55 +358,6 @@ function media_media_operations() {
     ),
   );
   return $operations;
-}
-
-/**
- * Menu callback; presents the Media editing form, or redirects to delete confirmation.
- */
-function media_page_edit($media) {
-  drupal_set_title(t('Edit @title', array('@title' => drupal_set_title($media->filename))));
-  return drupal_get_form('media_edit', $media);
-}
-
-/**
- * Form builder: Builds the edit file form.
- */
-function media_edit($form, $form_state, $media) {
-  drupal_set_title($media->filename);
-  field_attach_form('media', $media, $form, $form_state);
-
-  $form['#attached'] = media_admin_get_css_and_js();
-
-  $form['preview'] = field_view_field('media', $media, 'file', 'media_preview');
-  $form['preview']['#weight'] = -10;
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
-    '#weight' => 100,
-  );
-
-  $form['fid'] = array(
-    '#type' => 'hidden',
-    '#value' => $media->fid,
-  );
-
-  $form['#redirect'] = 'admin/content/media';
-  return $form;
-}
-
-function media_edit_validate($form, &$form_state) {
-  $media = media_load($form_state['values']['fid']);
-  field_attach_form_validate('media', $media, $form, $form_state);
-}
-
-/**
- * Process media_edit form submissions.
- */
-function media_edit_submit($form, &$form_state) {
-  $media = media_load($form_state['values']['fid']);
-  field_attach_submit('media', $media, $form, $form_state);
-  media_save($media);
 }
 
 /**
