@@ -240,11 +240,7 @@ function media_permission() {
 }
 
 /**
- * Implements hook_theme().
- * Register theming functions
- * @todo: remove cruft
- *
- * @return array
+ * Implement hook_theme().
  */
 function media_theme() {
   return array(
@@ -254,23 +250,23 @@ function media_theme() {
 
     // The media file browser form.
     'media_file_browser' => array(
-      'variables'          => array('element' => NULL),
+      'variables' => array('element' => NULL),
     ),
 
     // The default media file list form element.
     'media_file_list' => array(
-      'variables'       => array('element' => NULL),
+      'variables' => array('element' => NULL),
     ),
 
     // The media browser pane.
     'media_browser_pane' => array(
-      'variables'         => array('form' => array()),
+      'variables' => array('form' => array()),
     ),
 
     // A link for a file w/ an icon to the media/$fid page.
     'media_link' => array(
-      'variables'         => array('file' => NULL),
-      'file'              => 'media.theme.inc',
+      'variables' => array('file' => NULL),
+      'file' => 'media.theme.inc',
     ),
 
     // A preview of the uploaded file.
@@ -290,6 +286,7 @@ function media_theme() {
       'file' => 'media.theme.inc',
     ),
 
+    // Dialoge page.
     'media_dialog_page' => array(
       'render element' => 'page',
       'template' => 'media-dialog-page',
