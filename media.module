@@ -288,14 +288,15 @@ function media_image_default_styles() {
  * Implement hook_file_insert().
  */
 function media_file_insert(&$file) {
-  media_add_type_to_file($file);
+  $file->type = media_get_type($file);
+  drupal_write_record('file', $file, array('fid'));
 }
 
 /**
  * Implement hook_file_update().
  */
 function media_file_update(&$file) {
-  media_add_type_to_file($file);
+  media_file_insert($file);
 }
 
 /**
@@ -661,31 +662,6 @@ function media_build_multiple($files, $view_mode = 'media_original', $weight = 0
   $build['media']['#sorted'] = TRUE;
 
   return $build;
-}
-
-/**
- * Adds the media type field to the files table.
- *
- * This currently depends on the mimetype of the file.
- *
- * @param unknown_type $file
- * @return unknown_type
- */
-function media_add_type_to_file($file) {
-  $file->type = media_get_type($file);
-  drupal_write_record('file', $file, array('fid'));
-}
-
-function media_process_page(&$variables) {
-  // @todo: implement this or drop it.
-  return;
-  // This sucks, but don't know how else to know it is a request for the browser
-  $trail = menu_get_active_trail();
-  $active = array_pop($trail);
-  if ($active['page_callback'] == 'media_browser') {
-    //@todo: make this actually work (it doesn't right now).
-    //array_unshift($variables['template_files'], 'media-browser.page');
-  }
 }
 
 if (!function_exists('file_uri_to_object')) {
