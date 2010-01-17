@@ -89,8 +89,6 @@ function media_process_form(&$form, $form_state = array()) {
 }
 
 function media_wysiwyg_attach_alter(&$element) {
-  //dpr($element);
-  //die();
 }
 
 /**

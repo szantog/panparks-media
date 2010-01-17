@@ -427,7 +427,6 @@ function media_add_files_submit($form, &$form_state) {
   );
 
   if ($file = file_move($file, $destination, FILE_EXISTS_REPLACE)) {
-    //file_save($file);
     drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
     $form_state['redirect'] = 'media/' . $file->fid . '/edit';
     field_attach_submit('media', $file, $form, $form_state);
@@ -784,10 +783,6 @@ function media_browser_format_form($form, $form_state, $media) {
     $formats[$key]['#prefix'] = '<div id="' . $key . '"/>';
     $formats[$key]['#suffix'] = '</div>';
   }
-
-  // This won't work :( poo.
-  // We are printing the form, so no chance there
-  //drupal_add_js(array('media' => array('formats' => $formats)), 'setting');
 
   $form['preview'] = array(
     '#type' => 'markup',

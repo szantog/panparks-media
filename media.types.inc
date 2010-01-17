@@ -222,7 +222,6 @@ function media_type_set_defaults($info) {
 function media_get_type($file) {
   $types = media_type_get_types();
   foreach ($types as $name => $type) {
-//     dpr($type);
     if (call_user_func_array($type->type_callback, array($file, $type->type_callback_args))) {
       return $name;
     }
