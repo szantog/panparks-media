@@ -365,8 +365,8 @@ function _media_file_display_embed_form() {
  * @TODO: Implement and document
  */
 function media_file_media_action(&$form, $form_state, $op = '') {
-  dsm("In the Media File action handler. Implement switch and carry out tasks.");
-  dsm($op);
-  dsm($form_state);
-  dsm($form);
+  drupal_set_message("In the Media File action handler. Implement switch and carry out tasks.");
+  drupal_set_message($op);
+  drupal_set_message('<pre>' . print_r($form_state) . '</pre>');
+  drupal_set_message('<pre>' . print_r($form) . '</pre>');
 }
