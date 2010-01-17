@@ -95,30 +95,30 @@ function media_menu() {
     'title' => 'Media browser',
     'description' => 'Media Browser for picking media and uploading new media',
     'page callback' => 'media_browser',
-    'access arguments' => array('use media browser'),
+    'access arguments' => array('view media'),
     'weight' => 3,
     'type' => MENU_CALLBACK,
     'file' => 'media.admin.inc',
   );
 
   $items['media/browser/list'] = array(
-    'title'            => 'Media browser list',
-    'description'      => 'Ajax Callback for getting media',
-    'page callback'    => 'media_browser_list',
-    'access arguments' => array('use media browser'),
-    'weight'           => 3,
-    'type'             => MENU_CALLBACK,
-    'file'             => 'media.admin.inc',
+    'title' => 'Media browser list',
+    'description' => 'Ajax Callback for getting media',
+    'page callback' => 'media_browser_list',
+    'access arguments' => array('view media'),
+    'weight' => 3,
+    'type' => MENU_CALLBACK,
+    'file' => 'media.admin.inc',
   );
 
   $items['media/browser/library'] = array(
-    'title'            => 'Media browser library',
-    'description'      => 'Media Browser for picking media and uploading new media',
-    'page callback'    => 'media_browser_library',
+    'title' => 'Media browser library',
+    'description' => 'Media Browser for picking media and uploading new media',
+    'page callback' => 'media_browser_library',
     'access arguments' => array('use media browser'),
-    'weight'           => 3,
-    'type'             => MENU_CALLBACK,
-    'file'             => 'media.admin.inc',
+    'weight' => 3,
+    'type' => MENU_CALLBACK,
+    'file' => 'media.admin.inc',
   );
 
   // @TODO: make this more like node?  (End user facing)
