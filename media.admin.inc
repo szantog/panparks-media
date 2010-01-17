@@ -11,9 +11,11 @@
  */
 function media_admin($form, $form_state) {
   global $user;
+  $types = media_display_types();
+
   if (arg(3)) {
     $display = arg(3);
-    if ($display != 'list' && $display != 'thumbnails') {
+    if (!in_array($display, array_keys($types))) {
       exit(drupal_not_found());
     }
     // Save their preference.
@@ -47,14 +49,13 @@ function media_admin($form, $form_state) {
   // Build the 'Update options' form.
   $form[] = media_admin_operations();
 
-  switch ($display) {
-    case 'list':
-      $form['admin'] = media_admin_list();
-      break;
-    case 'thumbnails':
-      $form['admin'] = media_admin_thumbnails();
-      break;
-  }
+  include_once $types[$display]['file'];
+
+  $form['admin'] = $types[$display]['callback']();
+
+  // Build the display switch.
+  $form['switch'] = media_admin_display_switch(array('active display' => $display));
+
   return $form;
 }
 
@@ -90,12 +91,13 @@ function media_admin_list() {
    $options[$file->fid] = array(
      'title' => theme('media_link', array('file' => $file)),
      'type' =>  check_plain($file->filemime),
-     'size' => t('@size KB', array('@size' => number_format($file->filesize / 1000, 0))),
+     'size' => format_size($file->filesize),
      'author' => theme('username', array('account' => $file)),
      'timestamp' => format_date($file->timestamp, 'short'),
    );
    $options[$file->fid]['operations'] = l(t('edit'), 'media/' . $file->fid . '/edit', array('query' => $destination));
   }
+
   $form['files'] = array(
    '#type' => 'tableselect',
    '#header' => $header,
@@ -104,9 +106,6 @@ function media_admin_list() {
   );
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
 
-  // Build the display switch.
-  $form = media_admin_display_switch($form, array('active_display' => 'list'));
-
   return $form;
 }
 
@@ -114,8 +113,6 @@ function media_admin_list() {
  * Form builder: Builds the media thumbnails administration overview.
  */
 function media_admin_thumbnails() {
-
-
   $query = db_select('file', 'f')->extend('PagerDefault');
   $query->join('users', 'u', 'f.uid = u.uid');
 
@@ -134,6 +131,7 @@ function media_admin_thumbnails() {
    '#prefix' => '<div class ="media-display-thumbnails clearfix">',
    '#suffix' => '</div>',
   );
+
   if (count($result)) {
     foreach ($result as $file) {
      $form['files'][$file->fid] = array(
@@ -147,9 +145,6 @@ function media_admin_thumbnails() {
 
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
 
-  // Build the display switch.
-  $form = media_admin_display_switch($form, array('active_display' => 'thumbnails'));
-
   return $form;
 }
 
@@ -157,7 +152,6 @@ function media_admin_thumbnails() {
  * Build the operations portion of the file listing forms.
  */
 function media_admin_operations() {
-
   // Build the 'Update options' form.
   $form['options'] = array(
     '#type' => 'fieldset',
@@ -187,36 +181,20 @@ function media_admin_operations() {
 /**
  * Build the display switch portion of the file listings form.
  */
-function media_admin_display_switch($form = array(), $options = array()) {
-
-  $path = drupal_get_path('module', 'media');
-
-  $form_location = (isset($options['form_location'])) ? $options['form_location'] : 'admin/content/media';
-  $active_display = (isset($options['active_display'])) ? $options['active_display'] : NULL;
-
-  // Set up the default display types.
-  $display_types = array();
-  $display_types['list'] = array(
-    'title' => t('List'),
-    'description' => t('Display as a list.'),
-    'icon' => $path . '/images/display-list.png',
-    'icon_active' => $path . '/images/display-list-active.png',
+function media_admin_display_switch($options = array()) {
+  $options += array(
+    'form location' => 'admin/content/media',
+    'active display' => 'list',
   );
-  $display_types['thumbnails'] = array(
-    'title' => t('Thumbnails'),
-    'description' => t('Display as thumbnails.'),
-    'icon' => $path . '/images/display-thumbnails.png',
-    'icon_active' => $path . '/images/display-thumbnails-active.png',
-  );
-  // Make it alterable so other modules can add additional displays.
-  drupal_alter('media_display_types', $display_types);
+  $display_types = media_display_types();
 
   // Build the item list.
   $display_items = array();
   foreach ($display_types as $delta => $item) {
     $attributes = array('title' => $item['description']);
+
     // Set a seperate icon for the active item.
-    if ($delta == $active_display) {
+    if ($delta == $options['active display']) {
       $icon = $item['icon_active'];
       $attributes['class'][] = 'active';
     }
@@ -226,7 +204,7 @@ function media_admin_display_switch($form = array(), $options = array()) {
 
     $display_items[] = array(
       'data' => l(theme('image', array('path' => $icon, 'alt' => $item['title'])),
-        $form_location . '/' . $delta,
+        $options['form location'] . '/' . $delta,
         array(
           'html' => TRUE,
           'attributes' => $attributes,
@@ -234,7 +212,7 @@ function media_admin_display_switch($form = array(), $options = array()) {
     );
   }
 
-  $form['display_type'] = array(
+  return array(
     '#type' => 'markup',
     '#markup' => theme('item_list', array(
        'items' => $display_items,
@@ -242,8 +220,6 @@ function media_admin_display_switch($form = array(), $options = array()) {
       )
     ),
   );
-
-  return $form;
 }
 
 /**

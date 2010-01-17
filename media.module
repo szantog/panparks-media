@@ -332,6 +332,35 @@ function media_form_alter(&$form, &$form_state) {
   $form['#after_build'][] = 'media_process_form';
 }
 
+/**
+ * Implement hook_media_display_types().
+ * Different display types (list/thumbnails/etc).
+ */
+function media_media_display_types() {
+  $path = drupal_get_path('module', 'media');
+  $display_types = array();
+
+  $display_types['list'] = array(
+    'title' => t('List'),
+    'description' => t('Display as a list.'),
+    'icon' => $path . '/images/display-list.png',
+    'icon_active' => $path . '/images/display-list-active.png',
+    'callback' => 'media_admin_list',
+    'file' => drupal_get_path('module', 'media') . '/media.admin.inc',
+  );
+
+  $display_types['thumbnails'] = array(
+    'title' => t('Thumbnails'),
+    'description' => t('Display as thumbnails.'),
+    'icon' => $path . '/images/display-thumbnails.png',
+    'icon_active' => $path . '/images/display-thumbnails-active.png',
+    'callback' => 'media_admin_thumbnails',
+    'file' => drupal_get_path('module', 'media') . '/media.admin.inc',
+  );
+
+  return $display_types;
+}
+
 /* ***************************************** */
 /* API FUNCTIONS                             */
 /* ***************************************** */
@@ -379,6 +408,19 @@ function media_save($media) {
 function media_access($op) {
   return (user_access('administer media') || user_access($op . ' media'));
 }
+
+/**
+ * Get all display types.
+ */
+function media_display_types() {
+  $types = &drupal_static(__FUNCTION__);
+  if (!$types) {
+    $types = module_invoke_all('media_display_types');
+    drupal_alter('media_display_types', $types);
+  }
+  return $types;
+}
+
 
 /* ***************************************** */
 /* Callbacks                                 */
