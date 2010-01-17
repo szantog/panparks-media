@@ -98,13 +98,13 @@ function media_menu() {
    */
 
   $items['media/browser'] = array(
-    'title'            => 'Media browser',
-    'description'      => 'Media Browser for picking media and uploading new media',
-    'page callback'    => 'media_browser',
+    'title' => 'Media browser',
+    'description' => 'Media Browser for picking media and uploading new media',
+    'page callback' => 'media_browser',
     'access arguments' => array('use media browser'),
-    'weight'           => 3,
-    'type'             => MENU_CALLBACK,
-    'file'             => 'media.admin.inc',
+    'weight' => 3,
+    'type' => MENU_CALLBACK,
+    'file' => 'media.admin.inc',
   );
 
   $items['media/browser/list'] = array(
@@ -280,6 +280,11 @@ function media_theme() {
     // Tabs in the media browser.
     'media_browser_tabs' => array(
       'file' => 'media.theme.inc',
+    ),
+
+    'media_dialog_page' => array(
+      'render element' => 'page',
+      'template' => 'media-dialog-page',
     ),
   );
 }
@@ -655,9 +660,10 @@ function media_page_alter(&$page) {
   // This sucks, no way to remove the header in garland. :(
   // @todo: this needs to be a template
   if (isset($_GET['render']) && $_GET['render'] == 'media-browser') {
-    foreach (element_children($page) as $element_name) {
-      if ($element_name != 'content') {
-        unset($page[$element_name]);
+    $page['#theme'] = 'media_dialog_page';
+    foreach (element_children($page) as $key) {
+      if ($key != 'content') {
+        unset($page[$key]);
       }
     }
   }

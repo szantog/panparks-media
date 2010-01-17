@@ -716,7 +716,6 @@ function media_browser() {
       $path . '/javascript/util/json2.js',
       $path . '/javascript/util/ba-debug.min.js',
     ),
-
     'css' => array(
       '/misc/ui/ui.all.css',
       $path . '/media.browser.css'
@@ -771,7 +770,7 @@ function media_media_browser_plugins() {
   $plugins['upload'] = array(
     '#attached' => array(
       'js' => array($path . '/javascript/plugins/media.upload.js'),
-      ),
+    ),
   );
 
   $plugins['fromurl'] = array(

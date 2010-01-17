@@ -1,10 +1,12 @@
 @CHARSET "UTF-8";
-#header, .breadcrumb {
-  display:none;
+
+body.page-media-browser {
+  background-color: #fff;
 }
 
-/** This is stupid **/
-
-#wrapper, .right-corner, #squeeze, .left-corner {
-	background: none !important;
+div#media-browser-tabs {
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  border: 0;
 }
