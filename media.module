@@ -154,10 +154,12 @@ function media_menu() {
   $items['media/%media/edit'] = array(
     'title' => 'Edit',
     'page callback' => 'media_page_edit',
-    'page arguments' => array(1),
+    'page arguments'  => array(1),
+    'access arguments' => array('edit media'), //@todo: add this permission
     'weight' => 0,
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'media.admin.inc'
   );
 
   $items['media/%media/format-form'] = array(
@@ -303,26 +305,6 @@ function media_elements() {
 
   return $elements;
 }
-
-
-/**
- * Implement hook_image_default_styles().
- */
-function media_image_default_styles() {
-  $styles = array();
-  $styles['square_thumbnail'] = array(
-    'effects' => array(
-      array(
-        'name' => 'image_scale_and_crop',
-        'data' => array('width' => 180, 'height' => 180),
-        'weight' => 0,
-      ),
-    )
-  );
-
-  return $styles;
-}
-
 
 /* *************************************************** */
 /* Media forms                                         */
@@ -577,68 +559,6 @@ function media_file_list_element_process($element, $edit, $form_state, $form) {
 }
 
 /**
- *  Add the media browser jQuery files and all required libraries.
- *
- *  @param array &$element
- *    The element to add the attached libraries.
- */
-function media_attach_browser(&$element) {
-  static $attached;
-  if ($attached) {
-    return;
-  }
-  $attached = TRUE;
-  $path = drupal_get_path('module', 'media');
-
-  $element['#attached'] = isset($element['#attached']) ? $element['#attached'] : array();
-
-  // Use the currently undocumented #attached property to load js & css.
-  $element['#attached'] += array(
-    'library' => array(
-      array('system', 'vertical-tabs'),
-      array('system', 'ui'),
-      array('system', 'ui.draggable'),
-      array('system', 'ui.resizable'),
-      array('system', 'ui.dialog'),
-      array('system', 'ui.tabs'),
-    ),
-    'js' => array(
-      // Load the jQuery Plugin to launch / configure it.
-      $path . '/javascript/media.jquery.js',
-      // A debugging library.
-      $path . '/javascript/util/ba-debug.min.js',
-      // Load the custom JS to bind elements and handle fields.
-      $path . '/javascript/media.js',
-    ),
-    'css' => array(
-      $path . '/media.css',
-    ),
-  );
-
-  $settings = array(
-    'browserUrl' => url('media/browser'),
-    // @Todo: rip this down and make a callback API structure with tokens, etc
-    // this is temporary.
-  );
-  // @TODO This can technically be done w/ #attached as well, with a callback.
-  drupal_add_js(array('media' => $settings), 'setting');
-
-
-  //@todo: Re-integrate this.
-//  // @TODO: This is a hack to get the Media: YouTube js attached to the form.
-//  // I wasn't able to get the #attached property to be respected during AJAX;
-//  // it may not be possible. I suppose we can alter the form; this is just to
-//  // see if it works at all. - aaron
-//  if (module_exists('media_youtube')) {
-//    drupal_add_js(array('mediaYoutube' => array('parse_url' => url('media-youtube/parse'))), 'setting');
-//    drupal_add_js(drupal_get_path('module', 'media_youtube') . '/js/media_youtube.js');
-//  }
-
-  return;
-}
-
-
-/**
  * Menu callback; view a single piece of media.
  * @todo: this.
  */
@@ -671,52 +591,6 @@ function media_build_multiple($files, $view_mode = 'media_original', $weight = 0
   $build['media']['#sorted'] = TRUE;
 
   return $build;
-}
-
-/* *************************************************** */
-/* Media display forms                                 */
-/* *************************************************** */
-
-/**
- * Creates the file list display form
- *
- * @param unknown_type $form
- * @param unknown_type $form_state
- * @param $files
- *   array of Drupal file objects
- * @param $parameters
- *   array of current display settings
- * @return array drupal form
- *
- */
-function media_file_listing_form($form, $form_state, $files, $parameters) {
-  $form['files'] = array(
-   '#tree' => TRUE,
-   '#prefix' => '<div class ="media-display-thumbnails clearfix">',
-   '#suffix' => '</div>',
-  );
-  if (count($files)) {
-    foreach ($files as $id => $file) {
-     $form['files'][$id] = array(
-       '#type' => 'checkbox',
-       '#return_value' => $file->uri,
-       '#title' => check_plain($file->filename),
-       '#prefix' => '<div class="media-thumbnail">' . theme('media_browser_thumbnails', array('file' => $file)),
-       '#suffix' => '</div>',
-     );
-    }
-  }
-
-  // Unset the page value in options so that the pager can
-  // control which page the link refers to
-  unset($parameters['page']);
-  $form['pager'] = array('#markup' => theme('pager', array('parameters' => $parameters)));
-
-  // Build the display switch.
-  // @TODO support this correctly
-  // require_once('media.admin.inc');
-  // $form = media_admin_display_switch($form, array('active_display' => 'thumbnails'));
-  return $form;
 }
 
 /**

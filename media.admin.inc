@@ -371,27 +371,22 @@ function media_media_operations() {
 /**
  * Menu callback; presents the Media editing form, or redirects to delete confirmation.
  */
-function media_page_edit($file) {
-  drupal_set_title(t('Edit @title', array('@title' => drupal_set_title($file->filename))));
-  return drupal_get_form('media_edit', $file);
+function media_page_edit($media) {
+  drupal_set_title(t('Edit @title', array('@title' => drupal_set_title($media->filename))));
+  return drupal_get_form('media_edit', $media);
 }
 
 /**
  * Form builder: Builds the edit file form.
  */
-function media_edit($form, $form_state, $file) {
-  drupal_set_title($file->filename);
-  field_attach_form('media', $file, $form, $form_state);
+function media_edit($form, $form_state, $media) {
+  drupal_set_title($media->filename);
+  field_attach_form('media', $media, $form, $form_state);
 
   $form['#attached'] = media_admin_get_css_and_js();
 
-  $form['preview'] = array(
-    '#type' => 'markup',
-    '#markup' => theme('media_admin_thumbnail', array('file' => $file, 'style_name' => 'medium')),
-    '#prefix' => '<div class="media-preview">',
-    '#suffix' => '</div>',
-    '#weight' => -10,
-  );
+  $form['preview'] = field_view_field('media', $media, 'file', 'media_preview');
+  $form['preview']['#weight'] = -10;
 
   $form['submit'] = array(
     '#type' => 'submit',
@@ -401,7 +396,7 @@ function media_edit($form, $form_state, $file) {
 
   $form['fid'] = array(
     '#type' => 'hidden',
-    '#value' => $file->fid,
+    '#value' => $media->fid,
   );
 
   $form['#redirect'] = 'admin/content/media';
@@ -905,7 +900,7 @@ function media_add_fromurl($form, &$form_state = array()) {
 }
 
 function media_add_fromurl_validate($form, &$form_state) {
-
+  // How do we validate this?
 }
 
 /**
