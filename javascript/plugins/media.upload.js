@@ -9,7 +9,7 @@
         tabset.tabs('add', '#upload', 'Upload');
         mediaBrowser.listen('tabs.tabSelected', function (e, id) {
           if (id == 'upload') {
-            mediaBrowser.getContentArea().load(Drupal.settings.basePath + 'admin/content/media/add/files?destination=' + window.location.href +' form');
+            mediaBrowser.getContentArea().load(Drupal.settings.basePath + 'media/add/upload?destination=' + window.location.href +' form#media-add-upload');
           }
         });
       }

@@ -9,7 +9,7 @@
         tabset.tabs('add', '#fromurl', 'From URL');
         mediaBrowser.listen('tabs.tabSelected', function (e, id) {
           if (id == 'fromurl') {
-            mediaBrowser.getContentArea().load(Drupal.settings.basePath + 'admin/content/media/add/from_url?destination=' + window.location.href +' form');
+            mediaBrowser.getContentArea().load(Drupal.settings.basePath + 'media/add/from_url?destination=' + window.location.href +' form#media-add-from-url');
           }
         });
       }

@@ -37,10 +37,6 @@ function media_admin($form, $form_state) {
   }
 
   $form['#attached'] = media_attached_files();
-  $form['#attached']['js'][] = array(
-    'data' => array('mediaAddFileForm' => drupal_render(drupal_get_form('media_add_file'))),
-    'type' => 'setting',
-  );
 
   if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
     return media_multiple_delete_confirm($form, $form_state, array_filter($form_state['values']['files']));
@@ -312,10 +308,7 @@ function media_multiple_delete_confirm_submit($form, &$form_state) {
   }
 }
 
-/**
- * Display the list or thumbnails media admin display.
- */
-function media_add_file($form, $form_state) {
+function media_add_upload($form, $form_state) {
   $validators = array(
    'file_validate_extensions' => array(variable_get('media_file_extensions', '')),
    'file_validate_size' => array(parse_size(variable_get('media_max_filesize', ''))),
@@ -351,10 +344,12 @@ function media_add_file($form, $form_state) {
   return $form;
 }
 
+
+
 /**
  * Validate the generic file upload with the global media settings.
  */
-function media_add_file_validate($form, &$form_state) {
+function media_add_upload_validate($form, &$form_state) {
   // Save the file as a temporary file.
   $file = file_save_upload('upload', $form['#validators']);
   if ($file === FALSE) {
@@ -368,7 +363,7 @@ function media_add_file_validate($form, &$form_state) {
 /**
  * Upload a file.
  */
-function media_add_file_submit($form, &$form_state) {
+function media_add_upload_submit($form, &$form_state) {
   $scheme = variable_get('file_default_scheme', 'public') . '://';
   $file = $form_state['values']['upload'];
   $destination = file_stream_wrapper_uri_normalize($scheme . $file->filename);
@@ -395,6 +390,68 @@ function media_add_file_submit($form, &$form_state) {
   }
   $form_state['redirect'] = 'admin/content/media';
 }
+
+
+function media_add_from_url($form, &$form_state = array()) {
+  $form['url'] = array(
+    '#type' => 'textfield',
+    '#title' => 'URL',
+    '#description' => 'Input any url which Drupal can handle',
+  );
+
+  $form['url'] = array(
+    '#type' => 'textfield',
+    '#title' => 'URL',
+    '#description' => 'Input any url which Drupal can handle',
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+
+  return $form;
+}
+
+function media_add_from_url_validate($form, &$form_state) {
+  // How do we validate this?
+}
+
+/**
+ * Upload a file from a URL
+ */
+function media_add_from_url_submit($form, &$form_state) {
+  $url = $form_state['values']['url'];
+  $scheme = variable_get('file_default_scheme', 'public') . '://';
+  $destination = file_stream_wrapper_uri_normalize($scheme . basename($url));
+
+  $defaults = array (
+    'display' => TRUE,
+  );
+
+  copy($url, $destination);
+
+  $file = file_uri_to_object($destination);
+  file_save($file);
+
+  if ($file) {
+    $form_state['redirect'] = 'media/' . $file->fid . '/edit';
+    field_attach_submit('media', $file, $form, $form_state);
+    // Make a copy of the file object to use as the media object
+    // (file is a field of media and the base table). This is weird.
+    $media = clone($file);
+    $file->file = array();
+    $file->file[LANGUAGE_NONE] = array();
+    $file->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
+    $file->is_new = TRUE;
+    field_attach_insert('media', $file);
+  }
+  else {
+    drupal_set_message(t('An error occurred and no file was saved.'), 'error');
+  }
+  $form_state['redirect'] = 'admin/content/media';
+}
+
 
 /**
  * Display all media types.

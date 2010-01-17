@@ -80,25 +80,29 @@ function media_menu() {
    * @var unknown_type
    */
 
-  $items['media/add/files'] = array(
+  $items['media/add/upload'] = array(
     'title' => 'Upload new file',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('media_add_file'),
+    'page arguments' => array('media_add_upload'),
     'access arguments' => array('administer media'),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'media.admin.inc',
     'weight' => -1,
   );
 
+  $items['admin/content/media/add/upload'] = $items['media/add/upload'];
+
   $items['media/add/from_url'] = array(
     'title' => 'Add media from URL',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('media_add_fromurl'),
+    'page arguments' => array('media_add_from_url'),
     'access arguments' => array('administer media'),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'media.admin.inc',
     'weight' => -1,
   );
+
+  $items['admin/content/media/add/from_url'] = $items['media/add/from_url'];
 
   $items['media/browser'] = array(
     'title' => 'Media browser',
