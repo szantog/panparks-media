@@ -103,13 +103,11 @@ function media_type_configure_formatters($machine_name, $view_modes_to_formatter
   if (!$instance) {
     throw new Exception('Unable to set formatter preferences for '. $machine_name);
   }
-  dd($instance);
   foreach ($instance['display'] as $view_mode => $display) {
     if (isset($view_modes_to_formatters[$view_mode])) {
       $instance['display'][$view_mode]['type'] = $view_modes_to_formatters[$view_mode];
     }
   }
-  dd($instance);
   field_update_instance($instance);
 }
 
