@@ -4,6 +4,7 @@
   Drupal.media.browser.plugin.library = function(mediaBrowser, options) {
     
     return {
+      mediaFiles: [],
       init: function() {
         tabset = mediaBrowser.getTabset();
         tabset.tabs('add', '#library', 'Library');
@@ -49,7 +50,7 @@
         var that = this;
         //this.browser.html('');
         
-        for (m in this.mediaFiles) {
+        for (var m in this.mediaFiles) {
           mediaFile = this.mediaFiles[m];
 
           var listItem = jQuery('<li></li>').appendTo(this.browser)
