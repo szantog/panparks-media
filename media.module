@@ -306,6 +306,25 @@ function media_elements() {
   return $elements;
 }
 
+
+/**
+ * Implement hook_image_default_styles().
+ */
+function media_image_default_styles() {
+  $styles = array();
+  $styles['square_thumbnail'] = array(
+    'effects' => array(
+      array(
+        'name' => 'image_scale_and_crop',
+        'data' => array('width' => 180, 'height' => 180),
+        'weight' => 0,
+      ),
+    )
+  );
+  return $styles;
+}
+
+
 /* *************************************************** */
 /* Media forms                                         */
 /* *************************************************** */
