@@ -20,6 +20,7 @@ function media_media_plugin() {
       array('query' => array('render' => 'media-browser'))),
   // @Todo: rip this down and make a callback API structure with tokens, etc
   // this is temporary.
+    'blacklist' => array('src','fid'),
   );
   drupal_add_js(array('media' => $settings), 'setting');
   // Plugin definition

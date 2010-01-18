@@ -80,16 +80,23 @@
     },
     
     createTag: function(mediaObj) {
-        var imgNode = $("img",mediaObj);
+        imgNode = $("img",mediaObj);
+        // Collect all attribs to be stashed into tagContent
+        attribs = {};
+        imgAttribList = imgNode[0].attributes;
+        for(i=0; i<imgAttribList.length; i++) {
+          attribs[imgAttribList[i].nodeName] = imgAttribList[i].nodeValue; 
+        }
+        // Remove elements from attribs using the blacklist
+        for(var blackList in Drupal.settings.media.blacklist) {
+          delete attribs[Drupal.settings.media.blacklist[blackList]];
+        }
         tagContent = {
           "type": 'media',
           //@todo: This will be selected from the format form
           "view_mode": 'media_original',
           "fid" : imgNode.attr('fid'),
-          "attributes": {
-      	  "width" : imgNode.attr('width'),
-      	  "height" : imgNode.attr('height')
-          }
+          "attributes": attribs
         };
         return '[[' + JSON.stringify(tagContent) + ']]';
       }
