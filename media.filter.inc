@@ -90,8 +90,8 @@ function media_process_form(&$form, $form_state = array()) {
         drupal_add_js($settings, 'setting');
         $libraries_attached = TRUE;
       }
-      if(isset($form[$item]['#default_value'])) {
-        $text = $form[$item]['#default_value'];
+      if(isset($form[$item]['#value'])) {
+        $text = $form[$item]['#value'];
         $tagmap = _media_generate_tagMap($text);
         if(!empty($tagmap)) {
           drupal_add_js(array('tagmap' => array_unique($tagmap)), 'setting');
