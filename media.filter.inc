@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @file
+ * Functions related to the WYSIWYG editor.
+ */
 
 /**
  * Implementation of hook_wysiwyg_include_directory()
@@ -71,8 +75,21 @@ function _media_markup($match) {
  */
 
 function media_process_form(&$form, $form_state = array()) {
+  static $libraries_attached;
+
   foreach(element_children($form) as $item) {
     if(isset($form[$item]['#text_format'])) {
+      if (!$libraries_attached) {
+        $form['#attached']['library'][] = array('dialog', 'dialog');
+        $attached = TRUE;
+        $settings = array(
+          'media' => array(
+            'formatFormUrl' => url('media/-media-/format-form/nojs/'),
+          ),
+        );
+        drupal_add_js($settings, 'setting');
+        $libraries_attached = TRUE;
+      }
       if(isset($form[$item]['#default_value'])) {
         $text = $form[$item]['#default_value'];
         $tagmap = _media_generate_tagMap($text);
@@ -86,9 +103,6 @@ function media_process_form(&$form, $form_state = array()) {
     media_process_form($form[$item]);
   }
   return $form;
-}
-
-function media_wysiwyg_attach_alter(&$element) {
 }
 
 /**
@@ -125,3 +139,83 @@ function _media_generate_tagMap($text) {
   }
   return $tagmap;
 }
+
+/**
+ *
+ * @param unknown_type $form
+ * @param unknown_type $media
+ * @return unknown_type
+ */
+function media_format_form($form, $form_state, $media) {
+  $form = array();
+  $options = array();
+  foreach (media_field_view_modes('media') as $key => $mode) {
+    //@TODO: Get the file formatter, and display that here too.
+    $options[$key] = $mode['label'];
+    $formats[$key] = drupal_render(field_view_field('media', $media, 'file', $key));
+  }
+
+  // This totally doesn't work because the dialog API doesn't support it.
+  $settings = array();
+  $settings['media'] = array('formatFormFormats' => $formats);
+  drupal_add_js($settings, 'setting');
+
+  $path = drupal_get_path('module', 'media');
+  $form['#attached']['js'][] = $path . '/javascript/media-format-form.js';
+  drupal_add_js($path . '/javascript/media-format-form.js');
+
+  $form['preview'] = array(
+    '#type' => 'markup',
+    '#title' => basename($media->uri),
+    '#markup' => drupal_render(field_view_field('media', $media, 'file', 'media_preview'))
+  );
+
+  $form['format'] = array(
+    '#type' => 'radios',
+    '#title' => 'Format',
+    '#options' => $options,
+    '#default_value' => 'media_original',
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'select',
+    // This currently does nothing, because we really don't need a form submit here.
+//    '#ajax' => array(
+//      'callback' => 'media_format_select',
+//    ),
+  );
+
+  return $form;
+}
+
+function media_format_form_ajax($media, $js) {
+  if (!$media) {
+    drupal_set_message('Error getting format form, media not provided', 'error');
+    return;
+  }
+
+  if ($js) {
+    dialog_display(TRUE);
+    // Could be jQuery dialog options.
+    $options = array();
+    $content = drupal_get_form('media_format_form', $media);
+    $output[] = dialog_command_display($content, array('title' => 'Choose a format'), $options);
+    ajax_render($output);
+  }
+  else {
+    drupal_set_message('You must have Javascript enable to use this module');
+    drupal_goto('media/you/need/javascript');
+  }
+}
+
+
+/**
+ * Creates a Drupal AJAX command to open the modal with a loading animation.
+ */
+function media_command_format_select() {
+  return array(
+    'command' => 'media_format_select',
+  );
+}
+

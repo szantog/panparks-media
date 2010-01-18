@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 /**
  * @file
@@ -167,19 +168,19 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
   /*
   $uri = $form_state['values']['media_files'];
   $file_extension = pathinfo($uri, PATHINFO_EXTENSION);
-  
+
   // Get the file creator for this item.
   $file_creator = media_get_registered_modules(array($registration_id));
-  
+
   // Get the formaters for this node type.
   $formatters = media_active_fields_for_node_type($node_type, 'formatter');
-  
+
   // Get the registrations.
   $registrations = media_get_registered_modules($formatters[$field]);
-  
+
   // Remove any non-applying registrations.
   $registrations = media_get_applicable_formatters($registrations, $file_extension);
-  
+
   // Get all the formatting forms.
   $formatter_options = array();
   $forms = array();

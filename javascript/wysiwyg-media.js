@@ -1,3 +1,5 @@
+Drupal.media = Drupal.media || {};
+
 (function ($) {
   
   Drupal.wysiwyg.plugins.media = {
@@ -8,19 +10,34 @@
       if (data.format == 'html') {
         $().mediaBrowser( function (mediaFiles) {
           var mediaFile = mediaFiles[0];
-          //@todo: turn this into a non-anonymous bind
-          Drupal.media.formatForm.launch(mediaFile, function(formattedMedia) {
-            Drupal.wysiwyg.plugins.media.insertMediaFile(mediaFile, formattedMedia, Drupal.wysiwyg.instances[instanceId]);
+          debug.debug(instanceId);
+          // This is totally not the indended solution to this.  A very
+          // temporary hack to see if the dialog API is a good match
+          // and if so, I don't know how else to integrate it :(
+          element_settings = {};
+          element_settings.url = Drupal.settings.media.formatFormUrl.replace('-media-', mediaFile.fid);
+          element_settings.event = 'go';
+          var launcher = $('<div id ="wysiwyg-launcher"></div>');
+          Drupal.ajax['wysiwyg-launcher'] = new Drupal.ajax('wysiwyg-launcher', launcher, element_settings);
+          Drupal.ajax.prototype.commands.dialog_loading();
+          Drupal.dialog.bind('mediaSelected', function(event, formattedMedia) {
+            if (formattedMedia) {
+              debug.debug(formattedMedia);
+              Drupal.wysiwyg.plugins.media.insertMediaFile(mediaFile, formattedMedia.type, formattedMedia.html, Drupal.wysiwyg.instances[instanceId]);
+            }
           });
+          launcher.trigger('go');
+          return;
         });
       }    
     },
     
-    insertMediaFile: function(mediaFile, formattedMedia, wysiwygInstance) {
+    insertMediaFile: function(mediaFile, viewMode, formattedMedia, wysiwygInstance) {
       // Hack to allow for use of .html()
       var embeddedMedia = $('<div>' + formattedMedia + '</div>');
       // add the fid attribute to the image
       $('img', embeddedMedia).attr('fid', mediaFile.fid);
+      $('img', embeddedMedia).attr('view_mode', viewMode);
       tagContent = Drupal.wysiwyg.plugins.media.createTag(embeddedMedia);
       // When tagmap is defined such as node/edit, block/configure
       if(Drupal.settings.tagmap) {
@@ -31,7 +48,7 @@
         Drupal.settings.tagmap = { };
         Drupal.settings.tagmap[tagContent] = Drupal.wysiwyg.plugins.media.addWrapper(embeddedMedia.html());
       }
-      wysiwygInstance.insert(Drupal.wysiwyg.plugins.media.addWrapper(embeddedMedia.html()));
+      wysiwygInstance.insert(Drupal.wysiwyg.plugins.media.addWrapper(embeddedMedia.html()) + "&nbsp;");
     },
     
     /**
@@ -94,45 +111,11 @@
         tagContent = {
           "type": 'media',
           //@todo: This will be selected from the format form
-          "view_mode": 'media_original',
+          "view_mode": imgNode.attr('view_mode'),
           "fid" : imgNode.attr('fid'),
           "attributes": attribs
         };
         return '[[' + JSON.stringify(tagContent) + ']]';
       }
   };
-  
-  Drupal.media = Drupal.media || {};
-  Drupal.media.formatForm = {
-    launch: function(mediaFile, callback) {
-    
-      // Really, we should be doing what's happening below.
-      // For now, we're just retutning the preview
-    
-      callback(mediaFile.preview);
-      return;
-    
-      $('<div id="format_form"></div>')
-        .load(Drupal.settings.basePath + 'media/' + mediaFile.fid + '/format-form')
-        .dialog({
-          buttons: { 
-            "Ok": function() {
-              callback(mediaFile.preview);
-            }
-          },
-          modal: true,
-          draggable: true,
-          resizable: true,
-          minWidth: 600,
-          width: 800,
-          height:500,
-          position: 'top',
-          overlay: {
-            backgroundColor: '#000000',
-            opacity: 0.4
-          }
-        });
-    }
-  }
-
 })(jQuery);
