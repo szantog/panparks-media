@@ -49,6 +49,9 @@
       render: function() {
         var that = this;
         //this.browser.html('');
+        if(mediaFiles.length < 1) {
+          return;
+        }
         
         for (var m in this.mediaFiles) {
           mediaFile = this.mediaFiles[m];
