@@ -391,14 +391,10 @@ function media_add_upload_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/content/media';
 }
 
-
+/**
+ *  Callback for /media/add/upload and /admin/content/media/add/upload.
+ */
 function media_add_from_url($form, &$form_state = array()) {
-  $form['url'] = array(
-    '#type' => 'textfield',
-    '#title' => 'URL',
-    '#description' => 'Input any url which Drupal can handle',
-  );
-
   $form['url'] = array(
     '#type' => 'textfield',
     '#title' => 'URL',
@@ -418,7 +414,9 @@ function media_add_from_url_validate($form, &$form_state) {
 }
 
 /**
- * Upload a file from a URL
+ *  Upload a file from a URL.
+ *
+ *  This will copy a file from a remote location and store it locally.
  */
 function media_add_from_url_submit($form, &$form_state) {
   $url = $form_state['values']['url'];

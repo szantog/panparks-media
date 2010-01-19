@@ -187,12 +187,8 @@ abstract class MediaReadOnlyStreamWrapper implements MediaReadOnlyStreamWrapperI
    *    or FALSE if the $url is ill-formed.
    */
   protected function _parse_url($url) {
-    $path = parse_url($url, PHP_URL_HOST) . parse_url($url, PHP_URL_PATH);
-    if ($path === FALSE) {
-      // Non-recoverable error when parsing the path.
-      return FALSE;
-    }
-    $parts = explode('/',  $path);
+    $path = explode('://', $url);
+    $parts = explode('/',  $path[1]);
     $params = array();
     $count = 0;
     $total = count($parts);
@@ -480,6 +476,10 @@ abstract class MediaReadOnlyStreamWrapper implements MediaReadOnlyStreamWrapperI
    */
   public function dir_closedir() {
     return FALSE;
+  }
+
+  public function getDirectoryPath() {
+    return '';
   }
 
 }
