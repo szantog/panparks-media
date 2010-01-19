@@ -502,20 +502,6 @@ if (!function_exists('file_uri_to_object')) {
 }
 
 /**
- * Implement hook_ajax_render_ALTER
- */
-function media_ajax_render_alter(&$commands) {
-  // This is probably a hack
-  // But having a lot of trouble passing settings
-  // on the format-form (see media.filter.inc.
-  foreach ($commands as &$command) {
-    if ($command['command'] == 'settings') {
-      $command['merge'] = TRUE;
-    }
-  }
-}
-
-/**
  * Returns the files attached to administration pages.
  */
 function media_attached_files() {
@@ -538,7 +524,7 @@ function media_library() {
     'website' => 'http://drupal.org/project/media',
     'version' => '7.x',
     'js' => array(
-      $path . '/javascript/media.core.js' => array('weight' => JS_DEFAULT - 5),
+      $path . '/javascript/media.core.js' => array('weight' => JS_LIBRARY - 5),
       $path . '/javascript/util/json2.js' => array('weight' => JS_LIBRARY),
       $path . '/javascript/util/ba-debug.min.js' => array('weight' => JS_LIBRARY),
     ),
@@ -549,7 +535,7 @@ function media_library() {
     'website' => 'http://drupal.org/project/media',
     'version' => '7.x',
     'js' => array(
-      $path . '/javascript/media.popups.js' => array('weight' => JS_LIBRARY),
+      $path . '/javascript/media.popups.js' => array('weight' => JS_DEFAULT),
     ),
     'dependencies' => array(
       array('media', 'media_base'),
@@ -561,7 +547,10 @@ function media_library() {
   return $libraries;
 }
 
-
+/**
+ * Theme callback used to identify when we are in a popup dialog
+ * @return unknown_type
+ */
 function media_dialog_get_theme_name() {
   // Set to empty to get the default theme.
   return variable_get('media_dialog_get_theme_name', 'seven');

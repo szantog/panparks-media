@@ -75,21 +75,8 @@ function _media_markup($match) {
  */
 
 function media_process_form(&$form, $form_state = array()) {
-  static $libraries_attached;
-
   foreach(element_children($form) as $item) {
     if(isset($form[$item]['#text_format'])) {
-      if (!$libraries_attached) {
-        $form['#attached']['library'][] = array('dialog', 'dialog');
-        $attached = TRUE;
-        $settings = array(
-          'media' => array(
-            'formatFormUrl' => url('media/-media-/format-form/nojs/'),
-          ),
-        );
-        drupal_add_js($settings, 'setting');
-        $libraries_attached = TRUE;
-      }
       if(isset($form[$item]['#value'])) {
         $text = $form[$item]['#value'];
         $tagmap = _media_generate_tagMap($text);
@@ -180,34 +167,3 @@ function media_format_form($form, $form_state, $media) {
 
   return $form;
 }
-
-function media_format_form_ajax($media, $js) {
-  if (!$media) {
-    drupal_set_message('Error getting format form, media not provided', 'error');
-    return;
-  }
-
-  if ($js) {
-    dialog_display(TRUE);
-    // Could be jQuery dialog options.
-    $options = array();
-    $content = drupal_get_form('media_format_form', $media);
-    $output[] = dialog_command_display($content, array('title' => 'Choose a format'), $options);
-    ajax_render($output);
-  }
-  else {
-    drupal_set_message('You must have Javascript enable to use this module');
-    drupal_goto('media/you/need/javascript');
-  }
-}
-
-
-/**
- * Creates a Drupal AJAX command to open the modal with a loading animation.
- */
-function media_command_format_select() {
-  return array(
-    'command' => 'media_format_select',
-  );
-}
-

@@ -5,7 +5,7 @@
  */
 
 function media_media_plugin() {
-
+  include_once drupal_get_path('module', 'media') . '/media.browser.inc';
   media_include_browser_js();
 
   // Plugin definition
