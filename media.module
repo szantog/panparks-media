@@ -112,6 +112,7 @@ function media_menu() {
     'access arguments' => array('view'),
     'type' => MENU_CALLBACK,
     'file' => 'media.browser.inc',
+    'theme callback' => 'media_dialog_get_theme_name',
   );
 
   /**
@@ -126,7 +127,6 @@ function media_menu() {
     'access arguments' => array('view'),
     'type' => MENU_CALLBACK,
     'file' => 'media.browser.inc',
-    'theme callback' => 'media_dialog_get_theme_name',
   );
 
   $items['media/browser/library'] = array(
