@@ -1,30 +1,13 @@
-<?php 
+<?php
 
 /**
  * Implementation of hook_INCLUDE_plugin()
  */
 
 function media_media_plugin() {
-  // Not elegant to include js and css files here, but till we figure out
-  // elegant way, it atleast assures that they are included only when the
-  // plugin is included and not on all form_alter, page_alter, hook_init.
-  drupal_add_js(drupal_get_path('module','media').'/javascript/util/json2.js');
-  drupal_add_js(drupal_get_path('module','media').'/javascript/util/ba-debug.min.js');
-  drupal_add_js(drupal_get_path('module','media').'/javascript/media.jquery.js');
-  drupal_add_library('system','ui');
-  drupal_add_library('system','ui.dialog');
-  drupal_add_css(drupal_get_path('module','media').'/media-browser.css');
-  // copied directly from media module to get Drupal.settings.media object
-  $settings = array(
-    'browserUrl' => url('media/browser',
-      array('query' => array('render' => 'media-browser'))),
-  // @Todo: rip this down and make a callback API structure with tokens, etc
-  // this is temporary.
-  // Adding src to blacklist; fid and view_mode we capture outside attribs so adding
-  // them too to the blacklist.
-    'blacklist' => array('src','fid','view_mode'),
-  );
-  drupal_add_js(array('media' => $settings), 'setting');
+
+  media_include_browser_js();
+
   // Plugin definition
   $plugins['media'] = array(
     'title' => t('Media Browser'),
@@ -36,6 +19,6 @@ function media_media_plugin() {
     'js file' => 'wysiwyg-media.js',
     'settings' => array(),
    );
-   
+
    return $plugins;
 }

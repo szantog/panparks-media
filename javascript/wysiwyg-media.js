@@ -6,32 +6,35 @@ Drupal.media = Drupal.media || {};
     /**
      * Execute the button.
      */
-    invoke: function(data, settings, instanceId) {
+    invoke: function (data, settings, instanceId) {
       if (data.format == 'html') {
-        $().mediaBrowser( function (mediaFiles) {
-          var mediaFile = mediaFiles[0];
-          debug.debug(instanceId);
-          // This is totally not the indended solution to this.  A very
-          // temporary hack to see if the dialog API is a good match
-          // and if so, I don't know how else to integrate it :(
-          element_settings = {};
-          element_settings.url = Drupal.settings.media.formatFormUrl.replace('-media-', mediaFile.fid);
-          element_settings.event = 'go';
-          var launcher = $('<div id ="wysiwyg-launcher"></div>');
-          Drupal.ajax['wysiwyg-launcher'] = new Drupal.ajax('wysiwyg-launcher', launcher, element_settings);
-          Drupal.ajax.prototype.commands.dialog_loading();
-          Drupal.dialog.bind('mediaSelected', function(event, formattedMedia) {
-            if (formattedMedia) {
-              debug.debug(formattedMedia);
-              Drupal.wysiwyg.plugins.media.insertMediaFile(mediaFile, formattedMedia.type, formattedMedia.html, Drupal.wysiwyg.instances[instanceId]);
-            }
-          });
-          launcher.trigger('go');
-          return;
+        Drupal.media.popups.mediaBrowser(function (mediaFiles) {
+          Drupal.wysiwyg.plugins.media.mediaBrowserOnSelect(mediaFiles, instanceId);
         });
       }    
+    },    
+
+    /**
+     * Respond to the mediaBrowser's onSelect event.
+     */
+    mediaBrowserOnSelect: function (mediaFiles, instanceId) {
+      var mediaFile = mediaFiles[0];
+      var options = {};
+      Drupal.media.popups.mediaStyleSelector(mediaFile, function (formattedMedia) {
+        Drupal.wysiwyg.plugins.media.insertMediaFile(mediaFile, formattedMedia.type, formattedMedia.html, Drupal.wysiwyg.instances[instanceId]);
+      }, options);
+      
+      return;
     },
-    
+
+    styleChooserOnLoad: function (e) {
+      var options = e.data;
+      debug.debug("Loaded the stylechooser");
+      debug.debug(options);
+      // $("reference to stylechooser body").load("media format form");
+      // bind to the submit button
+    },
+
     insertMediaFile: function(mediaFile, viewMode, formattedMedia, wysiwygInstance) {
       // Hack to allow for use of .html()
       var embeddedMedia = $('<div>' + formattedMedia + '</div>');
@@ -98,7 +101,7 @@ Drupal.media = Drupal.media || {};
     },
     
     createTag: function(mediaObj) {
-        imgNode = $("img",mediaObj);
+        imgNode = $("img", mediaObj);
         // Collect all attribs to be stashed into tagContent
         attribs = {};
         imgAttribList = imgNode[0].attributes;

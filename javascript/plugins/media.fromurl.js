@@ -3,7 +3,6 @@
   
   Drupal.media.browser.plugin.fromurl = function(mediaBrowser, options) {
     return {
-      /* Abstract */
       init: function() {
         tabset = mediaBrowser.getTabset();
         tabset.tabs('add', '#fromurl', 'From URL');

@@ -114,3 +114,24 @@ function media_browser_list($conditions = array()) {
   print drupal_json_encode($medias);
   die();
 }
+
+function media_include_browser_js() {
+  drupal_add_library('media', 'media_browser');
+
+  drupal_add_library('system','ui');
+  drupal_add_library('system','ui.dialog');
+  // copied directly from media module to get Drupal.settings.media object
+  $settings = array(
+    'browserUrl' => url('media/browser',
+      array('query' => array('render' => 'media-popup'))),
+    'styleSelectorUrl' => url('media/-media_id-/format-form',
+      array('query' => array('render' => 'media-popup'))),
+  // @Todo: rip this down and make a callback API structure with tokens, etc
+  // this is temporary.
+  // Adding src to blacklist; fid and view_mode we capture outside attribs so adding
+  // them too to the blacklist.
+    'blacklist' => array('src','fid','view_mode'),
+  );
+
+  drupal_add_js(array('media' => $settings), 'setting');
+}

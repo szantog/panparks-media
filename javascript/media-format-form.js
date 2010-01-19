@@ -1,20 +1,20 @@
-Drupal.media = Drupal.media || {};
-
+namespace('Drupal.media');
+Drupal.media.mediaFormatSelected = {};
 (function ($) {
-
 Drupal.behaviors.mediaFormatForm = {
   attach: function (context, settings) {
-    // Create the jQuery UI dialog box to handle all dialog events.
-    $("#media-format-form").bind('submit', Drupal.media.mediaFormatSelected);
+    //Setup the value to start with.
+    
+    $("input[name='format']", context).change(Drupal.media.mediaFormatSelected);
+    $("input[name='format']:checked").trigger('change');
   }
 };
 
 Drupal.media.mediaFormatSelected = function (e) {
-  var formatType = $("input[@name='format']:checked", this).val();
+  var formatType = $(this).val();
   var formattedMedia = {type: formatType, html: Drupal.settings.media.formatFormFormats[formatType]};
-  $(this).parents('#dialog').trigger('mediaSelected', [formattedMedia]);
-  $(this).parents('#dialog').dialog('close');
-  return false;
+  debug.debug(formattedMedia);
+  Drupal.media.formattedMedia = formattedMedia;
 }
 
 })(jQuery);

@@ -160,9 +160,10 @@ function media_format_form($form, $form_state, $media) {
   $settings['media'] = array('formatFormFormats' => $formats);
   drupal_add_js($settings, 'setting');
 
+  drupal_add_library('media', 'media_base');
+
   $path = drupal_get_path('module', 'media');
   $form['#attached']['js'][] = $path . '/javascript/media-format-form.js';
-  drupal_add_js($path . '/javascript/media-format-form.js');
 
   $form['preview'] = array(
     '#type' => 'markup',
@@ -175,15 +176,6 @@ function media_format_form($form, $form_state, $media) {
     '#title' => 'Format',
     '#options' => $options,
     '#default_value' => 'media_original',
-  );
-
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => 'select',
-    // This currently does nothing, because we really don't need a form submit here.
-//    '#ajax' => array(
-//      'callback' => 'media_format_select',
-//    ),
   );
 
   return $form;

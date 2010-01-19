@@ -16,4 +16,3 @@ files[] = test/media.types.test
 dependencies[] = file
 dependencies[] = image
 dependencies[] = file_styles
-dependencies[] = dialog
