@@ -164,7 +164,7 @@ function media_format_form($form, $form_state, $media) {
 
   $form['format'] = array(
     '#type' => 'radios',
-    '#title' => 'Format',
+    '#title' => t('Format'),
     '#options' => $options,
     '#default_value' => 'media_original',
   );
