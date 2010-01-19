@@ -57,27 +57,28 @@ Drupal.media = Drupal.media || {};
      * that needs to show in the editor.
      * 
      */
-    attach: function(content, settings, instanceId) {    
+    attach: function(content, settings, instanceId) {
       matches = content.match(/\[\[.*?\]\]/g);
-  	tagmap = Drupal.settings.tagmap;
-  	  if(matches) {
-  	    for (i=0; i< matches.length; i++) {
-  		  for (var tagContent in tagmap ) {
-  		    if (tagContent === matches[i]) {
-  			  // This probably needs some work...
-  			  // We need to somehow get the fid propogated here.
-  			  // We really want to
-  			  matches[i] = matches[i].replace('[[','');
-  			  matches[i] = matches[i].replace(']]','');
-  			  mediaObj = JSON.parse(matches[i]);
-  			  imgMarkup = $(tagmap[tagContent]);
-  			  $('img',imgMarkup).attr('fid',mediaObj.fid);
-  			  content = content.replace(tagContent,this.addWrapper(imgMarkup.html()));
-  			}
-  		  }
-  	    }
-  	  }
-  	  return content;
+      tagmap = Drupal.settings.tagmap;
+      if(matches) {
+        for (i=0; i<matches.length; i++) {
+          for (var tagContent in tagmap ) {
+            if (tagContent === matches[i]) {
+              // This probably needs some work...
+              // We need to somehow get the fid propogated here.
+              // We really want to
+              matches[i] = matches[i].replace('[[','');
+              matches[i] = matches[i].replace(']]','');
+              mediaObj = JSON.parse(matches[i]);
+              imgMarkup = $(tagmap[tagContent]);
+              $('img',imgMarkup).attr('fid',mediaObj.fid);
+              $('img',imgMarkup).attr('view_mode',mediaObj.view_mode);
+              content = content.replace(tagContent,this.addWrapper(imgMarkup.html()));
+            }
+          }
+        }
+      }
+      return content;
     },
   
     /**
@@ -85,8 +86,8 @@ Drupal.media = Drupal.media || {};
      */
     detach: function(content, settings, instanceId) {
       var content = $('<div>' + content + '</div>');
-      $('div.media-embedded',content).each(function (elem){
-    	tagContent = Drupal.wysiwyg.plugins.media.createTag(this);
+      $('div.media-embedded',content).each(function (elem) {
+        tagContent = Drupal.wysiwyg.plugins.media.createTag(this);
         $(this).replaceWith(tagContent);
       });
       return content.html();

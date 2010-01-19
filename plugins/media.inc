@@ -20,7 +20,9 @@ function media_media_plugin() {
       array('query' => array('render' => 'media-browser'))),
   // @Todo: rip this down and make a callback API structure with tokens, etc
   // this is temporary.
-    'blacklist' => array('src','fid'),
+  // Adding src to blacklist; fid and view_mode we capture outside attribs so adding
+  // them too to the blacklist.
+    'blacklist' => array('src','fid','view_mode'),
   );
   drupal_add_js(array('media' => $settings), 'setting');
   // Plugin definition
@@ -31,9 +33,9 @@ function media_media_plugin() {
     'icon file' => 'wysiwyg-media.gif',
     'icon title' => t('Add media'),
     'js path' => drupal_get_path('module','media').'/javascript/',
-    'js file' => 'wysiwyg-media.js',  
+    'js file' => 'wysiwyg-media.js',
     'settings' => array(),
-   );  
+   );
    
    return $plugins;
 }
