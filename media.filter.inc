@@ -77,17 +77,21 @@ function _media_markup($match) {
 function media_process_form(&$form, $form_state = array()) {
   foreach(element_children($form) as $item) {
     if(isset($form[$item]['#text_format'])) {
+      // Make sure it gets created regardless of if we use it
+      if (!isset($tagmap)) {
+        $tagmap = array();
+      }
       if(isset($form[$item]['#value'])) {
         $text = $form[$item]['#value'];
         $tagmap = _media_generate_tagMap($text);
-        if(!empty($tagmap)) {
-          drupal_add_js(array('tagmap' => array_unique($tagmap)), 'setting');
-         }
       }
       // Continue if we found our text_format, so that it doesn't recurse.
       continue;
     }
     media_process_form($form[$item]);
+  }
+  if (isset($tagmap)) {
+    drupal_add_js(array('tagmap' => array_unique($tagmap)), 'setting');
   }
   return $form;
 }

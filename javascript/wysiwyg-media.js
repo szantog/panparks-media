@@ -27,31 +27,59 @@ Drupal.media = Drupal.media || {};
       return;
     },
 
-    styleChooserOnLoad: function (e) {
-      var options = e.data;
-      debug.debug("Loaded the stylechooser");
-      debug.debug(options);
-      // $("reference to stylechooser body").load("media format form");
-      // bind to the submit button
-    },
-
     insertMediaFile: function(mediaFile, viewMode, formattedMedia, wysiwygInstance) {
-      // Hack to allow for use of .html()
-      var embeddedMedia = $('<div>' + formattedMedia + '</div>');
-      // add the fid attribute to the image
-      $('img', embeddedMedia).attr('fid', mediaFile.fid);
-      $('img', embeddedMedia).attr('view_mode', viewMode);
-      tagContent = Drupal.wysiwyg.plugins.media.createTag(embeddedMedia);
-      // When tagmap is defined such as node/edit, block/configure
-      if(Drupal.settings.tagmap) {
-        Drupal.settings.tagmap[tagContent] = Drupal.wysiwyg.plugins.media.addWrapper(embeddedMedia.html());
-      }
-      // When tagmap is not defined such as node/add/, block/add
-      else {
+      
+      if(typeof Drupal.settings.tagmap == 'undefined') {
         Drupal.settings.tagmap = { };
-        Drupal.settings.tagmap[tagContent] = Drupal.wysiwyg.plugins.media.addWrapper(embeddedMedia.html());
       }
-      wysiwygInstance.insert(Drupal.wysiwyg.plugins.media.addWrapper(embeddedMedia.html()) + "&nbsp;");
+      // @TODO: the folks @ ckeditor have told us that there is no way
+      // to reliably add wrapper divs via normal HTML.
+      // There is some method of adding a "fake element"
+      // But until then, we're just going to embed to img.
+      // This is pretty hacked for now.
+      // 
+      var imgElement = $(this.stripDivs(formattedMedia));
+      this.addImgeAttributes(imgElement, mediaFile.fid, viewMode);
+      var toInsert = this.outerHTML(imgElement);
+      // Create an inline tag
+      var inlineTag = Drupal.wysiwyg.plugins.media.createTag(imgElement);
+      // Add it to the tag map in case the user switches input formats
+      Drupal.settings.tagmap[inlineTag] = toInsert;
+      
+      wysiwygInstance.insert(toInsert + "&nbsp;");
+    },
+    
+    /**
+     * Gets the HTML content of an element
+     * 
+     * @param jQuery element
+     */
+    outerHTML: function(element) {
+      return $('<div>').append( element.eq(0).clone() ).html();
+    },
+    
+    addImgeAttributes: function(imgElement, fid, view_mode) {
+      imgElement.attr('fid', fid);
+      imgElement.attr('view_mode', view_mode);
+      // Class so we can find this image later.
+      imgElement.addClass('media-image');
+    },
+    
+    /**
+     * Due to problems handling wrapping divs in ckeditor, this is needed.
+     * 
+     * Going forward, if we don't care about supporting other editors
+     * we can use the fakeobjects plugin to ckeditor to provide cleaner
+     * transparency between what Drupal will output <div class="field..."><img></div>
+     * instead of just <img>, for now though, we're going to remove all the stuff surrounding the images.
+     * 
+     * @param String formattedMedia
+     *  Element containing the image
+     *  
+     * @return HTML of <img> tag inside formattedMedia
+     */
+    stripDivs: function(formattedMedia) {
+      return $('<div>').append( $('img', $(formattedMedia)).eq(0).clone() ).html();
     },
     
     /**
@@ -61,23 +89,30 @@ Drupal.media = Drupal.media || {};
      * 
      */
     attach: function(content, settings, instanceId) {
-      matches = content.match(/\[\[.*?\]\]/g);
-      tagmap = Drupal.settings.tagmap;
+      var matches = content.match(/\[\[.*?\]\]/g);
+      var tagmap = Drupal.settings.tagmap;
       if(matches) {
-        for (i=0; i<matches.length; i++) {
-          for (var tagContent in tagmap ) {
-            if (tagContent === matches[i]) {
-              // This probably needs some work...
-              // We need to somehow get the fid propogated here.
-              // We really want to
-              matches[i] = matches[i].replace('[[','');
-              matches[i] = matches[i].replace(']]','');
-              mediaObj = JSON.parse(matches[i]);
-              imgMarkup = $(tagmap[tagContent]);
-              $('img',imgMarkup).attr('fid',mediaObj.fid);
-              $('img',imgMarkup).attr('view_mode',mediaObj.view_mode);
-              content = content.replace(tagContent,this.addWrapper(imgMarkup.html()));
-            }
+        var inlineTag = "";
+        for (i = 0; i < matches.length; i++) {
+          inlineTag = matches[i];
+          if (tagmap[inlineTag]) {
+            // This probably needs some work...
+            // We need to somehow get the fid propogated here.
+            // We really want to
+            var tagContent = tagmap[inlineTag];
+            var mediaMarkup = this.stripDivs(tagContent); // THis is <div>..<img>
+            
+            var _tag = inlineTag;
+            _tag = _tag.replace('[[','');
+            _tag = _tag.replace(']]','');
+            mediaObj = JSON.parse(_tag);
+            
+            var imgElement = $(mediaMarkup);
+            this.addImgeAttributes(imgElement, mediaObj.fid, mediaObj.view_mode);
+            var toInsert = this.outerHTML(imgElement);
+            content = content.replace(inlineTag, toInsert);
+          } else {
+            debug.debug("Could not find content for " + inlineTag);
           }
         }
       }
@@ -89,37 +124,39 @@ Drupal.media = Drupal.media || {};
      */
     detach: function(content, settings, instanceId) {
       var content = $('<div>' + content + '</div>');
-      $('div.media-embedded',content).each(function (elem) {
-        tagContent = Drupal.wysiwyg.plugins.media.createTag(this);
+      $('img.media-image',content).each(function (elem) {
+        tagContent = Drupal.wysiwyg.plugins.media.createTag($(this));
         $(this).replaceWith(tagContent);
       });
       return content.html();
     },
     
-    addWrapper: function(htmlContent) {
-      return '<div class="media-embedded">' + htmlContent + '</div>';  
-    },
-    
-    createTag: function(mediaObj) {
-        imgNode = $("img", mediaObj);
-        // Collect all attribs to be stashed into tagContent
-        attribs = {};
-        imgAttribList = imgNode[0].attributes;
-        for(i=0; i<imgAttribList.length; i++) {
-          attribs[imgAttribList[i].nodeName] = imgAttribList[i].nodeValue; 
-        }
-        // Remove elements from attribs using the blacklist
-        for(var blackList in Drupal.settings.media.blacklist) {
-          delete attribs[Drupal.settings.media.blacklist[blackList]];
-        }
-        tagContent = {
-          "type": 'media',
-          //@todo: This will be selected from the format form
-          "view_mode": imgNode.attr('view_mode'),
-          "fid" : imgNode.attr('fid'),
-          "attributes": attribs
-        };
-        return '[[' + JSON.stringify(tagContent) + ']]';
+    /**
+     * @param jQuery imgNode
+     *  Image node to create tag from
+     */
+    createTag: function(imgNode) {
+      // Currently this is the <img> itself
+      // Collect all attribs to be stashed into tagContent
+      var mediaAttributes = {};
+      
+      var imgElement = imgNode[0];
+      
+      for(i=0; i< imgElement.attributes.length; i++) {
+        mediaAttributes[imgElement.attributes[i].nodeName] = imgNode.attr(imgElement.attributes[i].nodeName);
       }
+      // Remove elements from attribs using the blacklist
+      for(var blackList in Drupal.settings.media.blacklist) {
+        delete mediaAttributes[Drupal.settings.media.blacklist[blackList]];
+      }
+      tagContent = {
+        "type": 'media',
+        //@todo: This will be selected from the format form
+        "view_mode": imgNode.attr('view_mode'),
+        "fid" : imgNode.attr('fid'),
+        "attributes": mediaAttributes
+      };
+      return '[[' + JSON.stringify(tagContent) + ']]';
+    }
   };
 })(jQuery);
