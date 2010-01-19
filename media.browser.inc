@@ -1,5 +1,14 @@
 <?php
+// $Id$
 
+/**
+ *  @file
+ *  @TODO Document.
+ */
+
+/**
+ *  @TODO: Document this.
+ */
 function media_browser() {
   $rows = array();
   $path = drupal_get_path('module', 'media');
@@ -89,6 +98,9 @@ function media_media_browser_plugins() {
   return $plugins;
 }
 
+/**
+ *  @TODO: Document.
+ */
 function media_media_browser_callbacks() {
   return array (
     'getMedia' => array(
@@ -115,6 +127,9 @@ function media_browser_list($conditions = array()) {
   die();
 }
 
+/**
+ *  @TODO: Document.
+ */
 function media_include_browser_js() {
   drupal_add_library('media', 'media_browser');
 

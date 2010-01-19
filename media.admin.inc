@@ -429,6 +429,7 @@ function media_add_from_url_submit($form, &$form_state) {
     'display' => TRUE,
   );
 
+  // @TODO: This won't work for YouTube and many other streams.
   copy($url, $destination);
 
   $file = file_uri_to_object($destination);
