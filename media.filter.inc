@@ -60,7 +60,15 @@ function _media_markup($match) {
   // errors. @TODO return something when fid is not found.
   if(isset($media['fid'])) {
     $media_obj = media_load($media['fid']);
-    return drupal_render(media_get_file_without_label($media_obj, $view_mode));
+    $settings = is_array($media['attributes']) ? $media['attributes'] : array();
+    if (isset($settings['style'])) {
+      'width: 148px; height: 161px;';
+      if (preg_match('@width: (.+?)px; height: (.+?)px;@i', $settings['style'], $matches)) {
+        $settings['width'] = $matches[1];
+        $settings['height'] = $matches[2];
+      }
+    }
+    return drupal_render(media_get_file_without_label($media_obj, $view_mode, $settings));
   }
 }
 
@@ -177,12 +185,16 @@ function media_format_form($form, $form_state, $media) {
  *
  * @param Object $media
  * @param string $view_mode
+ * @param array $settings
+ *  Any attribute overrides to pass to the style formatter.
  * @return array
  *  drupal_renderable array
  */
-function media_get_file_without_label($media, $view_mode) {
+function media_get_file_without_label($media, $view_mode, $settings = array()) {
   $instance = field_info_instance('media', 'file', $media->type);
   $format = $instance['display'][$view_mode];
   $format['label'] = 'hidden';
+  $format['settings'] = array_merge($format['settings'], $settings);
+  $media->override = $settings;
   return field_view_field('media', $media, 'file', $format);
 }
