@@ -3,6 +3,8 @@
 CHANGELOG for Media module.
 ===========================
 
+by aaron: Add cache_media_xml table to schema.
+by aaron: Add media_retrieve_xml().
 by aaron: Allow for WYSIWYG attribute overrides.
 by aaron: t('Format') in media_format_form().
 by aaron: Change _parse_url in MediaReadOnlyStreamWrapper to explode on ://.

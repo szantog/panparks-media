@@ -166,6 +166,9 @@ function media_schema() {
     'primary key' => array('uid'),
   );
 
+  $schema['cache_media_xml'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_media_xml']['description'] = 'Cache table for the the results of retreived XML documents for remote streams.';
+
   return $schema;
 }
 
@@ -218,4 +221,14 @@ function media_update_7000() {
     ),
     'primary key' => array('uid'),
   ));
+}
+
+/**
+ *  Create a cache table for media.
+ */
+function media_update_7001() {
+  $schema = array();
+  $schema['cache_media_xml'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_media_xml']['description'] = 'Cache table for the the results of retreived XML documents for remote streams.';
+  db_create_table('cache_media_xml', $schema['cache_media_xml']);
 }
