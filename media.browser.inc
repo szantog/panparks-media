@@ -60,6 +60,11 @@ function media_media_browser_plugins() {
   $path = drupal_get_path('module', 'media');
   include_once($path . '/media.admin.inc');
 
+  $redirect = array('media/browser', array('query' => array('render' => 'media-popup')));
+
+  $upload_form = drupal_get_form('media_add_upload', $redirect);
+  $from_url_form = drupal_get_form('media_add_from_url', $redirect);
+
   $plugins['upload'] = array(
 //    'tabs' => array(
 //      'title' => 'Upload',
@@ -69,7 +74,7 @@ function media_media_browser_plugins() {
       'js' => array($path . '/javascript/plugins/media.upload.js'),
     ),
     'settings' => array(
-      'uploadForm' => drupal_render(drupal_get_form('media_add_upload')),
+      'uploadForm' => drupal_render($upload_form),
     ),
   );
 
@@ -78,7 +83,7 @@ function media_media_browser_plugins() {
       'js' => array($path . '/javascript/plugins/media.fromurl.js'),
     ),
     'settings' => array(
-      'fromUrlForm' => drupal_render(drupal_get_form('media_add_from_url')),
+      'fromUrlForm' => drupal_render($from_url_form),
     ),
   );
 

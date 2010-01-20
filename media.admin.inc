@@ -308,7 +308,7 @@ function media_multiple_delete_confirm_submit($form, &$form_state) {
   }
 }
 
-function media_add_upload($form, $form_state) {
+function media_add_upload($form, $form_state, $redirect = NULL) {
   $validators = array(
    'file_validate_extensions' => array(variable_get('media_file_extensions', '')),
    'file_validate_size' => array(parse_size(variable_get('media_max_filesize', ''))),
@@ -329,6 +329,11 @@ function media_add_upload($form, $form_state) {
   }
 
   $form['#validators'] = $validators;
+
+  $form['redirect'] = array(
+    '#type' => 'value',
+    '#value' => $redirect,
+  );
 
   $form['upload'] = array(
     '#type' => 'file',
@@ -374,7 +379,6 @@ function media_add_upload_submit($form, &$form_state) {
 
   if ($file = file_move($file, $destination, FILE_EXISTS_REPLACE)) {
     drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
-    $form_state['redirect'] = 'media/' . $file->fid . '/edit';
     field_attach_submit('media', $file, $form, $form_state);
     // Make a copy of the file object to use as the media object
     // (file is a field of media and the base table). This is weird.
@@ -388,17 +392,22 @@ function media_add_upload_submit($form, &$form_state) {
   else {
     drupal_set_message(t('An error occurred and no file was uploaded.'), 'error');
   }
-  $form_state['redirect'] = 'admin/content/media';
+  $form_state['redirect'] = !empty($form_state['values']['redirect']) ? $form_state['values']['redirect'] : 'media/' . $file->fid . '/edit';
 }
 
 /**
  *  Callback for /media/add/upload and /admin/content/media/add/upload.
  */
-function media_add_from_url($form, &$form_state = array()) {
+function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
   $form['url'] = array(
     '#type' => 'textfield',
     '#title' => 'URL',
     '#description' => 'Input any url which Drupal can handle',
+  );
+
+  $form['redirect'] = array(
+    '#type' => 'value',
+    '#value' => $redirect,
   );
 
   $form['submit'] = array(
@@ -448,7 +457,7 @@ function media_add_from_url_submit($form, &$form_state) {
   else {
     drupal_set_message(t('An error occurred and no file was saved.'), 'error');
   }
-  $form_state['redirect'] = 'admin/content/media';
+  $form_state['redirect'] = !empty($form_state['values']['redirect']) ? $form_state['values']['redirect'] : 'media/' . $file->fid . '/edit';
 }
 
 
