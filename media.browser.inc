@@ -11,22 +11,9 @@
  */
 function media_browser() {
   $rows = array();
-  $path = drupal_get_path('module', 'media');
-  $attached = array(
-    'js' => array(
-      'misc/ui/ui.core.js',
-      'misc/ui/ui.tabs.js',
-      $path . '/javascript/media.core.js',
-      $path . '/javascript/media.pluginbase.js',
-      $path . '/javascript/media-browser.js',
-      $path . '/javascript/util/json2.js',
-      $path . '/javascript/util/ba-debug.min.js',
-    ),
-    'css' => array(
-      '/misc/ui/ui.all.css',
-      $path . '/media.browser.css'
-    ),
-  );
+
+  $attached = array();
+  $attached['library'][] = array('media', 'media_browser_page');
 
   $plugins = module_invoke_all('media_browser_plugins');
   foreach ($plugins as $name => $plugin) {
@@ -34,7 +21,6 @@ function media_browser() {
     if ($plugin['#attached']) {
       $attached = array_merge_recursive($attached, $plugin['#attached']);
     }
-
   }
 
   $callbacks = module_invoke_all('media_browser_callbacks');
@@ -137,8 +123,6 @@ function media_browser_list($conditions = array()) {
 function media_include_browser_js() {
   drupal_add_library('media', 'media_browser');
 
-  drupal_add_library('system','ui');
-  drupal_add_library('system','ui.dialog');
   // copied directly from media module to get Drupal.settings.media object
   $settings = array(
     'browserUrl' => url('media/browser',
