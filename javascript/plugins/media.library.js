@@ -9,16 +9,16 @@
         tabset = mediaBrowser.getTabset();
         tabset.tabs('add', '#library', 'Library');
         var that = this;
-        mediaBrowser.listen('tabs.tabSelected', function (e, id) {
+        mediaBrowser.listen('tabs.show', function (e, id) {
           if (id == 'library') {
+            // This is kinda rough, I'm not sure who should delegate what here.
             
-            //mediaBrowser.getContentArea().addThrobber();
-            mediaBrowser.getContentArea().html('');
+            mediaBrowser.getActivePanel().html('');
             
             // Assumes we have to refresh everytime.
             // Remove any existing content
-            mediaBrowser.getContentArea().append('<ul></ul>');
-            that.browser = $('ul', mediaBrowser.getContentArea());
+            mediaBrowser.getActivePanel().append('<ul></ul>');
+            that.browser = $('ul', mediaBrowser.getActivePanel());
             that.browser.addClass('clearfix');
             that.getMedia();
           }

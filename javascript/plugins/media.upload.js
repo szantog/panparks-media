@@ -7,9 +7,13 @@
       init: function() {
         tabset = mediaBrowser.getTabset();
         tabset.tabs('add', '#upload', 'Upload');
-        mediaBrowser.listen('tabs.tabSelected', function (e, id) {
+        mediaBrowser.listen('tabs.show', function (e, id) {
           if (id == 'upload') {
-            mediaBrowser.getContentArea().load(Drupal.settings.basePath + 'media/add/upload?destination=' + window.location.href +' form#media-add-upload');
+            // We only need to set this once.
+            // We probably could set it upon load.
+            if (mediaBrowser.getActivePanel().html() == '') {
+              mediaBrowser.getActivePanel().html(options.uploadForm);
+            }
           }
         });
       }

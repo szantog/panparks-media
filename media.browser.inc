@@ -21,6 +21,7 @@ function media_browser() {
     if ($plugin['#attached']) {
       $attached = array_merge_recursive($attached, $plugin['#attached']);
     }
+    unset($plugin['#attached']);
   }
 
   $callbacks = module_invoke_all('media_browser_callbacks');
@@ -57,21 +58,28 @@ function media_browser() {
 function media_media_browser_plugins() {
   $plugins = array();
   $path = drupal_get_path('module', 'media');
+  include_once($path . '/media.admin.inc');
 
   $plugins['upload'] = array(
-    'tabs' => array(
-      'title' => 'Upload',
-      'url' => url('media/add/upload', array('query' => array('destination' => drupal_get_destination()))),
-    ),
+//    'tabs' => array(
+//      'title' => 'Upload',
+//      'url' => url('media/add/upload', array('query' => array('destination' => drupal_get_destination()))),
+//    ),
     '#attached' => array(
       'js' => array($path . '/javascript/plugins/media.upload.js'),
+    ),
+    'settings' => array(
+      'uploadForm' => drupal_render(drupal_get_form('media_add_upload')),
     ),
   );
 
   $plugins['fromurl'] = array(
     '#attached' => array(
       'js' => array($path . '/javascript/plugins/media.fromurl.js'),
-      ),
+    ),
+    'settings' => array(
+      'fromUrlForm' => drupal_render(drupal_get_form('media_add_from_url')),
+    ),
   );
 
   $plugins['library'] = array(

@@ -26,7 +26,7 @@ Drupal.behaviors.mediaBrowser = {
 namespace('Drupal.media.browser');
 
 Drupal.media.browser.selectedMedia = [];
-Drupal.media.browser.plugins = [];
+Drupal.media.browser.plugins = {};
 
 Drupal.media.browser.getDefaults = function () {
   return {
@@ -64,7 +64,11 @@ Drupal.media.browser.setupTabs = function() {
   this.getTabset().tabs({
     select: function (e, ui) {
       // This is kinda silly, but I don't know how else to send the identifier upstream
-      that.notify('tabs.tabSelected', jQuery(ui.tab).attr('href').slice('1'));
+      that.notify('tabs.selected', jQuery(ui.tab).attr('href').slice('1'));
+    },
+    show: function (e, ui) {
+      // This is kinda silly, but I don't know how else to send the identifier upstream
+      that.notify('tabs.show', jQuery(ui.tab).attr('href').slice('1'));
     }
   });
 }
@@ -74,15 +78,27 @@ Drupal.media.browser.register = function (pluginId, factory, options) {
   this.plugins[pluginId] = {
     factory: factory,
     instance: null,
-    options: options
+    options: options // Currently this is not used.  @todo, figure this out.
   };
 };
 
 Drupal.media.browser.start = function (pluginId) {
   // Fire their init events, pass in this
   // @todo: decouple and provide an interface.
+  debug.debug('Starting Plugin: ' + pluginId);
+  //This isn't ideal, the settings thing needs more definition, anyway,
+  // allows us to merge in settings that could have been modified.
+  // 
+  debug.debug(this.settings);
+  if (typeof this.settings.plugin_settings[pluginId] != 'undefined') {
+    if (typeof this.settings.plugin_settings[pluginId] != 'undefined') {
+      var options = this.settings.plugin_settings[pluginId].settings;
+    }
+  }
+  
+  debug.debug(options);
   this.plugins[pluginId].instance =
-    this.plugins[pluginId].factory(this, this.plugins[pluginId].options);
+    this.plugins[pluginId].factory(this, options);
   this.plugins[pluginId].instance.init();
 };
 
@@ -134,8 +150,18 @@ Drupal.media.browser.getTabset = function() {
   return $('#media-browser-tabs');
 }
 
-Drupal.media.browser.getContentArea = function() {
-  return $('#media-browser-tabs .ui-tabs-panel');
+/**
+ * Returns the active tab panel
+ */
+Drupal.media.browser.getActivePanel = function() {
+  var selectedTabIndex = this.getTabset().tabs('option', 'selected');
+  if (selectedTabIndex == -1) {
+    // If nothing is selected return an empty element (I guess...).
+    return $();
+  }
+  debug.debug(selectedTabIndex);
+  debug.debug($('#media-browser-tabs .ui-tabs-panel:eq(' + selectedTabIndex + ')'));
+  return $('#media-browser-tabs .ui-tabs-panel:eq(' + selectedTabIndex + ')')
 }
 
 })(jQuery);

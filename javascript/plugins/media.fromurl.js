@@ -6,9 +6,13 @@
       init: function() {
         tabset = mediaBrowser.getTabset();
         tabset.tabs('add', '#fromurl', 'From URL');
-        mediaBrowser.listen('tabs.tabSelected', function (e, id) {
+        mediaBrowser.listen('tabs.show', function (e, id) {
           if (id == 'fromurl') {
-            mediaBrowser.getContentArea().load(Drupal.settings.basePath + 'media/add/from_url?destination=' + window.location.href +' form#media-add-from-url');
+            // We only need to set this once.
+            // We probably could set it upon load.
+            if (mediaBrowser.getActivePanel().html() == '') {
+              mediaBrowser.getActivePanel().html(options.fromUrlForm);
+            }
           }
         });
       }
