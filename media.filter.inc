@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 /**
  * @file
@@ -62,7 +63,6 @@ function _media_markup($match) {
     $media_obj = media_load($media['fid']);
     $settings = is_array($media['attributes']) ? $media['attributes'] : array();
     if (isset($settings['style'])) {
-      'width: 148px; height: 161px;';
       if (preg_match('@width: (.+?)px; height: (.+?)px;@i', $settings['style'], $matches)) {
         $settings['width'] = $matches[1];
         $settings['height'] = $matches[2];
