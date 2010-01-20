@@ -60,7 +60,7 @@ function _media_markup($match) {
   // errors. @TODO return something when fid is not found.
   if(isset($media['fid'])) {
     $media_obj = media_load($media['fid']);
-    return drupal_render(field_view_field('media', $media_obj, 'file', $view_mode));
+    return drupal_render(media_get_file_without_label($media_obj, $view_mode));
   }
 }
 
@@ -140,10 +140,10 @@ function _media_generate_tagMap($text) {
 function media_format_form($form, $form_state, $media) {
   $form = array();
   $options = array();
-  foreach (media_field_view_modes('media') as $key => $mode) {
+  foreach (media_field_view_modes('media') as $key => $view_mode) {
     //@TODO: Get the file formatter, and display that here too.
-    $options[$key] = $mode['label'];
-    $formats[$key] = drupal_render(field_view_field('media', $media, 'file', $key));
+    $options[$key] = $view_mode['label'];
+    $formats[$key] = drupal_render(media_get_file_without_label($media, $key));
   }
 
   // This totally doesn't work because the dialog API doesn't support it.
@@ -170,4 +170,19 @@ function media_format_form($form, $form_state, $media) {
   );
 
   return $form;
+}
+
+/**
+ * Wrapper around field_view_field, returns the file field w/o a label
+ *
+ * @param Object $media
+ * @param string $view_mode
+ * @return array
+ *  drupal_renderable array
+ */
+function media_get_file_without_label($media, $view_mode) {
+  $instance = field_info_instance('media', 'file', $media->type);
+  $format = $instance['display'][$view_mode];
+  $format['label'] = 'hidden';
+  return field_view_field('media', $media, 'file', $format);
 }

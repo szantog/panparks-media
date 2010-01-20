@@ -73,6 +73,10 @@ function media_media_browser_plugins() {
   $path = drupal_get_path('module', 'media');
 
   $plugins['upload'] = array(
+    'tabs' => array(
+      'title' => 'Upload',
+      'url' => url('media/add/upload', array('query' => array('destination' => drupal_get_destination()))),
+    ),
     '#attached' => array(
       'js' => array($path . '/javascript/plugins/media.upload.js'),
     ),

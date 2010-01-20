@@ -11,6 +11,8 @@
         var that = this;
         mediaBrowser.listen('tabs.tabSelected', function (e, id) {
           if (id == 'library') {
+            
+            //mediaBrowser.getContentArea().addThrobber();
             mediaBrowser.getContentArea().html('');
             
             // Assumes we have to refresh everytime.
