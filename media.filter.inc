@@ -149,6 +149,14 @@ function media_format_form($form, $form_state, $media) {
   // This will vary depending on the media type.
 
   $form = array();
+  $form['#media'] = $media;
+
+  $form['heading'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<h1 class="title">',
+    '#suffix' => '</h1>',
+    '#markup' => t('Embedding %filename', array('%filename' => $media->filename)),
+  );
   $options = array();
   foreach (media_field_view_modes('media') as $key => $view_mode) {
     //@TODO: Get the file formatter, and display that here too.
@@ -162,25 +170,61 @@ function media_format_form($form, $form_state, $media) {
   drupal_add_js($settings, 'setting');
 
   drupal_add_library('media', 'media_base');
+  drupal_add_library('system', 'form');
 
   $path = drupal_get_path('module', 'media');
   $form['#attached']['js'][] = $path . '/javascript/media-format-form.js';
+  $form['#attached']['css'][] = $path . '/css/media-format-form.css';
 
+
+  $preview = field_view_field('media', $media, 'file', 'media_preview');
+  $preview['#theme_wrappers'][] = 'media_thumbnail';
   $form['preview'] = array(
     '#type' => 'markup',
     '#title' => basename($media->uri),
-    '#markup' => drupal_render(field_view_field('media', $media, 'file', 'media_preview'))
+    '#markup' => drupal_render($preview),
   );
 
-  $form['format'] = array(
+  $default_format = 'media_original';
+
+  $form['format_group'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'format',
+    '#prefix' => t('<div class="clearfix" id="format-group-wrapper"><span id="format-description">Adding in <span id="selected-format">%currently_selected</span> format.  </span>', array('%currently_selected' => $options[$default_format])),
+    '#suffix' => t('</div>'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['format_group']['format'] = array(
     '#type' => 'radios',
     '#title' => t('Format'),
     '#options' => $options,
-    '#default_value' => 'media_original',
+    '#default_value' => $default_format,
   );
+
+  // These will get passed on to WYSIWYG
+  $form['options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('options'),
+    '#description' => t('Alternate text a user will see if the image is not available'),
+  );
+
+  // Similar to a form_alter, but we want this to run first so that media.types.inc
+  // can add the fields specific to a given type (like alt tags on media).
+  // If implemented as an alter, this might not happen, making other alters not
+  // be able to work on those fields.
+  // @TODO: We need to pass in existing values for those attributes.
+  drupal_alter('media_format_form_prepare', $form, $form_state, $media);
+
+  if (!element_children($form['options'])) {
+    $form['options']['#attributes'] = array('style' => 'display:none');
+  }
 
   return $form;
 }
+
+
 
 /**
  * Wrapper around field_view_field, returns the file field w/o a label

@@ -3,15 +3,14 @@
 
 /**
  *  @file
- *  Define Media entity types.
+ *  Define Media entity types, also provides support for the base types.
+ *
+ *  See media.install for a list of the base types.
  */
 
 /**
  * Implement hook_entity_info().
  *
- * @todo: This has a pretty serious flaw.  In the case someone uploads
- * a file without a known "type" fields will puke.  We need to provide
- * some "default type in the install probably". @TODO: done using other now?
  */
 function media_entity_info() {
   // @todo: change this function name now that it is no longer a hook.
@@ -274,3 +273,20 @@ function media_is_type($media, $args) {
     // so that we can allow for things like flickr photos vs. slideshows, etc.
   }
 }
+
+/**
+ * Implement hook_media_format_form_prepare_alter
+ * @return unknown_type
+ */
+function media_media_format_form_prepare_alter(&$form, &$form_state, $media) {
+  switch($media->type) {
+    case 'image':
+      $form['options']['alt'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Description'),
+      );
+      break;
+  }
+}
+
+

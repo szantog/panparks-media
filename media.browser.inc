@@ -124,7 +124,14 @@ function media_browser_list($conditions = array()) {
   foreach ($medias as &$media) {
     // Generate a preview of the file
     // @todo: Should generate placeholders for audio/video
-    $media->preview = drupal_render(field_view_field('media', $media, 'file', 'media_preview'));
+    // Add yet another wrapper so we can style it as a preview :(
+    // Otherwise it isn't really possible to know because the user can pick anything for their preview mode.
+    // Actually, on second thought, let's just use the square_thumbail view.
+    $preview = field_view_field('media', $media, 'file', 'media_preview');
+    $preview['#show_names'] = TRUE;
+    $preview['#theme_wrappers'][] = 'media_thumbnail';
+
+    $media->preview = drupal_render($preview);
   }
   print drupal_json_encode($medias);
   die();

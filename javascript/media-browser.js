@@ -11,7 +11,15 @@ Drupal.behaviors.mediaBrowser = {
     // Wants to pass options and tell it to start :(
     // We should be starting here IF the parent doesn't
     // initiate the process.
-    // For testing
+    // For testing  
+    if (window.location.href.search('autostart') != -1) {
+      Drupal.media.browser.launch({});
+      $('#media-browser-page-wrapper')
+        .width('800px')
+        .height('500px')
+        .css('border', '1px solid black')
+        .css('overflow', 'hidden');
+    };
     //var startLink = $('<a href="#">Start browser</a>');
     //$('h1').append(startLink);
     //startLink.bind('click', function() {Drupal.media.browser.launch()});

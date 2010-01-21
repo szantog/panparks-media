@@ -240,8 +240,8 @@ function media_theme() {
     ),
 
     // A preview of the uploaded file.
-    'media_admin_thumbnail' => array(
-      'variables' => array('file' => NULL, 'style_name' => 'thumbnail'),
+    'media_thumbnail' => array(
+      'render element' => 'element',
       'file' => 'media.theme.inc',
     ),
 
@@ -508,7 +508,7 @@ function media_attached_files() {
   $path = drupal_get_path('module', 'media');
   return array(
     'js' => array($path . '/javascript/media-admin.js'),
-    'css' => array($path . '/media.css'),
+    'css' => array($path . '/css/media.css'),
   );
 }
 
@@ -531,6 +531,9 @@ function media_library() {
       $path . '/javascript/util/json2.js' => array('weight' => JS_LIBRARY),
       $path . '/javascript/util/ba-debug.min.js' => array('weight' => JS_LIBRARY),
     ),
+    'css' => array(
+      $path . '/css/media.css',
+    ),
   );
 
   $libraries['media_browser'] = array(
@@ -552,7 +555,7 @@ function media_library() {
       $path . '/javascript/media-browser.js'  => array('weight' => JS_DEFAULT),
     ),
     'css' => array(
-      $path . '/media.browser.css' => array('weight' => CSS_DEFAULT),
+      $path . '/css/media.browser.css' => array('weight' => CSS_DEFAULT),
     ),
     'dependencies' => array(
       array('media', 'media_base'),

@@ -52,7 +52,6 @@
       render: function() {
         var that = this;
         mediaBrowser.getActivePanel().removeClass('throbber');
-        //this.browser.html('');
         if(this.mediaFiles.length < 1) {
           return;
         }
@@ -69,8 +68,8 @@
             .bind('click', mediaFile, function(e) {
               // Notify the main browser
               //this.selectedMedia = mediaFile;
-              $('.media-file').removeClass('selected');
-              $(this).parent().addClass('selected');
+              $('div.media-thumbnail img').removeClass('selected');
+              $('div.media-thumbnail img', $(this)).addClass('selected');
               mediaBrowser.notify('mediaSelected', {mediaFiles: [e.data]});
               //that.settings.onSelect(mediaFile);
               return false;

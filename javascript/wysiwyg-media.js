@@ -21,13 +21,14 @@ Drupal.media = Drupal.media || {};
       var mediaFile = mediaFiles[0];
       var options = {};
       Drupal.media.popups.mediaStyleSelector(mediaFile, function (formattedMedia) {
-        Drupal.wysiwyg.plugins.media.insertMediaFile(mediaFile, formattedMedia.type, formattedMedia.html, Drupal.wysiwyg.instances[instanceId]);
+        debug.debug(formattedMedia);
+        Drupal.wysiwyg.plugins.media.insertMediaFile(mediaFile, formattedMedia.type, formattedMedia.html, formattedMedia.options, Drupal.wysiwyg.instances[instanceId]);
       }, options);
       
       return;
     },
 
-    insertMediaFile: function(mediaFile, viewMode, formattedMedia, wysiwygInstance) {
+    insertMediaFile: function(mediaFile, viewMode, formattedMedia, options, wysiwygInstance) {
       
       if(typeof Drupal.settings.tagmap == 'undefined') {
         Drupal.settings.tagmap = { };
@@ -39,7 +40,8 @@ Drupal.media = Drupal.media || {};
       // This is pretty hacked for now.
       // 
       var imgElement = $(this.stripDivs(formattedMedia));
-      this.addImgeAttributes(imgElement, mediaFile.fid, viewMode);
+      this.addImgeAttributes(imgElement, mediaFile.fid, viewMode, options);
+      
       var toInsert = this.outerHTML(imgElement);
       // Create an inline tag
       var inlineTag = Drupal.wysiwyg.plugins.media.createTag(imgElement);
@@ -58,9 +60,14 @@ Drupal.media = Drupal.media || {};
       return $('<div>').append( element.eq(0).clone() ).html();
     },
     
-    addImgeAttributes: function(imgElement, fid, view_mode) {
+    addImgeAttributes: function(imgElement, fid, view_mode, additional) {
       imgElement.attr('fid', fid);
       imgElement.attr('view_mode', view_mode);
+      if (additional) {
+        for (k in additional) {
+          imgElement.attr(k, additional[k]);
+        }
+      }
       // Class so we can find this image later.
       imgElement.addClass('media-image');
     },

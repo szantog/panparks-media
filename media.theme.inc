@@ -260,3 +260,19 @@ function theme_media_link($variables) {
 
   return '<span class="file">' . $icon . ' ' . l($link_text, $url, $options) . '</span>';
 }
+
+/**
+ * Adds a wrapper around a preview of a media file.
+ * @param unknown_type $element
+ * @return unknown_type
+ */
+function theme_media_thumbnail($variables) {
+  $label = '';
+  $element = $variables['element'];
+  // Element should be a field renderable array... This is a little wonky - admitted.
+  if (!empty($element['#show_names']) && $element['#object']->filename) {
+    $label = '<label class="media-filename">' . $element['#object']->filename . '</label>';
+  }
+  // I'm sure this is the wrong way to do this, but can't figure it out... :(
+  return '<div class="media-thumbnail">' . $element['#children'] . $label . '</div>';
+}

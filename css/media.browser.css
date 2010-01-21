@@ -1,3 +1,5 @@
+/* @override http://dev7/sites/all/modules/media/css/media.browser.css?L */
+
 @CHARSET "UTF-8";
 
 body.page-media-browser {
@@ -18,3 +20,9 @@ div#media-browser .throbber {
 	position:absolute;
   background: transparent url(images/loading.gif) no-repeat center center;
 }
+
+#media-browser .ui-tabs-panel {
+	height: 450px;
+	overflow-y: auto;
+}
+
