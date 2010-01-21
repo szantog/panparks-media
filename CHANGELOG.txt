@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+by aaron: Add a wysiwyg flag to filter for youtube & the like.
 by aaron: Add cache_media_xml table to schema.
 by aaron: Add media_retrieve_xml().
 by aaron: Allow for WYSIWYG attribute overrides.

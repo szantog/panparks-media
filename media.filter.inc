@@ -47,12 +47,14 @@ function media_filter($text, $filter) {
 
 /**
  * Replace callback to convert tag into markup
- * @param
+ * @param string $match
  * Takes a match of tag code
+ * @param boolean $wysiwyg
+ *   Set to TRUE if called from within the WYSIWYG text area editor.
  * @return
  * Return the replaced markup
  */
-function _media_markup($match) {
+function _media_markup($match, $wysiwyg = FALSE) {
   $match = str_replace("[[","",$match);
   $match = str_replace("]]","",$match);
   $media = drupal_json_decode($match[0]);
@@ -67,6 +69,9 @@ function _media_markup($match) {
         $settings['width'] = $matches[1];
         $settings['height'] = $matches[2];
       }
+    }
+    if ($wysiwyg) {
+      $settings['wysiwyg'] = $wysiwyg;
     }
     return drupal_render(media_get_file_without_label($media_obj, $view_mode, $settings));
   }
@@ -130,7 +135,7 @@ function _media_generate_tagMap($text) {
     // We see if tagContent is already in $tagMap, if not we add it
     // to $tagmap otherwise return a empty error
     if(empty($tagmap[$match[0]])) {
-      $tagmap[$match[0]] = _media_markup($match);
+      $tagmap[$match[0]] = _media_markup($match, TRUE);
     }
     else {
       return array();
@@ -161,7 +166,7 @@ function media_format_form($form, $form_state, $media) {
   foreach (media_field_view_modes('media') as $key => $view_mode) {
     //@TODO: Get the file formatter, and display that here too.
     $options[$key] = $view_mode['label'];
-    $formats[$key] = drupal_render(media_get_file_without_label($media, $key));
+    $formats[$key] = drupal_render(media_get_file_without_label($media, $key, array('wysiwyg' => TRUE)));
   }
 
   // This totally doesn't work because the dialog API doesn't support it.
