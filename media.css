@@ -124,15 +124,6 @@ div.media-thumbnail.selected {
   list-style: none;
 }
 
-/* show the throbber on the page */
-#media_content_browser_throbber {
-  display: none;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: transparent url(images/throbber.gif) no-repeat  center center;
-}
-
 /** This is a massive hack. There must be a better way. See media.fields.inc **/
 
 .fid.form-text {

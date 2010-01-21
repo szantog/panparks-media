@@ -146,6 +146,8 @@ function _media_generate_tagMap($text) {
  * @return unknown_type
  */
 function media_format_form($form, $form_state, $media) {
+  // This will vary depending on the media type.
+
   $form = array();
   $options = array();
   foreach (media_field_view_modes('media') as $key => $view_mode) {

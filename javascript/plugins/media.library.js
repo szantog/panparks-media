@@ -12,8 +12,9 @@
         mediaBrowser.listen('tabs.show', function (e, id) {
           if (id == 'library') {
             // This is kinda rough, I'm not sure who should delegate what here.
-            
+            mediaBrowser.getActivePanel().addClass('throbber');
             mediaBrowser.getActivePanel().html('');
+            //mediaBrowser.getActivePanel().addClass('throbber');
             
             // Assumes we have to refresh everytime.
             // Remove any existing content
@@ -50,6 +51,7 @@
       
       render: function() {
         var that = this;
+        mediaBrowser.getActivePanel().removeClass('throbber');
         //this.browser.html('');
         if(this.mediaFiles.length < 1) {
           return;
