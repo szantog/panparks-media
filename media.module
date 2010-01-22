@@ -33,6 +33,30 @@ define('MEDIA_TYPES_DEFAULT', '*');
 /* ***************************************** */
 
 /**
+ * Implementation of hook_help()
+ */
+
+function media_help($path,$arg) {
+  switch($path) {
+    case 'admin/help#media':
+      $output = '';
+      $output .= '<h3>' .t('About') .'</h3>'; 
+      $output .= '<p>' .t('The Media module is a File Browser to the Internet, media provides a framework for managing files and multimedia assets, regardless of whether they are hosted on your own site or a 3rd party site. It replaces the Drupal core upload field with a unified User Interface where editors and administrators can upload, manage, and reuse files and multimedia assets. Media module also provides rich integration with WYSIWYG module to let content creators access media assets in rich text editor. For more information check <a href="@media_faq">Media Module FAQ</a>',array('@media_faq' => 'http://groups.drupal.org/node/19746')) .'</p>';
+      $output .= '<h3>' .t('Uses') .'</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' .t('Media Repository') .'</dt>';
+      $output .= '<dd>' .t('Media module allows you to maintain a <a href="@mediarepo">media asset repository</a> where in you can add, remove, reuse your media assets. You can add the media file using upload form or from a url and also do bulk operations on the media assets.', array('@mediarepo' => url('admin/content/media'))) .'</dd>';
+      $output .= '<dt>' .t('Attaching media assets to content types') .'</dt>';
+      $output .= '<dd>' .t('Media assets can be attached to content types as fields. To add a media field to a <a href="@content-type">content type</a>, go to the content type\'s <em>manage fields</em> page, and add a new field of type <em>Multimedia Asset</em>.', array('@content-type' => url('admin/structure/types'))) .'</dd>';
+      $output .= '<dt>' .t('Using media assets in WYSIWYG') .'</dt>';
+      $output .= '<dd>' .t('Media module provides rich integration with WYSIWYG editors, using Media Browser plugin you can select media asset from library to add to the rich text editor moreover you can add media asset from the media browser itself using either upload method or add from url method. To configure media with WYSIWYG you need two steps of configuration:');
+      $output .= '<ul><li>' .t('Enable WYSIWYG plugin on your desired <a href="@wysiwyg-profile">WYSIWYG profile</a>. Please note that you will need to have <a href="@wysiwyg">WYSIWYG</a> module enabled.', array('@wysiwyg-profile' => url('admin/config/content/wysiwyg'),'@wysiwyg' => 'http://drupal.org/project/wysiwyg')) .'</li>';
+      $output .= '<li>' .t('Add Media Filter to the WYSIWYG enabled <a href="@input-format">Input format</a>', array('@input-format' => url('admin/config/content/formats'))) .'</li></ul></dd>';
+      return $output;  
+  }
+}
+
+/**
  * Implement of hook_menu().
  */
 function media_menu() {
