@@ -155,21 +155,33 @@ function media_format_form($form, $form_state, $media) {
 
   $form = array();
   $form['#media'] = $media;
+  $instance_info = field_info_instance('media', 'file', $media->type);
+  $entity_info = entity_get_info('media');
 
-  $form['heading'] = array(
-    '#type' => 'markup',
-    '#prefix' => '<h1 class="title">',
-    '#suffix' => '</h1>',
-    '#markup' => t('Embedding %filename', array('%filename' => $media->filename)),
-  );
   $options = array();
-  foreach (media_field_view_modes('media') as $key => $view_mode) {
-    //@TODO: Get the file formatter, and display that here too.
-    $options[$key] = $view_mode['label'];
+  foreach ($entity_info['view modes'] as $key => $title) {
+    $format = $instance_info['display'][$key];
+    //If the format is set to hidden, don't offer it
+    if ($format['type'] == 'hidden') {
+      continue;
+    }
+
+    //@TODO: Display more verbose information about which formatter and what it does.
+    $options[$key] = $title['label'];
     $formats[$key] = drupal_render(media_get_file_without_label($media, $key, array('wysiwyg' => TRUE)));
   }
 
-  // This totally doesn't work because the dialog API doesn't support it.
+  if (!count($formats)) {
+    throw new Exception('Unable to continue, no available formats for displaying media.');
+    return;
+  }
+
+  $default_view_mode = variable_get('media_wysiwyg_default_view_mode', 'media_large');
+  if (!isset($formats[$default_view_mode])) {
+    $default_view_mode = key($formats);
+  }
+
+  // Add JS and settings array of formats.
   $settings = array();
   $settings['media'] = array('formatFormFormats' => $formats);
   drupal_add_js($settings, 'setting');
@@ -181,21 +193,26 @@ function media_format_form($form, $form_state, $media) {
   $form['#attached']['js'][] = $path . '/javascript/media-format-form.js';
   $form['#attached']['css'][] = $path . '/css/media-format-form.css';
 
+  $form['heading'] = array(
+    '#type' => 'markup',
+    '#prefix' => '<h1 class="title">',
+    '#suffix' => '</h1>',
+    '#markup' => t('Embedding %filename', array('%filename' => $media->filename)),
+  );
 
   $preview = field_view_field('media', $media, 'file', 'media_preview');
   $preview['#theme_wrappers'][] = 'media_thumbnail';
+
   $form['preview'] = array(
     '#type' => 'markup',
     '#title' => basename($media->uri),
     '#markup' => drupal_render($preview),
   );
 
-  $default_format = 'media_original';
-
   $form['format_group'] = array(
     '#type' => 'fieldset',
     '#title' => 'format',
-    '#prefix' => t('<div class="clearfix" id="format-group-wrapper"><span id="format-description">Adding in <span id="selected-format">%currently_selected</span> format.  </span>', array('%currently_selected' => $options[$default_format])),
+    '#prefix' => t('<div class="clearfix" id="format-group-wrapper"><span id="format-description">Adding in <span id="selected-format">%currently_selected</span> format.  </span>', array('%currently_selected' => $options[$default_view_mode])),
     '#suffix' => t('</div>'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
@@ -205,7 +222,7 @@ function media_format_form($form, $form_state, $media) {
     '#type' => 'radios',
     '#title' => t('Format'),
     '#options' => $options,
-    '#default_value' => $default_format,
+    '#default_value' => $default_view_mode,
   );
 
   // These will get passed on to WYSIWYG

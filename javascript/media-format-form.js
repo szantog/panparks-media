@@ -25,7 +25,6 @@ Drupal.behaviors.mediaFormatForm = {
   }
 };
 
-
 Drupal.media.formatForm.getOptions = function() {
   // Get all the values
   var ret = {}; $.each($('#media-format-form fieldset#edit-options *').serializeArray(), function(i, field) { ret[field.name] = field.value; });
