@@ -54,6 +54,9 @@ function media_browser() {
 /**
  * Implement hook_media_browser_plugins
  * @return unknown_type
+ *
+ * @see media_add_upload()
+ * @see media_add_from_url()
  */
 function media_media_browser_plugins() {
   $plugins = array();

@@ -308,6 +308,9 @@ function media_multiple_delete_confirm_submit($form, &$form_state) {
   }
 }
 
+/**
+ *  @see media_media_browser_plugins().
+ */
 function media_add_upload($form, $form_state, $redirect = NULL) {
   $validators = array(
    'file_validate_extensions' => array(variable_get('media_file_extensions', '')),
@@ -397,6 +400,9 @@ function media_add_upload_submit($form, &$form_state) {
 
 /**
  *  Callback for /media/add/upload and /admin/content/media/add/upload.
+ *  @TODO: work on the description.
+ *  @TODO: allow stream wrappers to add to the description.
+ *  @see media_media_browser_plugins().
  */
 function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
   $form['url'] = array(
@@ -418,6 +424,9 @@ function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
   return $form;
 }
 
+/**
+ *  @TODO: Allow stream wrappers to have their chance at validation.
+ */
 function media_add_from_url_validate($form, &$form_state) {
   // How do we validate this?
 }
@@ -426,6 +435,7 @@ function media_add_from_url_validate($form, &$form_state) {
  *  Upload a file from a URL.
  *
  *  This will copy a file from a remote location and store it locally.
+ *  @TODO: Allow stream wrappers to have their chance at submission.
  */
 function media_add_from_url_submit($form, &$form_state) {
   $url = $form_state['values']['url'];
