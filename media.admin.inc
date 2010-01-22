@@ -438,12 +438,17 @@ function media_add_from_url_validate($form, &$form_state) {
  *  Upload a file from a URL.
  *
  *  This will copy a file from a remote location and store it locally.
- *  @TODO: Allow stream wrappers to have their chance at submission.
  */
 function media_add_from_url_submit($form, &$form_state) {
   $url = $form_state['values']['url'];
 
-  $uri = media_parse($form_state['values']['url']);
+  // Any module implementing hook_media_parse will have an opportunity to
+  // parse the URL here. It simply needs to return an appropriate URI.
+  $uri = media_parse($url);
+
+  // If the URI was not parsed previously, then assume it's a remote file that
+  // will simply be copied to our local server instead.
+  // @TODO: Implement with media_media_parse() instead.
   if (!$uri) {
     $scheme = variable_get('file_default_scheme', 'public') . '://';
     $uri = file_stream_wrapper_uri_normalize($scheme . basename($url));
