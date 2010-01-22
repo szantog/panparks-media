@@ -380,7 +380,7 @@ function media_add_upload_submit($form, &$form_state) {
     'display' => TRUE,
   );
 
-  if ($file = file_move($file, $destination, FILE_EXISTS_REPLACE)) {
+  if ($file = file_move($file, $destination, FILE_EXISTS_RENAME)) {
     drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
     field_attach_submit('media', $file, $form, $form_state);
     // Make a copy of the file object to use as the media object
@@ -447,18 +447,13 @@ function media_add_from_url_submit($form, &$form_state) {
   if (!$uri) {
     $scheme = variable_get('file_default_scheme', 'public') . '://';
     $uri = file_stream_wrapper_uri_normalize($scheme . basename($url));
-
     copy($url, $uri);
   }
-
   $defaults = array (
     'display' => TRUE,
   );
-
   $file = file_uri_to_object($uri);
-  file_save($file);
-
-  if ($file) {
+  if ($file = file_move($file,$uri,FILE_EXISTS_RENAME)) {
     $form_state['redirect'] = 'media/' . $file->fid . '/edit';
     field_attach_submit('media', $file, $form, $form_state);
     // Make a copy of the file object to use as the media object
