@@ -425,10 +425,13 @@ function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
 }
 
 /**
- *  @TODO: Allow stream wrappers to have their chance at validation.
+ *  Allow stream wrappers to have their chance at validation.
+ *
+ *  Any module that implements hook_media_parse will have an
+ *  opportunity to validate this.
  */
 function media_add_from_url_validate($form, &$form_state) {
-  // How do we validate this?
+  media_parse($form_state['values']['url'], array('form_field' => 'url'));
 }
 
 /**
@@ -439,17 +442,20 @@ function media_add_from_url_validate($form, &$form_state) {
  */
 function media_add_from_url_submit($form, &$form_state) {
   $url = $form_state['values']['url'];
-  $scheme = variable_get('file_default_scheme', 'public') . '://';
-  $destination = file_stream_wrapper_uri_normalize($scheme . basename($url));
+
+  $uri = media_parse($form_state['values']['url']);
+  if (!$uri) {
+    $scheme = variable_get('file_default_scheme', 'public') . '://';
+    $uri = file_stream_wrapper_uri_normalize($scheme . basename($url));
+
+    copy($url, $uri);
+  }
 
   $defaults = array (
     'display' => TRUE,
   );
 
-  // @TODO: This won't work for YouTube and many other streams.
-  copy($url, $destination);
-
-  $file = file_uri_to_object($destination);
+  $file = file_uri_to_object($uri);
   file_save($file);
 
   if ($file) {

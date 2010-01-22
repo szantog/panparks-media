@@ -3,6 +3,8 @@
 CHANGELOG for Media module.
 ===========================
 
+#692592 by aaron: Allow stream wrappers to validate & parse url's.
+#692592 by aaron: Add hook_media_parse.
 by aaron: Rename the Media module.
 by aaron: Remove the media_emfield module.
 by aaron: Add a wysiwyg flag to filter for youtube & the like.

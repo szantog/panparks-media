@@ -597,3 +597,26 @@ function media_retrieve_xml($url, $display_errors = FALSE, $refresh = FALSE) {
   module_load_include('inc', 'media', 'media.xml');
   return _media_retrieve_xml($url, $display_errors, $refresh);
 }
+
+/**
+ *  This will parse the url or embedded code pasted by the node submitter.
+ *
+ *  @param string $url
+ *    The original URL or embed code to parse.
+ *  @param array $options
+ *    An optional associative array. Currently:
+ *      'form_field' => The field from FAPI when being validated, suitable for
+ *        form_set_error(). If this is set, then a particular implementation
+ *        may set the error if it believes the URL to be malformed.
+ *  @return
+ *    The unique URI for the file, based on its stream wrapper, or NULL.
+ */
+function media_parse($url, $options = array()) {
+  foreach (module_implements('media_parse') as $module) {
+    $success = module_invoke($module, 'media_parse', $url, $options);
+
+    if ($success) {
+      return $success;
+    }
+  }
+}
