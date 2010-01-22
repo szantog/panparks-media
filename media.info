@@ -1,6 +1,6 @@
 ; $Id$
 
-name = Media Core
+name = Media
 description = Provides the core Media API
 package = Media
 core = 7.x

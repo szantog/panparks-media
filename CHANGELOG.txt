@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+by aaron: Rename the Media module.
 by aaron: Remove the media_emfield module.
 by aaron: Add a wysiwyg flag to filter for youtube & the like.
 by aaron: Add cache_media_xml table to schema.
