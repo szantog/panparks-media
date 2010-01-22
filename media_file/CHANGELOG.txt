@@ -3,6 +3,7 @@
 CHANGELOG for Media File module.
 ================================
 
+by aaron: Module is extraneous (but may be useful stuff) - remove .info.
 by aaron: File results are objects, not arrays.
 by aaron: In media_file_resource_add_file() build form w/
   media_resource_display_upload_form().
