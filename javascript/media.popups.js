@@ -14,7 +14,6 @@
 
 namespace('Drupal.media.popups');  
 
-
 /**
  * Media browser popup. Creates a media browser dialog.
  * 
@@ -113,7 +112,7 @@ Drupal.media.popups.mediaStyleSelector = function(mediaFile, onSelect, options) 
    */
   var ok = 'OK';
   var cancel = 'Cancel';
-  var notSelected = 'You have not selected anything!';
+  var notSelected = 'Very sorry, there was an unknown error embedding media.';
 
   if (Drupal && Drupal.t) {
     ok = Drupal.t(ok);
@@ -125,8 +124,9 @@ Drupal.media.popups.mediaStyleSelector = function(mediaFile, onSelect, options) 
   var dialogOptions = Drupal.media.popups.getDialogOptions();
   
   dialogOptions.buttons[ok] = function () {
-    debug.debug(this.contentWindow);
-    var formattedMedia = this.contentWindow.Drupal.media.formattedMedia;
+    
+    var formattedMedia = this.contentWindow.Drupal.media.formatForm.getFormattedMedia();
+    debug.debug(this.formattedMedia);
     if (!formattedMedia) {
       alert(notSelected);
       return;

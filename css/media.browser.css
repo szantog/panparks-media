@@ -22,7 +22,11 @@ div#media-browser .throbber {
 }
 
 #media-browser .ui-tabs-panel {
-	height: 450px;
+	/**
+	 * This sucks, I don't want to hardcode this, but don't know how else
+	 * to keep the scrollbar INSIDE the iframe.
+	 */
+	height: 410px;
 	overflow-y: auto;
 }
 

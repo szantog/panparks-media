@@ -22,28 +22,19 @@ Drupal.behaviors.mediaFormatForm = {
         $('#format-description').remove();
       })
       .appendTo('#format-description');
-    // When we select a new radio, then load it up to be sent to the WYSIWYG.
-    $("input[name='format']", context).change(Drupal.media.formatForm.setFormValues);
-    //Setup the value to start with.
-    $("input[name='format']:checked").trigger('change');
   }
 };
 
 
 Drupal.media.formatForm.getOptions = function() {
-  var ret = {};
-  $('input, select, textarea', $('#edit-options')).each(function() {
-    //@todo: this isn't working... why?
-    //ret[this.name] = $(this).fieldValue()[0];
-    ret[this.name] = $(this).val();
-  });
+  // Get all the values
+  var ret = {}; $.each($('#media-format-form fieldset#edit-options *').serializeArray(), function(i, field) { ret[field.name] = field.value; });
   return ret;
 }
 
-Drupal.media.formatForm.setFormValues = function() {
+Drupal.media.formatForm.getFormattedMedia = function() {
   var formatType = $("input[name='format']:checked").val();
-  
-  Drupal.media.formattedMedia = {type: formatType, options: Drupal.media.formatForm.getOptions(), html: Drupal.settings.media.formatFormFormats[formatType]};
+  return {type: formatType, options: Drupal.media.formatForm.getOptions(), html: Drupal.settings.media.formatFormFormats[formatType]};
 }
 
 })(jQuery);
