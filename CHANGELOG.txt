@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+#692592 by aaron: Begin preview for from url form.
 #692592 by aaron: Allow stream wrappers to validate & parse url's.
 #692592 by aaron: Add hook_media_parse.
 by aaron: Rename the Media module.

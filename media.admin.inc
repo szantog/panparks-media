@@ -416,9 +416,19 @@ function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
     '#value' => $redirect,
   );
 
+  $form['preview'] = array(
+    '#type' => 'item',
+    '#title' => t('Preview'),
+    '#value' => '<div id="media-preview"></div>',
+  );
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => 'Submit',
+  );
+
+  $form['#attached'] = array(
+    'js' => array(drupal_get_path('module', 'media') . '/javascript/media-add_from_url.js'),
   );
 
   return $form;
