@@ -68,7 +68,7 @@
  */
 ?>
 
-  <div id="media-browser-page-wrapper"><div id="media-browser-page">
-    <?php if (!empty($title)): ?><h1 class="title" id="page-title"><?php print $title; ?></h1><?php endif; ?>
-    <?php print render($page['content']); ?>
-  </div></div> <!-- /#page, /#page-wrapper -->
+<div id="media-browser-page-wrapper"><div id="media-browser-page">
+  <?php if (isset($messages)) { print $messages; } ?>
+  <?php print render($page['content']); ?>
+</div></div> <!-- /#page, /#page-wrapper -->

@@ -185,6 +185,12 @@ function theme_media_admin_thumbnail_operations($variables) {
   return $output;
 }
 
+/**
+ * Add messages to the page.
+ */
+function template_preprocess_media_dialog_page(&$variables) {
+  $variables['messages'] = theme('status_messages');
+}
 
 /* ******************************************** */
 /* Content navigation controls                  */
