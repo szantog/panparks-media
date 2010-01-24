@@ -1,6 +1,6 @@
 <?php
 
-/** 
+/**
  * @file
  * Common pages for the Media module.
  */
@@ -16,6 +16,26 @@ function media_file_view($media) {
   $build['media'][$media->fid] = field_attach_view('media', $media, 'media_original');
 
   return $build;
+}
+
+/**
+ *  Menu callback; display a thumbnail for an AJAX preview.
+ */
+function media_preview_ajax() {
+  $url = $_GET['url'];
+  $uri = media_parse($url);
+  if ($uri) {
+    $media = file_uri_to_object($uri);
+    drupal_json_output(array(
+      'preview' => theme('media_admin_thumbnail', array('file' => $media)),
+    ));
+  }
+  else {
+    drupal_json_output(array(
+      'error' => t('Invalid URL.'),
+    ));
+  }
+  die();
 }
 
 /**

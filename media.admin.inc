@@ -409,6 +409,7 @@ function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
     '#type' => 'textfield',
     '#title' => 'URL',
     '#description' => 'Input any url which Drupal can handle',
+    '#attributes' => array('class' => array('media-add-from-url')),
   );
 
   $form['redirect'] = array(
@@ -419,7 +420,7 @@ function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
   $form['preview'] = array(
     '#type' => 'item',
     '#title' => t('Preview'),
-    '#value' => '<div id="media-preview"></div>',
+    '#markup' => '<div id="media-add-from-url-preview"></div>'
   );
 
   $form['submit'] = array(
@@ -427,9 +428,17 @@ function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
     '#value' => 'Submit',
   );
 
+  // Add the javascript for live previews on textfield change.
   $form['#attached'] = array(
     'js' => array(drupal_get_path('module', 'media') . '/javascript/media-add_from_url.js'),
   );
+
+  $settings = array(
+    'media' => array(
+      'add_from_url_preview' => url('media/js'),
+    ),
+  );
+  drupal_add_js($settings, array('type' => 'setting'));
 
   return $form;
 }
@@ -468,7 +477,9 @@ function media_add_from_url_submit($form, &$form_state) {
     'display' => TRUE,
   );
   $file = file_uri_to_object($uri);
-  if ($file = file_move($file,$uri,FILE_EXISTS_RENAME)) {
+  file_save($file);
+  if ($file) {
+//   if ($file = file_move($file,$uri,FILE_EXISTS_RENAME)) {
     $form_state['redirect'] = 'media/' . $file->fid . '/edit';
     field_attach_submit('media', $file, $form, $form_state);
     // Make a copy of the file object to use as the media object

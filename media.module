@@ -40,7 +40,7 @@ function media_help($path,$arg) {
   switch($path) {
     case 'admin/help#media':
       $output = '';
-      $output .= '<h3>' .t('About') .'</h3>'; 
+      $output .= '<h3>' .t('About') .'</h3>';
       $output .= '<p>' .t('The Media module is a File Browser to the Internet, media provides a framework for managing files and multimedia assets, regardless of whether they are hosted on your own site or a 3rd party site. It replaces the Drupal core upload field with a unified User Interface where editors and administrators can upload, manage, and reuse files and multimedia assets. Media module also provides rich integration with WYSIWYG module to let content creators access media assets in rich text editor. For more information check <a href="@media_faq">Media Module FAQ</a>',array('@media_faq' => 'http://groups.drupal.org/node/19746')) .'</p>';
       $output .= '<h3>' .t('Uses') .'</h3>';
       $output .= '<dl>';
@@ -52,7 +52,7 @@ function media_help($path,$arg) {
       $output .= '<dd>' .t('Media module provides rich integration with WYSIWYG editors, using Media Browser plugin you can select media asset from library to add to the rich text editor moreover you can add media asset from the media browser itself using either upload method or add from url method. To configure media with WYSIWYG you need two steps of configuration:');
       $output .= '<ul><li>' .t('Enable WYSIWYG plugin on your desired <a href="@wysiwyg-profile">WYSIWYG profile</a>. Please note that you will need to have <a href="@wysiwyg">WYSIWYG</a> module enabled.', array('@wysiwyg-profile' => url('admin/config/content/wysiwyg'),'@wysiwyg' => 'http://drupal.org/project/wysiwyg')) .'</li>';
       $output .= '<li>' .t('Add Media Filter to the WYSIWYG enabled <a href="@input-format">Input format</a>', array('@input-format' => url('admin/config/content/formats'))) .'</li></ul></dd>';
-      return $output;  
+      return $output;
   }
 }
 
@@ -210,6 +210,14 @@ function media_menu() {
     'file' => 'media.pages.inc',
   );
 
+  $items['media/js'] = array(
+    'page callback' => 'media_preview_ajax',
+    'access callback' => 'media_access',
+    'access arguments' => array('view'),
+    'type' => MENU_CALLBACK,
+    'file' => 'media.pages.inc',
+  );
+
   return $items;
 }
 
@@ -271,7 +279,7 @@ function media_theme() {
 
     // Administrative thumbnail previews.
     'media_admin_thumbnail' => array(
-      'variables' => array('files' => array(), 'style_name' => 'thumbnail'),
+      'variables' => array('file' => array(), 'style_name' => 'thumbnail'),
       'file' => 'media.theme.inc',
     ),
 
