@@ -18,7 +18,7 @@ function media_variable_get($name, $default = NULL) {
 
 function media_variable_set($name, $value) {
   $variable_name = 'media_' . $name;
-  return variable_set($name, $value);
+  return variable_set($variable_name, $value);
 }
 
 function media_variable_default($name) {
