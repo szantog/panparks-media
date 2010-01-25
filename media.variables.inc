@@ -25,7 +25,7 @@
 function media_variable_get($name, $default = NULL) {
   // Allow for an override of the default.
   // Useful when a variable is required (like $path), but namespacing still desired.
-  if (!$default) {
+  if (!isset($default)) {
     $default = media_variable_default($name);
   }
   // Namespace all variables
@@ -40,7 +40,7 @@ function media_variable_get($name, $default = NULL) {
  *    The variable name to set. Note that it will be namespaced by
  *    pre-pending 'media_', as to avoid variable collisions with other modules.
  *  @param unknown $value
- *    The value to which to set the variable.
+ *    The value for which to set the variable.
  *  @return unknown
  *    Returns the stored variable after setting.
  *
