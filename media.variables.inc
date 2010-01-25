@@ -1,10 +1,26 @@
 <?php
-// $Id;
+// $Id$
 
 /**
  * @file Contains the variables used by media and their defaults.
  */
 
+/**
+ *  Wrapper for variable_get that uses the Media variable registry.
+ *
+ *  @param string $name
+ *    The variable name to retrieve. Note that it will be namespaced by
+ *    pre-pending 'media_', as to avoid variable collisions with other modules.
+ *  @param unknown $default
+ *    An optional default variable to return if the variable hasn't been set
+ *    yet. Note that within this module, all veriables should already be set
+ *    in the media_variable_default() function.
+ *  @return unknown
+ *    Returns the stored variable or its default.
+ *
+ *  @see media_variable_set
+ *  @see media-variable_default
+ */
 function media_variable_get($name, $default = NULL) {
   // Allow for an override of the default.
   // Useful when a variable is required (like $path), but namespacing still desired.
@@ -16,15 +32,35 @@ function media_variable_get($name, $default = NULL) {
   return variable_get($variable_name, $default);
 }
 
+/**
+ *  Wrapper for variable_set that uses the Media variable registry.
+ *
+ *  @param string $name
+ *    The variable name to set. Note that it will be namespaced by
+ *    pre-pending 'media_', as to avoid variable collisions with other modules.
+ *  @param unknown $value
+ *    The value to which to set the variable.
+ *  @return unknown
+ *    Returns the stored variable after setting.
+ */
 function media_variable_set($name, $value) {
   $variable_name = 'media_' . $name;
   return variable_set($variable_name, $value);
 }
 
+/**
+ *  The default variables within the Media namespace.
+ *
+ *  @param string $name
+ *    The variable name to retrieve the default. Note that it has not yet been
+ *    pre-pended with the 'media_' namespace at this time.
+ *  @return unknown
+ *    The default value of this variable, if it's been set, or NULL.
+ */
 function media_variable_default($name) {
   static $defaults;
 
-  if (!$defaults) {
+  if (!isset($defaults)) {
     $defaults = array();
     $defaults['wysiwyg_title'] = 'Media Browser';
     $defaults['wysiwyg_icon_title'] = 'Add Media';
@@ -48,6 +84,3 @@ function media_variable_default($name) {
     return $defaults[$name];
   }
 }
-
-
-?>

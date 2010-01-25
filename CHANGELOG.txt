@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+#694520 by aaron: Document the variable namespace registry.
 #692786 by aaron: Prefill description in browser file selector.
 #692592 by aaron: Add AJAX preview for media from url.
 #692592 by aaron: Add media-add_from_url.js.
