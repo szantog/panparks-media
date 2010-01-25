@@ -67,9 +67,8 @@ function media_variable_set($name, $value) {
 function media_variable_default($name = NULL) {
   static $defaults;
 
-  // Use the advanced drupal_static() pattern.
   if (!isset($defaults)) {
-    $defaults = &drupal_static(__FUNCTION__, array());
+    $defaults = array();
 
     $defaults['wysiwyg_title'] = 'Media Browser';
     $defaults['wysiwyg_icon_title'] = 'Add Media';
