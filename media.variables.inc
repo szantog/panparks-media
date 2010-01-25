@@ -6,21 +6,21 @@
  */
 
 /**
- *  Wrapper for variable_get that uses the Media variable registry.
+ *  Wrapper for variable_get() that uses the Media variable registry.
  *
  *  @param string $name
  *    The variable name to retrieve. Note that it will be namespaced by
  *    pre-pending 'media_', as to avoid variable collisions with other modules.
  *  @param unknown $default
  *    An optional default variable to return if the variable hasn't been set
- *    yet. Note that within this module, all veriables should already be set
+ *    yet. Note that within this module, all variables should already be set
  *    in the media_variable_default() function.
  *  @return unknown
  *    Returns the stored variable or its default.
  *
- *  @see media_variable_set
- *  @see media_variable_del
- *  @see media_variable_default
+ *  @see media_variable_set()
+ *  @see media_variable_del()
+ *  @see media_variable_default()
  */
 function media_variable_get($name, $default = NULL) {
   // Allow for an override of the default.
@@ -34,7 +34,7 @@ function media_variable_get($name, $default = NULL) {
 }
 
 /**
- *  Wrapper for variable_set that uses the Media variable registry.
+ *  Wrapper for variable_set() that uses the Media variable registry.
  *
  *  @param string $name
  *    The variable name to set. Note that it will be namespaced by
@@ -44,9 +44,9 @@ function media_variable_get($name, $default = NULL) {
  *  @return unknown
  *    Returns the stored variable after setting.
  *
- *  @see media_variable_get
- *  @see media_variable_del
- *  @see media_variable_default
+ *  @see media_variable_get()
+ *  @see media_variable_del()
+ *  @see media_variable_default()
  */
 function media_variable_set($name, $value) {
   $variable_name = 'media_' . $name;
@@ -54,15 +54,15 @@ function media_variable_set($name, $value) {
 }
 
 /**
- *  Wrapper for variable_del that uses the Media variable registry.
+ *  Wrapper for variable_del() that uses the Media variable registry.
  *
  *  @param string $name
  *    The variable name to delete. Note that it will be namespaced by
  *    pre-pending 'media_', as to avoid variable collisions with other modules.
  *
- *  @see media_variable_get
- *  @see media_variable_set
- *  @see media_variable_default
+ *  @see media_variable_get()
+ *  @see media_variable_set()
+ *  @see media_variable_default()
  */
 function media_variable_del($name) {
   $variable_name = 'media_' . $name;
@@ -79,9 +79,9 @@ function media_variable_del($name) {
  *    The default value of this variable, if it's been set, or NULL, unless
  *    $name is NULL, in which case we return an array of all default values.
  *
- *  @see media_variable_get
- *  @see media_variable_set
- *  @see media_variable_del
+ *  @see media_variable_get()
+ *  @see media_variable_set()
+ *  @see media_variable_del()
  */
 function media_variable_default($name = NULL) {
   static $defaults;
