@@ -19,7 +19,7 @@
  *    Returns the stored variable or its default.
  *
  *  @see media_variable_set
- *  @see media-variable_default
+ *  @see media_variable_default
  */
 function media_variable_get($name, $default = NULL) {
   // Allow for an override of the default.
@@ -42,6 +42,9 @@ function media_variable_get($name, $default = NULL) {
  *    The value to which to set the variable.
  *  @return unknown
  *    Returns the stored variable after setting.
+ *
+ *  @see media_variable_get
+ *  @see media_variable_default
  */
 function media_variable_set($name, $value) {
   $variable_name = 'media_' . $name;
@@ -56,6 +59,9 @@ function media_variable_set($name, $value) {
  *    pre-pended with the 'media_' namespace at this time.
  *  @return unknown
  *    The default value of this variable, if it's been set, or NULL.
+ *
+ *  @see media_variable_get
+ *  @see media_variable_set
  */
 function media_variable_default($name) {
   static $defaults;
