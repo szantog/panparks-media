@@ -64,7 +64,7 @@ function media_variable_set($name, $value) {
  *  @see media_variable_set
  */
 function media_variable_default($name) {
-  static $defaults;
+  $defaults = &drupal_static(__FUNCTION__);
 
   if (!isset($defaults)) {
     $defaults = array();
