@@ -281,9 +281,12 @@ function media_is_type($media, $args) {
 function media_media_format_form_prepare_alter(&$form, &$form_state, $media) {
   switch($media->type) {
     case 'image':
+      // @TODO: Isn't there a $file->description?
+      $description = $media->filename;
       $form['options']['alt'] = array(
         '#type' => 'textfield',
         '#title' => t('Description'),
+        '#default_value' => $description,
       );
       break;
   }
