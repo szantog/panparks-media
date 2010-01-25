@@ -3,6 +3,8 @@
 CHANGELOG for Media module.
 ===========================
 
+#694520 by aaron: Remove all media namespace variables on uninstall.
+#694520 by aaron: Add media_variable_del().
 #694520 by aaron: Remove use of &drupal_static() for the variable defaults.
 #694520 by aaron: Allow media_variable_default() to return all variables.
 #694520 by aaron: Use &drupal_static() for the variable defaults.

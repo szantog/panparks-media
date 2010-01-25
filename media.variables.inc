@@ -19,6 +19,7 @@
  *    Returns the stored variable or its default.
  *
  *  @see media_variable_set
+ *  @see media_variable_del
  *  @see media_variable_default
  */
 function media_variable_get($name, $default = NULL) {
@@ -44,11 +45,28 @@ function media_variable_get($name, $default = NULL) {
  *    Returns the stored variable after setting.
  *
  *  @see media_variable_get
+ *  @see media_variable_del
  *  @see media_variable_default
  */
 function media_variable_set($name, $value) {
   $variable_name = 'media_' . $name;
   return variable_set($variable_name, $value);
+}
+
+/**
+ *  Wrapper for variable_del that uses the Media variable registry.
+ *
+ *  @param string $name
+ *    The variable name to delete. Note that it will be namespaced by
+ *    pre-pending 'media_', as to avoid variable collisions with other modules.
+ *
+ *  @see media_variable_get
+ *  @see media_variable_set
+ *  @see media_variable_default
+ */
+function media_variable_del($name) {
+  $variable_name = 'media_' . $name;
+  variable_del($variable_name);
 }
 
 /**
@@ -63,6 +81,7 @@ function media_variable_set($name, $value) {
  *
  *  @see media_variable_get
  *  @see media_variable_set
+ *  @see media_variable_del
  */
 function media_variable_default($name = NULL) {
   static $defaults;

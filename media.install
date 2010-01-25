@@ -189,26 +189,9 @@ function media_uninstall() {
    * See comment above in media_install.
    */
   db_drop_field('file', 'type');
-  $types = node_type_get_types();
-  $global = new stdClass;
-  $global->fields = field_info_instances();
-  $types['global'] = $global;
-  foreach ($types as $name => $type) {
-    variable_del('media_' . $name . '_override');
-    variable_del('media_' . $name . '_enabled');
-    if (isset($type->fields)) {
-      foreach ((array)$type->fields as $field_name => $field) {
-        foreach (media_registration_kinds() as $kind) {
-          variable_del('media_' . $node_type . '_' . $field['field_name'] . '_' . $kind);
-        }
-      }
-    }
+  foreach (media_variable_default() as $name => $value) {
+    media_variable_del($name);
   }
-  variable_del('media_file_extensions');
-  variable_del('media_max_filesize');
-  variable_del('media_file_progress_image');
-  variable_del('media_file_list_size');
-  variable_del('media_file_progress_success');
 }
 
 /**
