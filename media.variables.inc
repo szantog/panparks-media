@@ -55,19 +55,22 @@ function media_variable_set($name, $value) {
  *  The default variables within the Media namespace.
  *
  *  @param string $name
- *    The variable name to retrieve the default. Note that it has not yet been
- *    pre-pended with the 'media_' namespace at this time.
+ *    Optional variable name to retrieve the default. Note that it has not yet
+ *    been pre-pended with the 'media_' namespace at this time.
  *  @return unknown
- *    The default value of this variable, if it's been set, or NULL.
+ *    The default value of this variable, if it's been set, or NULL, unless
+ *    $name is NULL, in which case we return an array of all default values.
  *
  *  @see media_variable_get
  *  @see media_variable_set
  */
-function media_variable_default($name) {
-  $defaults = &drupal_static(__FUNCTION__);
+function media_variable_default($name = NULL) {
+  static $defaults;
 
+  // Use the advanced drupal_static() pattern.
   if (!isset($defaults)) {
-    $defaults = array();
+    $defaults = &drupal_static(__FUNCTION__, array());
+
     $defaults['wysiwyg_title'] = 'Media Browser';
     $defaults['wysiwyg_icon_title'] = 'Add Media';
     $defaults['wysiwyg_default_view_mode'] = 'media_large';
@@ -84,6 +87,10 @@ function media_variable_default($name) {
     // Used in media.xml.inc
     $defaults['xml_cache_expire'] = 3600;
     // Was in cruft.inc $defaults['media_file_progress_image'] = '';
+  }
+
+  if (!isset($name)) {
+    return $defaults;
   }
 
   if (isset($defaults[$name])) {
