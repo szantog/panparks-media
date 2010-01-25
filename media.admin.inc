@@ -313,8 +313,8 @@ function media_multiple_delete_confirm_submit($form, &$form_state) {
  */
 function media_add_upload($form, $form_state, $redirect = NULL) {
   $validators = array(
-   'file_validate_extensions' => array(variable_get('media_file_extensions', '')),
-   'file_validate_size' => array(parse_size(variable_get('media_max_filesize', ''))),
+   'file_validate_extensions' => array(media_variable_get('file_extensions')),
+   'file_validate_size' => array(parse_size(media_variable_get('max_filesize'))),
   );
 
 

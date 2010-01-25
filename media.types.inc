@@ -68,7 +68,7 @@ function media_entity_info() {
  *  @return void;
  */
 function media_type_save(&$type) {
-  $types = variable_get('media_types', array());
+  $types = media_variable_get('types');
   $type = media_type_set_defaults($type);
   $types[$type->machine_name] = $type;
 
@@ -186,7 +186,7 @@ function media_type_get_types() {
   $types =& drupal_static(__FUNCTION__);
 
   if (!$types) {
-    $types = variable_get('media_types', array());
+    $types = media_variable_get('types');
     uasort($types, 'drupal_sort_weight');
   }
   return $types;

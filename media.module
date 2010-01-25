@@ -16,9 +16,11 @@
 /* INCLUDES                                  */
 /* ***************************************** */
 
+include_once('media.variables.inc'); // A registry of variable_get defaults.
 include_once('media.types.inc');
 include_once('media.fields.inc');
 include_once('media.filter.inc'); // Code related to [[inline tags]] and wysiwyg
+
 
 /* ***************************************** */
 /* CONSTANTS                                 */
@@ -501,7 +503,7 @@ function media_file_list_element_process($element, $edit, $form_state, $form) {
   $element['list'] = array(
     '#type'     => 'select',
     '#options'  => $element['#options'],
-    '#size'     => variable_get('media_file_list_size', 10),
+    '#size'     => media_variable_get('file_list_size'),
   );
 
   return $element;
@@ -609,7 +611,7 @@ function media_library() {
  */
 function media_dialog_get_theme_name() {
   // Set to empty to get the default theme.
-  return variable_get('media_dialog_get_theme_name', 'seven');
+  return media_variable_get('dialog_get_theme_name');
 }
 
 /**

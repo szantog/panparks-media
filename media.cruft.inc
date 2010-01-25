@@ -128,7 +128,7 @@ function media_build_browser_form($form_state, $registration_ids, $node_type, $f
   );
   $form['media_browser']['media_browser_file_progress']['file_progress_message'] = array(
     '#type'  => 'item',
-    '#title' => theme('image', variable_get('media_file_progress_image', $path .'/images/uploading-gradient.gif')) . t('Please wait while your file is attached...'),
+    '#title' => theme('image', media_variable_get('file_progress_image', $path .'/images/uploading-gradient.gif')) . t('Please wait while your file is attached...'),
   );
 
   // AHAH enabled submit button.

@@ -320,7 +320,7 @@ function media_generic_widget_process($element, &$form_state, $form) {
     '#markup' => '<a class="launcher" href="#">Select Media</a>',
   );
 
-  if (variable_get('media_debug', TRUE)) {
+  if (media_variable_get('debug')) {
     drupal_add_js(array('media' => array('debug' => TRUE)), 'setting');
     $element['debug'] = array(
       '#type' => 'fieldset',

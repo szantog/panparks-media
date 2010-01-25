@@ -176,7 +176,7 @@ function media_format_form($form, $form_state, $media) {
     return;
   }
 
-  $default_view_mode = variable_get('media_wysiwyg_default_view_mode', 'media_large');
+  $default_view_mode = media_variable_get('wysiwyg_default_view_mode');
   if (!isset($formats[$default_view_mode])) {
     $default_view_mode = key($formats);
   }

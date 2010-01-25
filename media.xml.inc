@@ -58,7 +58,7 @@ function _media_retrieve_xml($url, $display_errors = FALSE, $refresh = FALSE) {
   }
   else {
     $xmls[$url] = _media_unserialize_xml($xml);
-    cache_set('media:xml:'. $url, $xmls[$url], 'cache_media_xml', variable_get('media_xml_cache_expire', 3600));
+    cache_set('media:xml:'. $url, $xmls[$url], 'cache_media_xml', media_variable_get('xml_cache_expire', 3600));
   }
 
   return $xmls[$url];
