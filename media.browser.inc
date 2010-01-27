@@ -129,7 +129,6 @@ function media_browser_list($conditions = array()) {
     // @todo: Should generate placeholders for audio/video
     // Add yet another wrapper so we can style it as a preview :(
     // Otherwise it isn't really possible to know because the user can pick anything for their preview mode.
-    // Actually, on second thought, let's just use the square_thumbail view.
     $preview = field_view_field('media', $media, 'file', 'media_preview');
     $preview['#show_names'] = TRUE;
     $preview['#theme_wrappers'][] = 'media_thumbnail';

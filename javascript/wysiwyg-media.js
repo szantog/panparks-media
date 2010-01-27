@@ -38,17 +38,16 @@ Drupal.media = Drupal.media || {};
       // There is some method of adding a "fake element"
       // But until then, we're just going to embed to img.
       // This is pretty hacked for now.
-      // 
+      //
       var imgElement = $(this.stripDivs(formattedMedia));
-      this.addImgeAttributes(imgElement, mediaFile.fid, viewMode, options);
+      this.addImageAttributes(imgElement, mediaFile.fid, viewMode, options);
       
       var toInsert = this.outerHTML(imgElement);
       // Create an inline tag
       var inlineTag = Drupal.wysiwyg.plugins.media.createTag(imgElement);
       // Add it to the tag map in case the user switches input formats
       Drupal.settings.tagmap[inlineTag] = toInsert;
-      
-      wysiwygInstance.insert(toInsert + "&nbsp;");
+      wysiwygInstance.insert(toInsert);
     },
     
     /**
@@ -60,7 +59,7 @@ Drupal.media = Drupal.media || {};
       return $('<div>').append( element.eq(0).clone() ).html();
     },
     
-    addImgeAttributes: function(imgElement, fid, view_mode, additional) {
+    addImageAttributes: function(imgElement, fid, view_mode, additional) {
       imgElement.attr('fid', fid);
       imgElement.attr('view_mode', view_mode);
       if (additional) {
@@ -115,7 +114,7 @@ Drupal.media = Drupal.media || {};
             mediaObj = JSON.parse(_tag);
             
             var imgElement = $(mediaMarkup);
-            this.addImgeAttributes(imgElement, mediaObj.fid, mediaObj.view_mode);
+            this.addImageAttributes(imgElement, mediaObj.fid, mediaObj.view_mode);
             var toInsert = this.outerHTML(imgElement);
             content = content.replace(inlineTag, toInsert);
           } else {
@@ -149,8 +148,12 @@ Drupal.media = Drupal.media || {};
       
       var imgElement = imgNode[0];
       
-      for(i=0; i< imgElement.attributes.length; i++) {
-        mediaAttributes[imgElement.attributes[i].nodeName] = imgNode.attr(imgElement.attributes[i].nodeName);
+      //@todo: this does not work in IE, width and height are always 0.
+      for (i=0; i< imgElement.attributes.length; i++) {
+        var attr = imgElement.attributes[i];
+        if (attr.specified == true) {
+          mediaAttributes[attr.name] = attr.value;
+        }
       }
       // Remove elements from attribs using the blacklist
       for(var blackList in Drupal.settings.media.blacklist) {
