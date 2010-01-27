@@ -24,6 +24,9 @@ function media_browser() {
     unset($plugin['#attached']);
   }
 
+  // Allow modules implementing hook_media_browser_callbacks() to add a set
+  // of callbacks to the settings.
+  // @TODO: Document the hook...
   $callbacks = module_invoke_all('media_browser_callbacks');
   drupal_alter('media_browser_callbacks_alter', $callbacks);
   $settings = array(
@@ -105,7 +108,7 @@ function media_media_browser_plugins() {
 }
 
 /**
- *  @TODO: Document.
+ * Implements hook_media_browser_callbacks().
  */
 function media_media_browser_callbacks() {
   return array (
@@ -121,8 +124,34 @@ function media_media_browser_callbacks() {
  *
  * @return unknown_type
  */
-function media_browser_list($conditions = array()) {
-  $medias = entity_load('media', FALSE, $conditions);
+function media_browser_list() {
+  if (isset($_GET['conditions'])) {
+    $conditions = drupal_json_decode($_GET['conditions']);
+  }
+  $conditions = isset($conditions) ? $conditions : array();
+
+  if (isset($_GET['streams'])) {
+    $streams = drupal_json_decode($_GET['streams']);
+  }
+  $fids = FALSE;
+
+  // If we have been passed an array of streams, such as 'youtube://',
+  // then only accept media from those streams. Unfortunately, entity_load
+  // doesn't accept a filter of LIKE, so we need to preprocess that.
+  // @TODO: This is completely unacceptable. 1) if we pass more than
+  // one stream, it will do AND rather than OR right now (easy fix),
+  // but 2) this will get rather large I suspect, unless we combine
+  // with pagers, or use a db_transaction maybe, or just write our own query.
+  if (isset($streams)) {
+    $fids = db_select('file', 'f')
+      ->fields('f', array('fid'));
+    foreach ($streams as $stream) {
+      $fids->condition('uri', db_like($stream) . '%', 'LIKE');
+    }
+    $fids = $fids->execute()
+      ->fetchCol();
+  }
+  $medias = entity_load('media', $fids, $conditions);
 
   foreach ($medias as &$media) {
     // Generate a preview of the file

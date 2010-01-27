@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+#697106 by aaron: Begin support for stream filter to media_browser_list().
 #694520 by aaron: check for !isset($default) in media_variable_get().
 #694520 by aaron: Remove all media namespace variables on uninstall.
 #694520 by aaron: Add media_variable_del().
