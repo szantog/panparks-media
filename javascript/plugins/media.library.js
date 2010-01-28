@@ -1,8 +1,14 @@
+// $Id$
+
+/**
+ *  @file
+ *  Build the media library thumbnails for the browser selection form.
+ */
 (function ($) {
   namespace('media.browser.plugin');
-  
+
   Drupal.media.browser.plugin.library = function(mediaBrowser, options) {
-    
+
     return {
       mediaFiles: [],
       init: function() {
@@ -15,7 +21,7 @@
             mediaBrowser.getActivePanel().addClass('throbber');
             mediaBrowser.getActivePanel().html('');
             //mediaBrowser.getActivePanel().addClass('throbber');
-            
+
             // Assumes we have to refresh everytime.
             // Remove any existing content
             mediaBrowser.getActivePanel().append('<ul></ul>');
@@ -25,19 +31,25 @@
           }
         });
       },
-      
+
       getConditions: function () {
-        return {};
-        //return this.settings.conditions;
+        return Drupal.settings.media.browser.conditions;
+//         return {};
+//         return this.settings.conditions;
       },
-    
+
+      getStreams: function () {
+        return Drupal.settings.media.browser.streams;
+//         return {};
+      },
+
       getMedia: function() {
         var that = this;
         var callback = mediaBrowser.getCallbackUrl('getMedia');
         var params = {
-          conditions: this.getConditions()
+          conditions: JSON.stringify(this.getConditions()),
+          streams: JSON.stringify(this.getStreams())
         };
-        
         jQuery.get(
           callback,
           params,
@@ -48,21 +60,21 @@
           'json'
         );
       },
-      
+
       render: function() {
         var that = this;
         mediaBrowser.getActivePanel().removeClass('throbber');
         if(this.mediaFiles.length < 1) {
           return;
         }
-        
+
         for (var m in this.mediaFiles) {
           mediaFile = this.mediaFiles[m];
 
           var listItem = jQuery('<li></li>').appendTo(this.browser)
             .attr('id', 'media-file-' + mediaFile.fid)
             .addClass('media-file');
-          
+
           var imgLink = jQuery('<a href="#"></a>').appendTo(listItem)
             .html(mediaFile.preview)
             .bind('click', mediaFile, function(e) {

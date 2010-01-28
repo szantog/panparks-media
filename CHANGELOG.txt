@@ -3,6 +3,8 @@
 CHANGELOG for Media module.
 ===========================
 
+#697106 by aaron: Allow modules to define & alter default streams & conditions.
+#697106 by aaron: Send default conditions & streams to browser library.
 #697106 by aaron: Filter fid's on conditions when filtering on stream.
 #697106 by aaron: Begin support for stream filter to media_browser_list().
 #694520 by aaron: check for !isset($default) in media_variable_get().

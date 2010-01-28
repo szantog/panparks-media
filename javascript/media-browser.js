@@ -11,7 +11,7 @@ Drupal.behaviors.mediaBrowser = {
     // Wants to pass options and tell it to start :(
     // We should be starting here IF the parent doesn't
     // initiate the process.
-    // For testing  
+    // For testing
     if (window.location.href.search('autostart') != -1) {
       Drupal.media.browser.launch({});
       $('#media-browser-page-wrapper')
@@ -27,7 +27,7 @@ Drupal.behaviors.mediaBrowser = {
     // This method is called when the popup appears.  Use this opportunity to
     // construct the tabs.
     // TODO: Hook it up so that visiting the library tab calls the start method.
-    
+
   }
 };
 
@@ -38,15 +38,15 @@ Drupal.media.browser.plugins = {};
 
 Drupal.media.browser.getDefaults = function () {
   return {
-    viewType: 'thumbnails',
-    //@todo: use variable
+    viewType: Drupal.settings.media.browser.viewType,
     callbacks: Drupal.settings.media.browser.callbacks,
     plugin_settings: Drupal.settings.media.browser.plugins,
     defaultTab: Drupal.settings.media.browser.defaultTab,
-    conditions: {}
+    conditions: Drupal.settings.media.browser.conditions,
+    streams: Drupal.settings.media.browser.streams
   }
 };
-  
+
 Drupal.media.browser.launch = function(options) {
   this.settings = $.extend({}, this.getDefaults(), options);
   this.setupListeners();
@@ -96,14 +96,14 @@ Drupal.media.browser.start = function (pluginId) {
   debug.debug('Starting Plugin: ' + pluginId);
   //This isn't ideal, the settings thing needs more definition, anyway,
   // allows us to merge in settings that could have been modified.
-  // 
+  //
   debug.debug(this.settings);
   if (typeof this.settings.plugin_settings[pluginId] != 'undefined') {
     if (typeof this.settings.plugin_settings[pluginId] != 'undefined') {
       var options = this.settings.plugin_settings[pluginId].settings;
     }
   }
-  
+
   debug.debug(options);
   this.plugins[pluginId].instance =
     this.plugins[pluginId].factory(this, options);

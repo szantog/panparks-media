@@ -29,9 +29,31 @@ function media_browser() {
   // @TODO: Document the hook...
   $callbacks = module_invoke_all('media_browser_callbacks');
   drupal_alter('media_browser_callbacks_alter', $callbacks);
+
+  // Allow modules implementing hook_media_browser_conditions to add new
+  // conditions to load the library. For instance, they may only return media
+  // belonging to the user, with array('uid' => $user->uid);
+  $conditions = module_invoke_all('media_browser_conditions');
+
+  // Allow modules implementing hook_media_browser_conditions_alter to alter
+  // the set of browser library conditions.
+  drupal_alter('media_browser_conditions_alter', $conditions);
+
+  // Allow modules implementing hook_media_browser_conditions to filter streams
+  // when loading the library. For instance, they may only return media
+  // belonging to the public:// stream, with array('public://');
+  $streams = module_invoke_all('media_browser_streams');
+
+  // Allow modules implementing hook_media_browser_streams_alter to alter
+  // the set of browser stream filters.
+  drupal_alter('media_browser_conditions_streams', $streams);
+
   $settings = array(
+    'viewType' => media_variable_get('browser_viewtype_default', 'thumbnails'),
     'callbacks' => $callbacks,
     'plugins' => $plugins,
+    'conditions' => $conditions,
+    'streams' => $streams,
   );
 
   drupal_add_js(array('media' => array('browser' => $settings)), 'setting');
@@ -141,7 +163,7 @@ function media_browser_list() {
   // one stream, it will do AND rather than OR right now (easy fix),
   // but 2) this will get rather large I suspect, unless we combine
   // with pagers, or use a db_transaction maybe, or just write our own query.
-  if (isset($streams)) {
+  if (!empty($streams)) {
     // First get the fid's to load. We have to do that first, because
     // entity_load doesn't accept a condition of LIKE.
     $fids = db_select('file', 'f')
