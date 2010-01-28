@@ -3,11 +3,11 @@
 
 /**
  *  @file
- *  @TODO Document.
+ *  The media popup browser for editors.
  */
 
 /**
- *  @TODO: Document this.
+ *  Displays the popup media browser for editors.
  */
 function media_browser() {
   $rows = array();
@@ -41,13 +41,14 @@ function media_browser() {
 
   // Allow modules implementing hook_media_browser_conditions to filter streams
   // when loading the library. For instance, they may only return media
-  // belonging to the public:// stream, with array('public://');
+  // belonging to the flickr:// stream, with array('flickr://');
   $streams = module_invoke_all('media_browser_streams');
 
   // Allow modules implementing hook_media_browser_streams_alter to alter
   // the set of browser stream filters.
   drupal_alter('media_browser_conditions_streams', $streams);
 
+  // Pass our settings to the browser.
   $settings = array(
     'viewType' => media_variable_get('browser_viewtype_default', 'thumbnails'),
     'callbacks' => $callbacks,
@@ -55,10 +56,8 @@ function media_browser() {
     'conditions' => $conditions,
     'streams' => $streams,
   );
-
   drupal_add_js(array('media' => array('browser' => $settings)), 'setting');
 
-//  drupal_add_js(array('mediaBrowser' => $settings), 'setting');
   // Here we will return the basic structure of the browser.
   $build['media_browser'] = array(
     '#prefix' => '<div id="media-browser">',
@@ -66,6 +65,7 @@ function media_browser() {
     '#attached' => $attached,
   );
 
+  // Display the browser tabs.
   $build['media_browser']['tabs'] = array(
     '#type' => 'markup',
     '#prefix' => '<div id="media-browser-tabs">',
@@ -93,11 +93,8 @@ function media_media_browser_plugins() {
   $upload_form = drupal_get_form('media_add_upload', $redirect);
   $from_url_form = drupal_get_form('media_add_from_url', $redirect);
 
+  // Add the Upload tab.
   $plugins['upload'] = array(
-//    'tabs' => array(
-//      'title' => 'Upload',
-//      'url' => url('media/add/upload', array('query' => array('destination' => drupal_get_destination()))),
-//    ),
     '#attached' => array(
       'js' => array($path . '/javascript/plugins/media.upload.js'),
     ),
@@ -106,6 +103,7 @@ function media_media_browser_plugins() {
     ),
   );
 
+  // Add the 'From URL' tab.
   $plugins['fromurl'] = array(
     '#attached' => array(
       'js' => array($path . '/javascript/plugins/media.fromurl.js'),
@@ -115,6 +113,7 @@ function media_media_browser_plugins() {
     ),
   );
 
+  // Add the default 'Library' tab.
   $plugins['library'] = array(
     '#attached' => array(
       'js' => array(
@@ -133,6 +132,7 @@ function media_media_browser_plugins() {
  * Implements hook_media_browser_callbacks().
  */
 function media_media_browser_callbacks() {
+  // The callback for the default media library thumbnail list.
   return array (
     'getMedia' => array(
       'url' => url('media/browser/list'),

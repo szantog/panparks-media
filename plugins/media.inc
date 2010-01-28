@@ -1,10 +1,17 @@
 <?php
-// $Id;
+// $Id$
+
+/**
+ *  @file
+ *  Define the WYSIWYG browser plugin.
+ */
+
 /**
  * Implementation of WYSIWYG's hook_INCLUDE_plugin().
  */
 function media_media_plugin() {
-  include_once drupal_get_path('module', 'media') . '/media.browser.inc';
+  // Include the required browser JS.
+  module_load_include('inc', 'media', 'media.browser');
   media_include_browser_js();
 
   // Plugin definition
