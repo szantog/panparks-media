@@ -152,57 +152,61 @@ function media_browser_list() {
   }
   $conditions = isset($conditions) ? $conditions : array();
 
-  if (isset($_GET['streams'])) {
-    $streams = drupal_json_decode($_GET['streams']);
-  }
-
   // If we have been passed an array of streams, such as 'youtube://',
   // then only accept media from those streams. Unfortunately, entity_load
   // doesn't accept a filter of LIKE, so we need to preprocess that.
-  // @TODO: This is completely unacceptable. 1) if we pass more than
-  // one stream, it will do AND rather than OR right now (easy fix),
-  // but 2) this will get rather large I suspect, unless we combine
+  // @TODO: However, if we pass more than one stream, it will do AND rather
+  // than OR right now (hopefully an easy fix).
+  if (isset($_GET['streams'])) {
+    $streams = drupal_json_decode($_GET['streams']);
+  }
+  $streams = isset($streams) ? $streams : array();
+
+  // @TODO: This will get rather large I suspect, unless we combine
   // with pagers, or use a db_transaction maybe, or just write our own query.
-  if (!empty($streams)) {
-    // First get the fid's to load. We have to do that first, because
-    // entity_load doesn't accept a condition of LIKE.
-    $fids = db_select('file', 'f')
-      ->fields('f', array('fid'));
 
-    // Filter on streams.
-    foreach ($streams as $stream) {
-      $fids->condition('uri', db_like($stream) . '%', 'LIKE');
-    }
+  // First get the fid's to load. We have to do that first, because
+  // entity_load doesn't accept a condition of LIKE.
+  $fids = db_select('file', 'f')
+    ->fields('f', array('fid'));
 
-    // Add our conditions.
-    foreach ($conditions as $field => $condition) {
-      $fids->condition($field, $condition);
-    }
+  // Filter on streams.
+  foreach ($streams as $stream) {
+    $fids->condition('uri', db_like($stream) . '%', 'LIKE');
+  }
 
-    // Grab the fid's.
-    $fids = $fids->execute()
-      ->fetchCol();
+  // Add our conditions.
+  foreach ($conditions as $field => $condition) {
+    $fids->condition($field, $condition);
+  }
 
+  // Grab the fid's.
+/*  $fids = $fids->extend('PagerDefault')
+    ->limit(media_variable_get('browser_pager_limit', 1));*/
+  $fids = $fids->execute()
+    ->fetchCol();
+
+  if (!empty($fids)) {
     // Now load the desired media to display.
     $medias = entity_load('media', $fids);
-  }
-  else {
-    // Load the media based on any required conditions.
-    $medias = entity_load('media', FALSE, $conditions);
+
+    foreach ($medias as &$media) {
+      // Generate a preview of the file
+      // @todo: Should generate placeholders for audio
+      // Add yet another wrapper so we can style it as a preview :(
+      // Otherwise it isn't really possible to know because the user can pick anything for their preview mode.
+      $preview = field_view_field('media', $media, 'file', 'media_preview');
+      $preview['#show_names'] = TRUE;
+      $preview['#theme_wrappers'][] = 'media_thumbnail';
+
+      $media->preview = drupal_render($preview);
+    }
+    print drupal_json_encode($medias);
+    die();
   }
 
-  foreach ($medias as &$media) {
-    // Generate a preview of the file
-    // @todo: Should generate placeholders for audio
-    // Add yet another wrapper so we can style it as a preview :(
-    // Otherwise it isn't really possible to know because the user can pick anything for their preview mode.
-    $preview = field_view_field('media', $media, 'file', 'media_preview');
-    $preview['#show_names'] = TRUE;
-    $preview['#theme_wrappers'][] = 'media_thumbnail';
-
-    $media->preview = drupal_render($preview);
-  }
-  print drupal_json_encode($medias);
+  // Print an empty message.
+  print drupal_json_encode(array('empty' => t('There are currently no media in this library to select.')));
   die();
 }
 

@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+#692618 by aaron: Begin framework to allow library paging.
 #697106 by aaron: Allow modules to define & alter default streams & conditions.
 #697106 by aaron: Send default conditions & streams to browser library.
 #697106 by aaron: Filter fid's on conditions when filtering on stream.
