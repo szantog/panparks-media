@@ -104,7 +104,11 @@ function media_variable_default($name = NULL) {
     $defaults['types'] = array();
     // Used in media.xml.inc
     $defaults['xml_cache_expire'] = 3600;
-    // Was in cruft.inc $defaults['media_file_progress_image'] = '';
+
+    // Browser defaults in media.browser.inc.
+    $defaults['browser_viewtype_default'] = 'thumbnails';
+    $defaults['browser_pager_limit'] = 10;
+    $defaults['browser_library_empty_message'] = t('There are currently no media in this library to select.');
   }
 
   if (!isset($name)) {

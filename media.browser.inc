@@ -50,7 +50,7 @@ function media_browser() {
 
   // Pass our settings to the browser.
   $settings = array(
-    'viewType' => media_variable_get('browser_viewtype_default', 'thumbnails'),
+    'viewType' => media_variable_get('browser_viewtype_default'),
     'callbacks' => $callbacks,
     'plugins' => $plugins,
     'conditions' => $conditions,
@@ -181,7 +181,7 @@ function media_browser_list() {
   }
 
   // Add our pager limit filter.
-  $select->limit(media_variable_get('browser_pager_limit', 10));
+  $select->limit(media_variable_get('browser_pager_limit'));
 
   // Grab the fid's.
   $fids = $select->execute()
@@ -207,7 +207,7 @@ function media_browser_list() {
   }
   else {
     // Print an empty message.
-    drupal_json_output(array('empty' => media_variable_get('browser_library_empty_message', t('There are currently no media in this library to select.')), 'media' => array()));
+    drupal_json_output(array('empty' => t(media_variable_get('browser_library_empty_message')), 'media' => array()));
     drupal_exit();
   }
 }
