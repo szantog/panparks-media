@@ -203,13 +203,14 @@ function media_browser_list() {
 
       $media->preview = drupal_render($preview);
     }
-    print drupal_json_encode(array('media' => $medias));
-    die();
+    drupal_json_output(array('media' => $medias, 'pager' => theme('pager')));
+    drupal_exit();
   }
-
-  // Print an empty message.
-  print drupal_json_encode(array('empty' => t('There are currently no media in this library to select.'), 'media' => array()));
-  die();
+  else {
+    // Print an empty message.
+    drupal_json_output(array('empty' => t('There are currently no media in this library to select.'), 'media' => array()));
+    drupal_exit();
+  }
 }
 
 /**

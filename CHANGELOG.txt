@@ -3,7 +3,9 @@
 CHANGELOG for Media module.
 ===========================
 
-by aaron: Add an empty message when there are no media.
+#692618 by aaron: Continue adding pager support.
+by aaron: Clean up json output for AJAX call.
+#613782 by aaron: Add an empty message when there are no media.
 #692618 by aaron: Begin framework to allow library paging.
 #697106 by aaron: Allow modules to define & alter default streams & conditions.
 #697106 by aaron: Send default conditions & streams to browser library.
