@@ -133,7 +133,6 @@ function media_browser_list() {
   if (isset($_GET['streams'])) {
     $streams = drupal_json_decode($_GET['streams']);
   }
-  $fids = FALSE;
 
   // If we have been passed an array of streams, such as 'youtube://',
   // then only accept media from those streams. Unfortunately, entity_load
@@ -143,19 +142,36 @@ function media_browser_list() {
   // but 2) this will get rather large I suspect, unless we combine
   // with pagers, or use a db_transaction maybe, or just write our own query.
   if (isset($streams)) {
+    // First get the fid's to load. We have to do that first, because
+    // entity_load doesn't accept a condition of LIKE.
     $fids = db_select('file', 'f')
       ->fields('f', array('fid'));
+
+    // Filter on streams.
     foreach ($streams as $stream) {
       $fids->condition('uri', db_like($stream) . '%', 'LIKE');
     }
+
+    // Add our conditions.
+    foreach ($conditions as $field => $condition) {
+      $fids->condition($field, $condition);
+    }
+
+    // Grab the fid's.
     $fids = $fids->execute()
       ->fetchCol();
+
+    // Now load the desired media to display.
+    $medias = entity_load('media', $fids);
   }
-  $medias = entity_load('media', $fids, $conditions);
+  else {
+    // Load the media based on any required conditions.
+    $medias = entity_load('media', FALSE, $conditions);
+  }
 
   foreach ($medias as &$media) {
     // Generate a preview of the file
-    // @todo: Should generate placeholders for audio/video
+    // @todo: Should generate placeholders for audio
     // Add yet another wrapper so we can style it as a preview :(
     // Otherwise it isn't really possible to know because the user can pick anything for their preview mode.
     $preview = field_view_field('media', $media, 'file', 'media_preview');
