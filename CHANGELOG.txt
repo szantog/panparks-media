@@ -3,6 +3,7 @@
 CHANGELOG for Media module.
 ===========================
 
+#692618 by aaron: Tie in pager to query & theme.
 #692618 by aaron: Continue adding pager support.
 by aaron: Clean up json output for AJAX call.
 #613782 by aaron: Add an empty message when there are no media.

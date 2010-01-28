@@ -167,7 +167,7 @@ function media_browser_list() {
 
   // First get the fid's to load. We have to do that first, because
   // entity_load doesn't accept a condition of LIKE, which we need for streams.
-  $select = db_select('file', 'f')
+  $select = db_select('file', 'f')->extend('PagerDefault')
     ->fields('f', array('fid'));
 
   // Filter on streams.
@@ -181,8 +181,7 @@ function media_browser_list() {
   }
 
   // Add our pager limit filter.
-  $select->extend('PagerDefault')
-    ->limit(media_variable_get('browser_pager_limit', 1));
+  $select->limit(media_variable_get('browser_pager_limit', 10));
 
   // Grab the fid's.
   $fids = $select->execute()
@@ -208,7 +207,7 @@ function media_browser_list() {
   }
   else {
     // Print an empty message.
-    drupal_json_output(array('empty' => t('There are currently no media in this library to select.'), 'media' => array()));
+    drupal_json_output(array('empty' => media_variable_get('browser_library_empty_message', t('There are currently no media in this library to select.')), 'media' => array()));
     drupal_exit();
   }
 }
