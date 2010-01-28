@@ -54,7 +54,8 @@
           callback,
           params,
           function(data, status) {
-            that.mediaFiles = data;
+            that.mediaFiles = data.media;
+            that.emptyMessage = data.empty;
             that.render();
           },
           'json'
@@ -64,7 +65,9 @@
       render: function() {
         var that = this;
         mediaBrowser.getActivePanel().removeClass('throbber');
-        if(this.mediaFiles.length < 1) {
+        if (this.mediaFiles.length < 1) {
+          jQuery('<div id="media-empty-message" class="media-empty-message"></div>').appendTo(this.browser)
+            .html(this.emptyMessage);
           return;
         }
 
