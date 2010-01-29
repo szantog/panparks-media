@@ -450,8 +450,10 @@ function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
  *  opportunity to validate this.
  */
 function media_add_from_url_validate($form, &$form_state) {
-  // @todo: Document this better.  How should a parsing function deal with a form field?
-  // Perhaps a try{} catch is more appropriate here?
+  // We have a dry-run of the parsing process to allow specific streams to
+  // catch an error, for instance to inform us that a video is no longer
+  // available or that a specific URL structure is not supported.
+  // @todo: Perhaps a try{} catch is more appropriate here?
   media_parse($form_state['values']['url'], array('form_field' => 'url'));
 
 }
