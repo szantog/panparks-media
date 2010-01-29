@@ -192,6 +192,7 @@ function media_browser_list() {
     $medias = entity_load('media', $fids);
 
     foreach ($medias as &$media) {
+      $media->override = array('browser' => TRUE);
       // Generate a preview of the file
       // @todo: Should generate placeholders for audio
       // Add yet another wrapper so we can style it as a preview :(
