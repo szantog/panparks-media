@@ -450,7 +450,10 @@ function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
  *  opportunity to validate this.
  */
 function media_add_from_url_validate($form, &$form_state) {
+  // @todo: Document this better.  How should a parsing function deal with a form field?
+  // Perhaps a try{} catch is more appropriate here?
   media_parse($form_state['values']['url'], array('form_field' => 'url'));
+
 }
 
 /**
@@ -459,6 +462,10 @@ function media_add_from_url_validate($form, &$form_state) {
  *  This will copy a file from a remote location and store it locally.
  */
 function media_add_from_url_submit($form, &$form_state) {
+  if (!empty($form_state['values']['redirect'])) {
+    $form_state['redirect'] = $form_state['values']['redirect'];
+  }
+
   $url = $form_state['values']['url'];
 
   // Any module implementing hook_media_parse will have an opportunity to
@@ -471,7 +478,10 @@ function media_add_from_url_submit($form, &$form_state) {
   if (!$uri) {
     $scheme = variable_get('file_default_scheme', 'public') . '://';
     $uri = file_stream_wrapper_uri_normalize($scheme . basename($url));
-    copy($url, $uri);
+    if (!@copy(@$url, $uri)) {
+      form_set_error('url', 'Unable to add file ' . $url);
+      return;
+    }
   }
   $defaults = array (
     'display' => TRUE,
@@ -490,11 +500,13 @@ function media_add_from_url_submit($form, &$form_state) {
     $file->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
     $file->is_new = TRUE;
     field_attach_insert('media', $file);
+    if (!$form_state['redirect']) {
+      $form_state['redirect'] = 'media/' . $file->fid . '/edit';
+    }
   }
   else {
     drupal_set_message(t('An error occurred and no file was saved.'), 'error');
   }
-  $form_state['redirect'] = !empty($form_state['values']['redirect']) ? $form_state['values']['redirect'] : 'media/' . $file->fid . '/edit';
 }
 
 
