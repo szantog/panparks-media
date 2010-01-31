@@ -63,17 +63,19 @@ function _media_markup($match, $wysiwyg = FALSE) {
   // errors. @TODO return something when fid is not found.
   if(isset($media['fid'])) {
     $media_obj = media_load($media['fid']);
-    $settings = is_array($media['attributes']) ? $media['attributes'] : array();
-    if (isset($settings['style'])) {
-      if (preg_match('@width: (.+?)px; height: (.+?)px;@i', $settings['style'], $matches)) {
-        $settings['width'] = $matches[1];
-        $settings['height'] = $matches[2];
+    if (isset($media_obj)) {
+      $settings = is_array($media['attributes']) ? $media['attributes'] : array();
+      if (isset($settings['style'])) {
+        if (preg_match('@width: (.+?)px; height: (.+?)px;@i', $settings['style'], $matches)) {
+          $settings['width'] = $matches[1];
+          $settings['height'] = $matches[2];
+        }
       }
+      if ($wysiwyg) {
+        $settings['wysiwyg'] = $wysiwyg;
+      }
+      return drupal_render(media_get_file_without_label($media_obj, $view_mode, $settings));
     }
-    if ($wysiwyg) {
-      $settings['wysiwyg'] = $wysiwyg;
-    }
-    return drupal_render(media_get_file_without_label($media_obj, $view_mode, $settings));
   }
 }
 

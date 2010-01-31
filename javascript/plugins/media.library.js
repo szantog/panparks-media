@@ -91,8 +91,8 @@
               return false;
             });
         }
-        jQuery('<div id="media-pager" class="media-pager"></div>').appendTo(this.browser)
-          .html(this.pager);
+//         jQuery('<div id="media-pager" class="media-pager"></div>').appendTo(this.browser)
+//           .html(this.pager);
       }
   };
 };

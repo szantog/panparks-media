@@ -3,6 +3,8 @@
 CHANGELOG for Media module.
 ===========================
 
+by aaron: Comment out pager from media library browser.
+by aaron: Fix fatal error when a file doesn't exist in markup.
 by aaron: Add ->override['browser'] so thumbs may be themed specially.
 by aaron: Clean up browser variables.
 #692618 by aaron: Tie in pager to query & theme.
