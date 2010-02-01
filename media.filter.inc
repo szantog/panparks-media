@@ -92,7 +92,7 @@ function _media_markup($match, $wysiwyg = FALSE) {
   }
   catch (Exception $e) {
     watchdog('media', 'Unable to render media from %tag. Error: %error', array('%tag' => $tag, '%error' => $e->getMessage()));
-    return FALSE;
+    return '';
   }
 
   return drupal_render(media_get_file_without_label($media_obj, $media['view_mode'], $settings));
@@ -156,7 +156,13 @@ function _media_generate_tagMap($text) {
     // We see if tagContent is already in $tagMap, if not we add it
     // to $tagmap otherwise return a empty error
     if(empty($tagmap[$match[0]])) {
-      $tagmap[$match[0]] = _media_markup($match, TRUE);
+      // @TODO: Total HACK, but better than nothing.
+      // We should find a better way of cleaning this up.
+      if ($markup_for_media = _media_markup($match, TRUE)) {
+        $tagmap[$match[0]] = $markup_for_media;
+      } else {
+        $tagmap[$match[0]] = '<div><img src="/broken.jpg" height="50px" width="100px"/></div>';
+      }
     }
     else {
       return array();
