@@ -57,8 +57,13 @@ function media_filter($text, $filter) {
 function _media_markup($match, $wysiwyg = FALSE) {
   $match = str_replace("[[","",$match);
   $match = str_replace("]]","",$match);
-  $media = drupal_json_decode($match[0]);
+  $tag = $match[0];
+
   try {
+    if (!is_string($tag)) {
+      throw new Exception('Unable to find matching tag');
+    }
+    $media = drupal_json_decode($tag);
     if (!isset($media['fid'])) {
       throw new Exception('No file Id');
     }
@@ -86,7 +91,7 @@ function _media_markup($match, $wysiwyg = FALSE) {
     }
   }
   catch (Exception $e) {
-    watchdog('media', 'Unable to render media from %tag_map. Error: %error', array('%tag_map' => $match, '%error' => $e->getMessage()));
+    watchdog('media', 'Unable to render media from %tag. Error: %error', array('%tag' => $tag, '%error' => $e->getMessage()));
     return FALSE;
   }
 
