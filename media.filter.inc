@@ -58,25 +58,39 @@ function _media_markup($match, $wysiwyg = FALSE) {
   $match = str_replace("[[","",$match);
   $match = str_replace("]]","",$match);
   $media = drupal_json_decode($match[0]);
-  $view_mode = $media['view_mode'];
-  // loads media object only when media fid found in json object, to prevent
-  // errors. @TODO return something when fid is not found.
-  if(isset($media['fid'])) {
+  try {
+    if (!isset($media['fid'])) {
+      throw new Exception('No file Id');
+    }
+    if (!isset($media['view_mode'])) {
+      // Should we log or throw an exception here instead?
+      // Do we need to validate the view mode for fields API?
+      $media['view_mode'] = media_variable_get('wysiwyg_default_view_mode');
+    }
     $media_obj = media_load($media['fid']);
-    if (isset($media_obj)) {
-      $settings = is_array($media['attributes']) ? $media['attributes'] : array();
-      if (isset($settings['style'])) {
-        if (preg_match('@width: (.+?)px; height: (.+?)px;@i', $settings['style'], $matches)) {
-          $settings['width'] = $matches[1];
-          $settings['height'] = $matches[2];
-        }
+    if (!$media_obj) {
+     throw new Exception('Could not load media object');
+    }
+    $settings = is_array($media['attributes']) ? $media['attributes'] : array();
+    // @TODO: What case does this provide for?  Can we add this logic in JS when we embed it?
+    // This doesn't look great to me.  Also won't work if the style has anything
+    // between width and height (or if they are in reverse order).
+    if (isset($settings['style'])) {
+      if (preg_match('@width: (.+?)px; height: (.+?)px;@i', $settings['style'], $matches)) {
+        $settings['width'] = $matches[1];
+        $settings['height'] = $matches[2];
       }
-      if ($wysiwyg) {
-        $settings['wysiwyg'] = $wysiwyg;
-      }
-      return drupal_render(media_get_file_without_label($media_obj, $view_mode, $settings));
+    }
+    if ($wysiwyg) {
+      $settings['wysiwyg'] = $wysiwyg;
     }
   }
+  catch (Exception $e) {
+    watchdog('media', 'Unable to render media from %tag_map. Error: %error', array('%tag_map' => $match, '%error' => $e->getMessage()));
+    return FALSE;
+  }
+
+  return drupal_render(media_get_file_without_label($media_obj, $media['view_mode'], $settings));
 }
 
 /**
