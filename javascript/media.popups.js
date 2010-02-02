@@ -72,7 +72,6 @@ Drupal.media.popups.mediaBrowser.mediaBrowserOnLoad = function (e) {
   var options = e.data;
   if (this.contentWindow.Drupal.media.browser) {
     this.contentWindow.Drupal.media.browser.launch(options);
-    debug.debug('browser is loaded');
   }
 },
 
@@ -126,7 +125,6 @@ Drupal.media.popups.mediaStyleSelector = function(mediaFile, onSelect, options) 
   dialogOptions.buttons[ok] = function () {
     
     var formattedMedia = this.contentWindow.Drupal.media.formatForm.getFormattedMedia();
-    debug.debug(this.formattedMedia);
     if (!formattedMedia) {
       alert(notSelected);
       return;
@@ -146,7 +144,6 @@ Drupal.media.popups.mediaStyleSelector = function(mediaFile, onSelect, options) 
 }
 
 Drupal.media.popups.mediaStyleSelector.mediaBrowserOnLoad = function(e) {
-  debug.debug('loaded the style picker form');
 }
 
 Drupal.media.popups.mediaStyleSelector.getDefaults = function() {
@@ -202,8 +199,6 @@ Drupal.media.popups.setDialogPadding = function(dialogElement) {
 Drupal.media.popups.getPopupIframe = function(src, id, options) {
   var defaults = {width: '800px', scrolling: 'no'};
   var options = $.extend({}, defaults, options);
-  
-  debug.debug(options);
   
   return $('<iframe class="media-modal-frame"/>')
   .attr('src', src)

@@ -214,22 +214,30 @@ function media_browser_list() {
 }
 
 /**
- *  @TODO: Document.
+ * Prepares the page to be able to launch the media browser.
+ *
+ * @TODO: This is a WTF at present.  Basically, the browser is launched from wysiwyg
+ * and from fields, so having a common function makes sense.  But not like this.
+ *
+ * Defines default variables.
  */
 function media_include_browser_js() {
+  static $included;
+  if ($included) {
+    return;
+  }
+  $included = TRUE;
   drupal_add_library('media', 'media_browser');
 
-  // copied directly from media module to get Drupal.settings.media object
   $settings = array(
     'browserUrl' => url('media/browser',
       array('query' => array('render' => 'media-popup'))),
     'styleSelectorUrl' => url('media/-media_id-/format-form',
       array('query' => array('render' => 'media-popup'))),
-  // @Todo: rip this down and make a callback API structure with tokens, etc
-  // this is temporary.
-  // Adding src to blacklist; fid and view_mode we capture outside attribs so adding
-  // them too to the blacklist.
-    'blacklist' => array('src','fid','view_mode'),
+
+    // Adding src to blacklist; fid and view_mode we capture outside attribs so adding
+    // them too to the blacklist.
+    'blacklist' => array('src','fid','view_mode'), // Only applies to WYSIWG - should be removed;
   );
 
   drupal_add_js(array('media' => $settings), 'setting');

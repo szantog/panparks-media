@@ -355,7 +355,9 @@ function media_generic_widget_process($element, &$form_state, $form) {
   );
 
   // Media browser attach code.
-  media_attach_browser($element);
+  $element['#attached']['js'][] = drupal_get_path('module', 'media') . '/javascript/media.fields.js';
+  module_load_include('inc', 'media', 'media.browser');
+  media_include_browser_js();
 
   return $element;
 }

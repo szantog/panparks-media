@@ -97,14 +97,12 @@ Drupal.media.browser.start = function (pluginId) {
   //This isn't ideal, the settings thing needs more definition, anyway,
   // allows us to merge in settings that could have been modified.
   //
-  debug.debug(this.settings);
   if (typeof this.settings.plugin_settings[pluginId] != 'undefined') {
     if (typeof this.settings.plugin_settings[pluginId] != 'undefined') {
       var options = this.settings.plugin_settings[pluginId].settings;
     }
   }
 
-  debug.debug(options);
   this.plugins[pluginId].instance =
     this.plugins[pluginId].factory(this, options);
   this.plugins[pluginId].instance.init();
@@ -122,7 +120,6 @@ Drupal.media.browser.startAll = function() {
   // Loop through the provided plugins
   // from Drupal.settings.media.plugins (or something)
   for (var pluginId in this.plugins) {
-    debug.debug("Starting plugin " + pluginId);
     this.start(pluginId);
   };
 };
@@ -167,8 +164,6 @@ Drupal.media.browser.getActivePanel = function() {
     // If nothing is selected return an empty element (I guess...).
     return $();
   }
-  debug.debug(selectedTabIndex);
-  debug.debug($('#media-browser-tabs .ui-tabs-panel:eq(' + selectedTabIndex + ')'));
   return $('#media-browser-tabs .ui-tabs-panel:eq(' + selectedTabIndex + ')')
 }
 
