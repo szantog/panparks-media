@@ -643,6 +643,7 @@ function media_retrieve_xml($url, $display_errors = FALSE, $refresh = FALSE) {
  *      'form_field' => The field from FAPI when being validated, suitable for
  *        form_set_error(). If this is set, then a particular implementation
  *        may set the error if it believes the URL to be malformed.
+ *  @todo: This should use exception handling, not pass the form field.
  *  @return
  *    The unique URI for the file, based on its stream wrapper, or NULL.
  */

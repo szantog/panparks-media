@@ -464,35 +464,53 @@ function media_add_from_url_validate($form, &$form_state) {
  *  This will copy a file from a remote location and store it locally.
  */
 function media_add_from_url_submit($form, &$form_state) {
+  $url = $form_state['values']['url'];
+  $uri = ''; // The URI we are eventually saving to the files table
+
   if (!empty($form_state['values']['redirect'])) {
     $form_state['redirect'] = $form_state['values']['redirect'];
   }
 
-  $url = $form_state['values']['url'];
-
   // Any module implementing hook_media_parse will have an opportunity to
   // parse the URL here. It simply needs to return an appropriate URI.
-  $uri = media_parse($url);
+  // @todo: Describe this function more clearly...
+  // Perhaps this should return a file object?
+
+  if ($uri = media_parse($url)) {
+    $file = file_uri_to_object($uri);
+    file_save($file);
+  }
 
   // If the URI was not parsed previously, then assume it's a remote file that
   // will simply be copied to our local server instead.
+  // This is not a good assumption IMO, we should somehow make it more clear.
   // @TODO: Implement with media_media_parse() instead.
   if (!$uri) {
-    $scheme = variable_get('file_default_scheme', 'public') . '://';
-    $uri = file_stream_wrapper_uri_normalize($scheme . basename($url));
-    if (!@copy(@$url, $uri)) {
+    // Copy to temporary first.
+    $source_uri = file_stream_wrapper_uri_normalize('temporary://' . basename($url));
+    if (!@copy(@$url, $source_uri)) {
       form_set_error('url', 'Unable to add file ' . $url);
       return;
     }
+    $source_file = file_uri_to_object($source_uri);
+    $scheme = variable_get('file_default_scheme', 'public') . '://';
+    $uri = file_stream_wrapper_uri_normalize($scheme . $source_file->filename);
+    // Now to its new home.
+    $file = file_move($source_file, $uri, FILE_EXISTS_RENAME);
   }
+
+  if (!$file->fid) {
+    form_set_error('url', 'Unknown error: unable to add file, please check URL and try again ' . $url);
+    return;
+  }
+
   $defaults = array (
     'display' => TRUE,
   );
-  $file = file_uri_to_object($uri);
-  file_save($file);
+
+  // @todo: this is a lot of shared functionality with upload form (and others).
+  // Should be shared there.
   if ($file) {
-//   if ($file = file_move($file,$uri,FILE_EXISTS_RENAME)) {
-    $form_state['redirect'] = 'media/' . $file->fid . '/edit';
     field_attach_submit('media', $file, $form, $form_state);
     // Make a copy of the file object to use as the media object
     // (file is a field of media and the base table). This is weird.
