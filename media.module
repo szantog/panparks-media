@@ -660,14 +660,20 @@ function media_retrieve_xml($url, $display_errors = FALSE, $refresh = FALSE) {
  *    The unique URI for the file, based on its stream wrapper, or NULL.
  */
 function media_parse($url, $form_field = NULL) {
+  // Trim any whitespace before parsing.
+  $url = trim($url);
   foreach (module_implements('media_parse') as $module) {
     try {
       $success = module_invoke($module, 'media_parse', $url);
     }
     catch (Exception $e) {
       if (isset($form_field)) {
+        // We're validating a form, so pass the error back to the user.
         form_set_error($form_field, $e->getMessage());
       }
+      // We'll fail after that, rather than trying to do something stupid
+      // like save a 404 page.
+      return;
     }
 
     if (isset($success)) {
