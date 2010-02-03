@@ -460,9 +460,7 @@ function media_add_from_url_validate($form, &$form_state) {
   // We have a dry-run of the parsing process to allow specific streams to
   // catch an error, for instance to inform us that a video is no longer
   // available or that a specific URL structure is not supported.
-  // @todo: Perhaps a try{} catch is more appropriate here?
-  media_parse($form_state['values']['url'], array('form_field' => 'url'));
-
+  media_parse($form_state['values']['url'], 'url');
 }
 
 /**

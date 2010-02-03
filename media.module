@@ -621,11 +621,12 @@ function media_retrieve_xml($url, $display_errors = FALSE, $refresh = FALSE) {
 }
 
 /**
- *  This will parse the url or embedded code pasted by the node submitter.
+ *  This will parse a url or embedded code into a unique URI.
  *
  *  The function will call all modules implementing
  *  hook_media_parse($url, $options = array()), which should return either a
- *  string containing a parsed URI or NULL.
+ *  string containing a parsed URI, an associative array with an error message
+ *  to return to the user keyed by error, or NULL.
  *
  *  @NOTE In emfield, we originally also accepted an array of regex patterns
  *  to match against. However, that module used a registration for providers,
@@ -651,18 +652,23 @@ function media_retrieve_xml($url, $display_errors = FALSE, $refresh = FALSE) {
  *
  *  @param string $url
  *    The original URL or embed code to parse.
- *  @param array $options
- *    An optional associative array. Currently:
- *      'form_field' => The field from FAPI when being validated, suitable for
- *        form_set_error(). If this is set, then a particular implementation
- *        may set the error if it believes the URL to be malformed.
- *  @todo: This should use exception handling, not pass the form field.
+ *  @param optional string $form_field
+ *    The field from FAPI when being validated, suitable for
+ *    form_set_error(). If this is set, then a particular implementation
+ *    may throw an error if it believes the URL to be malformed.
  *  @return
  *    The unique URI for the file, based on its stream wrapper, or NULL.
  */
-function media_parse($url, $options = array()) {
+function media_parse($url, $form_field = NULL) {
   foreach (module_implements('media_parse') as $module) {
-    $success = module_invoke($module, 'media_parse', $url, $options);
+    try {
+      $success = module_invoke($module, 'media_parse', $url);
+    }
+    catch (Exception $e) {
+      if (isset($form_field)) {
+        form_set_error($form_field, $e->getMessage());
+      }
+    }
 
     if (isset($success)) {
       return $success;
