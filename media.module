@@ -708,5 +708,6 @@ function media_parse_to_file($url) {
     // Now to its new home.
     $file = file_move($source_file, $uri, FILE_EXISTS_RENAME);
   }
+
   return $file;
 }

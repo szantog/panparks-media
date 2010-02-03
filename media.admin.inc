@@ -386,18 +386,11 @@ function media_add_upload_submit($form, &$form_state) {
     'display' => TRUE,
   );
 
-  if ($file = file_move($file, $destination, FILE_EXISTS_RENAME)) {
+  // Save the uploaded file.
+  $file = file_move($file, $destination, FILE_EXISTS_RENAME);
+
+  if (_media_file_save($file, $form, $form_state)) {
     drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
-    field_attach_submit('media', $file, $form, $form_state);
-    // Make a copy of the file object to use as the media object
-    // (file is a field of media and the base table). This is weird.
-    $media = clone($file);
-    $file->file = array();
-    $file->file[LANGUAGE_NONE] = array();
-    $file->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
-    $file->is_new = TRUE;
-    field_attach_presave('media', $file);
-    field_attach_insert('media', $file);
   }
   else {
     drupal_set_message(t('An error occurred and no file was uploaded.'), 'error');
@@ -510,19 +503,7 @@ function media_add_from_url_submit($form, &$form_state) {
     'display' => TRUE,
   );
 
-  // @todo: this is a lot of shared functionality with upload form (and others).
-  // Should be shared there.
-  if ($file) {
-    field_attach_submit('media', $file, $form, $form_state);
-    // Make a copy of the file object to use as the media object
-    // (file is a field of media and the base table). This is weird.
-    $media = clone($file);
-    $file->file = array();
-    $file->file[LANGUAGE_NONE] = array();
-    $file->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
-    $file->is_new = TRUE;
-    field_attach_presave('media', $file);
-    field_attach_insert('media', $file);
+  if (_media_file_save($file, $form, $form_state)) {
     if (!$form_state['redirect']) {
       $form_state['redirect'] = 'media/' . $file->fid . '/edit';
     }
@@ -532,6 +513,31 @@ function media_add_from_url_submit($form, &$form_state) {
   }
 }
 
+/**
+ *  When we save a file, we need to ensure any required media entity info is
+ *  saved as well.
+ *  @TODO: Can certainly be cleaned up and renamed or moved appropriately.
+ */
+function _media_file_save($file, $form, &$form_state) {
+  if ($file) {
+    $defaults = array (
+      'display' => TRUE,
+    );
+
+    // Make a copy of the file object to use as the media object
+    // (file is a field of media and the base table). This is weird.
+    // @TODO: Why are we not then working on $media?
+    $media = clone($file);
+    $file->file = array();
+    $file->file[LANGUAGE_NONE] = array();
+    $file->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
+    $file->is_new = TRUE;
+    field_attach_presave('media', $file);
+    field_attach_insert('media', $file);
+  }
+
+  return $file;
+}
 
 /**
  * Display all media types.
