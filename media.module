@@ -623,6 +623,32 @@ function media_retrieve_xml($url, $display_errors = FALSE, $refresh = FALSE) {
 /**
  *  This will parse the url or embedded code pasted by the node submitter.
  *
+ *  The function will call all modules implementing
+ *  hook_media_parse($url, $options = array()), which should return either a
+ *  string containing a parsed URI or NULL.
+ *
+ *  @NOTE In emfield, we originally also accepted an array of regex patterns
+ *  to match against. However, that module used a registration for providers,
+ *  and simply stored the match in the database keyed to the provider object.
+ *  However, other than the stream wrappers, there is currently no formal
+ *  registration for media handling. Additionally, few, if any, stream wrappers
+ *  will choose to store a straight match from the parsed URL directly into
+ *  the URI. Thus, we leave both the matching and the final URI result to the
+ *  implementing module in this implementation.
+ *
+ *  An alternative might be to do the regex pattern matching here, and pass a
+ *  successful match back to the implementing module. However, that would
+ *  require either an overloaded function or a new hook, which seems like more
+ *  overhead than it's worth at this point.
+ *
+ *  @NOTE Once hook_module_implements_alter() is in core (see the issue at
+ *  http://drupal.org/node/692950) we'll probably want to implement
+ *  media_media_parse() to match against URL's that haven't already matched,
+ *  to save the file. We'll also in that case only want to save files of the
+ *  types allowed for that calling instance: for instance, if the browser is
+ *  invoked by the user pic button, we'll only want to accept images; or if
+ *  it's called by a field for pdf reports, we'll only want to save pdf files.
+ *
  *  @param string $url
  *    The original URL or embed code to parse.
  *  @param array $options
@@ -638,7 +664,7 @@ function media_parse($url, $options = array()) {
   foreach (module_implements('media_parse') as $module) {
     $success = module_invoke($module, 'media_parse', $url, $options);
 
-    if ($success) {
+    if (isset($success)) {
       return $success;
     }
   }
