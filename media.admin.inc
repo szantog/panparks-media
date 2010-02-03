@@ -462,7 +462,13 @@ function media_add_from_url_validate($form, &$form_state) {
   // We have a dry-run of the parsing process to allow specific streams to
   // catch an error, for instance to inform us that a video is no longer
   // available or that a specific URL structure is not supported.
-  $uri = media_parse_to_uri($form_state['values']['url'], 'url');
+  try {
+    $uri = media_parse_to_uri($form_state['values']['url']);
+  }
+  catch (Exception $e) {
+    // Pass the error back to the user.
+    form_set_error('url', $e->getMessage());
+  }
 
   // @TODO: Validate that if we have no $uri that this is a valid file to
   // save. For instance, we may only be interested in images, and it would
@@ -487,7 +493,13 @@ function media_add_from_url_submit($form, &$form_state) {
   }
 
   // Save the remote file.
-  $file = media_parse_to_file($url);
+  try {
+    $file = media_parse_to_file($url);
+  }
+  catch (Exception $e) {
+    form_set_error('url', $e->getMessage());
+    return;
+  }
 
   if (!$file->fid) {
     form_set_error('url', 'Unknown error: unable to add file, please check URL and try again ' . $url);
