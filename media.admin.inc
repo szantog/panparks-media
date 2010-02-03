@@ -455,18 +455,28 @@ function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
  *
  *  Any module that implements hook_media_parse will have an
  *  opportunity to validate this.
+ *
+ *  @see media_parse_to_uri().
  */
 function media_add_from_url_validate($form, &$form_state) {
   // We have a dry-run of the parsing process to allow specific streams to
   // catch an error, for instance to inform us that a video is no longer
   // available or that a specific URL structure is not supported.
-  media_parse($form_state['values']['url'], 'url');
+  $uri = media_parse_to_uri($form_state['values']['url'], 'url');
+
+  // @TODO: Validate that if we have no $uri that this is a valid file to
+  // save. For instance, we may only be interested in images, and it would
+  // be helpful to let the user know they passed the HTML page containing
+  // the image accidentally. That would also save us from saving the file
+  // in the submit step.
 }
 
 /**
  *  Upload a file from a URL.
  *
  *  This will copy a file from a remote location and store it locally.
+ *  @see media_parse_to_uri().
+ *  @see media_parse_to_file().
  */
 function media_add_from_url_submit($form, &$form_state) {
   $url = $form_state['values']['url'];
@@ -476,38 +486,8 @@ function media_add_from_url_submit($form, &$form_state) {
     $form_state['redirect'] = $form_state['values']['redirect'];
   }
 
-  // Any module implementing hook_media_parse will have an opportunity to
-  // parse the URL here. It simply needs to return an appropriate URI.
-  // @todo: Perhaps this should return a file object?
-  // @note: We don't want to return a file object, because we use the same
-  // function during _validation. Additionally, it can be useful in other
-  // circumstances to be able to parse a URL to a URI w/o creating a file
-  // object in the db. A notable exception might be for the case which follows,
-  // in which case a file is copied from a remote stream.
-  // @TODO: Maybe we can make a media_parse_to_file() and media_parse_to_uri()?
-  if ($uri = media_parse($url)) {
-    $file = file_uri_to_object($uri);
-    file_save($file);
-  }
-
-  // If the URI was not parsed previously, then assume it's a remote file that
-  // will simply be copied to our local server instead.
-  // This is not a good assumption IMO, we should somehow make it more clear.
-  // @TODO: Implement with media_media_parse() instead; see notes in
-  // media_parse().
-  if (!$uri) {
-    // Copy to temporary first.
-    $source_uri = file_stream_wrapper_uri_normalize('temporary://' . basename($url));
-    if (!@copy(@$url, $source_uri)) {
-      form_set_error('url', 'Unable to add file ' . $url);
-      return;
-    }
-    $source_file = file_uri_to_object($source_uri);
-    $scheme = variable_get('file_default_scheme', 'public') . '://';
-    $uri = file_stream_wrapper_uri_normalize($scheme . $source_file->filename);
-    // Now to its new home.
-    $file = file_move($source_file, $uri, FILE_EXISTS_RENAME);
-  }
+  // Save the remote file.
+  $file = media_parse_to_file($url);
 
   if (!$file->fid) {
     form_set_error('url', 'Unknown error: unable to add file, please check URL and try again ' . $url);

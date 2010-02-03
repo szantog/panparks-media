@@ -623,10 +623,9 @@ function media_retrieve_xml($url, $display_errors = FALSE, $refresh = FALSE) {
 /**
  *  This will parse a url or embedded code into a unique URI.
  *
- *  The function will call all modules implementing
- *  hook_media_parse($url, $options = array()), which should return either a
- *  string containing a parsed URI, an associative array with an error message
- *  to return to the user keyed by error, or NULL.
+ *  The function will call all modules implementing hook_media_parse($url),
+ *  which should return either a string containing a parsed URI or NULL. The
+ *  module may also wish to throw an error, which will be caught here.
  *
  *  @NOTE In emfield, we originally also accepted an array of regex patterns
  *  to match against. However, that module used a registration for providers,
@@ -642,14 +641,6 @@ function media_retrieve_xml($url, $display_errors = FALSE, $refresh = FALSE) {
  *  require either an overloaded function or a new hook, which seems like more
  *  overhead than it's worth at this point.
  *
- *  @NOTE Once hook_module_implements_alter() is in core (see the issue at
- *  http://drupal.org/node/692950) we'll probably want to implement
- *  media_media_parse() to match against URL's that haven't already matched,
- *  to save the file. We'll also in that case only want to save files of the
- *  types allowed for that calling instance: for instance, if the browser is
- *  invoked by the user pic button, we'll only want to accept images; or if
- *  it's called by a field for pdf reports, we'll only want to save pdf files.
- *
  *  @param string $url
  *    The original URL or embed code to parse.
  *  @param optional string $form_field
@@ -658,8 +649,10 @@ function media_retrieve_xml($url, $display_errors = FALSE, $refresh = FALSE) {
  *    may throw an error if it believes the URL to be malformed.
  *  @return
  *    The unique URI for the file, based on its stream wrapper, or NULL.
+ *
+ *  @see media_parse_to_file().
  */
-function media_parse($url, $form_field = NULL) {
+function media_parse_to_uri($url, $form_field = NULL) {
   // Trim any whitespace before parsing.
   $url = trim($url);
   foreach (module_implements('media_parse') as $module) {
@@ -680,4 +673,42 @@ function media_parse($url, $form_field = NULL) {
       return $success;
     }
   }
+}
+
+/**
+ *  Parse a URL or embed code and return a file object.
+ *
+ *  @see media_parse_to_uri().
+ */
+function media_parse_to_file($url) {
+  $uri = media_parse_to_uri($url);
+  if ($uri) {
+    $file = file_uri_to_object($uri);
+    file_save($file);
+  }
+  else {
+    /**
+     *  @NOTE Once hook_module_implements_alter() is in core (see the issue at
+     *  http://drupal.org/node/692950) we may want to implement
+     *  media_media_parse() to match against URL's that haven't already
+     *  matched, to save the file. We'll also in that case only want to save
+     *  files of the types allowed for that calling instance: for instance, if
+     *  the browser is invoked by the user pic button, we'll only want to
+     *  accept images; or if it's called by a field for pdf reports, we'll only
+     *  want to save pdf files. In this case, we might want to pass along an
+     *  $option of the accepted filemimes.
+     */
+    // Copy to temporary first.
+    $source_uri = file_stream_wrapper_uri_normalize('temporary://' . basename($url));
+    if (!@copy(@$url, $source_uri)) {
+      form_set_error('url', 'Unable to add file ' . $url);
+      return;
+    }
+    $source_file = file_uri_to_object($source_uri);
+    $scheme = variable_get('file_default_scheme', 'public') . '://';
+    $uri = file_stream_wrapper_uri_normalize($scheme . $source_file->filename);
+    // Now to its new home.
+    $file = file_move($source_file, $uri, FILE_EXISTS_RENAME);
+  }
+  return $file;
 }
