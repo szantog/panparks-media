@@ -3,17 +3,18 @@
 
 /**
  * @file
- * Functions related to the WYSIWYG editor.
+ * Functions related to the WYSIWYG editor and the media input filter.
+ *
+ * @TODO: Rename this file?
  */
 
 /**
  * Implementation of hook_wysiwyg_include_directory()
  */
-
 function media_wysiwyg_include_directory($type) {
   switch($type) {
     case 'plugins':
-      return $type;
+      return 'wysiwyg_plugins';
         break;
     }
 }
