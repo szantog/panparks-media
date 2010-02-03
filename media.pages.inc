@@ -53,7 +53,7 @@ function media_edit($form, $form_state, $media) {
   drupal_set_title($media->filename);
   field_attach_form('media', $media, $form, $form_state);
 
-  $form['#attached'] = media_attached_files();
+//   $form['#attached'] = media_attached_files();
 
   $form['preview'] = field_view_field('media', $media, 'file', 'media_preview');
   $form['preview']['#weight'] = -10;
