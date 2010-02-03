@@ -627,8 +627,7 @@ function media_retrieve_xml($url, $display_errors = FALSE, $refresh = FALSE) {
  *  which should return either a string containing a parsed URI or NULL.
  *
  *  @NOTE The implementing modules may throw an error, which will not be caught
- *  here; it's up to the function calling media_parse_file() to catch any
- *  thrown errors.
+ *  here; it's up to the calling function to catch any thrown errors.
  *
  *  @NOTE In emfield, we originally also accepted an array of regex patterns
  *  to match against. However, that module used a registration for providers,
@@ -682,20 +681,22 @@ function media_parse_to_uri($url) {
  *  then we'll copy the file locally.
  *
  *  @NOTE The implementing modules may throw an error, which will not be caught
- *  here; it's up to the function calling media_parse_file() to catch any
- *  thrown errors.
+ *  here; it's up to the calling function to catch any thrown errors.
  *
  *  @see media_parse_to_uri().
  *  @see media_add_from_url_submit().
  */
 function media_parse_to_file($url) {
+  // @TODO: Do we want to fail on errors? If so, is there a way to pass them on?
   $uri = media_parse_to_uri($url);
 
   if (isset($uri)) {
+    // The URL was successfully parsed to a URL: save it!
     $file = file_uri_to_object($uri);
     file_save($file);
   }
   else {
+    // The URL wasn't parsed. We'll try to save a remote file.
     // Copy to temporary first.
     $source_uri = file_stream_wrapper_uri_normalize('temporary://' . basename($url));
     if (!@copy(@$url, $source_uri)) {
