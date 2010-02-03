@@ -390,6 +390,7 @@ function media_add_upload_submit($form, &$form_state) {
     $file->file[LANGUAGE_NONE] = array();
     $file->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
     $file->is_new = TRUE;
+    field_attach_presave('media', $file);
     field_attach_insert('media', $file);
   }
   else {
@@ -519,6 +520,7 @@ function media_add_from_url_submit($form, &$form_state) {
     $file->file[LANGUAGE_NONE] = array();
     $file->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
     $file->is_new = TRUE;
+    field_attach_presave('media', $file);
     field_attach_insert('media', $file);
     if (!$form_state['redirect']) {
       $form_state['redirect'] = 'media/' . $file->fid . '/edit';
