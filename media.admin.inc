@@ -478,9 +478,13 @@ function media_add_from_url_submit($form, &$form_state) {
 
   // Any module implementing hook_media_parse will have an opportunity to
   // parse the URL here. It simply needs to return an appropriate URI.
-  // @todo: Describe this function more clearly...
-  // Perhaps this should return a file object?
-
+  // @todo: Perhaps this should return a file object?
+  // @note: We don't want to return a file object, because we use the same
+  // function during _validation. Additionally, it can be useful in other
+  // circumstances to be able to parse a URL to a URI w/o creating a file
+  // object in the db. A notable exception might be for the case which follows,
+  // in which case a file is copied from a remote stream.
+  // @TODO: Maybe we can make a media_parse_to_file() and media_parse_to_uri()?
   if ($uri = media_parse($url)) {
     $file = file_uri_to_object($uri);
     file_save($file);
@@ -489,7 +493,8 @@ function media_add_from_url_submit($form, &$form_state) {
   // If the URI was not parsed previously, then assume it's a remote file that
   // will simply be copied to our local server instead.
   // This is not a good assumption IMO, we should somehow make it more clear.
-  // @TODO: Implement with media_media_parse() instead.
+  // @TODO: Implement with media_media_parse() instead; see notes in
+  // media_parse().
   if (!$uri) {
     // Copy to temporary first.
     $source_uri = file_stream_wrapper_uri_normalize('temporary://' . basename($url));
