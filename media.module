@@ -6,10 +6,8 @@
  * Media API
  *
  * The core Media API.
- * The Media module provides a drop-in replacement for Drupal's Upload,
- * FileField, Embedded Media Field, and other similar forms. It offers an API
- * and hooks available for other modules to implement, allowing for customized
- * file lists, tabs, drawers, and forms to the new Upload form.
+ * See http://drupal.org/project/media for more details.
+ *
  */
 
 /* ***************************************** */
@@ -17,17 +15,9 @@
 /* ***************************************** */
 
 include_once('media.variables.inc'); // A registry of variable_get defaults.
-include_once('media.types.inc');
-include_once('media.fields.inc');
+include_once('media.types.inc'); // Creating media types, entity definition
+include_once('media.fields.inc'); // Code relating to using media as a field
 include_once('media.filter.inc'); // Code related to [[inline tags]] and wysiwyg
-
-
-/* ***************************************** */
-/* CONSTANTS                                 */
-/* ***************************************** */
-
-define('MEDIA_RESOURCE_URI_DEFAULT', 'public://');
-define('MEDIA_TYPES_DEFAULT', '*');
 
 
 /* ***************************************** */
@@ -43,7 +33,7 @@ function media_help($path,$arg) {
     case 'admin/help#media':
       $output = '';
       $output .= '<h3>' .t('About') .'</h3>';
-      $output .= '<p>' .t('The Media module is a File Browser to the Internet, media provides a framework for managing files and multimedia assets, regardless of whether they are hosted on your own site or a 3rd party site. It replaces the Drupal core upload field with a unified User Interface where editors and administrators can upload, manage, and reuse files and multimedia assets. Media module also provides rich integration with WYSIWYG module to let content creators access media assets in rich text editor. For more information check <a href="@media_faq">Media Module FAQ</a>',array('@media_faq' => 'http://groups.drupal.org/node/19746')) .'</p>';
+      $output .= '<p>' .t('The Media module is a File Browser to the Internet, media provides a framework for managing files and multimedia assets, regardless of whether they are hosted on your own site or a 3rd party site. It replaces the Drupal core upload field with a unified User Interface where editors and administrators can upload, manage, and reuse files and multimedia assets. Media module also provides rich integration with WYSIWYG module to let content creators access media assets in rich text editor. For more information check <a href="@media_faq">Media Module page</a>',array('@media_faq' => 'http://drupal.org/project/media')) .'</p>';
       $output .= '<h3>' .t('Uses') .'</h3>';
       $output .= '<dl>';
       $output .= '<dt>' .t('Media Repository') .'</dt>';
@@ -230,41 +220,29 @@ function media_permission() {
   return array(
     'administer media' => array(
       'title' => t('Administer media'),
-      'description' => t('Add, edit or delete media.'),
+      'description' => t('Add, edit or delete media files and administer settings.'),
     ),
     'view media' => array(
       'title' => t('View media'),
-      'description' => t('View media.'), // @TODO better description
+      'description' => t('View all media files.'), // @TODO better description
     ),
     'edit media' => array(
       'title' => t('Edit media'),
-      'description' => t('Edit media.'), // @TODO better description
+      'description' => t('Edit all media files.'), // @TODO better description
     ),
   );
 }
 
 /**
  * Implement hook_theme().
+ * @TODO: Needs a major cleanup.
  */
 function media_theme() {
   return array(
-    'media_managed_file' => array(
-      'render element' => 'element',
-    ),
-
-    // The media file browser form.
-    'media_file_browser' => array(
-      'variables' => array('element' => NULL),
-    ),
 
     // The default media file list form element.
     'media_file_list' => array(
       'variables' => array('element' => NULL),
-    ),
-
-    // The media browser pane.
-    'media_browser_pane' => array(
-      'variables' => array('form' => array()),
     ),
 
     // A link for a file w/ an icon to the media/$fid page.
@@ -302,6 +280,7 @@ function media_theme() {
 /**
  * Implement of hook_media_elements().
  *
+ * @TODO: I think this is deprecated.
  * A Media File List element is created with the following FAPI:
  *   '#type' => 'media_file_list',
  *   '#options' => $options,         // An associative array of filepaths, keyed by FID.
@@ -324,6 +303,7 @@ function media_elements() {
 
 /**
  * Implement hook_image_default_styles().
+ *
  */
 function media_image_default_styles() {
   $styles = array();
@@ -356,6 +336,9 @@ function media_file_update(&$file) {
 
 /**
  * Implement hook_page_alter().
+ *
+ * This is used to use our alternate template when ?render=media-popup is passed
+ * in the URL.
  */
 function media_page_alter(&$page) {
   if (isset($_GET['render']) && $_GET['render'] == 'media-popup') {
@@ -384,7 +367,9 @@ function media_form_alter(&$form, &$form_state) {
 
 /**
  * Implement hook_media_display_types().
- * Different display types (list/thumbnails/etc).
+ *
+ * This is used to display media in different ways on the admin section.
+ * Perhaps should be merged in with the browser display.
  */
 function media_media_display_types() {
   $path = drupal_get_path('module', 'media');
@@ -413,7 +398,7 @@ function media_media_display_types() {
 
 /**
  * Implement hook_media_operations().
- * @todo: shouldn't this be using actions or something?
+ * @TODO: Shouldn't this be using actions or something?
  */
 function media_media_operations() {
   $operations = array(
@@ -537,18 +522,6 @@ if (!function_exists('file_uri_to_object')) {
 }
 
 /**
- * Returns the files attached to administration pages.
- */
-function media_attached_files() {
-  $path = drupal_get_path('module', 'media');
-  return array(
-    'js' => array($path . '/javascript/media-admin.js'),
-    'css' => array($path . '/css/media.css'),
-  );
-}
-
-
-/**
  * Implement hook_library().
  */
 function media_library() {
@@ -559,6 +532,9 @@ function media_library() {
     'version' => '7.x',
   );
 
+  /**
+   * Contains libraries common to other media modules.
+   */
   $libraries['media_base'] = array(
     'title' => 'Media base',
     'js' => array(
@@ -571,6 +547,10 @@ function media_library() {
     ),
   );
 
+  /**
+   * Includes resources needed to launch the media browser.  Should be included
+   * on pages where the media browser needs to be launched from.
+   */
   $libraries['media_browser'] = array(
     'title' => 'Media Browser popup libraries',
     'js' => array(
@@ -584,6 +564,9 @@ function media_library() {
     ),
   );
 
+  /**
+   * Resources needed in the media browser itself.
+   */
   $libraries['media_browser_page'] = array(
     'title' => 'Media browser',
     'js' => array(
@@ -606,8 +589,12 @@ function media_library() {
 }
 
 /**
- * Theme callback used to identify when we are in a popup dialog
- * @return unknown_type
+ * Theme callback used to identify when we are in a popup dialog.
+ *
+ * We do this because most times the default theme will look terrible in the
+ * browser.  So this will default to the administration theme, unless set otherwise.
+ *
+ * @return string
  */
 function media_dialog_get_theme_name() {
   // Set to empty to get the default theme.

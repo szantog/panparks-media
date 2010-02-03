@@ -1,6 +1,19 @@
 <?php
 // $Id$
 
+
+/* ***************************************** */
+/* CONSTANTS                                 */
+/* ***************************************** */
+
+/**
+ * @TODO: iz_cruft?
+ * @var unknown_type
+ */
+define('MEDIA_RESOURCE_URI_DEFAULT', 'public://');
+define('MEDIA_TYPES_DEFAULT', '*');
+
+
 /**
  * @file Contains the variables used by media and their defaults.
  */

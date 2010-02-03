@@ -2,8 +2,11 @@
 // $Id$
 
 /**
+ * @file: Provides a "Multimedia asset" field to the fields API
+ */
+
+/**
  * Implement hook_field_info().
- *
  */
 function media_field_info() {
   return array(

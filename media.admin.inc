@@ -36,7 +36,12 @@ function media_admin($form, $form_state) {
     }
   }
 
-  $form['#attached'] = media_attached_files();
+  $path = drupal_get_path('module', 'media');
+
+  $form['#attached'] = array(
+    'js' => array($path . '/javascript/media-admin.js'),
+    'css' => array($path . '/css/media.css'),
+  );
 
   if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
     return media_multiple_delete_confirm($form, $form_state, array_filter($form_state['values']['files']));
@@ -75,6 +80,7 @@ function media_admin($form, $form_state) {
 
   return $form;
 }
+
 
 /**
  * Form builder: Builds the media list administration overview.

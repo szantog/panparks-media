@@ -6,6 +6,7 @@
  *  Define Media entity types, also provides support for the base types.
  *
  *  See media.install for a list of the base types.
+ *  @TODO: Make media types have their own table.
  */
 
 /**
@@ -13,8 +14,6 @@
  *
  */
 function media_entity_info() {
-  // @todo: change this function name now that it is no longer a hook.
-  // @what? hook_entity_info is still a hook.
   $view_modes = media_field_view_modes('media');
   $return = array(
     'media' => array(
@@ -228,15 +227,15 @@ function media_get_type($file) {
 }
 
 /**
- *  Default callback used to determine if a piece of media is of a given type.
+ * Default callback used to determine if a piece of media is of a given type.
  *
  * @TODO: document 'any' and 'all' matching.
  *
- *  @param $media
- *    The media file asset object.
- *  @param $args
+ * @param $media
+ *   The media file asset object.
+ * @param $args
  *
- *  @return unknown_type
+ * @return unknown_type
  */
 function media_is_type($media, $args) {
   $match_type = !empty($args['match_type']) ? 'any' : $args['match_type'];
