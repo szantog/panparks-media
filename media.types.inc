@@ -26,7 +26,7 @@ function media_entity_info() {
         'bundle' => 'type', // @TODO: Why 'type' here...
       ),
       'bundle keys' => array(
-        'bundle' => 'machine_name', // @TODO: But 'machine_name' here?
+        'bundle' => 'name', // @TODO: But 'name' here?
       ),
       'bundles' => array(),
     ),
@@ -58,29 +58,39 @@ function media_entity_info() {
  *
  *  @param object &$type
  *    $type is an object with the following fields:
- *      ->machine_name => The name of the media asset type, such as 'video';
+ *      ->name => The name of the media asset type, such as 'video';
  *      ->label => The human readable name;
  *      ->base => boolean: If the media type cannot be removed.
  *      ->type_callback => Function call to filter an instance to its bundle.
  *      ->type_callback_args => An array of args to be passed to type_callback.
- *      ->view_mode_defaults => An array of view_mode_key => format.
  *  @return void;
  */
 function media_type_save(&$type) {
-  $types = media_variable_get('types');
-  $type = media_type_set_defaults($type);
-  $types[$type->machine_name] = $type;
+  if (empty($type->name)) {
+    throw new Exception('Enable to add type, name not provided');
+  }
 
-  // Set up the defaults for this media type bundle.
+  $type = media_type_set_defaults($type);
+  if (!is_array($type->type_callback_args)) {
+    throw new Exception('type_callback_args should be an array');
+  }
+
+  $type->type_callback_args = serialize($type->type_callback_args);
+
+  $ret = db_merge('media_type')
+    ->key(array('name' => $type->name))
+    ->fields((array)$type)
+  ->execute();
+
   media_type_configure_fields($type);
-  media_type_configure_formatters($type->machine_name, $type->view_mode_defaults);
-  // We don't need to save this information
-  unset($type->view_mode_defaults);
-  variable_set('media_types', $types);
+
   // Clear the caches
   drupal_static_reset('media_type_get_types');
   drupal_static_reset('media_type_get_mime_map');
+  return;
 }
+
+
 
 /**
  * Assigns formatters to view_modes for the file field of a media type.
@@ -88,18 +98,18 @@ function media_type_save(&$type) {
  * Each media type contains a field called "file" and certain stock view modes.
  * This function will assign a format to each view mode. For instance, images
  * would want to use a thumbnail format for files when in the "preview"
- * view_mode.  The called would pass in 'image' for $machine_name and
+ * view_mode.  The called would pass in 'image' for $name and
  * array('preview' => 'styles_file_square_thumbnail') to $view_modes_to_formatters.
  *
- * @param string $machine_name
+ * @param string $name
  * @param array $view_modes_to_formatters
  * @throws Exception
  * @return void
  */
-function media_type_configure_formatters($machine_name, $view_modes_to_formatters) {
-  $instance = field_info_instance('media', 'file', $machine_name);
+function media_type_configure_formatters($name, $view_modes_to_formatters) {
+  $instance = field_info_instance('media', 'file', $name);
   if (!$instance) {
-    throw new Exception('Unable to set formatter preferences for '. $machine_name);
+    throw new Exception('Unable to set formatter preferences for '. $name);
   }
   foreach ($instance['display'] as $view_mode => $display) {
     if (isset($view_modes_to_formatters[$view_mode])) {
@@ -112,13 +122,13 @@ function media_type_configure_formatters($machine_name, $view_modes_to_formatter
 /**
  * Loads a media type based on its machine name.
  *
- * @param string $machine_name
+ * @param string $name
  * @return StdClass
  */
-function media_type_load($machine_name) {
+function media_type_load($name) {
   $types = media_type_get_types();
-  if (isset($types[$machine_name])) {
-    return $types[$machine_name];
+  if (isset($types[$name])) {
+    return $types[$name];
   }
 }
 
@@ -133,7 +143,7 @@ function media_type_load($machine_name) {
  */
 function media_type_configure_fields($media_type) {
   $field = field_info_field('file');
-  $instance = field_info_instance('media', 'file', $media_type->machine_name);
+  $instance = field_info_instance('media', 'file', $media_type->name);
 
   if (empty($field)) {
     $field = array(
@@ -149,7 +159,7 @@ function media_type_configure_fields($media_type) {
     $instance = array(
       'field_name' => 'file',
       'object_type' => 'media',
-      'bundle' => $media_type->machine_name,
+      'bundle' => $media_type->name,
       'label' => 'File',
       'widget_type' => 'file_file',
       'widget' => array(
@@ -183,11 +193,18 @@ function media_type_configure_fields($media_type) {
  */
 function media_type_get_types() {
   $types =& drupal_static(__FUNCTION__);
-
   if (!$types) {
-    $types = media_variable_get('types');
-    uasort($types, 'drupal_sort_weight');
+    $types = db_select('media_type', 'mt')
+      ->orderBy('weight')
+      ->fields('mt')
+      ->execute()
+      ->fetchAllAssoc('name'); // Will key by the name field.
+    foreach ($types as &$type) {
+      // I really hate this.
+      $type->type_callback_args = unserialize($type->type_callback_args);
+    }
   }
+
   return $types;
 }
 
@@ -210,8 +227,7 @@ function media_type_set_defaults($info) {
 }
 
 /**
- * From the looks of other parts of the code.
- * This is not needed, but it was simpler to code up for now.
+ * Determines the type of media a passed in $file is.
  *
  * @todo: integrate this properly with other APIs in media when fields is done
  * @param unknown_type $file
@@ -224,6 +240,7 @@ function media_get_type($file) {
       return $name;
     }
   }
+  throw new Exception('Unable to determine type of media from ' . var_export($file, 1));
 }
 
 /**

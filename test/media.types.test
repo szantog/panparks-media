@@ -19,20 +19,20 @@ class MediaTypeTest extends DrupalWebTestCase {
   }
 
   function setUp() {
-    parent::setUp();
+    parent::setUp('media');
     // Nice, TDD FTW.  #totalsarcasm
     variable_set('simpletest_verbose', TRUE);
   }
 
   private function createType($overrides) {
     $type = new StdClass();
-    $type->machine_name = 'test';
+    $type->name = 'test';
     $type->label = "Test";
     $type->base = TRUE;
-    $type->view_mode_defaults = array(
-      'media_preview' => 'styles_file_square_thumbnail',
-      'media_original' => 'file_default',
-    );
+//    $type->view_mode_defaults = array(
+//      'media_preview' => 'styles_file_square_thumbnail',
+//      'media_original' => 'file_default',
+//    );
 
     $type->type_callback_args =
     array(
@@ -45,6 +45,7 @@ class MediaTypeTest extends DrupalWebTestCase {
     foreach ($overrides as $k => $v) {
       $type->$k = $v;
     }
+
     media_type_save($type);
     return $type;
   }
@@ -54,9 +55,22 @@ class MediaTypeTest extends DrupalWebTestCase {
    */
   function testCreate() {
     $type_machine_name = 'foo';
-    $type = $this->createType(array('machine_name' => $type_machine_name, 'label' => 'foobar'));
+    $type = $this->createType(array('name' => $type_machine_name, 'label' => 'foobar'));
     $loaded_type = media_type_load($type_machine_name);
-    $this->assertEqual($loaded_type->label, 'foobar');
+    $this->assertEqual($loaded_type->label, 'foobar', "Was able to create a type and retreive it");
+  }
+
+  /**
+   * Ensures that the weight is respected when types are created.
+   * @return unknown_type
+   */
+  function testOrder() {
+    $type = $this->createType(array('name' => 'last', 'label' => 'Last', 'weight' => 100));
+    $type = $this->createType(array('name' => 'first', 'label' => 'First'));
+    $types = media_type_get_types();
+    $keys = array_keys($types);
+    $this->assertTrue(isset($types['last']) && isset($types['first']),"Both types saved");
+    $this->assertTrue(array_search('last', $keys) > array_search('first', $keys), 'Type which was supposed to be first came first');
   }
 
   /**
@@ -64,16 +78,6 @@ class MediaTypeTest extends DrupalWebTestCase {
    * @return unknown_type
    */
   function testViewModesAssigned() {
-    $view_modes = array(
-      'media_preview' => 'styles_file_square_thumbnail',
-      'media_original' => 'file_default',
-    );
-    $type_machine_name = 'foo';
-    $type = $this->createType(array('machine_name' => $type_machine_name, 'view_mode_defaults' => $view_modes));
-    $instance = field_info_instance('media', 'file', $type_machine_name);
-    foreach ($view_modes as $view_mode => $formatter) {
-      $this->assertEqual($instance['display'][$view_mode]['type'], $formatter, 'When viewed as ' . $media_preview . ' Should be shown as ' . $formatter .' actually set to ' . $instance['display'][$view_mode]['type']);
-    }
   }
 
 }

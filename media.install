@@ -64,12 +64,14 @@ function media_enable() {
 
   // This is the default type which will be used if no other type is found
   $types['default'] = new StdClass();
-  $types['default']->machine_name = 'default';
+  $types['default']->name = 'default';
   $types['default']->label = "Other";
   $types['default']->base = TRUE;
   //@todo: I don't like this but we have to do something here.
-  $types['default']->view_mode_defaults = $view_mode_defaults;
+  $view_mode_settings['default'] = $view_mode_defaults;
 
+  // This should always run last because it is a fallback in case no other
+  // types claim the media.
   $types['default']->weight = 1000;
   // This is the default.
   $types['default']->type_callback_args = array(
@@ -79,10 +81,10 @@ function media_enable() {
 
   // Add the common media types.
   $types['image'] = new StdClass();
-  $types['image']->machine_name = 'image';
+  $types['image']->name = 'image';
   $types['image']->label = "Image";
   $types['image']->base = TRUE;
-  $types['image']->view_mode_defaults = $view_mode_defaults;
+  $view_mode_settings['image'] = $view_mode_defaults;
 
   $types['image']->type_callback_args =
   array(
@@ -93,12 +95,12 @@ function media_enable() {
   );
 
   $types['audio'] = new StdClass();
-  $types['audio']->machine_name = 'audio';
+  $types['audio']->name = 'audio';
   $types['audio']->label = "Audio";
   $types['audio']->base = TRUE;
 
   // @todo: these are image specific, needs to change
-  $types['audio']->view_mode_defaults = $view_mode_defaults;
+  $view_mode_settings['audio'] = $view_mode_defaults;
   $types['audio']->type_callback_args = array(
     'match_type' => 'all',
     'mimetypes' => array('/^audio/'),
@@ -106,15 +108,15 @@ function media_enable() {
     'streams' => array('public', 'private'),
   );
 
+
   $types['video'] = new StdClass();
-  $types['video']->machine_name = 'video';
+  $types['video']->name = 'video';
   $types['video']->label = "Video";
   $types['video']->base = TRUE;
 
   // @todo: these are image specific, needs to change
-  $types['video']->view_mode_defaults = $view_mode_defaults;
+  $view_mode_settings['video'] = $view_mode_defaults;
 
-  $types['video']->callbacks = array();
   // This is the default, otherwise could provide
   //$types['video']->type_callback = 'media_default_is_type';
   $types['video']->type_callback_args =
@@ -127,6 +129,7 @@ function media_enable() {
 
   foreach ($types as $name => $type) {
     media_type_save($type);
+    media_type_configure_formatters($type->name, $view_mode_settings[$type->name]);
   }
 }
 
@@ -146,6 +149,11 @@ function _media_type_field_spec() {
  * Implement hook_schema().
  */
 function media_schema() {
+
+  // Using this strange looking function name because of http://drupal.org/node/150220.
+  // Any changes to this table should happen after this line.
+  $schema['media_type'] = _media_update_7002_schema_media_type();
+
   $schema['media_list_type'] = array(
     'description' => 'Stores the user preference for whether to list as table or images.',
     'fields' => array(
@@ -216,3 +224,75 @@ function media_update_7001() {
   $schema['cache_media_xml']['description'] = 'Cache table for the the results of retreived XML documents for remote streams.';
   db_create_table('cache_media_xml', $schema['cache_media_xml']);
 }
+
+/**
+ * Add the media_type table and remove the variable
+ */
+function media_update_7002() {
+  $old_types = variable_get('media_types');
+  db_create_table('media_type', _media_update_7002_schema_media_type());
+  foreach ($old_types as $type) {
+    // Was an error in the original creation
+    if (isset($type->callbacks)) {
+      unset($type->callbacks);
+    }
+    $type->name = $type->machine_name;
+    unset($type->machine_name);
+    media_type_save($type);
+  }
+  variable_del('media_types');
+}
+
+// Using this strange looking function name because of http://drupal.org/node/150220.
+// This function should never be modified.
+function _media_update_7002_schema_media_type() {
+  return array(
+    'description' => 'Stores the settings for media types.',
+    'fields' => array(
+      'name' => array(
+        'description' => 'The machine name of the media type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'label' => array(
+        'description' => 'The label of the media type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'base' => array(
+        'description' => 'If this is a base type (i.e. cannot be deleted)',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+      ),
+      'weight' => array(
+        'description' => 'Weight of media type. Determines which one wins when claiming a piece of media (first wins)',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'normal',
+      ),
+      'type_callback' => array(
+        'description' => 'Callback to determine if provided media is of this type.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'type_callback_args' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'A serialized array of name value pairs that will be passed to the callback function',
+      ),
+    ),
+    'primary key' => array('name'),
+  );
+}
+

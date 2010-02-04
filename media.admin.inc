@@ -596,7 +596,7 @@ function media_admin_type_manage_form($form, &$form_state, $media_type) {
   $form = array();
   $form['media_type'] = array(
     '#type' => 'value',
-    '#value' => $media_type->machine_name,
+    '#value' => $media_type->name,
   );
   $form['type'] = array(
     '#type' => 'fieldset',
