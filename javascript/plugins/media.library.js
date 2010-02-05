@@ -73,7 +73,7 @@
         }
 
         for (var m in this.mediaFiles) {
-          mediaFile = this.mediaFiles[m];
+          var mediaFile = this.mediaFiles[m];
 
           var listItem = jQuery('<li></li>').appendTo(this.browser)
             .attr('id', 'media-file-' + mediaFile.fid)

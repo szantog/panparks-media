@@ -395,7 +395,14 @@ function media_add_upload_submit($form, &$form_state) {
   else {
     drupal_set_message(t('An error occurred and no file was uploaded.'), 'error');
   }
-  $form_state['redirect'] = !empty($form_state['values']['redirect']) ? $form_state['values']['redirect'] : 'media/' . $file->fid . '/edit';
+  if (empty($form_state['values']['redirect'])) {
+    $form_state['redirect'] = 'media/' . $file->fid . '/edit';
+  }
+  else {
+    if ($form_state['values']['redirect'][0] = 'media/browser' && $file->fid) {
+      $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
+    }
+  }
 }
 
 /**

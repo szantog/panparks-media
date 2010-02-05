@@ -167,4 +167,16 @@ Drupal.media.browser.getActivePanel = function() {
   return $('#media-browser-tabs .ui-tabs-panel:eq(' + selectedTabIndex + ')')
 }
 
+Drupal.media.browser.mediaAdded = function () {
+  if (window.location.search.indexOf('fid=') !== -1) {
+    // Determine the new fid from the iframe's URL.
+    var matches = window.location.search.match(/(^|&)fid=([0-9]+)/);
+    if (matches && matches[2]) {
+      var fid = matches[2];
+      return fid;
+    }
+  }
+  return false;
+};
+
 })(jQuery);

@@ -66,14 +66,35 @@ Drupal.media.popups.mediaBrowser = function(onSelect, options) {
   // Remove the title bar.
   mediaIframe.parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
   return mediaIframe;
-}
+};
 
 Drupal.media.popups.mediaBrowser.mediaBrowserOnLoad = function (e) {
   var options = e.data;
-  if (this.contentWindow.Drupal.media.browser) {
+  if (!this.contentWindow || !this.contentWindow.Drupal.media.browser) {
+    return;
+  }
+  // Check to see if new media has been successfully added (e.g. a file upload).
+  var fid = this.contentWindow.Drupal.media.browser.mediaAdded();
+  if (fid) {
+    Drupal.media.popups.mediaBrowser.chooseMedia(this, fid);
+  }
+  else {
     this.contentWindow.Drupal.media.browser.launch(options);
   }
-},
+};
+
+/**
+ * Select newly added media and submit the dialog.
+ */
+Drupal.media.popups.mediaBrowser.chooseMedia = function (iframe, fid) {
+  var ok = $(iframe).dialog('option', 'buttons')['OK'];
+  var options = {conditions: JSON.stringify({'fid': fid})};
+  var callback = function (data) {
+    iframe.contentWindow.Drupal.media.browser.selectedMedia = [data.media[fid]];
+    ok.call(iframe);
+  };
+  $.getJSON('/media/browser/list', options, callback);
+};
 
 Drupal.media.popups.mediaBrowser.getDefaults = function() {
   return {
