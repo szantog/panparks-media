@@ -30,15 +30,17 @@ function media_browser() {
   $callbacks = module_invoke_all('media_browser_callbacks');
   drupal_alter('media_browser_callbacks_alter', $callbacks);
 
-  // Allow modules implementing hook_media_browser_conditions to add new
+  // Allow modules implementing hook_media_conditions to add new
   // conditions to load the library. For instance, they may only return media
   // belonging to the user, with array('uid' => $user->uid);
-  $conditions = module_invoke_all('media_browser_conditions');
+  // @TODO: Not sure if we want this here specifically; we have an alter.
+  $conditions = module_invoke_all('media_conditions');
 
-  // Allow modules implementing hook_media_browser_conditions to filter streams
+  // Allow modules implementing hook_media_streams to filter streams
   // when loading the library. For instance, they may only return media
   // belonging to the flickr:// stream, with array('flickr://');
-  $streams = module_invoke_all('media_browser_streams');
+  // @TODO: Not sure if we want this here specifically; we have an alter.
+  $streams = module_invoke_all('media_streams');
 
   // Pass our settings to the browser.
   $settings = array(
