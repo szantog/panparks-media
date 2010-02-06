@@ -35,18 +35,10 @@ function media_browser() {
   // belonging to the user, with array('uid' => $user->uid);
   $conditions = module_invoke_all('media_browser_conditions');
 
-  // Allow modules implementing hook_media_browser_conditions_alter to alter
-  // the set of browser library conditions.
-  drupal_alter('media_browser_conditions_alter', $conditions);
-
   // Allow modules implementing hook_media_browser_conditions to filter streams
   // when loading the library. For instance, they may only return media
   // belonging to the flickr:// stream, with array('flickr://');
   $streams = module_invoke_all('media_browser_streams');
-
-  // Allow modules implementing hook_media_browser_streams_alter to alter
-  // the set of browser stream filters.
-  drupal_alter('media_browser_conditions_streams', $streams);
 
   // Pass our settings to the browser.
   $settings = array(
@@ -161,6 +153,14 @@ function media_browser_list() {
     $streams = drupal_json_decode($_GET['streams']);
   }
   $streams = isset($streams) ? $streams : array();
+
+  // Allow modules implementing hook_media_conditions_alter to alter
+  // the set of browser library conditions.
+  drupal_alter('media_conditions', $conditions);
+
+  // Allow modules implementing hook_media_streams_alter to alter
+  // the set of browser stream filters.
+  drupal_alter('media_streams', $streams);
 
   // @TODO: This will get rather large I suspect, unless we combine
   // with pagers, or use a db_transaction maybe, or just write our own query.
