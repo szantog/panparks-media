@@ -687,8 +687,14 @@ function media_parse_to_uri($url) {
  *  @see media_add_from_url_submit().
  */
 function media_parse_to_file($url) {
-  // @TODO: Do we want to fail on errors? If so, is there a way to pass them on?
-  $uri = media_parse_to_uri($url);
+  try {
+    $uri = media_parse_to_uri($url);
+  }
+  catch (Exception $e) {
+    // Pass the error along.
+    throw $e;
+    return;
+  }
 
   if (isset($uri)) {
     // The URL was successfully parsed to a URL: save it!
