@@ -1,12 +1,13 @@
 <?php
-// @Id;
+// $Id$
+
 /**
  * @file
- * Tests for media
+ * Tests for media types.
  */
 
 /**
- * Test media type creation and managedment
+ * Test media type creation and management.
  */
 class MediaTypeTest extends DrupalWebTestCase {
 
@@ -51,7 +52,7 @@ class MediaTypeTest extends DrupalWebTestCase {
   }
 
   /**
-   * Test creating a new type.  Basic CRUD
+   * Test creating a new type. Basic CRUD.
    */
   function testCreate() {
     $type_machine_name = 'foo';
@@ -74,7 +75,7 @@ class MediaTypeTest extends DrupalWebTestCase {
   }
 
   /**
-   * Test view mode assignment.  Currently fails, don't know why
+   * Test view mode assignment.  Currently fails, don't know why.
    * @return unknown_type
    */
   function testViewModesAssigned() {
