@@ -122,6 +122,10 @@ function media_variable_default($name = NULL) {
     $defaults['browser_viewtype_default'] = 'thumbnails';
     $defaults['browser_pager_limit'] = 10;
     $defaults['browser_library_empty_message'] = t('There are currently no media in this library to select.');
+
+    // This temporary variable is to test out the alternative browser.
+    // See media.browser.experimental.inc.
+    $defaults['experimental_browser'] = FALSE;
   }
 
   if (!isset($name)) {
