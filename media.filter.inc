@@ -31,10 +31,16 @@ function media_filter_info() {
     'tips callback' => 'media_filter_tips', // @TODO not implemented
     'cache' => FALSE,
   );
+  $filters['media_url_filter'] = array(
+    'title' => t('Converts Media urls to Markup'),
+    'description' => t('This filter will convert media urls into markup'),
+    'process callback' => 'media_url_filter',
+    'tips callback' => 'media_url_filter_tips', // @TODO not implemented
+    'cache' => FALSE,
+  );
   return $filters;
 }
 
-//
 /**
  * Implement hook_filter();
  * @TODO check for security probably pass text through filter_xss
@@ -43,7 +49,79 @@ function media_filter_info() {
 function media_filter($text, $filter) {
   $text = ' ' . $text . ' ';
   $text = preg_replace_callback("/\[\[.*?]]/s",'_media_markup', $text);
+
   return $text;
+}
+
+function media_url_filter($text, $filter) {
+  $text = ' '. $text .' ';
+
+  // Need to attach the variables to the callback after the regex.
+  $callback = _media_url_curry('_media_url_parse_full_links', 1);
+
+  // Match absolute URLs.
+  $text = preg_replace_callback("`(<p>|<li>|<br\s*/?>|[ \n\r\t\(])((http://|https://)([a-zA-Z0-9@:%_+*~#?&=.,/;-]*[a-zA-Z0-9@:%_+*~#&=/;-]))([.,?!]*?)(?=(</p>|</li>|<br\s*/?>|[ \n\r\t\)]))`i", $callback, $text);
+
+  return $text;
+}
+
+/**
+ * If one of our allowed providers knows what to do with the url,
+ * then let it embed the video.
+ *
+ * @param int $filter
+ *  The filter id.
+ * @param array $match
+ *  The matched text from our regex.
+ *
+ * @return string
+ *  The replacement text for the url.
+ */
+function _media_url_parse_full_links($match) {
+  // Get just the URL.
+  $match[2] = check_url(decode_entities($match[2]));
+  try {
+    $file = media_parse_to_file($match[2]);
+  }
+  catch (Exception $e) {
+    // Ignore errors; pass the original text for other filters to deal with.
+    return $match[0];
+  }
+
+  if ($file->fid) {
+    // Return the embedded media.
+    // Now load the desired media to display.
+    $medias = entity_load('media', array($file->fid));
+
+    if (!empty($medias)) {
+      $media = array_pop($medias);
+
+      // Generate a preview of the file
+      // @TODO: Allow user to change the formatter in the filter settings.
+      $preview = field_view_field('media', $media, 'file', 'media_large');
+      $preview['#show_names'] = TRUE;
+
+      return drupal_render($preview);
+    }
+  }
+
+  // Nothing was parsed; return the original text.
+  return $match[0];
+}
+
+function _media_url_curry($func, $arity) {
+  return create_function('', "
+    \$args = func_get_args();
+    if(count(\$args) >= $arity)
+        return call_user_func_array('$func', \$args);
+    \$args = var_export(\$args, 1);
+    return create_function('','
+        \$a = func_get_args();
+        \$z = ' . \$args . ';
+        \$a = array_merge(\$z,\$a);
+        return call_user_func_array(\'$func\', \$a);
+    ');
+  ");
 }
 
 /**
