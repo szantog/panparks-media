@@ -697,7 +697,22 @@ function media_parse_to_file($url) {
   }
 
   if (isset($uri)) {
-    // The URL was successfully parsed to a URL: save it!
+    // Attempt to load an existing file from the unique URI.
+    $select = db_select('file', 'f')
+    ->extend('PagerDefault')
+    ->fields('f', array('fid'))
+    ->condition('uri', $uri);
+
+    $fid = $select->execute()->fetchCol();
+    if (!empty($fid)) {
+      $file = file_load(array_pop($fid));
+      return $file;
+    }
+  }
+
+  if (isset($uri)) {
+    // The URL was successfully parsed to a URI, but does not yet have an
+    // associated file: save it!
     $file = file_uri_to_object($uri);
     file_save($file);
   }
@@ -714,6 +729,36 @@ function media_parse_to_file($url) {
     $uri = file_stream_wrapper_uri_normalize($scheme . $source_file->filename);
     // Now to its new home.
     $file = file_move($source_file, $uri, FILE_EXISTS_RENAME);
+  }
+
+  if (isset($file)) {
+    _media_file_save($file);
+  }
+
+  return $file;
+}
+
+/**
+ *  When we save a file, we need to ensure any required media entity info is
+ *  saved as well.
+ *  @TODO: Can certainly be cleaned up and renamed or moved appropriately.
+ */
+function _media_file_save($file) {
+  if ($file) {
+    $defaults = array (
+      'display' => TRUE,
+    );
+
+    // Make a copy of the file object to use as the media object
+    // (file is a field of media and the base table). This is weird.
+    // @TODO: Why are we not then working on $media?
+    $media = clone($file);
+    $file->file = array();
+    $file->file[LANGUAGE_NONE] = array();
+    $file->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
+    $file->is_new = TRUE;
+    field_attach_presave('media', $file);
+    field_attach_insert('media', $file);
   }
 
   return $file;
