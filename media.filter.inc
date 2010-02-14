@@ -42,7 +42,8 @@ function media_filter_info() {
 }
 
 /**
- * Implement hook_filter();
+ * Filter callback for media markup filter.
+ *
  * @TODO check for security probably pass text through filter_xss
  * @return unknown_type
  */
@@ -53,6 +54,9 @@ function media_filter($text, $filter) {
   return $text;
 }
 
+/**
+ *  Filter callback for media url filter.
+ */
 function media_url_filter($text, $filter) {
   $text = ' '. $text .' ';
 

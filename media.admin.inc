@@ -389,7 +389,7 @@ function media_add_upload_submit($form, &$form_state) {
   // Save the uploaded file.
   $file = file_move($file, $destination, FILE_EXISTS_RENAME);
 
-  if (_media_file_save($file)) {
+  if (media_save_attached_file($file)) {
     drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
   }
   else {

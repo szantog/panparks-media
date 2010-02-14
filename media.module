@@ -732,7 +732,7 @@ function media_parse_to_file($url) {
   }
 
   if (isset($file)) {
-    _media_file_save($file);
+    media_save_attached_file($file);
   }
 
   return $file;
@@ -741,9 +741,8 @@ function media_parse_to_file($url) {
 /**
  *  When we save a file, we need to ensure any required media entity info is
  *  saved as well.
- *  @TODO: Can certainly be cleaned up and renamed or moved appropriately.
  */
-function _media_file_save($file) {
+function media_save_attached_file($file) {
   if ($file) {
     $defaults = array (
       'display' => TRUE,
