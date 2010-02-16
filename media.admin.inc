@@ -401,6 +401,7 @@ function media_add_upload_submit($form, &$form_state) {
   else {
     if ($form_state['values']['redirect'][0] = 'media/browser' && $file->fid) {
       $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
+//       $form_state['redirect'] = array('media/'. $file->fid .'/format-form', array('query' => array('render' => 'media-popup')));
     }
   }
 }
@@ -508,6 +509,12 @@ function media_add_from_url_submit($form, &$form_state) {
 
   if (!$form_state['redirect']) {
     $form_state['redirect'] = 'media/' . $file->fid . '/edit';
+  }
+  else {
+    if ($form_state['values']['redirect'][0] = 'media/browser' && $file->fid) {
+      $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
+//       $form_state['redirect'] = array('media/'. $file->fid .'/format-form', array('query' => array('render' => 'media-popup')));
+    }
   }
 }
 

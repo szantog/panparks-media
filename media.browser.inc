@@ -15,6 +15,16 @@ function media_browser() {
     return media_browser_experimental();
   }
 
+  if (isset($_GET['fid']) && is_numeric($_GET['fid'])) {
+    $media = entity_load('media', array($_GET['fid']));
+    if (!empty($media)) {
+      $media = array_pop($media);
+      if ($media->fid) {
+        return drupal_get_form('media_format_form', $media);
+      }
+    }
+  }
+
   $rows = array();
 
   $attached = array();
