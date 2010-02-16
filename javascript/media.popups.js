@@ -1,22 +1,22 @@
 /**
  * @file: Popup dialog interfaces for the media project.
- * 
- * Drupal.media.popups.mediaBrowser 
+ *
+ * Drupal.media.popups.mediaBrowser
  *   Launches the media browser which allows users to pick a piece of media.
- *   
+ *
  * Drupal.media.popups.mediaStyleSelector
  *  Launches the style selection form where the user can choose
  *  what format / style they want their media in.
- * 
+ *
  */
 
 (function ($) {
 
-namespace('Drupal.media.popups');  
+namespace('Drupal.media.popups');
 
 /**
  * Media browser popup. Creates a media browser dialog.
- * 
+ *
  * @param {function}
  *          onSelect Callback for when dialog is closed, received (Array
  *          media, Object extra);
@@ -44,10 +44,10 @@ Drupal.media.popups.mediaBrowser = function(onSelect, options) {
     cancel = Drupal.t(cancel);
     notSelected = Drupal.t(notSelected);
   }
-  
+
   // @todo: let some options come through here. Currently can't be changed.
   var dialogOptions = Drupal.media.popups.getDialogOptions();
-  
+
   dialogOptions.buttons[ok] = function () {
     var selected = this.contentWindow.Drupal.media.browser.selectedMedia;
     if (selected.length < 1) {
@@ -57,12 +57,12 @@ Drupal.media.popups.mediaBrowser = function(onSelect, options) {
     onSelect(selected);
     $(this).dialog("close");
   };
- 
+
   dialogOptions.buttons[cancel] = function () {
     $(this).dialog("close");
   };
-  
-  Drupal.media.popups.setDialogPadding(mediaIframe.dialog(dialogOptions));  
+
+  Drupal.media.popups.setDialogPadding(mediaIframe.dialog(dialogOptions));
   // Remove the title bar.
   mediaIframe.parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
   return mediaIframe;
@@ -93,7 +93,7 @@ Drupal.media.popups.mediaBrowser.chooseMedia = function (iframe, fid) {
     iframe.contentWindow.Drupal.media.browser.selectedMedia = [data.media[fid]];
     ok.call(iframe);
   };
-  $.getJSON('/media/browser/list', options, callback);
+  $.getJSON(Drupal.settings.basePath + 'media/browser/list', options, callback);
 };
 
 Drupal.media.popups.mediaBrowser.getDefaults = function() {
@@ -105,15 +105,15 @@ Drupal.media.popups.mediaBrowser.getDefaults = function() {
 
 /**
  * Style chooser Popup. Creates a dialog for a user to choose a media style.
- * 
+ *
  * @param mediaFile
  *          The mediaFile you are requesting this formatting form for.
  *          @todo: should this be fid?  That's actually all we need now.
- *          
+ *
  * @param Function
  *          onSubmit Function to be called when the user chooses a media
  *          style. Takes one parameter (Object formattedMedia).
- *          
+ *
  * @param Object
  *          options Options for the mediaStyleChooser dialog.
  */
@@ -126,7 +126,7 @@ Drupal.media.popups.mediaStyleSelector = function(mediaFile, onSelect, options) 
   var mediaIframe = Drupal.media.popups.getPopupIframe(options.src, 'mediaBrowser');
   // Attach the onLoad event
   mediaIframe.bind('load', options, options.onLoad);
-  
+
   /**
    * Set up the button text
    */
@@ -139,12 +139,12 @@ Drupal.media.popups.mediaStyleSelector = function(mediaFile, onSelect, options) 
     cancel = Drupal.t(cancel);
     notSelected = Drupal.t(notSelected);
   }
-  
+
   // @todo: let some options come through here. Currently can't be changed.
   var dialogOptions = Drupal.media.popups.getDialogOptions();
-  
+
   dialogOptions.buttons[ok] = function () {
-    
+
     var formattedMedia = this.contentWindow.Drupal.media.formatForm.getFormattedMedia();
     if (!formattedMedia) {
       alert(notSelected);
@@ -153,12 +153,12 @@ Drupal.media.popups.mediaStyleSelector = function(mediaFile, onSelect, options) 
     onSelect(formattedMedia);
     $(this).dialog("close");
   };
-  
+
   dialogOptions.buttons[cancel] = function () {
     $(this).dialog("close");
   };
-  
-  Drupal.media.popups.setDialogPadding(mediaIframe.dialog(dialogOptions));  
+
+  Drupal.media.popups.setDialogPadding(mediaIframe.dialog(dialogOptions));
   // Remove the title bar.
   mediaIframe.parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
   return mediaIframe;
@@ -201,7 +201,7 @@ Drupal.media.popups.getDialogOptions = function() {
 
 /**
  * Created padding on a dialog
- * 
+ *
  * @param jQuery dialogElement
  *  The element which has .dialog() attached to it.
  */
@@ -209,7 +209,7 @@ Drupal.media.popups.setDialogPadding = function(dialogElement) {
   // @TODO: Perhaps remove this hardcoded reference
   var horizontalPadding = 30;
   var verticalPadding = 30;
-  
+
   dialogElement.width(dialogElement.dialog('option', 'width') - horizontalPadding)
   dialogElement.height(dialogElement.dialog('option', 'height') - verticalPadding);
 };
@@ -220,7 +220,7 @@ Drupal.media.popups.setDialogPadding = function(dialogElement) {
 Drupal.media.popups.getPopupIframe = function(src, id, options) {
   var defaults = {width: '800px', scrolling: 'no'};
   var options = $.extend({}, defaults, options);
-  
+
   return $('<iframe class="media-modal-frame"/>')
   .attr('src', src)
   .attr('width', options.width)
