@@ -10,6 +10,11 @@
  *  Displays the popup media browser for editors.
  */
 function media_browser() {
+  if (media_variable_get('experimental_browser')) {
+    module_load_include('inc', 'media', 'media.browser.experimental');
+    return media_browser_experimental();
+  }
+
   $rows = array();
 
   $attached = array();
@@ -119,6 +124,7 @@ function media_media_browser_plugins() {
     ),
     'settings' => array('viewMode' => 'thumbnails'),
   );
+
   return $plugins;
 }
 

@@ -7,8 +7,12 @@
  *
  * To use this, you'll need to add the following variable override to your
  * settings.php:
- *   $conf['experimental_browser'] = TRUE;
+ *   $conf['media_experimental_browser'] = TRUE;
  */
+
+function media_browser_experimental() {
+  return drupal_get_form('media_browser_form', media_browser_fid_list());
+}
 
 /**
  * Build a form listing available media files.
@@ -17,16 +21,45 @@
  *  The form built with FAPI.
  * @param array &$form_state
  *  The current form state after rendering.
- * @param array $options
+ * @param array $selections
+ *  An array of thumbnails associated by fid or uri for the radio selection
+ *  options.
+ */
+function media_browser_form($form, &$form_state, $selections = array()) {
+  $form = array();
+
+  $form['#attached']['library'][] = array('media', 'media_browser_page');
+
+  $form['media'] = array(
+    '#type' => 'radios',
+    '#options' => $selections,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('OK'),
+  );
+
+  return $form;
+}
+
+function media_browser_form_submit(&$form, &$form_state) {
+  $media = $form_state['values']['media'];
+
+  if (is_numeric($media)) {
+    $url = url('media/'. $media. '/format-form', array('query' => array('render' => 'media-popup'), 'absolute' => TRUE));
+    $form_state['redirect'] = $url;
+  }
+}
+
+/**
  *  Any options needed to retrieve the file select options. An associate array
  *  with the following optional keys:
  *    'conditions' => An array of 'column' => 'value' to pass to the db query,
  *    'streams' => An array of streams to filter,
  *    'limit' => The number of results to return.
  */
-function media_browser_form($form, &$form_state, $options = array()) {
-  $form = array();
-
+function media_browser_fid_list($options = array()) {
   $conditions = isset($options['conditions']) ? $options['conditions'] : array();
   $streams = isset($options['streams']) ? $options['streams'] : array();
   $limit = isset($options['limit']) ? $options['limit'] : media_variable_get('browser_pager_limit');
@@ -50,13 +83,13 @@ function media_browser_form($form, &$form_state, $options = array()) {
   // Add our pager limit filter.
   $select->limit($limit);
 
-  // Grab the fid's.
+  // Grab the uri's.
   $fids = $select->execute()
     ->fetchCol();
 
   $selections = array();
 
-  if (!empty($fids)) {
+   if (!empty($fids)) {
     // Now load the desired media to display.
     $medias = entity_load('media', $fids);
 
@@ -74,10 +107,5 @@ function media_browser_form($form, &$form_state, $options = array()) {
     }
   }
 
-  $form['media'] = array(
-    '#type' => 'radios',
-    '#options' => $selections,
-  );
-
-  return $form;
+  return $selections;
 }
