@@ -23,7 +23,7 @@ define('MEDIA_TYPES_DEFAULT', '*');
  *
  *  @param string $name
  *    The variable name to retrieve. Note that it will be namespaced by
- *    pre-pending 'media_', as to avoid variable collisions with other modules.
+ *    pre-pending 'media__', as to avoid variable collisions with other modules.
  *  @param unknown $default
  *    An optional default variable to return if the variable hasn't been set
  *    yet. Note that within this module, all variables should already be set
@@ -42,7 +42,7 @@ function media_variable_get($name, $default = NULL) {
     $default = media_variable_default($name);
   }
   // Namespace all variables
-  $variable_name = 'media_' . $name;
+  $variable_name = 'media__' . $name;
   return variable_get($variable_name, $default);
 }
 
@@ -51,7 +51,7 @@ function media_variable_get($name, $default = NULL) {
  *
  *  @param string $name
  *    The variable name to set. Note that it will be namespaced by
- *    pre-pending 'media_', as to avoid variable collisions with other modules.
+ *    pre-pending 'media__', as to avoid variable collisions with other modules.
  *  @param unknown $value
  *    The value for which to set the variable.
  *  @return unknown
@@ -62,7 +62,7 @@ function media_variable_get($name, $default = NULL) {
  *  @see media_variable_default()
  */
 function media_variable_set($name, $value) {
-  $variable_name = 'media_' . $name;
+  $variable_name = 'media__' . $name;
   return variable_set($variable_name, $value);
 }
 
@@ -71,14 +71,14 @@ function media_variable_set($name, $value) {
  *
  *  @param string $name
  *    The variable name to delete. Note that it will be namespaced by
- *    pre-pending 'media_', as to avoid variable collisions with other modules.
+ *    pre-pending 'media__', as to avoid variable collisions with other modules.
  *
  *  @see media_variable_get()
  *  @see media_variable_set()
  *  @see media_variable_default()
  */
 function media_variable_del($name) {
-  $variable_name = 'media_' . $name;
+  $variable_name = 'media__' . $name;
   variable_del($variable_name);
 }
 
@@ -87,7 +87,7 @@ function media_variable_del($name) {
  *
  *  @param string $name
  *    Optional variable name to retrieve the default. Note that it has not yet
- *    been pre-pended with the 'media_' namespace at this time.
+ *    been pre-pended with the 'media__' namespace at this time.
  *  @return unknown
  *    The default value of this variable, if it's been set, or NULL, unless
  *    $name is NULL, in which case we return an array of all default values.
@@ -100,32 +100,31 @@ function media_variable_default($name = NULL) {
   static $defaults;
 
   if (!isset($defaults)) {
-    $defaults = array();
+    $defaults = array(
+      'wysiwyg_title' => 'Media Browser',
+      'wysiwyg_icon_title' => 'Add Media',
+      'wysiwyg_default_view_mode' => 'media_large',
 
-    $defaults['wysiwyg_title'] = 'Media Browser';
-    $defaults['wysiwyg_icon_title'] = 'Add Media';
-    $defaults['wysiwyg_default_view_mode'] = 'media_large';
-    // Name of the theme to use in media popup dialogs
-    $defaults['dialog_get_theme_name'] = 'seven';
-    $defaults['file_extensions'] = '';
-    $defaults['max_filesize'] = '';
-    $defaults['debug'] = FALSE;
+      // Name of the theme to use in media popup dialogs
+      'dialog_get_theme_name' => 'seven',
+      'file_extensions' => '',
+      'max_filesize' => '',
+      'debug' => FALSE,
 
-    $defaults['file_list_size'] = 10;
+      'file_list_size' => 10,
 
-    // The list of media types in the system... Should be a table probably
-    $defaults['types'] = array();
-    // Used in media.xml.inc
-    $defaults['xml_cache_expire'] = 3600;
+      // Used in media.xml.inc: how long to cache retrieved remote data.
+      'xml_cache_expire' => 3600,
 
-    // Browser defaults in media.browser.inc.
-    $defaults['browser_viewtype_default'] = 'thumbnails';
-    $defaults['browser_pager_limit'] = 10;
-    $defaults['browser_library_empty_message'] = t('There are currently no media in this library to select.');
+      // Browser defaults in media.browser.inc.
+      'browser_viewtype_default' => 'thumbnails',
+      'browser_pager_limit' => 10,
+      'browser_library_empty_message' => 'There are currently no media in this library to select.',
 
-    // This temporary variable is to test out the alternative browser.
-    // See media.browser.experimental.inc.
-    $defaults['experimental_browser'] = FALSE;
+      // This temporary variable is to test out the alternative browser.
+      // See media.browser.experimental.inc.
+      'experimental_browser' => FALSE,
+    );
   }
 
   if (!isset($name)) {
