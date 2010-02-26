@@ -123,7 +123,7 @@ Drupal.media.popups.mediaStyleSelector = function(mediaFile, onSelect, options) 
   defaults.src = defaults.src.replace('-media_id-', mediaFile.fid);
   options = $.extend({}, defaults, options);
   // Create it as a modal window.
-  var mediaIframe = Drupal.media.popups.getPopupIframe(options.src, 'mediaBrowser');
+  var mediaIframe = Drupal.media.popups.getPopupIframe(options.src, 'mediaStyleSelector');
   // Attach the onLoad event
   mediaIframe.bind('load', options, options.onLoad);
 

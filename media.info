@@ -13,6 +13,7 @@ files[] = media.types.inc
 files[] = MediaReadOnlyStreamWrapper.inc
 ; Tests
 files[] = test/media.types.test
+files[] = test/media.entity.test
 dependencies[] = file
 dependencies[] = image
 dependencies[] = file_styles

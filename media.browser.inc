@@ -31,6 +31,21 @@ function media_browser() {
   $attached['library'][] = array('media', 'media_browser_page');
 
   $plugins = module_invoke_all('media_browser_plugins');
+  // What can plugins do?
+  // Plugins can declare a JS class which they use to add stuff.. Okay.
+  // Plugins can add tabs?
+
+  // Alternate model
+  // There are no plugins, just a big form alter.
+  // Cons:
+  // API control is lost.  This makes upgrades near impossible, testing too.
+
+  // Alternate model
+  // Hybrid: Plugins can add tabs, and they can add options for those tabs
+  // Q: Can the tabs submit any forms?
+  // Q: What do the tabs contain?  Either HTML or a URL
+  // Q: What if a plugin wants to modify an existing tab?  (that tab should provide a UI).
+  
   foreach ($plugins as $name => $plugin) {
     // Add their JS and CSS
     if ($plugin['#attached']) {
@@ -206,9 +221,7 @@ function media_browser_list() {
     ->fetchCol();
 
   if (!empty($fids)) {
-    // Now load the desired media to display.
-    $medias = entity_load('media', $fids);
-
+    $medias = entity_get_controller('media')->load($fids);
     foreach ($medias as &$media) {
       $media->override = array('browser' => TRUE);
       // Generate a preview of the file

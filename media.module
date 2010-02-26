@@ -10,6 +10,24 @@
  *
  */
 
+spl_autoload_register('media_autoload');
+
+
+/**
+ * Autoload API includes. Note that the code registry autoload is used only
+ * by the providing API module.
+ */
+function media_autoload($class) {
+  if (stripos($class, 'faces') === 0) {
+    module_load_include('inc', 'media', 'includes/faces');
+  }
+  if (stripos($class, 'entity') === 0) {
+    module_load_include('inc', 'media', 'includes/entity');
+  }
+}
+ 
+ 
+ 
 /* ***************************************** */
 /* INCLUDES                                  */
 /* ***************************************** */

@@ -18,6 +18,8 @@ function media_entity_info() {
   $return = array(
     'media' => array(
       'label' => t('Media'),
+  	  'entity class' => 'Media',
+      'controller class' => 'MediaEntityController',
       'base table' => 'file',
       'fieldable' => TRUE,
       'view modes' => $view_modes,
@@ -308,4 +310,61 @@ function media_media_format_form_prepare_alter(&$form, &$form_state, $media) {
   }
 }
 
+
+class Media extends EntityDb {
+  public function __construct($values = array()) {
+    parent::__construct($values, 'media');
+  }
+}
+
+class MediaEntityController extends EntityAPIController {
+  
+  public $customConditions = array();
+  
+  /**
+   * Wrapper around the DB_API to allow conditions which are not ==
+   * 
+   * @param $key
+   * @param $value
+   * @param $operator
+   * @return unknown_type
+   */
+  public function addCondition($key, $value, $operator = NULL) {
+    $this->customConditions = array($key, $value, $operator);
+  }
+  
+  /**
+   * Overloaded (and this sucks).  $conditions can be an array or key=>value pairs or DBNTG conditions.
+   *  
+   * @see sites/all/modules/media/includes/EntityAPIController#load($ids, $conditions)
+   */
+  public function load($ids = array(), $conditions = array()) {
+    // Conditions using the = (equals) operator.
+    $normal_conditions = array();
+    foreach ($conditions as $condition) {
+      if (is_array($condition)) {
+        $this->customConditions[] = array($condition[0], $condition[1], $condition[2]);
+        // We can't use caching in this case
+        $this->cache = FALSE;
+      }
+      else {
+        $normal_conditions[] = $condition;  
+      }
+    }
+    // Unfortuantely, the load method won't query unless there is at least one condition
+    // This is a bad pattern and undocumented side-effect.
+    // @todo: refactor this.
+    if (!$normal_conditions && $this->customConditions) {
+      $normal_conditions['status'] = TRUE;
+    }
+    return parent::load($ids, $normal_conditions);
+  }
+  
+  public function buildQuery() {
+    parent::buildQuery();
+    foreach ($this->customConditions as $condition) {
+      $this->query->condition($condition[0], $condition[1], $condition[2]);
+    }
+  }
+}
 
