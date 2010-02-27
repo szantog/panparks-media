@@ -320,7 +320,7 @@ function media_generic_widget_process($element, &$form_state, $form) {
   // JS: This is just 1/2 written code of what launching the browser might look like
   $element['launcher'] = array (
     '#type' => 'markup',
-    '#markup' => '<a class="launcher" href="#">Select Media</a>',
+    '#markup' => '<a class="launcher" href="#">' . t(media_variable_get('field_select_media_text')) . '</a>',
   );
 
   if (media_variable_get('debug')) {

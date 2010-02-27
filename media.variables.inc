@@ -101,9 +101,11 @@ function media_variable_default($name = NULL) {
 
   if (!isset($defaults)) {
     $defaults = array(
-      'wysiwyg_title' => 'Media Browser',
-      'wysiwyg_icon_title' => 'Add Media',
+      'wysiwyg_title' => 'Media browser',
+      'wysiwyg_icon_title' => 'Add media',
       'wysiwyg_default_view_mode' => 'media_large',
+
+      'field_select_media_text' => 'Select media',
 
       // Name of the theme to use in media popup dialogs
       'dialog_get_theme_name' => 'seven',
