@@ -31,13 +31,13 @@ function media_filter_info() {
     'tips callback' => 'media_filter_tips', // @TODO not implemented
     'cache' => FALSE,
   );
-  $filters['media_url_filter'] = array(
-    'title' => t('Converts Media urls to Markup'),
-    'description' => t('This filter will convert media urls into markup'),
-    'process callback' => 'media_url_filter',
-    'tips callback' => 'media_url_filter_tips', // @TODO not implemented
-    'cache' => FALSE,
-  );
+//   $filters['media_url_filter'] = array(
+//     'title' => t('Converts Media urls to Markup'),
+//     'description' => t('This filter will convert media urls into markup'),
+//     'process callback' => 'media_url_filter',
+//     'tips callback' => 'media_url_filter_tips', // @TODO not implemented
+//     'cache' => FALSE,
+//   );
   return $filters;
 }
 
@@ -56,6 +56,12 @@ function media_filter($text, $filter) {
 
 /**
  *  Filter callback for media url filter.
+ *  @TODO: There are currently problems with this. For instance, if a file is
+ *  to be loaded from a remote location here, it will be recreated multiple
+ *  times, each time this filter is called. If we want to continue supporting
+ *  this feature, we would need to probably create a new stream or other way
+ *  to lookup a remote file w/ its local version. Probably best as a contributed
+ *  module because of this difficulty. ~ aaron.
  */
 function media_url_filter($text, $filter) {
   $text = ' '. $text .' ';
