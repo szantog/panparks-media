@@ -302,7 +302,7 @@ function _media_update_7002_schema_media_type() {
 function media_update_7003() {
   foreach (media_variable_default() as $variable => $value) {
     if (($test = variable_get('media_' . $variable, TRUE)) == variable_get('media_' . $variable, FALSE)) {
-      variable_set('media__' . $variable, $test);
+      media_variable_set($variable, $test);
       variable_del('media_' . $variable);
     }
   }
