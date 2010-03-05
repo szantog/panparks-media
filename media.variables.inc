@@ -27,7 +27,8 @@ define('MEDIA_VARIABLE_NAMESPACE', 'media__');
  *
  *  @param string $name
  *    The variable name to retrieve. Note that it will be namespaced by
- *    pre-pending MEDIA_VARIABLE_NAMESPACE, as to avoid variable collisions with other modules.
+ *    pre-pending MEDIA_VARIABLE_NAMESPACE, as to avoid variable collisions with
+ *    other modules.
  *  @param unknown $default
  *    An optional default variable to return if the variable hasn't been set
  *    yet. Note that within this module, all variables should already be set
@@ -55,7 +56,8 @@ function media_variable_get($name, $default = NULL) {
  *
  *  @param string $name
  *    The variable name to set. Note that it will be namespaced by
- *    pre-pending MEDIA_VARIABLE_NAMESPACE, as to avoid variable collisions with other modules.
+ *    pre-pending MEDIA_VARIABLE_NAMESPACE, as to avoid variable collisions with
+ *    other modules.
  *  @param unknown $value
  *    The value for which to set the variable.
  *  @return unknown
@@ -75,7 +77,8 @@ function media_variable_set($name, $value) {
  *
  *  @param string $name
  *    The variable name to delete. Note that it will be namespaced by
- *    pre-pending MEDIA_VARIABLE_NAMESPACE, as to avoid variable collisions with other modules.
+ *    pre-pending MEDIA_VARIABLE_NAMESPACE, as to avoid variable collisions with
+ *    other modules.
  *
  *  @see media_variable_get()
  *  @see media_variable_set()
