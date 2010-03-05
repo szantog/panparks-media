@@ -10,8 +10,10 @@
  *
  */
 
+/**
+ * Register the media_autoload() function to load relevant classes on demand.
+ */
 spl_autoload_register('media_autoload');
-
 
 /**
  * Autoload API includes. Note that the code registry autoload is used only
@@ -25,9 +27,9 @@ function media_autoload($class) {
     module_load_include('inc', 'media', 'includes/entity');
   }
 }
- 
- 
- 
+
+
+
 /* ***************************************** */
 /* INCLUDES                                  */
 /* ***************************************** */
