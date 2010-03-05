@@ -68,7 +68,7 @@ function media_field_widget_info() {
   return array(
     'media_generic' => array(
       'label' => t('File (media)'),
-      'field types' => array('file', 'media'),
+      'field types' => array('media'),
       'settings' => array(
         'progress_indicator' => 'throbber',
         'allowed_types' => array('image'),
