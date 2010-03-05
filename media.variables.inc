@@ -20,7 +20,7 @@ define('MEDIA_TYPES_DEFAULT', '*');
 /**
  * Define constants.
  */
-define('MEDIA_VARIABLE_NAMESPACE', MEDIA_VARIABLE_NAMESPACE);
+define('MEDIA_VARIABLE_NAMESPACE', 'media__');
 
 /**
  *  Wrapper for variable_get() that uses the Media variable registry.
