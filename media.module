@@ -151,6 +151,17 @@ function media_menu() {
     'theme callback' => 'media_dialog_get_theme_name',
   );
 
+  $items['media/browser/testbed'] = array(
+    'title' => 'Media Browser test',
+    'description' => 'Make it easier to test media browser',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_browser_testbed'),
+    'file' => 'media.browser.inc',
+    'access arguments' => array('administer media'),
+    'type' => MENU_CALLBACK,
+  );
+
+
   /**
    * Browser callbacks
    * @var unknown_type
@@ -602,6 +613,24 @@ function media_library() {
       array('system', 'ui.dialog'),
     ),
   );
+<<<<<<< media.module
+
+  $libraries['media_browser_page_experimental'] = array(
+    'title' => 'Media browser',
+    'js' => array(
+      $path . '/javascript/media.experimental.js'  => array('weight' => JS_DEFAULT),
+    ),
+    'css' => array(
+      $path . '/css/media.browser.css' => array('weight' => CSS_DEFAULT),
+    ),
+    'dependencies' => array(
+      array('media', 'media_base'),
+      array('system', 'ui.tabs'),
+      array('system', 'ui.draggable'),
+      array('system', 'ui.dialog'),
+    ),
+  );
+=======
 
   /**
    * Resources needed in the media browser itself.
@@ -622,6 +651,7 @@ function media_library() {
     ),
   );
 
+>>>>>>> 1.11.2.136
   foreach ($libraries as &$library) {
     $library += $common;
   }

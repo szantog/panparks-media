@@ -31,6 +31,7 @@ function media_browser() {
   $attached['library'][] = array('media', 'media_browser_page');
 
   $plugins = module_invoke_all('media_browser_plugins');
+  
   // What can plugins do?
   // Plugins can declare a JS class which they use to add stuff.. Okay.
   // Plugins can add tabs?
@@ -272,4 +273,53 @@ function media_include_browser_js() {
   );
 
   drupal_add_js(array('media' => $settings), 'setting');
+}
+
+
+/**
+ * Menu callback for testing the media browser
+ */
+function media_browser_testbed($form) {
+  media_include_browser_js();
+  $launcher = '<a href="#" id="launcher"> Launch Media Browser</a>';
+
+  $form['options'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Options (JSON)',
+    '#rows' => 10,
+  );
+
+  $form['launcher'] = array(
+    '#markup' => $launcher,
+  );
+
+  $form['result'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Result',
+  );
+  
+
+  $js = <<<EOF
+    Drupal.behaviors.mediaTest = {
+    attach: function(context, settings) {
+      jQuery('#launcher').click(function () {
+        var options = {};
+        options = eval('(' + jQuery('#edit-options').val() + ')');
+        debug.debug(options);
+        Drupal.media.popups.mediaBrowser(Drupal.behaviors.mediaTest.mediaSelected, options);
+        return false;
+      });
+    },
+    
+    mediaSelected: function() {
+      debug.debug(arguments)
+      jQuery('#edit-results').val(JSON.encode(arguments));
+    }
+  }
+
+EOF;
+  
+  drupal_add_js($js, array('type' => 'inline'));
+  return $form;
+  
 }
