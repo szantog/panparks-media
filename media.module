@@ -198,13 +198,6 @@ function media_menu() {
     'theme callback' => 'media_dialog_get_theme_name',
   );
 
-  $items['media'] = array(
-    'title' => 'Media',
-    'page callback' => 'media_page_default',
-    'access arguments' => array('view media'),
-    'type' => MENU_CALLBACK,
-  );
-
   $items['media/%media'] = array(
     'page callback' => 'media_file_view',
     'page arguments' => array(1),

@@ -307,3 +307,10 @@ function media_update_7003() {
     }
   }
 }
+
+/**
+ * Removed /media from the menu.
+ */
+function media_update_7004() {
+  menu_rebuild();
+}
