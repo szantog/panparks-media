@@ -602,6 +602,26 @@ function media_library() {
       array('system', 'ui.dialog'),
     ),
   );
+
+  /**
+   * Resources needed in the media browser itself.
+   */
+  $libraries['media_browser_experimental'] = array(
+    'title' => 'Media browser (experimental)',
+    'js' => array(
+      $path . '/javascript/media-browser-experimental.js'  => array('weight' => JS_DEFAULT),
+    ),
+    'css' => array(
+      $path . '/css/media.browser.css' => array('weight' => CSS_DEFAULT),
+    ),
+    'dependencies' => array(
+      array('media', 'media_base'),
+      array('system', 'ui.tabs'),
+      array('system', 'ui.draggable'),
+      array('system', 'ui.dialog'),
+    ),
+  );
+
   foreach ($libraries as &$library) {
     $library += $common;
   }
