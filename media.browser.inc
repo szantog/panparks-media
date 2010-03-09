@@ -15,20 +15,61 @@ function media_browser() {
     return media_browser_experimental();
   }
 
-  if (isset($_GET['fid']) && is_numeric($_GET['fid'])) {
-    $media = entity_load('media', array($_GET['fid']));
-    if (!empty($media)) {
-      $media = array_pop($media);
-      if ($media->fid) {
-        return drupal_get_form('media_format_form', $media);
-      }
-    }
-  }
-
   $rows = array();
 
   $attached = array();
   $attached['library'][] = array('media', 'media_browser_page');
+
+
+  if (isset($_GET['fid']) && is_numeric($_GET['fid'])) {
+    // Temporary hack.  God this is too many cooks in a messy kitchen.
+    // Basically, this just returns here, and there is other crazy code OUTSIDE
+    // of the browser to determine that an upload has happened, and we should exit
+    // the browser, selecting that one.
+    // see media.popups.js.
+    // This code seriosuly needs to change, but the code that was here before
+    // was heinously broken and assumed a format form should show after every upload.
+    // This does not make sense when using media as a field.
+
+    $media = entity_load('media', array($_GET['fid']));
+    if (!empty($media)) {
+      $media = array_pop($media);
+      if ($media->fid) {
+        drupal_add_js(array(
+          'media' => array(
+            'selectedMedia' => array($media),
+            )
+          )
+        );
+      }
+    }
+
+    $plugins = array();
+  }
+  
+  else {
+    // If the media is already selected, we don't need to load plugins.
+    // This is a god-awful way to do this, but it is there, so just trying
+    // to support it till it can be replaced.
+
+    $plugins = module_invoke_all('media_browser_plugins');
+
+    // What can plugins do?
+    // Plugins can declare a JS class which they use to add stuff.. Okay.
+    // Plugins can add tabs?
+
+    // Alternate model
+    // There are no plugins, just a big form alter.
+    // Cons:
+    // API control is lost.  This makes upgrades near impossible, testing too.
+
+    // Alternate model
+    // Hybrid: Plugins can add tabs, and they can add options for those tabs
+    // Q: Can the tabs submit any forms?
+    // Q: What do the tabs contain?  Either HTML or a URL
+    // Q: What if a plugin wants to modify an existing tab?  (that tab should provide a UI).
+
+  }
 
   $plugins = module_invoke_all('media_browser_plugins');
   
