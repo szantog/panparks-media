@@ -7,7 +7,7 @@
  *
  * To use this, you'll need to add the following variable override to your
  * settings.php:
- *   $conf['media_experimental_browser'] = TRUE;
+ *   $conf['media__experimental_browser'] = TRUE;
  */
 
 function media_browser_experimental() {
