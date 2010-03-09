@@ -23,7 +23,7 @@ function media_file_view($media) {
  */
 function media_preview_ajax() {
   $url = $_GET['url'];
-  $uri = media_parse($url);
+  $uri = media_parse_to_uri($url);
   if ($uri) {
     $media = file_uri_to_object($uri);
     drupal_json_output(array(
