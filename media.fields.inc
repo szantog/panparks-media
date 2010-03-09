@@ -56,6 +56,7 @@ function media_field_formatter_prepare_view($obj_type, $objects, $field, $instan
   // Load the file items here?
   foreach ($items as $delta => $item) {
     foreach ($item as $file_delta => $file) {
+      $file = (array)$file;
       $items[$delta][$file_delta] = media_load($file['fid']);
     }
   }
