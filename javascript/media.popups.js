@@ -82,7 +82,6 @@ Drupal.media.popups.mediaBrowser.mediaBrowserOnLoad = function (e) {
   // Just related to the experimental browser
   // If this function exists, we know we're using that one.
   // See the docs there for what it does
-  console.log(this.contentWindow.Drupal.media.browser.selectedMedia);
   if (this.contentWindow.Drupal.media.browser.selectedMedia.length > 0) {
     var ok = $(this).dialog('option', 'buttons')['OK'];
     ok.call(this);

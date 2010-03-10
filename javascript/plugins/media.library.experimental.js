@@ -8,34 +8,14 @@ Drupal.behaviors.mediaLibrary = {
     var library = new Drupal.media.browser.library(Drupal.settings.media.browser.library);
     $('#media-browser-tabset').bind('tabsselect', function(event, ui) {
       if (ui.tab.hash === '#media-tab-library') {
+        // @todo: implement the types param here.
         
-        // Show the spinner
-        // Grab the list of IDs
-        // Show 'em
-        
-
-        // how do we get the conditions?
-        // It is passed in, do we just reference a global?
         var params = {
-          //conditions: JSON.stringify(this.getConditions()),
-          //streams: JSON.stringify(this.getStreams())
         };
 
         //$(ui.panel).addClass('throbber');
         library.reset($(ui.panel));
         library.start($(ui.panel), params);
-        
-        
-        // It's not really a form is it?
-        // So what is it?
-        // Maybe we load the form, the JS to operate it, etc
-        // But it has no images.
-        // when we get here, we fill it in.
-        // Problem is that the form definition won't include those items
-        // Making any kind of submit function useless.
-
-
-        // Could be loading thie form here (probably should).
       }
     });
   }

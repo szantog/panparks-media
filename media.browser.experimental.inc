@@ -3,38 +3,41 @@
 
 /**
  * @file
- * Experimental browser, testing alternative FAPI integration with the popup.
+ * Experimental browser, testing alternative architechture.
  *
  * To use this, you'll need to add the following variable override to your
  * settings.php:
  *   $conf['media__experimental_browser'] = TRUE;
  */
-
 function media_browser_experimental($selected = NULL) {
   $output = array();
   $output['#attached']['library'][] = array('media', 'media_browser_page_experimental');
 
-  if (isset($_GET['fid'])) {
-    // A form has submitted, selected a piece (or pieces) of media and we refreshd.
-    // So we're just going to send the settings out.
-    if (!is_array($_GET['fid'])) {
-      $selected = array($_GET['fid']);
+  $params = drupal_get_query_parameters();
+
+  // How do we validate these?  I don't know.
+  // I think PDO should protect them, but I'm not 100% certain.
+  array_walk_recursive($params, '_media_recursive_check_plain');
+  
+  if (isset($params['fid'])) {
+    // A form has submitted, selected a piece (or pieces) of media and we refreshed.
+    // So we're just going to send the media entity out as a JS setting so the browser can close itself.
+    if (!is_array($params['fid'])) {
+      $selected = array($params['fid']);
     }
     $selectedMedia = entity_load('media', $selected);
     $setting = array('media' => array('selectedMedia' => array_values($selectedMedia)));
     drupal_add_js($setting, 'setting');
     return $output;
   }
+
+  // Normal browser operation.
   
 
-  // Any values which need to go to the media browser will come here.
-  // How do we validate these?  I don't know.
-  // I think PDO should protect them, but I'm not 100% certain.
-  $params = isset($_GET['params']) ? $_GET['params'] : array();
-  array_walk_recursive($params, '_media_recursive_check_plain');
+  // See hook_media_browser_new_plugins
   $plugins = module_invoke_all('media_browser_new_plugins', $params);
-  
-  $list = array();
+
+  $tabs = array(); // List of tabs to render.
 
   $settings = array('media' => array('browser' => array()));
   $browser_settings =& $settings['media']['browser'];
@@ -42,13 +45,15 @@ function media_browser_experimental($selected = NULL) {
   //@todo: replace with Tabs module if it gets upgraded.
   foreach (element_children($plugins) as $key) {
     $plugin =& $plugins[$key];
+
     //Add any JS settings
-    $browser_settings[$key] = array();
-    if (isset($plugin['#settings'])) {
-      $browser_settings[$key] += $plugin['#settings'];
-    }
+    $browser_settings[$key] = isset($plugin['#settings']) ? $plugin['#settings'] : array();
+
+    // If this is a "ajax" style tab, add the href, otherwise an id.
     $href = isset($plugin['#callback']) ? $plugin['#callback'] : "#media-tab-$key";
-    $list[] = "<a href='$href'><span>{$plugin['#title']}</span></a>";
+    $tabs[] = "<a href='$href'><span>{$plugin['#title']}</span></a>";
+
+    // Create a div for each tab's content.
     $plugin['#prefix'] = <<<EOS
     <div class="media-browser-tab" id="media-tab-$key">
 EOS;
@@ -57,7 +62,7 @@ EOS;
     <!-- End #media-tab-$key -->
 EOS;
   }
-
+  
   drupal_add_js($settings, 'setting');
 
   $output['tabset'] = array(
@@ -65,21 +70,26 @@ EOS;
     '#suffix' => '</div>',
   );
   $output['tabset']['list'] = array(
-    '#markup' => '<ul><li>' . implode('</li><li>', $list) . '</li></ul>'
+    '#markup' => '<ul><li>' . implode('</li><li>', $tabs) . '</li></ul>'
   );
   
   $output['tabset']['plugins'] = $plugins;
   return $output;
 }
 
-
+/**
+ * AJAX Callback function to return a list of media files 
+ */
 function media_browser_list_experimental() {
-  $params = $_GET;
+  $params = drupal_get_query_parameters();
+  // How do we validate these?  I don't know.
+  // I think PDO should protect them, but I'm not 100% certain.
   array_walk_recursive($params, '_media_recursive_check_plain');
-
-  if (isset($params['types'])) {
-    $types = $params['types'];
-  }
+  
+  $types = isset($params['types']) ? $params['types'] : NULL;
+  $url_include_patterns = isset($params['url_include_patterns']) ? $params['url_include_patterns'] : NULL;
+  $url_exclude_patterns = isset($params['url_exclude_patterns']) ? $params['url_exclude_patterns'] : NULL;
+  
 
   $start = isset($params['start']) ? $params['start'] : NULL;
   $limit = isset($params['limit']) ? $params['limit'] : NULL;
@@ -92,72 +102,23 @@ function media_browser_list_experimental() {
 
   if ($url_include_patterns) {
     $conditions[] = array('uri', "%$v%", 'like');
-    // Insert stream related restrictions here like:
+    // Insert stream related restrictions here.
   }
-
-  //$streams = isset($options['streams']) ? $options['streams'] : array();
-  //$limit = isset($options['limit']) ? $options['limit'] : media_variable_get('browser_pager_limit');
-
+  if ($url_exclude_patterns) {
+    $conditions[] = array('uri', "%$v%", 'not like');
+    // Insert stream related restrictions here.
+  }
+  
   $entity_controller = entity_get_controller('media');
   $media_entities = $entity_controller->load(NULL, $conditions, $start, $limit);
 
   foreach ($media_entities as &$media) {
     $media->preview = drupal_render(_media_format_for_browser($media));
   }
-
-  print drupal_json_encode(array('media' => array_values($media_entities)));
+  
+  drupal_json_output(array('media' => array_values($media_entities)));
   die();
 
-}
-
-/**
- * Build a form listing available media files.
- * @todo: decide if this will even work...
- * Problems: Don't want to build unless the user goes to that tab
- * Also, how do you add additional checkboxes later?
- * Or change params?
- *
- * @param array $form
- *  The form built with FAPI.
- * @param array &$form_state
- *  The current form state after rendering.
- * @param array $types
- *  An array media types to show.
- * @param array $url_include_patterns
- *  An array of url patterns to show (OR'd).
- * @param array $url_exclude_patterns
- *  An array of url patterns to hide.
- */
-function media_browser_library($form, &$form_state, $types = array(), $url_include_patterns = array(), $url_exclude_patterns = array()) {
-  $options = array();
-  $options['conditions'] = array();
-
-  if ($types) {
-    $options['conditions'][] = array('type', $types, 'IN');
-  }
-  
-  if ($url_include_patterns) {
-    // Insert stream related restrictions here like:
-    foreach($url_include_patterns as $v) {
-      $options['conditions'][] = array('uri', "%$v%", 'like');
-    }
-  }
-  $media_entities = media_browser_fid_list($options);
-
-  // Now build the "form"
-
-  $form['media'] = array();
-
-  foreach ($media_entities as $media) {
-    $form['media']['media_' . $media->fid] = array(
-      '#type' => 'checkbox',
-      '#preview' => _media_format_for_browser($media),
-      // Not sure I like putting a bogus attribute here...
-      '#attributes' => array('fid' => $media->fid),
-    );
-  }
-
-  return $form;
 }
 
 function _media_format_for_browser($media) {
@@ -231,6 +192,9 @@ function media_media_browser_new_plugins($params) {
 }
 
 /**
+ * @todo: Re-integrate the stream based filters, etc
+ * Currently this function is not being used.  See media_browser_experimental_list
+ *
  *  Any options needed to retrieve the file select options. An associate array
  *  with the following optional keys:
  *    'conditions' => An array of 'column' => 'value' to pass to the db query,
@@ -284,6 +248,54 @@ function media_browser_fid_list($options = array()) {
   return $selections;
 }
 
+/**
+ * Silly function to recursively run check_plain on an array.
+ *
+ * There is probably something in core I am not aware of that does this.
+ * 
+ * @param $value
+ * @param $key
+ */
 function _media_recursive_check_plain(&$value, $key) {
   $value = check_plain($value);
+}
+
+// Hook Docs: Will eventually go in API file.
+
+/**
+ * Plugins are expected to return a keyed array of renderable elements.
+ *
+ * Each element will be a jQuery tab on the media browser (we should make this more flexible).
+ * May be replaced if tabs module gets upgraded.
+ *
+ * Some elements are special:
+ *  - #title: The title that goes on the tab
+ *  - #settings: Drupal.settings.media.browser.$key (where key is the array key).
+ *  - #callback: If provided, will make the tab an "ajax" tab.
+ *
+ * Example:
+ *   $plugins['library'] = array(
+ *  '#title' => t('Library'),
+ *  '#attached' => array(
+ *    'js' => array(
+ *       $path . '/javascript/plugins/media.library.experimental.js',
+ *     ),
+ *   ),
+ *   '#settings' => array(
+ *     'viewMode' => 'thumbnails',
+ *     'getMediaUrl' => url('media/browser/experimental/list'),
+ *   ),
+ *   '#markup' => '<div> Library goes here</div>',
+ * );
+ *
+ * @param $params
+ *  An array of parameters which came in is $_GET['params'].
+ *  The expected parameters is still being defined.
+ *   - types: Array of media types to support
+ *
+ * @return
+ *  Renderable array.
+ */
+function hook_media_browser_new_plugins($params) {
+
 }
