@@ -17,3 +17,4 @@ files[] = test/media.entity.test
 dependencies[] = file
 dependencies[] = image
 dependencies[] = file_styles
+dependencies[] = entity

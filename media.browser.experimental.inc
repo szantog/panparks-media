@@ -13,17 +13,21 @@ function media_browser_experimental($selected = NULL) {
   $output = array();
   $output['#attached']['library'][] = array('media', 'media_browser_page_experimental');
 
-  $params = drupal_get_query_parameters();
+  $get = drupal_get_query_parameters();
+  array_walk_recursive($get, '_media_recursive_check_plain');
+
+  // We don't want everything, just this array.
+  $params = isset($get['params']) ? $get['params'] : array();
 
   // How do we validate these?  I don't know.
   // I think PDO should protect them, but I'm not 100% certain.
-  array_walk_recursive($params, '_media_recursive_check_plain');
   
-  if (isset($params['fid'])) {
+  
+  if (isset($get['fid'])) {
     // A form has submitted, selected a piece (or pieces) of media and we refreshed.
     // So we're just going to send the media entity out as a JS setting so the browser can close itself.
-    if (!is_array($params['fid'])) {
-      $selected = array($params['fid']);
+    if (!is_array($get['fid'])) {
+      $selected = array($get['fid']);
     }
     $selectedMedia = entity_load('media', $selected);
     $setting = array('media' => array('selectedMedia' => array_values($selectedMedia)));
@@ -137,11 +141,7 @@ function media_media_browser_new_plugins($params) {
   $plugins = array();
   $path = drupal_get_path('module', 'media');
 
-  if (isset($params['types'])) {
-    // This could be use to add validators to the upload form
-    $types = $params['types'];
-  }
-  
+  $types = isset($params['types']) ? $params['types'] : array();
   include_once($path . '/media.admin.inc');
   include_once($path . '/media.pages.inc');
 
@@ -182,6 +182,7 @@ function media_media_browser_new_plugins($params) {
     '#settings' => array(
       'viewMode' => 'thumbnails',
       'getMediaUrl' => url('media/browser/experimental/list'),
+      'types' => $types,
     // We should probably change this to load dynamically when requested
     // via the JS file.
     ),

@@ -9,9 +9,8 @@ Drupal.behaviors.mediaLibrary = {
     $('#media-browser-tabset').bind('tabsselect', function(event, ui) {
       if (ui.tab.hash === '#media-tab-library') {
         // @todo: implement the types param here.
-        
-        var params = {
-        };
+        var params = {};
+        params.types = Drupal.settings.media.browser.library.types
 
         //$(ui.panel).addClass('throbber');
         library.reset($(ui.panel));
@@ -73,12 +72,19 @@ Drupal.media.browser.library.prototype.loadMedia = function() {
     that.render(that.renderElement);
   }
 
-  jQuery.get(
-    this.settings.getMediaUrl,
-    this.params,
-    gotMedia,
-    'json'
-  );
+  var errorCallback = function() {
+    alert('Error getting media.');
+    clearTimeout(that.updaterTimeout);
+  }
+
+  jQuery.ajax({
+    url: this.settings.getMediaUrl,
+    type: 'GET',
+    dataType: 'json',
+    data: this.params,
+    error: errorCallback,
+    success: gotMedia
+  });
 }
 
 Drupal.media.browser.library.prototype.scrollUpdater = function(){

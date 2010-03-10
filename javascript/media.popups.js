@@ -29,7 +29,7 @@ Drupal.media.popups.mediaBrowser = function(onSelect, options) {
   var browserSrc = options.src;
   // Params to send along to the iframe.  Experimental.
   debug.debug(options.params);
-  browserSrc += '&' + $.recursiveParam({params:options.params});
+  browserSrc += '&' + $.param({params:options.params});
   //debug.debug(browserSrc);
   var mediaIframe = Drupal.media.popups.getPopupIframe(browserSrc, 'mediaBrowser');
   // Attach the onLoad event
@@ -75,7 +75,7 @@ Drupal.media.popups.mediaBrowser = function(onSelect, options) {
 
 Drupal.media.popups.mediaBrowser.mediaBrowserOnLoad = function (e) {
   var options = e.data;
-  if (!this.contentWindow || !this.contentWindow.Drupal.media.browser) {
+  if (!this.contentWindow || this.contentWindow.Drupal.media.browser == undefined) {
     return;
   }
 

@@ -372,15 +372,16 @@ class MediaEntityController extends EntityAPIController {
     // @todo: refactor this.
     return parent::load($ids, $normal_conditions);
   }
-  
-  public function buildQuery() {
-    parent::buildQuery();
+
+  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
+    $query = parent::buildQuery($ids, $conditions = array(), $revision_id = FALSE);
     if ($this->limit) {
-      $this->query->range($this->start, $this->limit);
+      $query->range($this->start, $this->limit);
     }
     foreach ($this->customConditions as $condition) {
-      $this->query->condition($condition[0], $condition[1], $condition[2]);
+      $query->condition($condition[0], $condition[1], $condition[2]);
     }
+    return $query;
   }
 }
 
