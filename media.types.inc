@@ -320,6 +320,8 @@ class Media extends EntityDb {
 class MediaEntityController extends EntityAPIController {
   
   public $customConditions = array();
+  public $start;
+  public $limit;
   
   /**
    * Wrapper around the DB_API to allow conditions which are not ==
@@ -332,36 +334,50 @@ class MediaEntityController extends EntityAPIController {
   public function addCondition($key, $value, $operator = NULL) {
     $this->customConditions = array($key, $value, $operator);
   }
-  
+
+  /**
+   * Takes a DB query and... does what?
+   * @param <type> $query
+   */
+  public function getMedia($query) {
+
+  }
   /**
    * Overloaded (and this sucks).  $conditions can be an array or key=>value pairs or DBNTG conditions.
+   * Sets status = TRUE by default.
    *  
    * @see sites/all/modules/media/includes/EntityAPIController#load($ids, $conditions)
    */
-  public function load($ids = array(), $conditions = array()) {
+  public function load($ids = array(), $conditions = array(), $start = NULL, $limit = NULL) {
     // Conditions using the = (equals) operator.
     $normal_conditions = array();
-    foreach ($conditions as $condition) {
+    $normal_conditions['status'] = TRUE;
+
+    $this->start = $start;
+    $this->limit = $limit;
+
+    foreach ($conditions as $k => $condition) {
       if (is_array($condition)) {
         $this->customConditions[] = array($condition[0], $condition[1], $condition[2]);
         // We can't use caching in this case
         $this->cache = FALSE;
       }
       else {
-        $normal_conditions[] = $condition;  
+        $normal_conditions[$k] = $condition;
       }
     }
+    
     // Unfortuantely, the load method won't query unless there is at least one condition
     // This is a bad pattern and undocumented side-effect.
     // @todo: refactor this.
-    if (!$normal_conditions && $this->customConditions) {
-      $normal_conditions['status'] = TRUE;
-    }
     return parent::load($ids, $normal_conditions);
   }
   
   public function buildQuery() {
     parent::buildQuery();
+    if ($this->limit) {
+      $this->query->range($this->start, $this->limit);
+    }
     foreach ($this->customConditions as $condition) {
       $this->query->condition($condition[0], $condition[1], $condition[2]);
     }

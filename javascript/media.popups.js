@@ -26,7 +26,12 @@ namespace('Drupal.media.popups');
 Drupal.media.popups.mediaBrowser = function(onSelect, options) {
   options = $.extend({}, Drupal.media.popups.mediaBrowser.getDefaults(), options);
   // Create it as a modal window.
-  var mediaIframe = Drupal.media.popups.getPopupIframe(options.src, 'mediaBrowser');
+  var browserSrc = options.src;
+  // Params to send along to the iframe.  Experimental.
+  debug.debug(options.params);
+  browserSrc += '&' + $.recursiveParam({params:options.params});
+  //debug.debug(browserSrc);
+  var mediaIframe = Drupal.media.popups.getPopupIframe(browserSrc, 'mediaBrowser');
   // Attach the onLoad event
   mediaIframe.bind('load', options, options.onLoad);
   /**
@@ -73,12 +78,22 @@ Drupal.media.popups.mediaBrowser.mediaBrowserOnLoad = function (e) {
   if (!this.contentWindow || !this.contentWindow.Drupal.media.browser) {
     return;
   }
+
+  // Just related to the experimental browser
+  // If this function exists, we know we're using that one.
+  // See the docs there for what it does
+  console.log(this.contentWindow.Drupal.media.browser.selectedMedia);
+  if (this.contentWindow.Drupal.media.browser.selectedMedia.length > 0) {
+    var ok = $(this).dialog('option', 'buttons')['OK'];
+    ok.call(this);
+    return;
+  }
+
   // Check to see if new media has been successfully added (e.g. a file upload).
   var fid = this.contentWindow.Drupal.media.browser.mediaAdded();
   if (fid) {
     Drupal.media.popups.mediaBrowser.chooseMedia(this, fid);
-  }
-  else {
+  } else {
     this.contentWindow.Drupal.media.browser.launch(options);
   }
 };
@@ -99,7 +114,8 @@ Drupal.media.popups.mediaBrowser.chooseMedia = function (iframe, fid) {
 Drupal.media.popups.mediaBrowser.getDefaults = function() {
   return {
     src: Drupal.settings.media.browserUrl,
-    onLoad: Drupal.media.popups.mediaBrowser.mediaBrowserOnLoad
+    onLoad: Drupal.media.popups.mediaBrowser.mediaBrowserOnLoad,
+    params: {}
   };
 }
 
