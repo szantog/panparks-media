@@ -152,7 +152,7 @@ function media_browser() {
 function media_media_browser_plugins() {
   $plugins = array();
   $path = drupal_get_path('module', 'media');
-  include_once($path . '/media.admin.inc');
+  include_once($path . '/media.pages.inc');
 
   $redirect = array('media/browser', array('query' => array('render' => 'media-popup')));
 
@@ -343,18 +343,43 @@ function media_browser_testbed($form) {
   $js = <<<EOF
     Drupal.behaviors.mediaTest = {
     attach: function(context, settings) {
+      var delim = "---";
+      var recentOptions = [];
+      var recentOptionsCookie = jQuery.cookie("recentOptions");
+      if (recentOptionsCookie) {
+        recentOptions = recentOptionsCookie.split("---");
+      }
+
+      var recentSelectBox = jQuery('<select id="recent_options" style="width:100%"></select>').change(function() { jQuery('#edit-options').val(jQuery(this).val())});
+
+      jQuery('.form-item-options').append('<label for="recent_options">Recent</a>');
+      jQuery('.form-item-options').append(recentSelectBox);
+      jQuery('.form-item-options').append(jQuery('<a href="#">Reset</a>').click(function() {alert('reset'); jQuery.cookie("recentOptions", null); window.location.reload(); }));
+      
+      jQuery.each(recentOptions, function (idx, val) {
+        recentSelectBox.append(jQuery('<option></option>').val(val).html(val));
+      });
+
+
       jQuery('#launcher').click(function () {
+        jQuery('#edit-result').val('');
         var options = {};
-        options = eval('(' + jQuery('#edit-options').val() + ')');
-        debug.debug(options);
+        var optionsTxt = jQuery('#edit-options').val();
+        if (optionsTxt) {
+          // Store it in the recent box
+          recentOptionsCookie += "---" + optionsTxt
+          jQuery.cookie("recentOptions", recentOptionsCookie, { expires: 7 });
+          recentSelectBox.append(jQuery('<option></option>').val(optionsTxt).html(optionsTxt));
+          options = eval('(' + optionsTxt + ')');
+        }
         Drupal.media.popups.mediaBrowser(Drupal.behaviors.mediaTest.mediaSelected, options);
         return false;
       });
     },
     
-    mediaSelected: function() {
-      debug.debug(arguments)
-      jQuery('#edit-results').val(JSON.encode(arguments));
+    mediaSelected: function(selectedMedia) {
+      var result = JSON.stringify(selectedMedia);
+        jQuery('#edit-result').val(result);
     }
   }
 

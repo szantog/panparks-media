@@ -39,7 +39,6 @@ include_once('media.types.inc'); // Creating media types, entity definition
 include_once('media.fields.inc'); // Code relating to using media as a field
 include_once('media.filter.inc'); // Code related to [[inline tags]] and wysiwyg
 
-
 /* ***************************************** */
 /* Hook Implementations                      */
 /* ***************************************** */
@@ -110,36 +109,7 @@ function media_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'media.admin.inc',
   );
-
-  /**
-   * End-user CRUD screens
-   * @var unknown_type
-   */
-
-  $items['media/add/upload'] = array(
-    'title' => 'Upload new file',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('media_add_upload'),
-    'access arguments' => array('administer media'),
-    'type' => MENU_LOCAL_ACTION,
-    'file' => 'media.admin.inc',
-    'weight' => -1,
-  );
-
-  $items['admin/content/media/add/upload'] = $items['media/add/upload'];
-
-  $items['media/add/from_url'] = array(
-    'title' => 'Add media from URL',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('media_add_from_url'),
-    'access arguments' => array('administer media'),
-    'type' => MENU_LOCAL_ACTION,
-    'file' => 'media.admin.inc',
-    'weight' => -1,
-  );
-
-  $items['admin/content/media/add/from_url'] = $items['media/add/from_url'];
-
+  
   $items['media/browser'] = array(
     'title' => 'Media browser',
     'description' => 'Media Browser for picking media and uploading new media',
@@ -174,6 +144,16 @@ function media_menu() {
     'access arguments' => array('view'),
     'type' => MENU_CALLBACK,
     'file' => 'media.browser.inc',
+  );
+
+  $items['media/browser/experimental/list'] = array(
+    'title' => 'Media browser list',
+    'description' => 'Ajax Callback for getting media',
+    'page callback' => 'media_browser_list_experimental',
+    'access callback' => 'media_access',
+    'access arguments' => array('view'),
+    'type' => MENU_CALLBACK,
+    'file' => 'media.browser.experimental.inc',
   );
 
   $items['media/browser/library'] = array(
@@ -222,9 +202,40 @@ function media_menu() {
     'weight' => 0,
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    'file' => 'media.admin.inc',
     'file' => 'media.pages.inc',
   );
+
+
+  $items['media/add/upload'] = array(
+    'title' => 'Upload new file',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_add_upload'),
+    'access arguments' => array('administer media'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'media.pages.inc',
+    'weight' => -1,
+  );
+
+  $items['admin/content/media/add/upload'] = $items['media/add/upload'];
+
+
+
+  /**
+   * End-user CRUD screens
+   * @var unknown_type
+   */
+
+  $items['media/add/from_url'] = array(
+    'title' => 'Add media from URL',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_add_from_url'),
+    'access arguments' => array('administer media'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'media.pages.inc',
+    'weight' => -1,
+  );
+
+  $items['admin/content/media/add/from_url'] = $items['media/add/from_url'];
 
   $items['media/js'] = array(
     'page callback' => 'media_preview_ajax',
@@ -349,13 +360,14 @@ function media_image_default_styles() {
 function media_file_insert(&$file) {
   $file->type = media_get_type($file);
   drupal_write_record('file', $file, array('fid'));
+  media_save_attached_file($file);
 }
 
 /**
  * Implement hook_file_update().
  */
 function media_file_update(&$file) {
-  media_file_insert($file);
+  $file->type = media_get_type($file);
 }
 
 /**
@@ -610,10 +622,10 @@ function media_library() {
   $libraries['media_browser_page_experimental'] = array(
     'title' => 'Media browser',
     'js' => array(
-      $path . '/javascript/media.experimental.js'  => array('weight' => JS_DEFAULT),
+      $path . '/javascript/media-browser-experimental.js'  => array('weight' => JS_DEFAULT),
     ),
     'css' => array(
-      $path . '/css/media.browser.css' => array('weight' => CSS_DEFAULT),
+      $path . '/css/media.browser.experimental.css' => array('weight' => CSS_DEFAULT),
     ),
     'dependencies' => array(
       array('media', 'media_base'),
@@ -772,10 +784,6 @@ function media_parse_to_file($url) {
     $file = file_move($source_file, $uri, FILE_EXISTS_RENAME);
   }
 
-  if (isset($file)) {
-    media_save_attached_file($file);
-  }
-
   return $file;
 }
 
@@ -785,6 +793,9 @@ function media_parse_to_file($url) {
  */
 function media_save_attached_file($file) {
   if ($file) {
+    // This is terrible.  Just awful.  But if we don't do it, the file gets deleted next cron run.
+    $file->status = 1;
+    file_save($file);
     $defaults = array (
       'display' => TRUE,
     );
@@ -793,13 +804,13 @@ function media_save_attached_file($file) {
     // (file is a field of media and the base table). This is weird.
     // @TODO: Why are we not then working on $media?
     $media = clone($file);
-    $file->file = array();
-    $file->file[LANGUAGE_NONE] = array();
-    $file->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
-    $file->is_new = TRUE;
-    field_attach_presave('media', $file);
-    field_attach_insert('media', $file);
+    $media->file = array();
+    $media->file[LANGUAGE_NONE] = array();
+    $media->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
+    $media->is_new = TRUE;
+    field_attach_presave('media', $media);
+    field_attach_insert('media', $media);
   }
 
-  return $file;
+  return $media;
 }
