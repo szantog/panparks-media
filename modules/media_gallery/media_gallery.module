@@ -3,10 +3,18 @@
 function media_gallery_menu() {
   $items = array();
 
-  $items['admin/content/Gallery'] = array(
+  $items['admin/content/gallery'] = array(
     'title' => 'Create Galleries',
     'description' => 'Gallery',
     'page callback' => 'media_gallery_admin_list',
+    'access arguments' => array('administer media galleries'),
+    'file' => 'media_gallery.admin.inc',
+  );
+
+  $items['admin/structure/gallery'] = array(
+    'title' => 'Galleries',
+    'description' => 'Nothing here yet',
+    'page callback' => 'media_gallery_blah',
     'access arguments' => array('administer media galleries'),
     'file' => 'media_gallery.admin.inc',
   );

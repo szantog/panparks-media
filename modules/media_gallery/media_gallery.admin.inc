@@ -6,6 +6,10 @@ function media_gallery_admin_list() {
 
 }
 
+function media_gallery_blah() {
+  return "nothing here, just for the menu";
+}
+
 function media_gallery_form($form, &$form_state, $gallery = NULL) {
   // IS new?
   if (!$gallery){
