@@ -21,25 +21,44 @@ namespace('Drupal.media.popups');
  *          onSelect Callback for when dialog is closed, received (Array
  *          media, Object extra);
  * @param {Object}
- *          options Array of options for the browser.
+ *          globalOptions Global options that will get passed upon initialization of the browser.
+ *          @see Drupal.media.popups.mediaBrowser.getDefaults();
+ *
+ * @param {Object}
+ *          pluginOptions Options for specific plugins. These are passed
+ *          to the plugin upon initialization.  If a function is passed here as
+ *          a callback, it is obviously not passed, but is accessible to the plugin
+ *          in Drupal.settings.variables.
+ *
+ *          Example
+ *          pluginOptions = {library: {url_include_patterns:'/foo/bar'}};
+ *          
+ * @param {Object}
+ *          widgetOptions Options controlling the appearance and behavior of the
+ *          modal dialog.
+ *          @see Drupal.media.popups.mediaBrowser.getDefaults();
  */
-Drupal.media.popups.mediaBrowser = function(onSelect, options) {
-  options = $.extend({}, Drupal.media.popups.mediaBrowser.getDefaults(), options);
+Drupal.media.popups.mediaBrowser = function(onSelect, globalOptions, pluginOptions, widgetOptions) {
+  var options = Drupal.media.popups.mediaBrowser.getDefaults();
+  options.global = $.extend({}, options.global, globalOptions);
+  options.plugins = pluginOptions;
+  options.widget = $.extend({}, options.widget, widgetOptions);
+  
   // Create it as a modal window.
-  var browserSrc = options.src;
-  // Params to send along to the iframe.  Experimental.
-  debug.debug(options.params);
-  browserSrc += '&' + $.param({params:options.params});
-  //debug.debug(browserSrc);
+  var browserSrc = options.widget.src;
+  // Params to send along to the iframe.  WIP.
+  var params = {};
+  $.extend(params, options.global);
+  params.plugins = options.plugins
+
+  browserSrc += '&' + $.param(params);
   var mediaIframe = Drupal.media.popups.getPopupIframe(browserSrc, 'mediaBrowser');
   // Attach the onLoad event
-  mediaIframe.bind('load', options, options.onLoad);
+  mediaIframe.bind('load', options, options.widget.onLoad);
   /**
    * Setting up the modal dialog
    */
-  /**
-   * Set up the button text
-   */
+  
   var ok = 'OK';
   var cancel = 'Cancel';
   var notSelected = 'You have not selected anything!';
@@ -51,7 +70,7 @@ Drupal.media.popups.mediaBrowser = function(onSelect, options) {
   }
 
   // @todo: let some options come through here. Currently can't be changed.
-  var dialogOptions = Drupal.media.popups.getDialogOptions();
+  var dialogOptions = options.dialog;
 
   dialogOptions.buttons[ok] = function () {
     var selected = this.contentWindow.Drupal.media.browser.selectedMedia;
@@ -69,52 +88,30 @@ Drupal.media.popups.mediaBrowser = function(onSelect, options) {
 
   Drupal.media.popups.setDialogPadding(mediaIframe.dialog(dialogOptions));
   // Remove the title bar.
-  mediaIframe.parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
+  //mediaIframe.parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
   return mediaIframe;
 };
 
 Drupal.media.popups.mediaBrowser.mediaBrowserOnLoad = function (e) {
   var options = e.data;
-  if (!this.contentWindow || this.contentWindow.Drupal.media.browser == undefined) {
-    return;
-  }
-
-  // Just related to the experimental browser
-  // If this function exists, we know we're using that one.
-  // See the docs there for what it does
   if (this.contentWindow.Drupal.media.browser.selectedMedia.length > 0) {
     var ok = $(this).dialog('option', 'buttons')['OK'];
     ok.call(this);
     return;
   }
-
-  // Check to see if new media has been successfully added (e.g. a file upload).
-  var fid = this.contentWindow.Drupal.media.browser.mediaAdded();
-  if (fid) {
-    Drupal.media.popups.mediaBrowser.chooseMedia(this, fid);
-  } else {
-    this.contentWindow.Drupal.media.browser.launch(options);
-  }
-};
-
-/**
- * Select newly added media and submit the dialog.
- */
-Drupal.media.popups.mediaBrowser.chooseMedia = function (iframe, fid) {
-  var ok = $(iframe).dialog('option', 'buttons')['OK'];
-  var options = {conditions: JSON.stringify({'fid': fid})};
-  var callback = function (data) {
-    iframe.contentWindow.Drupal.media.browser.selectedMedia = [data.media[fid]];
-    ok.call(iframe);
-  };
-  $.getJSON(Drupal.settings.basePath + 'media/browser/list', options, callback);
 };
 
 Drupal.media.popups.mediaBrowser.getDefaults = function() {
   return {
-    src: Drupal.settings.media.browserUrl,
-    onLoad: Drupal.media.popups.mediaBrowser.mediaBrowserOnLoad,
-    params: {}
+    global: {
+      types: [], // Types to allow, defaults to all.
+      activePlugins: [] // If provided, a list of plugins which should be enabled.
+    },
+    widget: { // Settings for the actual iFrame which is launched.
+      src: Drupal.settings.media.browserUrl, // Src of the media browser (if you want to totally override it)
+      onLoad: Drupal.media.popups.mediaBrowser.mediaBrowserOnLoad // Onload function when iFrame loads.
+    },
+    dialog: Drupal.media.popups.getDialogOptions()
   };
 }
 

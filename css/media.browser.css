@@ -1,6 +1,4 @@
-/* @override http://dev7/sites/all/modules/media/css/media.browser.css?L */
-
-@CHARSET "UTF-8";
+/* $Id; */
 
 body.page-media-browser {
   background-color: #fff;
@@ -13,12 +11,17 @@ div#media-browser-tabs {
   border: 0;
 }
 
+body.page-media-browser {
+  background-color: #fff;
+}
+
+
 /* show the throbber on the page */
 div#media-browser .throbber {
 	height:100%;
 	width:100%;
 	position:absolute;
-  background: transparent url(images/loading.gif) no-repeat center center;
+  background: transparent url('images/loading.gif') no-repeat center center;
 }
 
 #media-browser .ui-tabs-panel {
@@ -29,4 +32,3 @@ div#media-browser .throbber {
 	height: 410px;
 	overflow-y: auto;
 }
-
