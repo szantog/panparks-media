@@ -314,7 +314,6 @@ function media_multiple_delete_confirm_submit($form, &$form_state) {
   }
 }
 
-
 /**
  * Display all media types.
  */
@@ -474,4 +473,123 @@ function media_admin_type_manage_form_submit($form, &$form_state) {
 
   media_type_save($media_type);
   drupal_set_message(t('The @label media type has been saved.', array('@label' => $media_type->label)));
+}
+
+/**
+ * Form callback for mass import. 
+ * 
+ */
+function media_import($form, &$form_state) {
+
+  if (!isset($form_state['storage']['files'])) {
+    $form_state['storage']['step'] = 'choose';
+    $form_state['storage']['next_step'] = 'preview';
+    $form['directory'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Directory'),
+      '#required' => TRUE,
+    );
+
+    $form['pattern'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Pattern'),
+      '#description' => 'Only files matching this pattern will be imported.',
+    );
+
+    $form['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Preview')
+    );
+  }
+  else {
+    $form['preview'] = array(
+      '#markup' => theme('item_list', array('items' => $form_state['storage']['files'])),
+    );
+
+    $form = confirm_form($form, t('Import these files?'), 'admin/content/media/import');
+  }
+  return $form;
+
+}
+
+function media_import_validate($form, &$form_state) {
+  if ($form_state['values']['op'] != 'Confirm') {
+    $directory = $form_state['values']['directory'];
+    $pattern = $form_state['values']['pattern'];
+    if (!is_dir($directory)) {
+      form_set_error('directory', t('The provided directory does not exist.'));
+    }
+    $pattern = !empty($pattern) ? $pattern :  '*';
+    $files = glob("$directory/$pattern");
+    if (count($files) == 1) {
+      form_set_error('pattern', t('No files were found in %directory matching %pattern', array('%directory' => $directory, '%pattern' => $pattern)));
+    }
+    $form_state['storage']['files'] = $files;
+  }
+}
+
+/**
+ * Submit handler for media_import()
+ */
+function media_import_submit($form, &$form_state) {
+  if ($form_state['values']['op'] == 'Confirm') {
+    $files = $form_state['storage']['files'];
+    $batch = array(
+      'title' => t('Importing'),
+      'operations' => array(
+        array('media_import_batch_import_files', array($files)),
+      ),
+      'finished' => 'media_import_batch_import_complete',
+      'file' => drupal_get_path('module', 'media') . '/media.admin.inc',
+    );
+    batch_set($batch);
+    return;
+
+  }
+  $form_state['rebuild'] = TRUE;
+}
+
+function media_import_batch_import_files($files, &$context) {
+  if (!isset($context['sandbox']['files'])) {
+    // This runs the first time the batch runs.
+    // This is stupid, but otherwise, I don't think it will work...
+    $context['results'] = array('success' => array(), 'errors' => array());
+    $context['sandbox']['max'] = count($files);
+    $context['sandbox']['files'] = $files;
+  }
+  $files =& $context['sandbox']['files'];
+  
+  // Take a cut of files.  Let's do 10 at a time.
+  $length = (count($files) > media_variable_get('import_batch_size')) ? media_variable_get('import_batch_size') : count($files);
+  $to_process = array_splice($files, 0, $length);
+  $image_in_message = '';
+
+  foreach ($to_process as $file) {
+    try {
+      $file_obj = media_parse_to_file($file);
+      $context['results']['success'][] = $file;
+      if (!$image_in_message) {
+        $media = media_load($file_obj->fid);
+        $image_in_message = field_view_field('media', $media, 'file', 'media_preview');
+      }
+    }
+    catch(Exception $e) {
+      $context['results']['errors'][] = $file . " Reason: " . $e->getMessage();
+    }
+  }
+  
+  $context['message'] = "Importing " . theme('item_list', array('items' => $to_process));
+  $context['message'] .= drupal_render($image_in_message); // Just for kicks, show an image we are importing
+  
+  $context['finished'] = ($context['sandbox']['max'] - count($files)) / $context['sandbox']['max'];
+  
+}
+
+function media_import_batch_import_complete($success, $results, $operations) {
+  if ($results['errors']) {
+    drupal_set_message(theme('item_list', array('items' => $results['errors'])), 'error');
+  }
+  if ($results['success']) {
+    drupal_set_message(theme('item_list', array('items' => $results['success'])));
+  }
 }

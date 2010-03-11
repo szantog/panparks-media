@@ -89,6 +89,17 @@ function media_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'media.admin.inc',
   );
+
+  $items['admin/content/media/import'] = array(
+    'title' => 'Import media',
+    'description' => 'Import files into your media library.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_import'),
+    'file' => 'media.admin.inc',
+    'access arguments' => array('administer media'),
+    'type' => MENU_LOCAL_ACTION,
+  );
+
   $items['media/browser'] = array(
     'title' => 'Media browser',
     'description' => 'Media Browser for picking media and uploading new media',

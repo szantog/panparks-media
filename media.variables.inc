@@ -137,9 +137,8 @@ function media_variable_default($name = NULL) {
       'browser_pager_limit' => 10,
       'browser_library_empty_message' => 'There are currently no media in this library to select.',
 
-      // This temporary variable is to test out the alternative browser.
-      // See media.browser.experimental.inc.
-      'experimental_browser' => FALSE,
+      'import_batch_size' => 20,
+
     );
   }
 

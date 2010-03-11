@@ -56,11 +56,7 @@ Drupal.behaviors.mediaAdmin = {
       }
     });
     fieldset.hide();
-    // Replace the link with a form.
-    $('ul.action-links a').click(function() {
-      $('ul.action-links').slideUp('fast').parent().prepend($(Drupal.settings.mediaAddFileForm).hide()).children('form').slideDown('fast');
-      return false;
-    });
+    
   }
 };
   
