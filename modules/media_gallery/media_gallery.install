@@ -1,0 +1,33 @@
+<?php
+
+function media_gallery_install() {
+  // Add the media field to the entity that is created here?  Can we?
+  
+}
+
+/**
+ * Implements hook_schema().
+ */
+function media_gallery_schema() {
+  $schema['gallery'] = array(
+  'description' => 'Gallery',
+    'fields' => array(
+      'gid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => "Gallery ID",
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "Weight",
+      ),
+    ),
+    'primary key' => array('gid'),
+  );
+
+  return $schema;
+}

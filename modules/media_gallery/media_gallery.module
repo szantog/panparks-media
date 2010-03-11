@@ -1,0 +1,104 @@
+<?php
+
+function media_gallery_menu() {
+  $items = array();
+
+  $items['admin/content/Gallery'] = array(
+    'title' => 'Create Galleries',
+    'description' => 'Gallery',
+    'page callback' => 'media_gallery_admin_list',
+    'access arguments' => array('administer media galleries'),
+    'file' => 'media_gallery.admin.inc',
+  );
+  
+  $items['gallery/add'] = array(
+    'title' => 'Create Gallerie',
+    'description' => 'Gallery',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_gallery_form'),
+    'access arguments' => array('create media galleries'),
+    'file' => 'media_gallery.admin.inc', // Should be pages.inc
+  );
+
+  $items['gallery/%media_gallery/edit'] = array(
+    'title' => 'Edit Gallerie',
+    'description' => 'Gallery',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_gallery_form', 1),
+    'access arguments' => array('create media galleries'),
+    'file' => 'media_gallery.admin.inc', // Should be pages.inc
+  );
+
+  return $items;
+}
+
+function media_gallery_entity_info() {
+  $view_modes = array(
+    'slideshow' => array('label' => t('Slideshow')),
+    'thumbnails' => array('label' => t('Thumbnails')),
+  );
+
+  $return = array(
+    'gallery' => array(
+      'label' => t('Gallery'),
+  	  'entity class' => 'Gallery',
+      'controller class' => 'EntityAPIController',
+      'base table' => 'gallery',
+      'fieldable' => TRUE,
+      'view modes' => $view_modes,
+      'object keys' => array(
+        'id' => 'gid',
+        //'bundle' => 'type', // @TODO: Why 'type' here...
+      ),
+      'bundles' => array(
+        'gallery' => array(
+          'label' => t('Gallery'),
+          'admin' => array(
+            'path' => 'admin/structure/gallery',
+            'access arguments' => array('administer media galleries'),
+          ),
+        ),
+      ),
+//      'bundle keys' => array(
+//        'bundle' => 'name', // @TODO: But 'name' here?
+//      ),
+//      'bundles' => array(),
+    ),
+  );
+
+  //$media_types = media_type_get_types();
+
+//  foreach ($media_types as $type => $bundle_info) {
+//    $return['media']['bundles'][$type] = (array)$bundle_info;
+//    $return['media']['bundles'][$type]['admin'] = array(
+//      'label' => $bundle_info->label,
+//      'path' => 'admin/structure/media/manage/%media_type',
+//      'real path' => 'admin/structure/media/manage/' . $type,
+//      'bundle argument' => 4,
+//      // @TODO: Add an 'administer media types' perm?
+//      'access arguments' => array('administer site configuration'),
+//    );
+//  }
+
+  // @TODO: Do we need to define search-related view modes for attached fields?
+  return $return;
+}
+
+class Gallery extends EntityDb {
+  public function __construct($values = array()) {
+    parent::__construct($values, 'gallery');
+  }
+}
+
+function media_gallery_load($gid) {
+  if (!is_numeric($gid)) {
+    return;
+    //Getting call twice for some reason
+  }
+  $ids = array($gid);
+  $galleries = entity_get_controller('gallery')->load($ids);
+  return array_shift($galleries);
+}
+
+
+?>
