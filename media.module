@@ -89,7 +89,6 @@ function media_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'media.admin.inc',
   );
-  
   $items['media/browser'] = array(
     'title' => 'Media browser',
     'description' => 'Media Browser for picking media and uploading new media',
@@ -125,17 +124,7 @@ function media_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'media.browser.inc',
   );
-
-  $items['media/browser/experimental/list'] = array(
-    'title' => 'Media browser list',
-    'description' => 'Ajax Callback for getting media',
-    'page callback' => 'media_browser_list_experimental',
-    'access callback' => 'media_access',
-    'access arguments' => array('view'),
-    'type' => MENU_CALLBACK,
-    'file' => 'media.browser.experimental.inc',
-  );
-
+  
   $items['media/browser/library'] = array(
     'title' => 'Media browser library',
     'description' => 'Media Browser for picking media and uploading new media',
