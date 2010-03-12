@@ -11,11 +11,13 @@ function media_gallery_blah() {
 }
 
 function media_gallery_form($form, &$form_state, $gallery = NULL) {
+  $is_edit = FALSE;
   // IS new?
   if (!$gallery){
     $gallery = new Gallery();
   }
   else {
+    $is_edit = TRUE;
     $form['gid'] = array(
       '#type' => 'value',
       '#value' => $gallery->gid,
@@ -26,7 +28,7 @@ function media_gallery_form($form, &$form_state, $gallery = NULL) {
 
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => 'Create',
+    '#value' => $is_edit ? 'Update' : 'Create',
     '#weight' => 10,
   );
 
@@ -36,7 +38,7 @@ function media_gallery_form($form, &$form_state, $gallery = NULL) {
 function media_gallery_form_submit($form, &$form_state) {
 
   if (isset($form_state['values']['gid'])) {
-    $g = new Gallery(array('gid' => $form_state['values']['gid']));
+    $g = media_gallery_load($form_state['values']['gid']);
   }
   else {
     $g = new Gallery();
@@ -44,6 +46,4 @@ function media_gallery_form_submit($form, &$form_state) {
   field_attach_submit('gallery', $g, $form, $form_state);
   field_attach_presave('gallery', $g);
   $g->save();
-
-  //$form_state['redirect'] = 'gallery/' . $x . '/edit';
 }

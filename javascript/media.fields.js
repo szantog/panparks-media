@@ -7,9 +7,14 @@ Drupal.behaviors.mediaBrowserFields ={
   attach: function (context, settings) {
     // For each media field
     $('.field-type-media', context).once('mediaBrowserLaunch', function () {
+      //options = Drupal.settings.media.fields[this.id];
+      
+      //debug.debug(this.id);
+      //debug.debug(options);
 
-      var fidField = $('.fid', this);
-      var previewField = $('.preview', this);
+      var fidField = $('.fid', $(this));
+      var previewField = $('.preview', $(this));
+      
       if (Drupal.settings.media.debug) {
         // @TODO: Remove this, here for debugging purposes.
         fidField.show();
@@ -29,6 +34,7 @@ Drupal.behaviors.mediaBrowserFields ={
           // Set the value of the filefield fid (hidden).
           fidField.val(mediaFile.fid);
           // Set the preview field HTML
+          debug.debug(mediaFile.preview);
           previewField.html(mediaFile.preview);
           if (Drupal.settings.media.debug) {
             // @TODO: Remove this, here for debugging purposes.

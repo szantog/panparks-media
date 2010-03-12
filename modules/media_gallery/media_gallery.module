@@ -92,6 +92,19 @@ function media_gallery_entity_info() {
   return $return;
 }
 
+function media_gallery_field_ui_view_modes_tabs() {
+  $view_modes = array(
+    'slideshow' => array('label' => t('Slideshow')),
+    'thumbnails' => array('label' => t('Thumbnails')),
+  );
+  $modes = array(
+    'basic' => array(
+      'view modes' => array_keys($view_modes),
+    ),
+  );
+  return $modes;
+}
+
 class Gallery extends EntityDb {
   public function __construct($values = array()) {
     parent::__construct($values, 'gallery');
@@ -107,6 +120,95 @@ function media_gallery_load($gid) {
   $galleries = entity_get_controller('gallery')->load($ids);
   return array_shift($galleries);
 }
+
+/**
+ * Implement hook_field_widget_info().
+ */
+function media_gallery_field_widget_info() {
+  return array(
+    'media_gallery_item' => array(
+      'label' => t('Media item for Gallery'),
+      'field types' => array('media'),
+      'settings' => array(
+        'progress_indicator' => 'throbber',
+        'allowed_types' => array('image'),
+        'allowed_schemes' => array('public', 'private'),
+      ),
+      'behaviors' => array(
+        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
+        'default value' => FIELD_BEHAVIOR_NONE,
+      ),
+    ),
+  );
+}
+
+
+/**
+ *  Implement hook_field_widget_form().
+ */
+function media_gallery_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
+  $elements = media_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0);
+  foreach (element_children($elements) as $key) {
+    $elements[$key]['#process'][] = 'media_gallery_widget_process';
+    $elements[$key]['#value_callback'] = 'media_gallery_field_widget_value';
+    $elements[$key]['#extended'] = TRUE;
+  }
+  return $elements;
+}
+
+
+/**
+ * An element #process callback for the media_managed_file type.
+ *
+ * Expands the media_managed_file type to include the uri field.
+ */
+function media_gallery_widget_process($element, &$form_state, $form) {
+
+  $description = NULL;
+  $link = NULL;
+  $data = !empty($element['#default_value']['data']) ? $element['#default_value']['data'] : NULL;
+  if ($data) {
+    $description = $data['description'];
+    $link = $data['link'];
+  }
+
+  $element['description'] = array(
+    '#type' => 'textfield',
+    '#size' => 255,
+    '#title' => 'Description',
+    '#default_value' => $description,
+  );
+
+  $element['link'] = array(
+    '#type' => 'textfield',
+    '#size' => 100,
+    '#title' => 'Link',
+    '#default_value' => $link,
+  );
+  
+  return $element;
+}
+
+/**
+ * The #value_callback for the file_generic field element.
+ */
+function media_gallery_field_widget_value($element, $input = FALSE, $form_state) {
+  $return = array();
+  if ($input) {
+    $data = array('link' => $input['link'], 'description' => $input['description']);
+    $return = array(
+      'fid'  => $input['fid'],
+      'title' => '',
+      'data' => serialize($data),
+    );
+  }
+
+  $return += array('fid' => 0, 'title' => '', 'data' => NULL);
+  
+  return $return;
+
+}
+
 
 
 ?>

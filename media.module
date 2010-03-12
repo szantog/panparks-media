@@ -198,8 +198,6 @@ function media_menu() {
 
   $items['admin/content/media/add/upload'] = $items['media/add/upload'];
 
-
-
   /**
    * End-user CRUD screens
    * @var unknown_type

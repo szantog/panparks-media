@@ -32,6 +32,18 @@ function media_field_schema($field) {
         'unsigned' => TRUE,
         'not null' => FALSE,
       ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+      'data' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+        //'description' => 'Used for storing additional information.  Can be harnessed by widgets',
+      ),
     ),
     'indexes' => array(
       'fid' => array('fid'),
@@ -116,7 +128,6 @@ function media_field_view_modes($obj_type) {
 }
 
 function media_field_ui_view_modes_tabs() {
-
   $modes = array(
     'basic' => array(
       'view modes' => array_keys(media_field_view_modes('media')),
@@ -210,6 +221,12 @@ function media_field_widget_settings_form($field, $instance) {
 function media_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
   $widget_settings = $instance['widget']['settings'];
 
+  $defaults = array(
+    'fid' => 0,
+    'title' => '',
+    'data' => NULL
+  );
+  
   $permission = user_access('use media browser');
   if (!$permission) {
     // @todo: show the default file upload field.
@@ -223,6 +240,17 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     unset($form_state['values'][$field['field_name']][$langcode]);
   }
 
+  foreach ($items as $delta => $item) {
+    $items[$delta] = array_merge($defaults, $items[$delta]);
+    if (!is_null($items[$delta]['data'])) {
+      $items[$delta]['data'] = unserialize($items[$delta]['data']);
+    }
+    // Remove any items from being displayed that are not needed.
+    if ($items[$delta]['fid'] == 0) {
+      unset($items[$delta]);
+    }
+  }
+
   // Re-index deltas after removing empty items.
   $items = array_values($items);
 
@@ -231,12 +259,18 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
   $element = array(
     '#theme' => 'media_managed_file',
-    '#type' => 'media_managed_file',
+    '#type' => 'value',
     '#default_value' => isset($items[$delta]) ? $items[$delta] : 0,
     '#required' => $instance['required'],
     //'#media_file_extensions' => $instance['settings']['file_extensions'],
-    '#media_allowed_types' => $instance['widget']['settings']['allowed_types'],
-    '#media_allowed_schemes' => $instance['widget']['settings']['allowed_schemes'],
+    // @TODO: Not implemented yet.
+    '#media_options' => array(
+      'global' => array(
+        'types' => $instance['widget']['settings']['allowed_types'],
+        // @todo: Not implemented
+        'schemes' => $instance['widget']['settings']['allowed_schemes'],
+      ),
+    ),
     '#process' => array('media_generic_widget_process'),
     // Add extra Field properties.
     '#field_name' => $field['field_name'],
@@ -268,13 +302,11 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     // The group of elements all-together need some extra functionality
     // after building up the full list (like draggable table rows).
     $elements['#file_upload_delta'] = $delta;
-
     $elements['#theme_wrappers'] = array('fieldset');
     $elements['#attributes']['class'] = array('media-file-widget');
 
     $elements['#title'] = $instance['label'];
     $elements['#description'] = $instance['description'];
-
   }
 
   return $elements;
@@ -289,8 +321,16 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 function media_generic_widget_process($element, &$form_state, $form) {
   $fid = isset($element['#default_value']['fid']) ? $element['#default_value']['fid'] : 0;
   $file = media_load($fid);
-
   $path = drupal_get_path('module', 'media');
+
+  $settings = array('media' => array('fields' => array($element['#id'] => $element['#media_options'])));
+  drupal_add_js($settings, 'setting');
+
+//  $element['wrapper'] = array(
+//    '#type' => '#markup',
+//    '#prefix' => '<div class="media-field" id="media-field-">',
+//    '#suffix' => '</div>',
+//  );
 
   if ($file) {
     $element['filename'] = array(
