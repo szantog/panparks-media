@@ -3,20 +3,22 @@
 function media_gallery_menu() {
   $items = array();
 
-  $items['admin/content/gallery'] = array(
-    'title' => 'Create Galleries',
-    'description' => 'Gallery',
-    'page callback' => 'media_gallery_admin_list',
+  $items['admin/structure/gallery'] = array(
+    'title' => 'Galleries',
+    'description' => 'Configure Gallery fields',
+    'page callback' => 'media_gallery_blah',
     'access arguments' => array('administer media galleries'),
     'file' => 'media_gallery.admin.inc',
   );
 
-  $items['admin/structure/gallery'] = array(
+  $items['admin/content/gallery'] = array(
     'title' => 'Galleries',
-    'description' => 'Nothing here yet',
-    'page callback' => 'media_gallery_blah',
+    'description' => 'Gallery',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_gallery_admin_list'),
     'access arguments' => array('administer media galleries'),
     'file' => 'media_gallery.admin.inc',
+    'type' => MENU_LOCAL_TASK,
   );
   
   $items['gallery/add'] = array(
@@ -25,8 +27,11 @@ function media_gallery_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_gallery_form'),
     'access arguments' => array('create media galleries'),
+    'type' => MENU_LOCAL_ACTION,
     'file' => 'media_gallery.admin.inc', // Should be pages.inc
   );
+
+  $items['admin/content/gallery/add'] = $items['gallery/add'];
 
   $items['gallery/%media_gallery/edit'] = array(
     'title' => 'Edit Gallerie',
@@ -36,6 +41,9 @@ function media_gallery_menu() {
     'access arguments' => array('create media galleries'),
     'file' => 'media_gallery.admin.inc', // Should be pages.inc
   );
+  
+  $items['admin/content/gallery/%media_gallery/edit'] = $items['gallery/%media_gallery/edit'];
+  $items['admin/content/gallery/%media_gallery/edit']['page arguments'] = array('media_gallery_form', 3);
 
   return $items;
 }
@@ -67,10 +75,6 @@ function media_gallery_entity_info() {
           ),
         ),
       ),
-//      'bundle keys' => array(
-//        'bundle' => 'name', // @TODO: But 'name' here?
-//      ),
-//      'bundles' => array(),
     ),
   );
 
@@ -142,6 +146,13 @@ function media_gallery_field_widget_info() {
   );
 }
 
+/**
+ * Implement hook_field_widget_settings_form().
+ */
+function media_gallery_field_widget_settings_form($field, $instance) {
+  return media_field_widget_settings_form($field, $instance);
+}
+
 
 /**
  *  Implement hook_field_widget_form().
@@ -163,7 +174,6 @@ function media_gallery_field_widget_form(&$form, &$form_state, $field, $instance
  * Expands the media_managed_file type to include the uri field.
  */
 function media_gallery_widget_process($element, &$form_state, $form) {
-
   $description = NULL;
   $link = NULL;
   $data = !empty($element['#default_value']['data']) ? $element['#default_value']['data'] : NULL;

@@ -277,7 +277,7 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     '#bundle' => $instance['bundle'],
     '#object_type' => $instance['object_type'],
   );
-
+  
   if ($field['cardinality'] == 1) {
     // If there's only one field, return it as delta 0.
     $element['#title'] = $instance['label'];
