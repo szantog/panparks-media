@@ -80,7 +80,7 @@
 
 /** This is a massive hack. There must be a better way. See media.fields.inc **/
 
-.fid.form-text {
+.media-widget .fid {
   display:none;
 }
 

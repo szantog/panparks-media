@@ -71,5 +71,5 @@ function media_gallery_form_submit($form, &$form_state) {
   field_attach_submit('gallery', $g, $form, $form_state);
   field_attach_presave('gallery', $g);
   $g->save();
-  $form_state['redirect'] = $is_edit ? '' : 'gallery/' . $g->gid . '/edit';
+  $form_state['redirect'] = 'gallery/' . $g->gid . '/edit';
 }

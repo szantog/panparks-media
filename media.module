@@ -287,32 +287,14 @@ function media_theme() {
       'template' => 'media-dialog-page',
       'file' => 'media.theme.inc',
     ),
+
+    //
+    'media_element' => array(
+      'render element' => 'element',
+      'file' => 'media.theme.inc',
+    ),
   );
 }
-
-/**
- * Implement of hook_media_elements().
- *
- * @TODO: I think this is deprecated.
- * A Media File List element is created with the following FAPI:
- *   '#type' => 'media_file_list',
- *   '#options' => $options,         // An associative array of filepaths, keyed by FID.
- *   '#title' => $title,             // The translated title, displayed in the tab.
- *   '#description' => $description, // A translated description, to be displayed below the title.
- */
-function media_elements() {
-  $elements = array();
-
-  $elements['media_file_list'] = array(
-    '#input'            => TRUE,
-    '#process'          => array('media_file_list_element_process'),
-    '#element_validate' => array('media_file_list_element_validate'),
-    '#submit'           => array('media_file_list_element_submit'),
-  );
-
-  return $elements;
-}
-
 
 /**
  * Implement hook_image_default_styles().
@@ -775,4 +757,33 @@ function media_save_attached_file($file) {
   }
 
   return $media;
+}
+
+
+/**
+ * Implements hook_element_info().
+ *
+ * Media field... Not sure if this is going to work :)
+ */
+function media_element_info() {
+  $types = array();
+  $types['media'] = array(
+    '#input' => TRUE,
+    //'#process' => array('media_process'),
+    //'#value_callback' => 'media_field_value',
+    //'#element_validate' => array('file_managed_file_validate'),
+    '#theme' => 'media_element',
+    '#theme_wrappers' => array('form_element'),
+    '#progress_indicator' => 'throbber',
+    '#progress_message' => NULL,
+    '#upload_validators' => array(),
+    '#upload_location' => NULL,
+    '#extended' => FALSE,
+    // We should add these...
+//    '#attached' => array(
+//      'css' => array($file_path . '/file.css'),
+//      'js' => array($file_path . '/file.js'),
+//    ),
+  );
+  return $types;
 }

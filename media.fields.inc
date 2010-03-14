@@ -258,8 +258,8 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
   $items = _field_sort_items($field, $items);
 
   $element = array(
-    '#theme' => 'media_managed_file',
-    '#type' => 'value',
+    '#type' => 'media', // Would like to make this a fieldset, but throws some weird warning about element_children... not sure what it is about yet.
+    '#collapsed' => TRUE,
     '#default_value' => isset($items[$delta]) ? $items[$delta] : 0,
     '#required' => $instance['required'],
     //'#media_file_extensions' => $instance['settings']['file_extensions'],
@@ -276,6 +276,7 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     '#field_name' => $field['field_name'],
     '#bundle' => $instance['bundle'],
     '#object_type' => $instance['object_type'],
+    '#value_callback' => 'media_field_widget_value',
   );
   
   if ($field['cardinality'] == 1) {
@@ -303,11 +304,15 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     // after building up the full list (like draggable table rows).
     $elements['#file_upload_delta'] = $delta;
     $elements['#theme_wrappers'] = array('fieldset');
-    $elements['#attributes']['class'] = array('media-file-widget');
 
     $elements['#title'] = $instance['label'];
     $elements['#description'] = $instance['description'];
   }
+  // This seems like a roayl hack.  What's a better way to do this?
+  $settings = array('media' => array('fields' => array('edit-' . str_replace('_', '-', $instance['field_name']) => $element['#media_options'])));
+  // hmm... Might need to think about this.
+  // All settings would likely apply to all media in a multi-value, but what about passing the existing fid?
+  drupal_add_js($settings, 'setting');
 
   return $elements;
 }
@@ -322,15 +327,6 @@ function media_generic_widget_process($element, &$form_state, $form) {
   $fid = isset($element['#default_value']['fid']) ? $element['#default_value']['fid'] : 0;
   $file = media_load($fid);
   $path = drupal_get_path('module', 'media');
-
-  $settings = array('media' => array('fields' => array($element['#id'] => $element['#media_options'])));
-  drupal_add_js($settings, 'setting');
-
-//  $element['wrapper'] = array(
-//    '#type' => '#markup',
-//    '#prefix' => '<div class="media-field" id="media-field-">',
-//    '#suffix' => '</div>',
-//  );
 
   if ($file) {
     $element['filename'] = array(
@@ -352,10 +348,12 @@ function media_generic_widget_process($element, &$form_state, $form) {
   );
 
   //@HACK: @todo: this is so I can find it in media.js without putting every field in a settings variable.
+  // If I make it hidden (which it should be) it will go to the top of the form... I know this sucks.
   // This is hidden in media.css
   $element['fid'] = array(
     '#type' => 'textfield',
-    '#default_value' => $fid
+    '#default_value' => $fid,
+    '#attributes' => array('class' => array('fid')),
   );
 
   // JS: This is just 1/2 written code of what launching the browser might look like
@@ -435,4 +433,24 @@ function media_field_validate($obj_type, $object, $field, $instance, $langcode, 
       );
     }
   }
+}
+
+function media_field_widget_value($element, $input, $form_state) {
+  $return = $input;
+  
+  if (isset($return['data'])) {
+    $return['data'] = serialize($return['data']);
+  }
+  
+  $return += array(
+    'fid' => 0,
+    'title' => '',
+    'data' => NULL,
+  );
+
+//
+//  dpr($return);
+//  die();
+
+  return $return;
 }

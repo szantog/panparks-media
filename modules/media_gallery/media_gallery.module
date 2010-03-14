@@ -164,6 +164,7 @@ function media_gallery_field_widget_form(&$form, &$form_state, $field, $instance
     $elements[$key]['#value_callback'] = 'media_gallery_field_widget_value';
     $elements[$key]['#extended'] = TRUE;
   }
+  
   return $elements;
 }
 
@@ -181,7 +182,7 @@ function media_gallery_widget_process($element, &$form_state, $form) {
     $description = $data['description'];
     $link = $data['link'];
   }
-
+  
   $element['description'] = array(
     '#type' => 'textfield',
     '#size' => 255,
@@ -204,19 +205,13 @@ function media_gallery_widget_process($element, &$form_state, $form) {
  */
 function media_gallery_field_widget_value($element, $input = FALSE, $form_state) {
   $return = array();
+
   if ($input) {
-    $data = array('link' => $input['link'], 'description' => $input['description']);
-    $return = array(
-      'fid'  => $input['fid'],
-      'title' => '',
-      'data' => serialize($data),
-    );
+    $return = $input;
+    $return['data'] = array('link' => $input['link'], 'description' => $input['description']);
   }
-
-  $return += array('fid' => 0, 'title' => '', 'data' => NULL);
   
-  return $return;
-
+  return media_field_widget_value($element, $return, $form_state);
 }
 
 

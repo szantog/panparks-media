@@ -282,3 +282,17 @@ function theme_media_thumbnail($variables) {
   // I'm sure this is the wrong way to do this, but can't figure it out... :(
   return '<div class="media-thumbnail">' . $element['#children'] . $label . '</div>';
 }
+
+/**
+ * Theme a managed file element.
+ */
+function theme_media_element($variables) {
+  $element = $variables['element'];
+
+  // This wrapper is required to apply JS behaviors and CSS styling.
+  $output = '';
+  $output .= '<div class="media-widget">';
+  $output .= drupal_render_children($element);
+  $output .= '</div>';
+  return $output;
+}
