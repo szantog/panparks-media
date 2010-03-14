@@ -7,6 +7,8 @@
 The Media module provides a robust API for developers to extend functionality
 in useful and novel ways.
 
+CAUTION: This is pretty old!
+
 Architecture
 ------------
 
