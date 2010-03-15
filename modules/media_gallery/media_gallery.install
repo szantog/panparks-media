@@ -32,7 +32,7 @@ function media_gallery_install() {
     'label' => 'Title',
     'bundle' => 'gallery',
     'description' => 'Title of your gallery or slideshow',
-    'required' => FALSE,
+    'required' => TRUE,
     'widget' => array(
       'type' => 'text_textfield',
       'weight' => FIELD_CARDINALITY_UNLIMITED,

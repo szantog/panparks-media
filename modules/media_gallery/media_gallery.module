@@ -1,16 +1,21 @@
 <?php
+//$Id;
 
+/**
+ * Implement hook_menu();
+ */
 function media_gallery_menu() {
   $items = array();
 
-  $items['admin/structure/gallery'] = array(
+  $items['admin/config/media/gallery'] = array(
     'title' => 'Galleries',
-    'description' => 'Configure Gallery fields',
-    'page callback' => 'media_gallery_blah',
+    'description' => 'Configure galleries and slideshows.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_gallery_admin_settings'),
     'access arguments' => array('administer media galleries'),
     'file' => 'media_gallery.admin.inc',
   );
-
+  
   $items['admin/content/gallery'] = array(
     'title' => 'Galleries',
     'description' => 'Gallery',
@@ -22,32 +27,45 @@ function media_gallery_menu() {
   );
   
   $items['gallery/add'] = array(
-    'title' => 'Create Gallerie',
+    'title' => 'Create Gallery',
     'description' => 'Gallery',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_gallery_form'),
     'access arguments' => array('create media galleries'),
     'type' => MENU_LOCAL_ACTION,
-    'file' => 'media_gallery.admin.inc', // Should be pages.inc
+    'file' => 'media_gallery.pages.inc', // Should be pages.inc
   );
 
   $items['admin/content/gallery/add'] = $items['gallery/add'];
 
   $items['gallery/%media_gallery/edit'] = array(
-    'title' => 'Edit Gallerie',
+    'title' => 'Edit Gallery',
     'description' => 'Gallery',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_gallery_form', 1),
     'access arguments' => array('create media galleries'),
-    'file' => 'media_gallery.admin.inc', // Should be pages.inc
+    'file' => 'media_gallery.pages.inc', // Should be pages.inc
   );
   
   $items['admin/content/gallery/%media_gallery/edit'] = $items['gallery/%media_gallery/edit'];
   $items['admin/content/gallery/%media_gallery/edit']['page arguments'] = array('media_gallery_form', 3);
 
+  $items['gallery/%media_gallery'] = array(
+    'title' => 'View Gallery',
+    'description' => 'Gallery',
+    'page callback' => 'media_gallery_view',
+    //'page callback' => array(1),
+    'access arguments' => array('view content'),
+    'file' => 'media_gallery.pages.inc',
+  );
+
+
   return $items;
 }
 
+/**
+ * Implement hook_entity_info();
+ */
 function media_gallery_entity_info() {
   $view_modes = array(
     'slideshow' => array('label' => t('Slideshow')),
@@ -70,32 +88,22 @@ function media_gallery_entity_info() {
         'gallery' => array(
           'label' => t('Gallery'),
           'admin' => array(
-            'path' => 'admin/structure/gallery',
+            'path' => 'admin/config/media/gallery',
             'access arguments' => array('administer media galleries'),
           ),
         ),
       ),
     ),
   );
-
-  //$media_types = media_type_get_types();
-
-//  foreach ($media_types as $type => $bundle_info) {
-//    $return['media']['bundles'][$type] = (array)$bundle_info;
-//    $return['media']['bundles'][$type]['admin'] = array(
-//      'label' => $bundle_info->label,
-//      'path' => 'admin/structure/media/manage/%media_type',
-//      'real path' => 'admin/structure/media/manage/' . $type,
-//      'bundle argument' => 4,
-//      // @TODO: Add an 'administer media types' perm?
-//      'access arguments' => array('administer site configuration'),
-//    );
-//  }
-
+  
   // @TODO: Do we need to define search-related view modes for attached fields?
   return $return;
 }
 
+
+/**
+ * Implement hook_field_ui_view_modes_tabs();
+ */
 function media_gallery_field_ui_view_modes_tabs() {
   $view_modes = array(
     'slideshow' => array('label' => t('Slideshow')),
@@ -109,12 +117,9 @@ function media_gallery_field_ui_view_modes_tabs() {
   return $modes;
 }
 
-class Gallery extends EntityDb {
-  public function __construct($values = array()) {
-    parent::__construct($values, 'gallery');
-  }
-}
-
+/**
+ * Menu page argument loader
+ */
 function media_gallery_load($gid) {
   if (!is_numeric($gid)) {
     return;
@@ -167,7 +172,9 @@ function media_gallery_field_widget_form(&$form, &$form_state, $field, $instance
 
 
 /**
- * Build a comment by processing form values and prepare for a form rebuild.
+ * Build the Gallery object and rebuild the form when receiving an #ajax callback.
+ *
+ * This is required for the multiple-value fields to work.
  */
 function media_gallery_form_submit_build_gallery($form, &$form_state) {
   if ($form_state['values']) {
@@ -186,9 +193,9 @@ function media_gallery_form_submit_build_gallery($form, &$form_state) {
 
 
 /**
- * An element #process callback for the media_managed_file type.
+ * An element #process callback for media_gallery_item widget
  *
- * Expands the media_managed_file type to include the uri field.
+ * Adds description and link fields to the standard media widget.
  */
 function media_gallery_widget_process($element, &$form_state, $form) {
   $description = NULL;
@@ -231,5 +238,8 @@ function media_gallery_field_widget_value($element, $input = FALSE, $form_state)
 }
 
 
-
-?>
+class Gallery extends EntityDb {
+  public function __construct($values = array()) {
+    parent::__construct($values, 'gallery');
+  }
+}
