@@ -294,3 +294,56 @@ function media_edit_submit($form, &$form_state) {
   media_save($media);
 }
 
+function media_add_remote($form, &$form_state) {
+  // Totally prototyping code to show designs.
+  $form['sources'] = array(
+    '#type' => 'vertical_tabs',
+    '#title' => 'Sources',
+  );
+
+  $form['sources']['paste'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Paste URL or embed code',
+  );
+
+  
+  $providers = ''; 
+  $providers .= '<img style="height:50px; margin:20px" src="http://www.macuser.com/2008/10/09/top_youtube_logo_31_Dec_06.jpg">';
+  $providers .= '<img style="height:50px; margin:20px" src="http://jasonhilldesign.com/FlikrLogo.jpg">';
+  $form['sources']['paste']['code'] = array(
+    '#type' => 'textarea',
+    '#title' => t('URL or embed code'),
+    '#description' => t('The following providers are supported: <br/>' . $providers),
+  );
+
+  $form['sources']['youtube'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'YouTube',
+    '#description' => t(''),
+    '#attributes' => array('style' => 'height: 300px; overflow:auto'),
+  );
+  
+  $form['sources']['flikr'] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Flikr',
+  );
+
+  $box = '<div style="width:100px; height:100px; border:1px solid blue; padding:10px; float:left; margin:5px;"> Video </div>';
+  $boxes = '';
+  for ($i = 0; $i < 10; $i++) {
+    $boxes .= $box;
+  }
+  $form['sources']['youtube']['stupid'] = array(
+    '#markup' => $boxes,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Import'),
+    '#attributes' => array('style' => 'float:right'),
+    '#suffix' => '<br style="clear:both" />',
+  );
+
+  return $form;
+}
+

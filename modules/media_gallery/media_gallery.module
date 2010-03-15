@@ -139,7 +139,7 @@ function media_gallery_field_widget_info() {
         'allowed_schemes' => array('public', 'private'),
       ),
       'behaviors' => array(
-        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
+        'multiple values' => FIELD_BEHAVIOR_DEFAULT,
         'default value' => FIELD_BEHAVIOR_NONE,
       ),
     ),
@@ -157,15 +157,31 @@ function media_gallery_field_widget_settings_form($field, $instance) {
 /**
  *  Implement hook_field_widget_form().
  */
-function media_gallery_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
-  $elements = media_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0);
-  foreach (element_children($elements) as $key) {
-    $elements[$key]['#process'][] = 'media_gallery_widget_process';
-    $elements[$key]['#value_callback'] = 'media_gallery_field_widget_value';
-    $elements[$key]['#extended'] = TRUE;
+function media_gallery_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
+  $element = media_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base);
+  $element['#process'][] = 'media_gallery_widget_process';
+  $element['#value_callback'] = 'media_gallery_field_widget_value';
+  $element['#extended'] = TRUE;
+  return $element;
+}
+
+
+/**
+ * Build a comment by processing form values and prepare for a form rebuild.
+ */
+function media_gallery_form_submit_build_gallery($form, &$form_state) {
+  if ($form_state['values']) {
+    $gallery = new Gallery($form_state['values']);
   }
-  
-  return $elements;
+  else {
+    $gallery = new Gallery();
+  }
+
+  field_attach_submit('gallery', $gallery, $form, $form_state);
+
+  $form_state['gallery'] = $gallery; // uh, wtf is this.
+  $form_state['rebuild'] = TRUE;
+  return $gallery;
 }
 
 
@@ -185,7 +201,7 @@ function media_gallery_widget_process($element, &$form_state, $form) {
   
   $element['description'] = array(
     '#type' => 'textfield',
-    '#size' => 255,
+    '#size' => 100,
     '#title' => 'Description',
     '#default_value' => $description,
   );

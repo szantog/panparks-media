@@ -88,7 +88,7 @@ function media_field_widget_info() {
         'allowed_schemes' => array('public', 'private'),
       ),
       'behaviors' => array(
-        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
+        'multiple values' => FIELD_BEHAVIOR_DEFAULT,
         'default value' => FIELD_BEHAVIOR_NONE,
       ),
     ),
@@ -215,10 +215,9 @@ function media_field_widget_settings_form($field, $instance) {
   return $form;
 }
 
-/**
- *  Implement hook_field_widget_form().
- */
-function media_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta = 0) {
+
+function media_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
+  $element = $base;
   $widget_settings = $instance['widget']['settings'];
 
   $defaults = array(
@@ -226,41 +225,25 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     'title' => '',
     'data' => NULL
   );
-  
+
   $permission = user_access('use media browser');
   if (!$permission) {
     // @todo: show the default file upload field.
+    // Maybe...
     return;
   }
 
-  // Retrieve any values set in $form_state, as will be the case during AJAX
-  // rebuilds of this form.
-  if (isset($form_state['values'][$field['field_name']][$langcode])) {
-    $items = $form_state['values'][$field['field_name']][$langcode];
-    unset($form_state['values'][$field['field_name']][$langcode]);
+  $current_value = array();
+  // Obviously doesn't belong here, but in some lower level implementation.
+  if (isset($items[$delta])) {
+    $current_value = $items[$delta];
+    $current_value['data'] = unserialize($current_value['data']);
   }
 
-  foreach ($items as $delta => $item) {
-    $items[$delta] = array_merge($defaults, $items[$delta]);
-    if (!is_null($items[$delta]['data'])) {
-      $items[$delta]['data'] = unserialize($items[$delta]['data']);
-    }
-    // Remove any items from being displayed that are not needed.
-    if ($items[$delta]['fid'] == 0) {
-      unset($items[$delta]);
-    }
-  }
-
-  // Re-index deltas after removing empty items.
-  $items = array_values($items);
-
-  // Update order according to weight.
-  $items = _field_sort_items($field, $items);
-
-  $element = array(
+  $element += array(
     '#type' => 'media', // Would like to make this a fieldset, but throws some weird warning about element_children... not sure what it is about yet.
     '#collapsed' => TRUE,
-    '#default_value' => isset($items[$delta]) ? $items[$delta] : 0,
+    '#default_value' => $current_value,
     '#required' => $instance['required'],
     //'#media_file_extensions' => $instance['settings']['file_extensions'],
     // @TODO: Not implemented yet.
@@ -279,44 +262,14 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     '#value_callback' => 'media_field_widget_value',
   );
   
-  if ($field['cardinality'] == 1) {
-    // If there's only one field, return it as delta 0.
-    $element['#title'] = $instance['label'];
-    $elements = array($element);
-  }
-  else {
-    // If there are multiple values, add an element for each existing one.
-    $delta = -1;
-    foreach ($items as $delta => $item) {
-      $elements[$delta] = $element;
-      $elements[$delta]['#default_value'] = $item;
-      $elements[$delta]['#weight'] = $delta;
-    }
-    // And then add one more empty row for new uploads.
-    $delta++;
-    if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED || $delta < $field['cardinality']) {
-      $elements[$delta] = $element;
-      $elements[$delta]['#default_value'] = 0;
-      $elements[$delta]['#weight'] = $delta;
-      $elements[$delta]['#required'] = ($instance['required'] && $delta == 0);
-    }
-    // The group of elements all-together need some extra functionality
-    // after building up the full list (like draggable table rows).
-    $elements['#file_upload_delta'] = $delta;
-    $elements['#theme_wrappers'] = array('fieldset');
-
-    $elements['#title'] = $instance['label'];
-    $elements['#description'] = $instance['description'];
-  }
   // This seems like a roayl hack.  What's a better way to do this?
   $settings = array('media' => array('fields' => array('edit-' . str_replace('_', '-', $instance['field_name']) => $element['#media_options'])));
   // hmm... Might need to think about this.
   // All settings would likely apply to all media in a multi-value, but what about passing the existing fid?
   drupal_add_js($settings, 'setting');
 
-  return $elements;
+  return $element;
 }
-
 
 /**
  * An element #process callback for the media_managed_file type.
@@ -342,8 +295,8 @@ function media_generic_widget_process($element, &$form_state, $form) {
 
   $element['preview'] = array(
     '#type' => 'item',
-    '#markup' => theme('media_admin_thumbnail', array('file' => $file, 'style_name' => 'thumbnail')),
-    '#prefix' => '<div class="preview">',
+    '#markup' => empty($file) ? '<div class="empty-preview"><a class="launcher" href="#">' . t(media_variable_get('field_select_media_text')) . '</a></div>' : theme('media_admin_thumbnail', array('file' => $file, 'style_name' => 'thumbnail')),
+    '#prefix' => '<div class="preview launcher">',
     '#suffix' => '</div>',
   );
 
@@ -354,46 +307,6 @@ function media_generic_widget_process($element, &$form_state, $form) {
     '#type' => 'textfield',
     '#default_value' => $fid,
     '#attributes' => array('class' => array('fid')),
-  );
-
-  // JS: This is just 1/2 written code of what launching the browser might look like
-  $element['launcher'] = array (
-    '#type' => 'markup',
-    '#markup' => '<a class="launcher" href="#">' . t(media_variable_get('field_select_media_text')) . '</a>',
-  );
-
-  if (media_variable_get('debug')) {
-    drupal_add_js(array('media' => array('debug' => TRUE)), 'setting');
-    $element['debug'] = array(
-      '#type' => 'fieldset',
-      '#title' => 'Debug information',
-      '#collapsed' => FALSE,
-      '#collapsible' => TRUE,
-    );
-
-    $element['debug']['file_info'] = array(
-      '#type' => 'textarea',
-      '#rows' => 5,
-      '#title' => 'File Info',
-      '#attributes' => array('class' => array('file_info'), 'style' => 'font-size:.75em; font-family:courier'),
-      '#default_value' => drupal_json_encode($file),
-    );
-  }
-
-  $element['fid']['#attributes'] = array('class' => array('fid'));
-
-  // @todo: make me launch a simple iframe
-
-  // Add some JS Settings
-  // Not currently in effect.
-  $browser_settings = array(
-    'media_items_callback' => url('media/service/get/for/fields'),
-    // These params are passed on every callback
-    'extra_params' => array (
-      'bundle' => $element['#bundle'],
-      'field_name' => $element['#field_name'],
-      'object_type' => $element['#object_type'],
-    ),
   );
 
   // Media browser attach code.

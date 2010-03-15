@@ -183,6 +183,11 @@ function media_media_browser_plugins($params) {
     '#markup' => '<div id="container"><div id="scrollbox"><ul id="media-browser-library-list"></ul></div><div id="status"></div></div>',
   );
 
+//  $plugins['remote'] = array(
+//    '#title' => 'Internet',
+//    '#markup' => drupal_render(drupal_get_form('media_add_remote')),
+//  );
+
   return $plugins;
 }
 

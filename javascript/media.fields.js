@@ -6,7 +6,7 @@
 Drupal.behaviors.mediaBrowserFields ={
   attach: function (context, settings) {
     // For each media field
-    $('.field-type-media', context).once('mediaBrowserLaunch', function () {
+    $('.field-type-media', context).each(function () {
       var options = Drupal.settings.media.fields[this.id];
       // For each widget
       $('.media-widget', this).once('mediaBrowserLaunch', function () {

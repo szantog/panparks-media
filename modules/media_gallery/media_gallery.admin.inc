@@ -45,7 +45,16 @@ function media_gallery_form($form, &$form_state, $gallery = NULL) {
       '#value' => $gallery->gid,
     );
   }
-  
+
+  // For multi-step processing and Add more widget...
+  // Weird.  related to builder_function.
+  // @see media_gallery_form_submit_build_gallery
+  if (isset($form_state['gallery'])) {
+    foreach ($form_state['gallery'] as $k => $v) {
+      $gallery->{$k} = $v;
+    }
+  }
+  $form['#builder_function'] = 'media_gallery_form_submit_build_gallery';
   field_attach_form('gallery', $gallery, $form, $form_state);
 
   $form['submit'] = array(

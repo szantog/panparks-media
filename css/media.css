@@ -84,6 +84,19 @@
   display:none;
 }
 
+.media-widget .empty-preview {
+  width:110px;
+  height:110px;
+  text-align: center;
+  border: 3px solid #DDD;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+}
+
+.media-widget .empty-preview a {
+  margin-top:40px;
+  display:block;
+}
 
 /* Cut off long filenames to prevent a messed up layout. */
 div.media-thumbnail .media-filename  {
