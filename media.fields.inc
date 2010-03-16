@@ -350,6 +350,9 @@ function media_field_validate($obj_type, $object, $field, $instance, $langcode, 
 
 function media_field_widget_value($element, $input, $form_state) {
   $return = $input;
+  if (!is_array($return)) {
+    $return = array();
+  }
   
   if (isset($return['data'])) {
     $return['data'] = serialize($return['data']);

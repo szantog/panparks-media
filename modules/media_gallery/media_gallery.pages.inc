@@ -32,11 +32,13 @@ function media_gallery_form($form, &$form_state, $gallery = NULL) {
     '#weight' => 10,
   );
 
-  $form['delete'] = array(
-    '#type' => 'submit',
-    '#value' => 'Delete',
-    '#weight' => 10,
-  );
+  if ($is_edit) {
+    $form['delete'] = array(
+      '#type' => 'submit',
+      '#value' => 'Delete',
+      '#weight' => 10,
+    );
+  }
 
   return $form;
 }
