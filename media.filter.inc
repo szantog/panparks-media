@@ -20,34 +20,14 @@ function media_wysiwyg_include_directory($type) {
 }
 
 /**
- * Implement hook_filter_info
- * @return unknown_type
- */
-function media_filter_info() {
-  $filters['media_filter'] = array(
-    'title' => t('Converts Media tags to Markup'),
-    'description' => t('This filter will convert [[{type:media... ]] tags into markup'),
-    'process callback' => 'media_filter',
-    'tips callback' => 'media_filter_tips', // @TODO not implemented
-    'cache' => FALSE,
-  );
-//   $filters['media_url_filter'] = array(
-//     'title' => t('Converts Media urls to Markup'),
-//     'description' => t('This filter will convert media urls into markup'),
-//     'process callback' => 'media_url_filter',
-//     'tips callback' => 'media_url_filter_tips', // @TODO not implemented
-//     'cache' => FALSE,
-//   );
-  return $filters;
-}
-
-/**
  * Filter callback for media markup filter.
  *
  * @TODO check for security probably pass text through filter_xss
  * @return unknown_type
  */
-function media_filter($text, $filter) {
+function media_filter($text) {
+  dpr($filter);
+  die();
   $text = ' ' . $text . ' ';
   $text = preg_replace_callback("/\[\[.*?]]/s",'_media_markup', $text);
 
@@ -188,35 +168,29 @@ function _media_markup($match, $wysiwyg = FALSE) {
 }
 
 /**
- * Process callback which will be called when form is completely built
- * This function will scan all textareas with text_format enabled and
- * add associative array of tag code => markup to Drupal.settings in JS
- * @param $form
+ * Process a text format widget to load and attach editors.
  *
- * @see
- * _media_generate_tagMap
+ * The element's #id is used as reference to attach client-side editors.
  */
-
-function media_process_form(&$form, $form_state = array()) {
-  foreach(element_children($form) as $item) {
-    if(isset($form[$item]['#text_format'])) {
-      // Make sure it gets created regardless of if we use it
-      if (!isset($tagmap)) {
-        $tagmap = array();
-      }
-      if(isset($form[$item]['#value'])) {
-        $text = $form[$item]['#value'];
-        $tagmap = _media_generate_tagMap($text);
-      }
-      // Continue if we found our text_format, so that it doesn't recurse.
-      continue;
-    }
-    media_process_form($form[$item]);
+function media_pre_render_text_format($element) {
+  // filter_process_format() copies properties to the expanded 'value' child
+  // element.
+  if (!isset($element['format'])) {
+    return $element;
   }
+
+  $format_field = &$element['format'];
+  $field = &$element['value'];
+  $settings = array(
+    'field' => $field['#id'],
+  );
+  
+  $tagmap = _media_generate_tagMap($field['#value']);
+
   if (isset($tagmap)) {
     drupal_add_js(array('tagmap' => array_unique($tagmap)), 'setting');
   }
-  return $form;
+  return $element;
 }
 
 /**

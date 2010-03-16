@@ -348,17 +348,10 @@ function media_page_alter(&$page) {
 }
 
 /**
- * Implement of hook_form_alter().
- * We assign a form #after_build processing callback that is executed
- * on all forms after they have been completely built, so that we can
- * take the content of the textarea to inject our tagMap in Drupal.settings
- * to access on node/edit/<nid> or block/configure forms.
- *
- * @see media_process_form()
+ * Implements hook_element_info_alter().
  */
-
-function media_form_alter(&$form, &$form_state) {
-  $form['#after_build'][] = 'media_process_form';
+function media_element_info_alter(&$types) {
+  $types['text_format']['#pre_render'][] = 'media_pre_render_text_format';
 }
 
 /**
@@ -786,4 +779,19 @@ function media_element_info() {
 //    ),
   );
   return $types;
+}
+
+
+/**
+ * Implement hook_filter_info
+ */
+function media_filter_info() {
+  $filters['media_filter'] = array(
+    'title' => t('Converts Media tags to Markup'),
+    'description' => t('This filter will convert [[{type:media... ]] tags into markup'),
+    'process callback' => 'media_filter',
+    'tips callback' => 'media_filter_tips', // @TODO not implemented
+    'cache' => FALSE,
+  );
+  return $filters;
 }
