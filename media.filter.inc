@@ -26,8 +26,6 @@ function media_wysiwyg_include_directory($type) {
  * @return unknown_type
  */
 function media_filter($text) {
-  dpr($filter);
-  die();
   $text = ' ' . $text . ' ';
   $text = preg_replace_callback("/\[\[.*?]]/s",'_media_markup', $text);
 
