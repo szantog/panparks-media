@@ -229,6 +229,7 @@ function media_update_7001() {
  * Add the media_type table and remove the variable
  */
 function media_update_7002() {
+  drupal_load('module', 'media');
   $old_types = variable_get('media_types');
   db_create_table('media_type', _media_update_7002_schema_media_type());
   foreach ($old_types as $type) {
@@ -300,6 +301,7 @@ function _media_update_7002_schema_media_type() {
  * We now prefix media namespaced variables with media__, so fix old variables.
  */
 function media_update_7003() {
+  drupal_load('module', 'media');
   foreach (media_variable_default() as $variable => $value) {
     if (($test = variable_get('media_' . $variable, TRUE)) == variable_get('media_' . $variable, FALSE)) {
       media_variable_set($variable, $test);
