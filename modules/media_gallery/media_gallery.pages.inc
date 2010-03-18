@@ -65,8 +65,14 @@ function media_gallery_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'gallery/' . $g->gid . '/edit';
 }
 
-function media_gallery_view($gallery) {
+function media_gallery_view($gallery, $view_mode = 'slideshow') {
   if (!$gallery) {
     return drupal_not_found();
   }
+
+
+  field_attach_prepare_view('gallery', array($gallery->gid => $gallery));
+  entity_prepare_view('gallery', array($gallery->gid => $gallery));
+  return field_attach_view('gallery', $gallery, $view_mode);
+
 }

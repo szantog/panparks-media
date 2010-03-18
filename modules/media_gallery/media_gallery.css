@@ -1,0 +1,9 @@
+/* $Id; */
+
+.media-widget-open .edit-description-link {
+  display:none;
+}
+
+.media-widget-closed .edit-description-link {
+  display: block;
+}
