@@ -98,6 +98,13 @@
   display:block;
 }
 
+
+.media-display-thumbnails .media-thumbnail {
+  width: 150px;
+  float: left;
+  margin-bottom: 20px;
+}
+
 /* Cut off long filenames to prevent a messed up layout. */
 div.media-thumbnail .media-filename  {
   white-space: nowrap;
