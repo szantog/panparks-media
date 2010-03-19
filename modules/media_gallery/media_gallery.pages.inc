@@ -1,5 +1,5 @@
 <?php
-// $Id;
+// $Id$
 
 function media_gallery_form($form, &$form_state, $gallery = NULL) {
   $is_edit = FALSE;

@@ -1,5 +1,5 @@
 <?php
-// $Id;
+// $Id$
 
 /**
  * Return an array of plugins for the media browser.

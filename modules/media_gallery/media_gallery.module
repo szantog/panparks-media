@@ -1,5 +1,5 @@
 <?php
-//$Id;
+//$Id$
 
 /**
  * Implement hook_menu();
@@ -49,6 +49,7 @@ function media_gallery_menu() {
   );
   
   $items['admin/content/gallery/%media_gallery/edit'] = $items['gallery/%media_gallery/edit'];
+  $items['admin/content/gallery/%media_gallery/edit']['type'] = MENU_CALLBACK;
   $items['admin/content/gallery/%media_gallery/edit']['page arguments'] = array('media_gallery_form', 3);
 
   $items['gallery/%media_gallery/view'] = array(
@@ -316,7 +317,7 @@ function theme_media_gallery_slideshow($variables) {
 
 
 /** Classes **/
-class Gallery extends EntityDb {
+class Gallery extends EntityDB {
   public function __construct($values = array()) {
     parent::__construct($values, 'gallery');
   }

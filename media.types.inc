@@ -311,7 +311,7 @@ function media_media_format_form_prepare_alter(&$form, &$form_state, $media) {
 }
 
 
-class Media extends EntityDb {
+class Media extends EntityDB {
   public function __construct($values = array()) {
     parent::__construct($values, 'media');
   }
