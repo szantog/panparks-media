@@ -28,7 +28,7 @@ function media_gallery_install() {
   // @see: http://api.drupal.org/api/function/field_create_instance/7
   $instance = array(
     'field_name' => 'field_gallery_title',
-    'object_type' => 'gallery',
+    'entity_type' => 'gallery',
     'label' => 'Title',
     'bundle' => 'gallery',
     'description' => 'Title of your gallery or slideshow',
