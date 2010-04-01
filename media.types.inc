@@ -160,7 +160,7 @@ function media_type_configure_fields($media_type) {
     $weight = -5;
     $instance = array(
       'field_name' => 'file',
-      'object_type' => 'media',
+      'entity_type' => 'media',
       'bundle' => $media_type->name,
       'label' => 'File',
       'widget_type' => 'file_file',
