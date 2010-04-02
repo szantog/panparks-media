@@ -89,7 +89,7 @@ function media_gallery_entity_info() {
       'base table' => 'gallery',
       'fieldable' => TRUE,
       'view modes' => $view_modes,
-      'object keys' => array(
+      'entity keys' => array(
         'id' => 'gid',
         //'bundle' => 'type', // @TODO: Why 'type' here...
       ),
@@ -287,12 +287,49 @@ function media_gallery_field_formatter_info() {
     'behaviors' => array(
       'multiple values' => FIELD_BEHAVIOR_CUSTOM,
     ),
-    'theme' => array('function' => 'theme_media_gallery_slideshow')
   );
   
   return $info;
 }
 
+/**
+ * Implements hook_field_formatter_view();
+ */
+function media_gallery_field_formatter_view($obj_type, $object, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  
+  if ($display['type'] == 'media_gallery_slideshow') {
+    $element = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('jCycle-container')),
+    // We need to add settings here somehow... :(
+    // Probably from $instance['settings']
+    );
+    $path = drupal_get_path('module', 'media_gallery');
+
+    $element['#attached'] = array(
+      'js' => array(
+        $path . 'includes/jquery.cycle.js',
+      ),
+    );
+
+    foreach ($items as $delta => $item) {
+      $element[$delta] = array(
+        '#markup' => 'Slide ' . $delta,
+        '#prefix' => '<div>',
+        '#suffix' => '</div>',
+      );
+    }
+  }
+
+  return $element;
+}
+
+//list_field_formatter_view
+
+/**
+ * Implement hook_theme
+ */
 function media_gallery_theme() {
   return array(
     'media_gallery_slideshow' => array(
@@ -300,7 +337,6 @@ function media_gallery_theme() {
     )
   );
 }
-
 
 
 function theme_media_gallery_slideshow($variables) {

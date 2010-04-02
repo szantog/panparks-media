@@ -23,7 +23,7 @@ function media_entity_info() {
       'base table' => 'file',
       'fieldable' => TRUE,
       'view modes' => $view_modes,
-      'object keys' => array(
+      'entity keys' => array(
         'id' => 'fid',
         'bundle' => 'type', // @TODO: Why 'type' here...
       ),
@@ -366,7 +366,7 @@ class MediaEntityController extends EntityAPIController {
         $normal_conditions[$k] = $condition;
       }
     }
-    
+
     // Unfortuantely, the load method won't query unless there is at least one condition
     // This is a bad pattern and undocumented side-effect.
     // @todo: refactor this.
