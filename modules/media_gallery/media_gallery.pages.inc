@@ -70,9 +70,7 @@ function media_gallery_view($gallery, $view_mode = 'slideshow') {
     return drupal_not_found();
   }
 
-
   field_attach_prepare_view('gallery', array($gallery->gid => $gallery));
   entity_prepare_view('gallery', array($gallery->gid => $gallery));
   return field_attach_view('gallery', $gallery, $view_mode);
-
 }

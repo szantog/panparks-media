@@ -5,10 +5,19 @@
  * List all galleries.
  */
 function media_gallery_admin_list($form, &$form_state) {
+  $options = array();
+  $empty_message = t('You have no galleries. Click "Create gallery" to create one.');
+
   $gids = db_select('gallery', 'g')
     ->fields('g', array('gid'))
     ->execute()
     ->fetchCol();
+  if (!$gids) {
+    $form['message'] = array(
+      '#markup' => $empty_message, 
+    );
+    return $form;
+  }
   $galleries = entity_get_controller('gallery')->load($gids);
   foreach ($galleries as $gallery) {
     $options[$gallery->gid] = array(

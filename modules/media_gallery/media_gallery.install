@@ -79,7 +79,7 @@ function media_gallery_install() {
   $instance = array(
     'active' => 1,
     'field_name' => 'field_gallery_item',
-    'object_type' => 'gallery',
+    'entity_type' => 'gallery',
     'label' => 'Items',
     'bundle' => 'gallery',
     'description' => 'Add media to your gallery',

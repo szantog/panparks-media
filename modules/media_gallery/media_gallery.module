@@ -27,7 +27,7 @@ function media_gallery_menu() {
   );
   
   $items['gallery/add'] = array(
-    'title' => 'Create Gallery',
+    'title' => 'Create gallery',
     'description' => 'Gallery',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_gallery_form'),
@@ -39,7 +39,7 @@ function media_gallery_menu() {
   $items['admin/content/gallery/add'] = $items['gallery/add'];
 
   $items['gallery/%media_gallery/edit'] = array(
-    'title' => 'Edit Gallery',
+    'title' => 'Edit gallery',
     'description' => 'Gallery',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_gallery_form', 1),
@@ -53,14 +53,14 @@ function media_gallery_menu() {
   $items['admin/content/gallery/%media_gallery/edit']['page arguments'] = array('media_gallery_form', 3);
 
   $items['gallery/%media_gallery/view'] = array(
-    'title' => 'View Gallery',
+    'title' => 'View gallery',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10
   );
 
   $items['gallery/%media_gallery'] = array(
     'type' => MENU_CALLBACK,
-    'title' => 'View Gallery',
+    'title' => 'View gallery',
     'description' => 'Gallery',
     'page callback' => 'media_gallery_view',
     'page arguments' => array(1),
@@ -70,6 +70,22 @@ function media_gallery_menu() {
 
 
   return $items;
+}
+
+/**
+ * Implements hook_block_info
+ */
+function media_gallery_block_info() {
+  $blocks = array();
+
+  $result = db_select('gallery', 'g')
+    ->fields('g')
+    ->execute()
+    ->fetch();
+
+
+
+  ///foreach ($ as $hit)
 }
 
 /**

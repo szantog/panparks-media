@@ -3,7 +3,19 @@
 (function ($) {
   Drupal.behaviors.experimentalMediaBrowser = {
     attach: function (context) {
+      // On the edit form.
       $('.media-widget-closed', context).once('mediaWidgetDrawrerDone', this.processWidget);
+
+      // Temporary jCycle code (needs to be abstracted, with settings, etc)
+
+      $('.jCycle-container').once('jcycleActivated', function () {
+        $(this).cycle({
+          fx: 'fade',
+          timeout: 6000,
+          delay: -2000
+        }
+        );
+      });
     },
 
     processWidget: function() {
