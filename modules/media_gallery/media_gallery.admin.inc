@@ -75,5 +75,5 @@ function media_gallery_create_block($gid) {
   db_insert('gallery_blocks')
     ->fields(array('gid' => $gid, 'delta' => $delta))
     ->execute();
-  
+  return $delta;
 }
