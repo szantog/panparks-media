@@ -113,7 +113,6 @@ function media_browser_list() {
   foreach ($media_entities as &$media) {
     $media->preview = drupal_render(_media_format_for_browser($media));
   }
-
   drupal_json_output(array('media' => array_values($media_entities)));
   die();
 

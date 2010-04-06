@@ -6,25 +6,6 @@
  */
 function media_gallery_menu() {
   $items = array();
-
-  $items['admin/config/media/gallery'] = array(
-    'title' => 'Galleries',
-    'description' => 'Configure galleries and slideshows.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('media_gallery_admin_settings'),
-    'access arguments' => array('administer media galleries'),
-    'file' => 'media_gallery.admin.inc',
-  );
-  
-  $items['admin/content/gallery'] = array(
-    'title' => 'Galleries',
-    'description' => 'Gallery',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('media_gallery_admin_list'),
-    'access arguments' => array('administer media galleries'),
-    'file' => 'media_gallery.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-  );
   
   $items['gallery/add'] = array(
     'title' => 'Create gallery',
@@ -36,8 +17,6 @@ function media_gallery_menu() {
     'file' => 'media_gallery.pages.inc', // Should be pages.inc
   );
 
-  $items['admin/content/gallery/add'] = $items['gallery/add'];
-
   $items['gallery/%media_gallery/edit'] = array(
     'title' => 'Edit gallery',
     'description' => 'Gallery',
@@ -47,10 +26,6 @@ function media_gallery_menu() {
     'file' => 'media_gallery.pages.inc', // Should be pages.inc
     'type' => MENU_LOCAL_TASK,
   );
-  
-  $items['admin/content/gallery/%media_gallery/edit'] = $items['gallery/%media_gallery/edit'];
-  $items['admin/content/gallery/%media_gallery/edit']['type'] = MENU_CALLBACK;
-  $items['admin/content/gallery/%media_gallery/edit']['page arguments'] = array('media_gallery_form', 3);
 
   $items['gallery/%media_gallery/view'] = array(
     'title' => 'View gallery',
@@ -62,30 +37,178 @@ function media_gallery_menu() {
     'type' => MENU_CALLBACK,
     'title' => 'View gallery',
     'description' => 'Gallery',
-    'page callback' => 'media_gallery_view',
+    'page callback' => 'media_gallery_view_standalone',
     'page arguments' => array(1),
     'access arguments' => array('view content'),
     'file' => 'media_gallery.pages.inc',
   );
 
+  $items['admin/config/media/gallery'] = array(
+    'title' => 'Galleries',
+    'description' => 'Configure galleries and slideshows.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_gallery_admin_settings'),
+    'access arguments' => array('administer media galleries'),
+    'file' => 'media_gallery.admin.inc',
+  );
 
+  $items['admin/content/gallery'] = array(
+    'title' => 'Galleries',
+    'description' => 'Gallery',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_gallery_admin_list'),
+    'access arguments' => array('administer media galleries'),
+    'file' => 'media_gallery.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/content/gallery/add'] = $items['gallery/add'];
+
+  $items['admin/content/gallery/%media_gallery/edit'] = $items['gallery/%media_gallery/edit'];
+  $items['admin/content/gallery/%media_gallery/edit']['type'] = MENU_CALLBACK;
+  $items['admin/content/gallery/%media_gallery/edit']['page arguments'] = array('media_gallery_form', 3);
+
+  $items['admin/content/gallery/%media_gallery/embed'] = array(
+    'title' => 'Embed gallery',
+    'description' => 'Creates a block for the gallery',
+    'page callback' => 'media_gallery_embed',
+    'page arguments' => array(3),
+    'access arguments' => array('administer blocks'),
+    'type' => MENU_CALLBACK,
+    'file' => 'media_gallery.admin.inc', // Should be pages.inc
+  );
+  
   return $items;
 }
 
 /**
- * Implements hook_block_info
+ * Implements hook_block_info().
  */
 function media_gallery_block_info() {
   $blocks = array();
 
-  $result = db_select('gallery', 'g')
-    ->fields('g')
+  $result = db_select('gallery_blocks', 'gb')
+    ->fields('gb')
     ->execute()
-    ->fetch();
+    ->fetchAll();
+  foreach ($result as $row) {
+    $ids = array($row->gid);
+    $gallery = array_shift(entity_get_controller('gallery')->load($ids));
+    $blocks[$row->delta] = array(
+      'info' => t('[GALLERY] @gallery_name', array('@gallery_name' => $gallery->field_gallery_title[LANGUAGE_NONE][0]['value'])),
+      //'cache' => DRUPAL_CACHE_GLOBAL,
+    );
+  }
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_configure().
+ */
+function media_gallery_block_configure($delta) {
+  // @TODO: add some JS to handle view_type changes
+  $info = entity_get_info('gallery');
+  $settings = _media_gallery_block_settings_get($delta);
+
+  foreach ($info['view modes'] as $key => $mode) {
+    $view_modes[$key] = $mode['label'];
+  }
+
+  $form = array();
+  $form['gallery_settings'] = array(
+    '#tree' => TRUE,
+  );
 
 
+  // In the great future, you would be able to change this stuff.
+  // Right now, you can only make a slide show.
+  
+  $form['gallery_settings']['view_mode'] = array(
+    '#title' => 'Display type',
+    '#type' => 'radios',
+    '#options' => $view_modes,
+    '#default_value' => $settings['view_mode'],
+  );
 
-  ///foreach ($ as $hit)
+  $form['gallery_settings']['display_settings'] = array();
+  $form['gallery_settings']['display_settings']['slideshow'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Slideshow settings'),
+  );
+
+  $form['gallery_settings']['display_settings']['thumbnails'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Thumbnail gallery settings'),
+  );
+
+  // Okay, now undo the above abstraction until we can really make it work.
+  $form['gallery_settings']['view_mode']['#type'] = 'hidden';
+  $form['gallery_settings']['view_mode']['#value'] = 'slideshow';
+  unset($form['gallery_settings']['display_settings']['thumbnails']);
+
+  $form['gallery_settings']['display_settings']['slideshow']['transition_type'] = array(
+    '#type' => 'select',
+    '#options' => array('fade', 'wipe right', 'wipe left'),
+    '#default_value' => $settings['display_settings']['slideshow']['transition_type'],
+  );
+  return $form;
+}
+
+
+/**
+ * Implements hook_block_save().
+ */
+function media_gallery_block_save($delta, $edit = array()) {
+  $settings = serialize($edit['gallery_settings']);
+  db_update('gallery_blocks')
+    ->fields(array('settings' => $settings))
+    ->execute();
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function media_gallery_block_view($delta) {
+  $gid = db_select('gallery_blocks', 'gb')
+    ->fields('gb', array('gid'))
+    ->execute()
+    ->fetchField();
+  $gallery = array_shift(entity_get_controller('gallery')->load(array($gid)));
+  $settings = _media_gallery_block_settings_get($delta);
+
+  $content = media_gallery_view($gallery, $settings['view_mode'], $settings['display_settings'][$settings['view_mode']]);
+  return array('content' => $content);
+}
+
+/**
+ * Helper function for getting settings for gallery display blocks.
+ *
+ * @param <type> $delta
+ * @return <type>
+ */
+function _media_gallery_block_settings_get($delta) {
+  $defaults = array(
+    'view_mode' => 'slideshow',
+    'display_settings' => array(
+      'slideshow' => array(
+
+      ),
+
+      'thumbnails' => array(
+      ),
+    ),
+  );
+
+  $settings = db_select('gallery_blocks', 'gb')
+    ->fields('gb', array('settings'))
+    ->condition('delta', $delta)
+    ->execute()
+    ->fetchField();
+  if ($settings) {
+    $settings = unserialize($settings);
+  }
+  $settings += $defaults;
+  return $settings;
 }
 
 /**
@@ -124,7 +247,6 @@ function media_gallery_entity_info() {
   // @TODO: Do we need to define search-related view modes for attached fields?
   return $return;
 }
-
 
 /**
  * Implement hook_field_ui_view_modes_tabs();
@@ -349,21 +471,33 @@ function media_gallery_field_formatter_view($obj_type, $object, $field, $instanc
 function media_gallery_theme() {
   return array(
     'media_gallery_slideshow' => array(
-      'variables' => array('render element' => 'element', 'element' => NULL, 'object' => NULL),
-    )
+      'variables' => array('gallery' => NULL),
+    ),
   );
+}
+
+function media_gallery_view($gallery, $view_mode, $settings) {
+  if (!$gallery) {
+    return drupal_not_found();
+  }
+  field_attach_prepare_view('gallery', array($gallery->gid => $gallery), $view_mode);
+  entity_prepare_view('gallery', array($gallery->gid => $gallery));
+  $output = field_attach_view('gallery', $gallery, $view_mode);
+  $output['field_gallery_title']['access'] = FALSE;
+
+  return theme('media_gallery_' . $view_mode, array('gallery' => $output));
 }
 
 
 function theme_media_gallery_slideshow($variables) {
-  $element = $variables['element'];
+  $gallery = $variables['gallery'];
+  // This might be better as another module providing field formatters...
+  // Anyway, for now.
+  $path = drupal_get_path('module', 'media_gallery');
+  $gallery['#attached']['js'][] = $path . '/includes/jquery.cycle.js';
+  $gallery['#attached']['js'][] = $path . '/media_gallery.js';
   
-  $presets = styles_presets();
-  foreach ($presets as $field_type => $styles) {
-    foreach ($styles as $style_name => $style) {
-
-    }
-  }
+  return $gallery;
 }
 
 

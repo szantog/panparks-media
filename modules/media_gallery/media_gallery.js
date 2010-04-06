@@ -1,21 +1,10 @@
 // $Id$
 
 (function ($) {
-  Drupal.behaviors.experimentalMediaBrowser = {
+  Drupal.behaviors.mediaGalleryWidget = {
     attach: function (context) {
       // On the edit form.
       $('.media-widget-closed', context).once('mediaWidgetDrawrerDone', this.processWidget);
-
-      // Temporary jCycle code (needs to be abstracted, with settings, etc)
-
-      $('.jCycle-container').once('jcycleActivated', function () {
-        $(this).cycle({
-          fx: 'fade',
-          timeout: 6000,
-          delay: -2000
-        }
-        );
-      });
     },
 
     processWidget: function() {
@@ -27,6 +16,20 @@
           $this.addClass('media-widget-open');
           $this.removeClass('media-widget-closed');
         });
+    }
+  };
+
+  Drupal.behaviors.mediaGallerySlideshow = {
+    attach: function (context) {
+      // Temporary jCycle code (needs to be abstracted, with settings, etc)
+      $('.field-items').once('jcycleActivated', function () {
+        $(this).cycle({
+          fx: 'fade',
+          timeout: 6000,
+          delay: -2000
+        }
+        );
+      });
     }
   };
 })(jQuery);

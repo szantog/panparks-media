@@ -254,11 +254,15 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
         'schemes' => $instance['widget']['settings']['allowed_schemes'],
       ),
     ),
+    // Required to attach behaviors to the widget, @see theme_media_element();
+    '#attributes' => array(
+      'class' => array('media-widget'),
+    ),
     '#process' => array('media_generic_widget_process'),
     // Add extra Field properties.
     '#field_name' => $field['field_name'],
     '#bundle' => $instance['bundle'],
-    '#object_type' => $instance['object_type'],
+    '#entity_type' => $instance['entity_type'],
     '#value_callback' => 'media_field_widget_value',
   );
   

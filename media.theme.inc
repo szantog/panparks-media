@@ -291,7 +291,7 @@ function theme_media_element($variables) {
 
   // This wrapper is required to apply JS behaviors and CSS styling.
   $output = '';
-  $output .= '<div class="media-widget">';
+  $output .= '<div ' . drupal_attributes($element['#attributes']) . '>';
   $output .= drupal_render_children($element);
   $output .= '</div>';
   return $output;

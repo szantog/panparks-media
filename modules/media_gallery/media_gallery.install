@@ -32,7 +32,7 @@ function media_gallery_install() {
     'label' => 'Title',
     'bundle' => 'gallery',
     'description' => 'Title of your gallery or slideshow',
-    'required' => TRUE,
+    'required' => FALSE,
     'widget' => array(
       'type' => 'text_textfield',
       'weight' => FIELD_CARDINALITY_UNLIMITED,
@@ -132,6 +132,33 @@ function media_gallery_schema() {
       ),
     ),
     'primary key' => array('gid'),
+  );
+
+  $schema['gallery_blocks'] = array(
+  'description' => 'Media gallery blocks',
+    'fields' => array(
+      'gid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default'  => 0,
+        'description' => "Gallery ID",
+      ),
+      'delta' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '0',
+        'description' => 'Unique ID for block within a module.',
+      ),
+      'settings' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('gid', 'delta'),
   );
 
   return $schema;
