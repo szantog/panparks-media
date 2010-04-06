@@ -310,6 +310,10 @@ function media_media_format_form_prepare_alter(&$form, &$form_state, $media) {
   }
 }
 
+if (class_exists('EntityDB')) {
+  module_enable(array('entity'));
+  cache_clear_all();
+}
 
 class Media extends EntityDB {
   public function __construct($values = array()) {

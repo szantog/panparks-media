@@ -133,7 +133,6 @@ function media_gallery_block_configure($delta) {
     '#tree' => TRUE,
   );
 
-
   // In the great future, you would be able to change this stuff.
   // Right now, you can only make a slide show.
   
@@ -234,6 +233,10 @@ function _media_gallery_block_settings_get($delta) {
     ->fetchField();
   if ($settings) {
     $settings = unserialize($settings);
+  }
+
+  if (!$settings) {
+    $settings = array();
   }
 
   /**

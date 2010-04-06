@@ -316,3 +316,11 @@ function media_update_7003() {
 function media_update_7004() {
   menu_rebuild();
 }
+
+/**
+ * Removed /media from the menu.
+ */
+function media_update_7005() {
+  // This is a new dependency and must be enabled as soon as the new code is pushed.
+  module_enable(array('entity'));
+}
