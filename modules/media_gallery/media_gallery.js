@@ -22,13 +22,11 @@
   Drupal.behaviors.mediaGallerySlideshow = {
     attach: function (context) {
       // Temporary jCycle code (needs to be abstracted, with settings, etc)
-      $('.field-items').once('jcycleActivated', function () {
-        $(this).cycle({
-          fx: 'fade',
-          timeout: 6000,
-          delay: -2000
-        }
-        );
+      $('.slideshow.media-gallery').once('jCycleActivated', function() {
+        var settings = Drupal.settings.media.gallery[this.id];
+        $('.field-items').each(function () {
+          $(this).cycle(settings);
+        });
       });
     }
   };

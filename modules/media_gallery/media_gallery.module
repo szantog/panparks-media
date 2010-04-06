@@ -146,11 +146,24 @@ function media_gallery_block_configure($delta) {
   $form['gallery_settings']['view_mode']['#value'] = 'slideshow';
   unset($form['gallery_settings']['display_settings']['thumbnails']);
 
-  $form['gallery_settings']['display_settings']['slideshow']['transition_type'] = array(
+  $form['gallery_settings']['display_settings']['slideshow']['fx'] = array(
     '#type' => 'select',
-    '#options' => array('fade', 'wipe right', 'wipe left'),
-    '#default_value' => $settings['display_settings']['slideshow']['transition_type'],
+    '#options' => array(
+      'fade' => 'Fade',
+      'scrollLeft' => 'Scroll Left',
+      'scrollRight' => 'Scroll Right',
+      'scrollUp' => 'Scroll Up',
+    ),
+    '#default_value' => $settings['display_settings']['slideshow']['fx'],
   );
+
+  $form['gallery_settings']['display_settings']['slideshow']['timeout'] = array(
+    '#title' => t('Delay between slides in millisecondss.'),
+    '#type' => 'textfield',
+    '#description' => t('Leave blank to disable automatic transition.'),
+    '#default_value' => $settings['display_settings']['slideshow']['timeout'],
+  );
+
   return $form;
 }
 
@@ -191,7 +204,8 @@ function _media_gallery_block_settings_get($delta) {
     'view_mode' => 'slideshow',
     'display_settings' => array(
       'slideshow' => array(
-
+        'fx' => 'fade',
+        'timeout' => 4000,
       ),
 
       'thumbnails' => array(
@@ -207,8 +221,13 @@ function _media_gallery_block_settings_get($delta) {
   if ($settings) {
     $settings = unserialize($settings);
   }
-  $settings += $defaults;
-  return $settings;
+
+  /**
+   * This kinda sucks, but since array_merge_recursive doesn't really do what it
+   * says, I don't know how to fix this.
+   */
+  return $settings + $defaults;
+
 }
 
 /**
@@ -416,8 +435,17 @@ function media_gallery_field_widget_value($element, $input = FALSE, $form_state)
 
 /**
  * Implements hook_field_formatter_info();
+ *
+ * @note: not used.  This is likely a preferable way to implement this.
+ * However, I don't see how to do so in a manner which can also specify the
+ * width, etc.
+ *
+ * So for now, we're just doing it through blocks.
+ *
+ * NOT USED!
  */
 function media_gallery_field_formatter_info() {
+
   $info = array();
   $info['media_gallery_slideshow'] = array(
     'label' => t('Slideshow'),
@@ -432,6 +460,8 @@ function media_gallery_field_formatter_info() {
 
 /**
  * Implements hook_field_formatter_view();
+ * NOT USED!
+ * @see media_gallery_field_formatter_info()
  */
 function media_gallery_field_formatter_view($obj_type, $object, $field, $instance, $langcode, $items, $display) {
   $element = array();
@@ -471,36 +501,56 @@ function media_gallery_field_formatter_view($obj_type, $object, $field, $instanc
 function media_gallery_theme() {
   return array(
     'media_gallery_slideshow' => array(
-      'variables' => array('gallery' => NULL),
+      'variables' => array('gallery' => NULL, 'element' => NULL),
     ),
   );
 }
 
+/**
+ * Generates a renderable array for a gallery.
+ * 
+ * @param Gallery $gallery
+ * @param string $view_mode
+ * @param array $settings
+ * @return array
+ */
 function media_gallery_view($gallery, $view_mode, $settings) {
   if (!$gallery) {
     return drupal_not_found();
   }
   field_attach_prepare_view('gallery', array($gallery->gid => $gallery), $view_mode);
   entity_prepare_view('gallery', array($gallery->gid => $gallery));
-  $output = field_attach_view('gallery', $gallery, $view_mode);
-  $output['field_gallery_title']['access'] = FALSE;
+  $element = field_attach_view('gallery', $gallery, $view_mode);
+  $element['field_gallery_title']['access'] = FALSE;
 
-  return theme('media_gallery_' . $view_mode, array('gallery' => $output));
+  $media_galleries = array();
+  $id = 'media-gallery-' . $gallery->gid;
+  $media_galleries[$id] = $settings;
+  drupal_add_js(array('media' => array('gallery' => $media_galleries)), 'setting');
+
+  $element['#prefix'] = sprintf('<div class="%s" id="%s">', $view_mode . ' media-gallery', $id);
+  $element['#suffix'] = '</div>';
+
+  // Add the JS to the page?
+  // wrap an ID around this
+
+  return theme('media_gallery_' . $view_mode, array('gallery' => $gallery, 'element' => $element));
 }
 
 
 function theme_media_gallery_slideshow($variables) {
   $gallery = $variables['gallery'];
+  $element = $variables['element'];
   // This might be better as another module providing field formatters...
   // Anyway, for now.
   $path = drupal_get_path('module', 'media_gallery');
-  $gallery['#attached']['js'][] = $path . '/includes/jquery.cycle.js';
-  $gallery['#attached']['js'][] = $path . '/media_gallery.js';
-  
-  return $gallery;
+  $output = array('#type' => 'container', '#attributes' => array('id' => 'gallery_' . $gallery->gid));
+
+  $element['#attached']['js'][] = $path . '/includes/jquery.easing.js';
+  $element['#attached']['js'][] = $path . '/includes/jquery.cycle.js';
+  $element['#attached']['js'][] = $path . '/media_gallery.js';
+  return $element;
 }
-
-
 
 /** Classes **/
 class Gallery extends EntityDB {
