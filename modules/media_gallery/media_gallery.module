@@ -109,12 +109,26 @@ function media_gallery_block_configure($delta) {
   // @TODO: add some JS to handle view_type changes
   $info = entity_get_info('gallery');
   $settings = _media_gallery_block_settings_get($delta);
+  
 
   foreach ($info['view modes'] as $key => $mode) {
     $view_modes[$key] = $mode['label'];
   }
 
   $form = array();
+
+  $gid = db_select('gallery_blocks', 'gb')
+    ->fields('gb', array('gid'))
+    ->execute()
+    ->fetchField();
+
+  $gallery = array_shift(entity_get_controller('gallery')->load(array($gid)));
+  $title = $gallery->field_gallery_title[LANGUAGE_NONE][0]['value'];
+
+  $form['edit_link'] = array(
+    '#markup' => l(t('Change images used in %gallery_title.', array('%gallery_title' => $title)), 'gallery/' . $gid . '/edit', array('html' => TRUE)),
+
+  );
   $form['gallery_settings'] = array(
     '#tree' => TRUE,
   );
