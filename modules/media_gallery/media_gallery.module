@@ -504,7 +504,10 @@ function theme_media_gallery_slideshow($variables) {
 }
 
 if (!class_exists('EntityDB')) {
-  drupal_set_message('You must run update.php immediately to enable the entity module or Media will not function.', 'error');
+  if (basename($_SERVER["SCRIPT_NAME"]) != 'index.php') {
+    // Don't show the warning if they are on update.php or running via drush.
+    drupal_set_message('You must run update.php immediately to enable the entity module or Media will not function.', 'error');
+  }
 } else {
   /** Classes **/
   class Gallery extends EntityDB {
