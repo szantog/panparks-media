@@ -110,6 +110,7 @@ function media_browser_list() {
   $entity_controller = entity_get_controller('media');
   $media_entities = $entity_controller->load(NULL, $conditions, $start, $limit);
 
+
   foreach ($media_entities as &$media) {
     $media->preview = drupal_render(_media_format_for_browser($media));
   }
@@ -124,6 +125,7 @@ function _media_format_for_browser($media) {
   // @todo: Should generate placeholders for audio
   // Add yet another wrapper so we can style it as a preview :(
   // Otherwise it isn't really possible to know because the user can pick anything for their preview mode.
+  
   $preview = field_view_field('media', $media, 'file', 'media_preview');
   $preview['#show_names'] = TRUE;
   $preview['#theme_wrappers'][] = 'media_thumbnail';

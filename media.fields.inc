@@ -262,7 +262,7 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     // Add extra Field properties.
     '#field_name' => $field['field_name'],
     '#bundle' => $instance['bundle'],
-    '#entity_type' => $instance['entity_type'],
+    '#object_type' => $instance['object_type'],
     '#value_callback' => 'media_field_widget_value',
   );
   

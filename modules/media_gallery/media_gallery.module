@@ -264,7 +264,7 @@ function media_gallery_entity_info() {
       'base table' => 'gallery',
       'fieldable' => TRUE,
       'view modes' => $view_modes,
-      'entity keys' => array(
+      'object keys' => array(
         'id' => 'gid',
         //'bundle' => 'type', // @TODO: Why 'type' here...
       ),

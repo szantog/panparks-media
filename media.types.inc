@@ -23,7 +23,7 @@ function media_entity_info() {
       'base table' => 'file',
       'fieldable' => TRUE,
       'view modes' => $view_modes,
-      'entity keys' => array(
+      'object keys' => array(
         'id' => 'fid',
         'bundle' => 'type', // @TODO: Why 'type' here...
       ),
@@ -160,7 +160,7 @@ function media_type_configure_fields($media_type) {
     $weight = -5;
     $instance = array(
       'field_name' => 'file',
-      'entity_type' => 'media',
+      'object_type' => 'media',
       'bundle' => $media_type->name,
       'label' => 'File',
       'widget_type' => 'file_file',
@@ -378,7 +378,7 @@ class MediaEntityController extends EntityAPIController {
   }
 
   protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
-    $query = parent::buildQuery($ids, $conditions = array(), $revision_id = FALSE);
+    $query = parent::buildQuery($ids, $conditions, $revision_id);
     if ($this->limit) {
       $query->range($this->start, $this->limit);
     }
