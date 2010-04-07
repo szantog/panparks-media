@@ -503,9 +503,13 @@ function theme_media_gallery_slideshow($variables) {
   return $element;
 }
 
-/** Classes **/
-class Gallery extends EntityDB {
-  public function __construct($values = array()) {
-    parent::__construct($values, 'gallery');
+if (!class_exists('EntityDB')) {
+  drupal_set_message('You must run update.php immediately to enable the entity module or Media will not function.', 'error');
+} else {
+  /** Classes **/
+  class Gallery extends EntityDB {
+    public function __construct($values = array()) {
+      parent::__construct($values, 'gallery');
+    }
   }
 }
