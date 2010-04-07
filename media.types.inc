@@ -311,7 +311,7 @@ function media_media_format_form_prepare_alter(&$form, &$form_state, $media) {
 }
 
 if (!class_exists('EntityDB')) {
-  if (basename($_SERVER["SCRIPT_NAME"]) != 'index.php') {
+  if (basename($_SERVER["SCRIPT_NAME"]) == 'index.php') {
     // Don't show the warning if they are on update.php or running via drush.
     drupal_set_message('You must run update.php immediately to enable the entity module or Media will not function.', 'error');
   }
