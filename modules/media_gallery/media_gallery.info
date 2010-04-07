@@ -1,0 +1,9 @@
+; $Id$
+
+name = Media Gallery
+description = Gallerys of Media
+package = Media
+core = 7.x
+php = 5.2
+files[] = media_gallery.module
+dependencies[] = media

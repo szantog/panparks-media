@@ -1,0 +1,165 @@
+<?php
+// $Id$
+
+/**
+ * Implements hook_install()
+ *
+ * Creates a title field and a multi-value media field for the Gallery entity.
+ */
+function media_gallery_install() {
+
+
+  //@todo: make sure this name isn't claimed
+  $field = array(
+    'field_name' => 'field_gallery_title',
+    'type' => 'text',
+    'cardinality' => 1,
+    'translatable' => TRUE,
+    'locked' => FALSE,
+    'storage' => array(
+      'type' => 'field_sql_storage',
+      'settings' => array(),
+    ),
+  );
+  field_create_field($field);
+
+
+  // Many of the following values will be defaulted, they're included here as an illustrative examples.
+  // @see: http://api.drupal.org/api/function/field_create_instance/7
+  $instance = array(
+    'field_name' => 'field_gallery_title',
+    'entity_type' => 'gallery',
+    'label' => 'Title',
+    'bundle' => 'gallery',
+    'description' => 'Title of your gallery or slideshow',
+    'required' => FALSE,
+    'widget' => array(
+      'type' => 'text_textfield',
+      'weight' => FIELD_CARDINALITY_UNLIMITED,
+    ),
+//    'display' => array(
+//      'slideshow' => array(
+//        'label' => 'hidden',
+//        'type' => 'media_large',
+//        'settings' => array(),
+//        'weight' => -1,
+//      ),
+//      'thumbnails' => array(
+//        'label' => 'hidden',
+//        'type' => 'media_preview',
+//        'settings' => array(),
+//        'weight' => -1,
+//      ),
+//    ),
+  );
+  field_create_instance($instance);
+
+  $field = array(
+    'field_name' => 'field_gallery_item',
+    'type' => 'media',
+    'cardinality' => -1,
+    'translatable' => TRUE,
+    'locked' => FALSE,
+    'indexes' => array('fid' => array('fid')),
+    'settings' => array(
+      'progress_indicator' => 'throbber',
+      'allowed_types' => array(),
+      'allowed_schemes' => array(),
+    ),
+    'storage' => array(
+      'type' => 'field_sql_storage',
+      'settings' => array(),
+    ),
+  );
+  field_create_field($field);
+
+
+  // Many of the following values will be defaulted, they're included here as an illustrative examples.
+  // @see: http://api.drupal.org/api/function/field_create_instance/7
+  $instance = array(
+    'active' => 1,
+    'field_name' => 'field_gallery_item',
+    'entity_type' => 'gallery',
+    'label' => 'Items',
+    'bundle' => 'gallery',
+    'description' => 'Add media to your gallery',
+    'required' => FALSE,
+    'widget' => array(
+      'type' => 'media_gallery_item',
+      'module' => 'media_gallery',
+      'settings' => array(
+      ),
+      'weight' => -1,
+    ),
+    'display' => array(
+      'slideshow' => array(
+        'label' => 'hidden',
+        'type' => 'media_large',
+        'settings' => array(),
+        'weight' => -1,
+      ),
+      'thumbnails' => array(
+        'label' => 'hidden',
+        'type' => 'media_preview',
+        'settings' => array(),
+        'weight' => -1,
+      ),
+    ),
+  );
+  field_create_instance($instance);
+}
+
+
+/**
+ * Implements hook_schema().
+ */
+function media_gallery_schema() {
+  $schema['gallery'] = array(
+  'description' => 'Gallery',
+    'fields' => array(
+      'gid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => "Gallery ID",
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "Weight",
+      ),
+    ),
+    'primary key' => array('gid'),
+  );
+
+  $schema['gallery_blocks'] = array(
+  'description' => 'Media gallery blocks',
+    'fields' => array(
+      'gid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default'  => 0,
+        'description' => "Gallery ID",
+      ),
+      'delta' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '0',
+        'description' => 'Unique ID for block within a module.',
+      ),
+      'settings' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('gid', 'delta'),
+  );
+
+  return $schema;
+}

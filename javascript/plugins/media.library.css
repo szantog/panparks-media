@@ -1,0 +1,49 @@
+/* @override 
+	http://dev7/sites/all/modules/media/javascript/plugins/media.library.css?4
+	http://dev7/sites/all/modules/media/javascript/plugins/media.library.css?L
+*/
+
+#media-browser #library ul {
+	list-style: none;
+	margin: 0; 
+	padding: 0px;
+	background-color: white;
+}
+
+#media-browser #library ul li {
+  float: left;
+  width: 120px;
+  padding-right: 5px;
+}
+
+
+/* Experimental CSS */
+
+
+ul#media-browser-library-list {
+	list-style: none;
+	margin: 0;
+	padding: 0px;
+	background-color: white;
+}
+
+ul#media-browser-library-list li {
+  float: left;
+  width: 120px;
+  padding-right: 5px;
+}
+
+#media-tab-library #container{
+	padding:20px 0;
+}
+#media-tab-library #scrollbox{
+	height:300px;
+	overflow:auto; overflow-x:hidden;
+}
+#media-tab-library > li{
+	background:#eee;
+	color:#666;
+	font-family:Arial, sans-serif; font-size:0.75em;
+	padding:5px; margin:0;
+	text-align:right;
+}

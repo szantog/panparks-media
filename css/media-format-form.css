@@ -1,0 +1,23 @@
+/* @override http://dev7/sites/all/modules/media/css/media-format-form.css?L */
+
+#media-format-form {
+  margin:30px;
+}
+
+#media-format-form div div.media-thumbnail {
+	width: 150px;
+	float: left;
+	margin-bottom: 20px;
+}
+
+#format-group-wrapper fieldset{
+	border: none;
+	padding: 0;
+}
+
+#format-group-wrapper fieldset legend {
+	display: none;
+}
+
+
+
