@@ -215,9 +215,6 @@ function media_field_widget_settings_form($field, $instance) {
   return $form;
 }
 
-<<<<<<< media.fields.inc
-=======
-
 function media_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
   $element = $base;
   $widget_settings = $instance['widget']['settings'];
@@ -376,4 +373,3 @@ function media_field_widget_value($element, $input, $form_state) {
 
   return $return;
 }
->>>>>>> 1.1.2.36
