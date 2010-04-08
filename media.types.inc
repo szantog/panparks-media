@@ -310,82 +310,86 @@ function media_media_format_form_prepare_alter(&$form, &$form_state, $media) {
   }
 }
 
-if (class_exists('EntityDB')) {
-  module_enable(array('entity'));
-  cache_clear_all();
-}
-
-class Media extends EntityDB {
-  public function __construct($values = array()) {
-    parent::__construct($values, 'media');
+if (!class_exists('EntityDB')) {
+  if (basename($_SERVER["SCRIPT_NAME"]) == 'index.php') {
+    // Don't show the warning if they are on update.php or running via drush.
+    drupal_set_message('You must run update.php immediately to enable the entity module or Media will not function.', 'error');
   }
 }
+else {
 
-class MediaEntityController extends EntityAPIController {
-  
-  public $customConditions = array();
-  public $start;
-  public $limit;
-  
-  /**
-   * Wrapper around the DB_API to allow conditions which are not ==
-   * 
-   * @param $key
-   * @param $value
-   * @param $operator
-   * @return unknown_type
-   */
-  public function addCondition($key, $value, $operator = NULL) {
-    $this->customConditions = array($key, $value, $operator);
+  class Media extends EntityDB {
+    public function __construct($values = array()) {
+      parent::__construct($values, 'media');
+    }
   }
 
-  /**
-   * Takes a DB query and... does what?
-   * @param <type> $query
-   */
-  public function getMedia($query) {
+  class MediaEntityController extends EntityAPIController {
 
-  }
-  /**
-   * Overloaded (and this sucks).  $conditions can be an array or key=>value pairs or DBNTG conditions.
-   * Sets status = TRUE by default.
-   *  
-   * @see sites/all/modules/media/includes/EntityAPIController#load($ids, $conditions)
-   */
-  public function load($ids = array(), $conditions = array(), $start = NULL, $limit = NULL) {
-    // Conditions using the = (equals) operator.
-    $normal_conditions = array();
-    $normal_conditions['status'] = TRUE;
+    public $customConditions = array();
+    public $start;
+    public $limit;
 
-    $this->start = $start;
-    $this->limit = $limit;
+    /**
+     * Wrapper around the DB_API to allow conditions which are not ==
+     *
+     * @param $key
+     * @param $value
+     * @param $operator
+     * @return unknown_type
+     */
+    public function addCondition($key, $value, $operator = NULL) {
+      $this->customConditions = array($key, $value, $operator);
+    }
 
-    foreach ($conditions as $k => $condition) {
-      if (is_array($condition)) {
-        $this->customConditions[] = array($condition[0], $condition[1], $condition[2]);
-        // We can't use caching in this case
-        $this->cache = FALSE;
+    /**
+     * Takes a DB query and... does what?
+     * @param <type> $query
+     */
+    public function getMedia($query) {
+
+    }
+    /**
+     * Overloaded (and this sucks).  $conditions can be an array or key=>value pairs or DBNTG conditions.
+     * Sets status = TRUE by default.
+     *
+     * @see sites/all/modules/media/includes/EntityAPIController#load($ids, $conditions)
+     */
+    public function load($ids = array(), $conditions = array(), $start = NULL, $limit = NULL) {
+      // Conditions using the = (equals) operator.
+      $normal_conditions = array();
+      $normal_conditions['status'] = TRUE;
+
+      $this->start = $start;
+      $this->limit = $limit;
+
+      foreach ($conditions as $k => $condition) {
+        if (is_array($condition)) {
+          $this->customConditions[] = array($condition[0], $condition[1], $condition[2]);
+          // We can't use caching in this case
+          $this->cache = FALSE;
+        }
+        else {
+          $normal_conditions[$k] = $condition;
+        }
       }
-      else {
-        $normal_conditions[$k] = $condition;
+
+      // Unfortuantely, the load method won't query unless there is at least one condition
+      // This is a bad pattern and undocumented side-effect.
+      // @todo: refactor this.
+      return parent::load($ids, $normal_conditions);
+    }
+
+    protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
+      $query = parent::buildQuery($ids, $conditions = array(), $revision_id = FALSE);
+      if ($this->limit) {
+        $query->range($this->start, $this->limit);
       }
+      foreach ($this->customConditions as $condition) {
+        $query->condition($condition[0], $condition[1], $condition[2]);
+      }
+      return $query;
     }
-
-    // Unfortuantely, the load method won't query unless there is at least one condition
-    // This is a bad pattern and undocumented side-effect.
-    // @todo: refactor this.
-    return parent::load($ids, $normal_conditions);
-  }
-
-  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
-    $query = parent::buildQuery($ids, $conditions = array(), $revision_id = FALSE);
-    if ($this->limit) {
-      $query->range($this->start, $this->limit);
-    }
-    foreach ($this->customConditions as $condition) {
-      $query->condition($condition[0], $condition[1], $condition[2]);
-    }
-    return $query;
   }
 }
 
