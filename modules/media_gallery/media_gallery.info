@@ -1,6 +1,6 @@
 ; $Id$
 
-hidden = 1
+hidden = TRUE
 name = Media Gallery
 description = Gallerys of Media
 package = Media
