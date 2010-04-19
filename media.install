@@ -39,9 +39,9 @@ function media_install() {
    * INSERTS or column names.
    */
 
-  // Alter {file}.type and add it as an index.
-  db_add_field('file', 'type', _media_type_field_spec());
-  db_add_index('file', 'file_type', array('type'));
+  // Alter {file_managed}.type and add it as an index.
+  db_add_field('file_managed', 'type', _media_type_field_spec());
+  db_add_index('file_managed', 'file_type', array('type'));
 }
 
 /**
@@ -134,7 +134,7 @@ function media_enable() {
 }
 
 /**
- *  Define the database {file}.type field.
+ *  Define the database {file_managed}.type field.
  */
 function _media_type_field_spec() {
   return array(
@@ -185,8 +185,8 @@ function media_schema() {
  * Implement hook_schema_alter().
  */
 function media_schema_alter(&$schema) {
-  // Alter {file}.type.
-  $schema['file']['fields']['type'] = _media_type_field_spec();
+  // Alter {file_managed}.type.
+  $schema['file_managed']['fields']['type'] = _media_type_field_spec();
 }
 
 /**
@@ -196,7 +196,7 @@ function media_uninstall() {
   /**
    * See comment above in media_install.
    */
-  db_drop_field('file', 'type');
+  db_drop_field('file_managed', 'type');
   foreach (media_variable_default() as $name => $value) {
     media_variable_del($name);
   }
@@ -323,4 +323,12 @@ function media_update_7004() {
 function media_update_7005() {
   // This is a new dependency and must be enabled as soon as the new code is pushed.
   module_enable(array('entity'));
+}
+
+/**
+ * HEAD changed the 'file' table to 'file_managed'.
+ */
+function media_update_7006() {
+  db_add_field('file_managed', 'type', _media_type_field_spec());
+  db_add_index('file_managed', 'file_type', array('type'));
 }
