@@ -788,8 +788,7 @@ function media_element_info() {
 }
 
 function media_element_process(&$element) {
-  dpr(func_get_args());
-
+  // @todo: make this work for file and image fields
 }
 
 
