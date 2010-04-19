@@ -328,6 +328,7 @@ function media_file_insert(&$file) {
  */
 function media_file_update(&$file) {
   $file->type = media_get_type($file);
+  media_save_attached_file($file);
 }
 
 /**
@@ -730,30 +731,36 @@ function media_parse_to_file($url) {
  */
 function media_save_attached_file($file) {
   if ($file) {
-    // This is terrible.  Just awful.  But if we don't do it, the file gets deleted next cron run.
-    //$file->status = 1;
+    // This is terrible.  Just awful.
     if ($file->status != FILE_STATUS_PERMANENT) {
       // We only want to manage files which are FILE_STATUS_PERMANENT
       return;
     }
-    
     $defaults = array (
       'display' => TRUE,
     );
 
     // Make a copy of the file object to use as the media object
     // (file is a field of media and the base table). This is weird.
-    // @TODO: Why are we not then working on $media?
-    $media = clone($file);
-    $media->file = array();
-    $media->file[LANGUAGE_NONE] = array();
-    $media->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
-    $media->is_new = TRUE;
-    field_attach_presave('media', $media);
-    field_attach_insert('media', $media);
-    
+    // The problem is, files get managed elsewhere, and when they move from
+    // temporary to PERMANENT files, we want to create media entities for them.
+    // Unfortunately, there is no hook for that, so on every insert / update
+    // we have to look to see if the media entity has been setup
+    // and if not, we have to create it.
+    $media = media_load($file->fid);
+    if (!$media->file) { //Then we haven't setup the media entity.
+      $media->file = array();
+      $media->file[LANGUAGE_NONE] = array();
+      $media->file[LANGUAGE_NONE][0] = (array)$file + $defaults;
+      $media->is_new = TRUE;
+      field_attach_presave('media', $media);
+      field_attach_update('media', $media);
+      //field_attach_insert('media', $media);
 
+    }
   }
+
+
 
   return $media;
 }
@@ -813,8 +820,8 @@ function media_filter_info() {
  *  A file object.
  */
 function _media_save_file_permenently(&$file) {
-  if (($file->status & FILE_STATUS_PERMANENT) == 0) {
-    $file->status |= FILE_STATUS_PERMANENT;
+  if ($file->status < FILE_STATUS_PERMANENT) {
+    $file->status = FILE_STATUS_PERMANENT;
     file_save($file);
   }
 }
