@@ -96,7 +96,7 @@ function media_admin_list() {
    'operations' => array('data' => t('Operations')),
   );
 
-  $query = db_select('file', 'f')->extend('PagerDefault')->extend('TableSort');
+  $query = db_select('file_managed', 'f')->extend('PagerDefault')->extend('TableSort');
   $query->join('users', 'u', 'f.uid = u.uid');
 
   $result = $query
@@ -136,7 +136,7 @@ function media_admin_list() {
  * Form builder: Builds the media thumbnails administration overview.
  */
 function media_admin_thumbnails() {
-  $query = db_select('file', 'f')->extend('PagerDefault');
+  $query = db_select('file_managed', 'f')->extend('PagerDefault');
   $query->join('users', 'u', 'f.uid = u.uid');
 
   $result = $query
@@ -476,8 +476,8 @@ function media_admin_type_manage_form_submit($form, &$form_state) {
 }
 
 /**
- * Form callback for mass import. 
- * 
+ * Form callback for mass import.
+ *
  */
 function media_import($form, &$form_state) {
 
@@ -558,7 +558,7 @@ function media_import_batch_import_files($files, &$context) {
     $context['sandbox']['files'] = $files;
   }
   $files =& $context['sandbox']['files'];
-  
+
   // Take a cut of files.  Let's do 10 at a time.
   $length = (count($files) > media_variable_get('import_batch_size')) ? media_variable_get('import_batch_size') : count($files);
   $to_process = array_splice($files, 0, $length);
@@ -577,12 +577,12 @@ function media_import_batch_import_files($files, &$context) {
       $context['results']['errors'][] = $file . " Reason: " . $e->getMessage();
     }
   }
-  
+
   $context['message'] = "Importing " . theme('item_list', array('items' => $to_process));
   $context['message'] .= drupal_render($image_in_message); // Just for kicks, show an image we are importing
-  
+
   $context['finished'] = ($context['sandbox']['max'] - count($files)) / $context['sandbox']['max'];
-  
+
 }
 
 function media_import_batch_import_complete($success, $results, $operations) {
