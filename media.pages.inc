@@ -100,6 +100,7 @@ function media_add_upload(&$form, &$form_state, $redirect = NULL) {
 function media_add_upload_validate($form, &$form_state) {
   // Save the file as a temporary file.
   $file = file_save_upload('upload', $form['#validators']);
+
   if ($file === FALSE) {
     form_set_error('upload', t("Failed to upload the file."));
   }
@@ -114,6 +115,7 @@ function media_add_upload_validate($form, &$form_state) {
 function media_add_upload_submit($form, &$form_state) {
   $scheme = variable_get('file_default_scheme', 'public') . '://';
   $file = $form_state['values']['upload'];
+  _media_save_file_permenently($file);
   $destination = file_stream_wrapper_uri_normalize($scheme . $file->filename);
 
   $defaults = array (
