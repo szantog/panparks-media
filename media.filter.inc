@@ -162,7 +162,8 @@ function _media_markup($match, $wysiwyg = FALSE) {
     return '';
   }
 
-  return drupal_render(media_get_file_without_label($media_obj, $media['view_mode'], $settings));
+  $file_field = media_get_file_without_label($media_obj, $media['view_mode'], $settings);
+  return drupal_render($file_field);
 }
 
 /**
@@ -182,7 +183,7 @@ function media_pre_render_text_format($element) {
   $settings = array(
     'field' => $field['#id'],
   );
-  
+
   $tagmap = _media_generate_tagMap($field['#value']);
 
   if (isset($tagmap)) {
@@ -256,7 +257,8 @@ function media_format_form($form, $form_state, $media) {
 
     //@TODO: Display more verbose information about which formatter and what it does.
     $options[$key] = $title['label'];
-    $formats[$key] = drupal_render(media_get_file_without_label($media, $key, array('wysiwyg' => TRUE)));
+    $file_field = media_get_file_without_label($media, $key, array('wysiwyg' => TRUE));
+    $formats[$key] = drupal_render($file_field);
   }
 
   if (!count($formats)) {
