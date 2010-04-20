@@ -331,4 +331,5 @@ function media_update_7005() {
 function media_update_7006() {
   db_add_field('file_managed', 'type', _media_type_field_spec());
   db_add_index('file_managed', 'file_type', array('type'));
+  drupal_flush_all_caches();
 }

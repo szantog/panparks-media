@@ -20,7 +20,7 @@ function media_entity_info() {
       'label' => t('Media'),
   	  'entity class' => 'Media',
       'controller class' => 'MediaEntityController',
-      'base table' => 'file',
+      'base table' => 'file_managed',
       'fieldable' => TRUE,
       'view modes' => $view_modes,
       'entity keys' => array(
@@ -324,7 +324,7 @@ else {
       // Add the public url to this file (if applicable)
       $this->url = file_create_url($this->uri);
     }
-    
+
   }
 
   class MediaEntityController extends EntityAPIController {

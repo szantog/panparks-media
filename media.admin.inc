@@ -264,7 +264,7 @@ function media_multiple_delete_confirm($form, &$form_state, $files) {
   $form['files'] = array('#prefix' => '<ul>', '#suffix' => '</ul>', '#tree' => TRUE);
   // array_filter returns only elements with TRUE values
   foreach ($files as $fid => $value) {
-    $title = db_query('SELECT filename FROM {file} WHERE fid = :fid', array(':fid' => $fid))->fetchField();
+    $title = db_query('SELECT filename FROM {file_managed} WHERE fid = :fid', array(':fid' => $fid))->fetchField();
     $form['files'][$fid] = array(
       '#type' => 'hidden',
       '#value' => $fid,
