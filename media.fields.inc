@@ -264,7 +264,7 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     '#entity_type' => $instance['entity_type'],
     '#value_callback' => 'media_field_widget_value',
   );
-  
+
   // This seems like a roayl hack.  What's a better way to do this?
   $settings = array('media' => array('fields' => array('edit-' . str_replace('_', '-', $instance['field_name']) => $element['#media_options'])));
   // hmm... Might need to think about this.
@@ -336,7 +336,7 @@ function media_field_validate($obj_type, $object, $field, $instance, $langcode, 
       return TRUE;
       //@TODO: make support for submiting with just a URI here?
     }
-    $result = db_select('file', 'f')
+    $result = db_select('file_managed', 'f')
       ->fields('f')
       ->condition('fid', $item['fid'])
       ->condition('type', $allowed_types, 'IN')
@@ -356,11 +356,11 @@ function media_field_widget_value($element, $input, $form_state) {
   if (!is_array($return)) {
     $return = array();
   }
-  
+
   if (isset($return['data'])) {
     $return['data'] = serialize($return['data']);
   }
-  
+
   $return += array(
     'fid' => 0,
     'title' => '',

@@ -135,7 +135,7 @@ function media_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'media.browser.inc',
   );
-  
+
   $items['media/browser/library'] = array(
     'title' => 'Media browser library',
     'description' => 'Media Browser for picking media and uploading new media',
@@ -319,7 +319,7 @@ function media_image_default_styles() {
  */
 function media_file_insert(&$file) {
   $file->type = media_get_type($file);
-  drupal_write_record('file', $file, array('fid'));
+  drupal_write_record('file_managed', $file, array('fid'));
   media_save_attached_file($file);
 }
 
@@ -572,7 +572,7 @@ function media_library() {
       array('system', 'ui.dialog'),
     ),
   );
-  
+
   foreach ($libraries as &$library) {
     $library += $common;
   }
@@ -689,7 +689,7 @@ function media_parse_to_file($url) {
 
   if (isset($uri)) {
     // Attempt to load an existing file from the unique URI.
-    $select = db_select('file', 'f')
+    $select = db_select('file_managed', 'f')
     ->extend('PagerDefault')
     ->fields('f', array('fid'))
     ->condition('uri', $uri);

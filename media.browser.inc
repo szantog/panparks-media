@@ -312,7 +312,7 @@ function media_browser_testbed($form) {
     '#type' => 'textarea',
     '#title' => 'Result',
   );
-  
+
 
   $js = <<<EOF
     Drupal.behaviors.mediaTest = {
@@ -329,7 +329,7 @@ function media_browser_testbed($form) {
       jQuery('.form-item-options').append('<label for="recent_options">Recent</a>');
       jQuery('.form-item-options').append(recentSelectBox);
       jQuery('.form-item-options').append(jQuery('<a href="#">Reset</a>').click(function() {alert('reset'); jQuery.cookie("recentOptions", null); window.location.reload(); }));
-      
+
       jQuery.each(recentOptions, function (idx, val) {
         recentSelectBox.append(jQuery('<option></option>').val(val).html(val));
       });
@@ -350,7 +350,7 @@ function media_browser_testbed($form) {
         return false;
       });
     },
-    
+
     mediaSelected: function(selectedMedia) {
       var result = JSON.stringify(selectedMedia);
         jQuery('#edit-result').val(result);
@@ -358,8 +358,7 @@ function media_browser_testbed($form) {
   }
 
 EOF;
-  
+
   drupal_add_js($js, array('type' => 'inline'));
   return $form;
-  
 }
