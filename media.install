@@ -318,7 +318,7 @@ function media_update_7004() {
 }
 
 /**
- * Removed /media from the menu.
+ * Added the entity module
  */
 function media_update_7005() {
   // This is a new dependency and must be enabled as soon as the new code is pushed.
@@ -329,7 +329,8 @@ function media_update_7005() {
  * HEAD changed the 'file' table to 'file_managed'.
  */
 function media_update_7006() {
-  db_add_field('file_managed', 'type', _media_type_field_spec());
-  db_add_index('file_managed', 'file_type', array('type'));
-  drupal_flush_all_caches();
+  // In case the user has used the head2head upgrade.
+  if (!db_table_exists('file') && !db_table_exists('file_managed')) {
+    db_rename_table('file', 'file_managed');
+  }
 }
