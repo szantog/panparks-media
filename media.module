@@ -317,7 +317,7 @@ function media_image_default_styles() {
 /**
  * Implement hook_file_insert().
  */
-function media_file_insert(&$file) {
+function media_file_insert($file) {
   $file->type = media_get_type($file);
   drupal_write_record('file_managed', $file, array('fid'));
   media_save_attached_file($file);
@@ -326,7 +326,7 @@ function media_file_insert(&$file) {
 /**
  * Implement hook_file_update().
  */
-function media_file_update(&$file) {
+function media_file_update($file) {
   $file->type = media_get_type($file);
   media_save_attached_file($file);
 }
