@@ -51,7 +51,7 @@ function media_page_edit($media) {
  * Form callback for adding media via an upload form.
  * @todo: should use the AJAX uploader
  */
-function media_add_upload(&$form, &$form_state, $redirect = NULL) {
+function media_add_upload($form, &$form_state, $redirect = NULL) {
 
   $validators = array(
    'file_validate_extensions' => array(media_variable_get('file_extensions')),
@@ -90,7 +90,7 @@ function media_add_upload(&$form, &$form_state, $redirect = NULL) {
     '#type' => 'submit',
     '#value' => t('Submit'),
   );
-  
+
   return $form;
 }
 
@@ -116,7 +116,7 @@ function media_add_upload_submit($form, &$form_state) {
   $scheme = variable_get('file_default_scheme', 'public') . '://';
   $file = $form_state['values']['upload'];
   _media_save_file_permenently($file);
-  
+
   $destination = file_stream_wrapper_uri_normalize($scheme . $file->filename);
 
   $defaults = array (
@@ -309,8 +309,8 @@ function media_add_remote($form, &$form_state) {
     '#title' => 'Paste URL or embed code',
   );
 
-  
-  $providers = ''; 
+
+  $providers = '';
   $providers .= '<img style="height:50px; margin:20px" src="http://www.macuser.com/2008/10/09/top_youtube_logo_31_Dec_06.jpg">';
   $providers .= '<img style="height:50px; margin:20px" src="http://jasonhilldesign.com/FlikrLogo.jpg">';
   $form['sources']['paste']['code'] = array(
@@ -325,7 +325,7 @@ function media_add_remote($form, &$form_state) {
     '#description' => t(''),
     '#attributes' => array('style' => 'height: 300px; overflow:auto'),
   );
-  
+
   $form['sources']['flikr'] = array(
     '#type' => 'fieldset',
     '#title' => 'Flikr',
