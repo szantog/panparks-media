@@ -26,6 +26,9 @@ function media_browser($selected = NULL) {
       $selected = array($get['fid']);
     }
     $selectedMedia = entity_load('media', $selected);
+    foreach ($selectedMedia as &$media) {
+      $media->preview = drupal_render(media_get_thumbnail_preview($media));
+    }
     $setting = array('media' => array('selectedMedia' => array_values($selectedMedia)));
     drupal_add_js($setting, 'setting');
     return $output;
