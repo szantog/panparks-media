@@ -146,8 +146,18 @@ function media_field_prepare_view($obj_type, $objects, $field, $instances, $lang
 /**
  * Implement hook_field_formatter_view
  */
-function media_field_formatter_view($obj_type, $object, $field, $instance, $langcode, $items, $display) {
+function media_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
+
+  // An array of media items to pass into entity rendering functions.
+  $media_items = array();
+
+  foreach ($items as $delta => $item) {
+    $media_items[$item->fid] = $item;
+  }
+
+  field_attach_prepare_view('media', $media_items, $display['type']);
+  entity_prepare_view('media', $media_items);
 
   foreach ($items as $delta => $item) {
     // @TODO:
@@ -366,10 +376,6 @@ function media_field_widget_value($element, $input, $form_state) {
     'title' => '',
     'data' => NULL,
   );
-
-//
-//  dpr($return);
-//  die();
 
   return $return;
 }

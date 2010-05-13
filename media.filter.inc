@@ -234,6 +234,9 @@ function _media_generate_tagMap($text) {
 }
 
 /**
+ * Used when embedding media.  Allows the user to pick a format for their media file.
+ *
+ * Can also have additional params depending on the media type.
  *
  * @param unknown_type $form
  * @param unknown_type $media
@@ -241,13 +244,14 @@ function _media_generate_tagMap($text) {
  */
 function media_format_form($form, $form_state, $media) {
   // This will vary depending on the media type.
-
   $form = array();
   $form['#media'] = $media;
+
   $instance_info = field_info_instance('media', 'file', $media->type);
   $entity_info = entity_get_info('media');
 
   $options = array();
+
   foreach ($entity_info['view modes'] as $key => $title) {
     $format = $instance_info['display'][$key];
     //If the format is set to hidden, don't offer it
@@ -289,7 +293,7 @@ function media_format_form($form, $form_state, $media) {
     '#suffix' => '</h1>',
     '#markup' => t('Embedding %filename', array('%filename' => $media->filename)),
   );
-
+  
   $preview = field_view_field('media', $media, 'file', 'media_preview');
   $preview['#theme_wrappers'][] = 'media_thumbnail';
 

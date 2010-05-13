@@ -825,3 +825,26 @@ function _media_save_file_permenently(&$file) {
     file_save($file);
   }
 }
+
+/**
+ * Returns a renderable array with the necessary classes to support a media
+ * thumbnail.  Also provides default fallback images if no image is available.
+ *
+ * @param $media
+ */
+function media_get_thumbnail_preview($media) {
+  $preview = field_view_field('media', $media, 'file', 'media_preview');
+  $preview['#show_names'] = TRUE;
+  $preview['#theme_wrappers'][] = 'media_thumbnail';
+  return $preview;
+}
+
+/**
+ * Implement hook_file_references().
+ */
+function media_file_references($file) {
+  // I guess this is what we want...
+  if ($file->status == FILE_STATUS_PERMANENT) {
+    return array('media' => 1);
+  }
+}

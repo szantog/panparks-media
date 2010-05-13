@@ -11,7 +11,6 @@
  */
 function media_file_view($media) {
   drupal_set_title($media->filename);
-
   // @TODO maybe something more elegant... ?
   field_attach_prepare_view('media', array($media->fid => $media), 'media_original');
   $build['media'][$media->fid] = field_attach_view('media', $media, 'media_original');
@@ -262,6 +261,7 @@ function media_add_from_url_submit($form, &$form_state) {
 function media_edit($form, $form_state, $media) {
   drupal_set_title($media->filename);
   field_attach_form('media', $media, $form, $form_state);
+  unset($form['file']);
 
 //   $form['#attached'] = media_attached_files();
 
