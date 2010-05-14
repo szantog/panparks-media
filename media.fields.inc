@@ -312,29 +312,33 @@ function media_generic_widget_process($element, &$form_state, $form) {
     '#suffix' => '</div>',
   );
 
-  $element['more_fields_wrapper'] = array(
-    '#type' => 'fieldset',
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#title' => t('Meta-data'),
-  );
-
-  $element['more_fields_wrapper']['edit'] = array(
-    '#type' => 'markup',
-    '#markup' => l(t('Edit'), 'media/' . $fid . '/edit', array('query' => array('render' => 'media-popup'), 'attributes' => array('class'=> array('media-edit-link')))),
-  );
-
-  // Oh god, there must be a better way to add a wrapper.
-  $parents = $element['#parents'];
-  array_push($parents, 'more_fields');
-
-  if ($file) {
-    $media_wo_file = $file;
-    $media_wo_file->file = array(); // heh, let's see how this works.
-    field_attach_prepare_view('media', array($file->fid => $media_wo_file));
-    entity_prepare_view('media', array($file->fid => $media_wo_file));
-    $element['more_fields_wrapper']['more_fields'] = field_attach_view('media', $media_wo_file, 'media_preview');
-  }
+  /**
+   * This section handles fields on media when media is added as a field.
+   * It is pretty unpolished, so hiding it for now.
+   */
+//  $element['more_fields_wrapper'] = array(
+//    '#type' => 'fieldset',
+//    '#collapsible' => TRUE,
+//    '#collapsed' => TRUE,
+//    '#title' => t('Meta-data'),
+//  );
+//
+//  $element['more_fields_wrapper']['edit'] = array(
+//    '#type' => 'markup',
+//    '#markup' => l(t('Edit'), 'media/' . $fid . '/edit', array('query' => array('render' => 'media-popup'), 'attributes' => array('class'=> array('media-edit-link')))),
+//  );
+//
+//  // Oh god, there must be a better way to add a wrapper.
+//  $parents = $element['#parents'];
+//  array_push($parents, 'more_fields');
+//
+//  if ($file) {
+//    $media_wo_file = $file;
+//    $media_wo_file->file = array(); // heh, let's see how this works.
+//    field_attach_prepare_view('media', array($file->fid => $media_wo_file));
+//    entity_prepare_view('media', array($file->fid => $media_wo_file));
+//    $element['more_fields_wrapper']['more_fields'] = field_attach_view('media', $media_wo_file, 'media_preview');
+//  }
 
   //@HACK: @todo: this is so I can find it in media.js without putting every field in a settings variable.
   // If I make it hidden (which it should be) it will go to the top of the form... I know this sucks.
