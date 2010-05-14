@@ -187,6 +187,82 @@ Drupal.media.popups.mediaStyleSelector.getDefaults = function() {
 }
 
 
+
+/**
+ * Style chooser Popup. Creates a dialog for a user to choose a media style.
+ *
+ * @param mediaFile
+ *          The mediaFile you are requesting this formatting form for.
+ *          @todo: should this be fid?  That's actually all we need now.
+ *
+ * @param Function
+ *          onSubmit Function to be called when the user chooses a media
+ *          style. Takes one parameter (Object formattedMedia).
+ *
+ * @param Object
+ *          options Options for the mediaStyleChooser dialog.
+ */
+Drupal.media.popups.mediaFieldEditor = function(fid, onSelect, options) {
+  var defaults = Drupal.media.popups.mediaFieldEditor.getDefaults();
+  // @todo: remove this awful hack :(
+  defaults.src = defaults.src.replace('-media_id-', fid);
+  options = $.extend({}, defaults, options);
+  // Create it as a modal window.
+  var mediaIframe = Drupal.media.popups.getPopupIframe(options.src, 'mediaFieldEditor');
+  // Attach the onLoad event
+  mediaIframe.bind('load', options, options.onLoad);
+
+  /**
+   * Set up the button text
+   */
+  var ok = 'OK';
+  var cancel = 'Cancel';
+  var notSelected = 'Very sorry, there was an unknown error embedding media.';
+
+  if (Drupal && Drupal.t) {
+    ok = Drupal.t(ok);
+    cancel = Drupal.t(cancel);
+    notSelected = Drupal.t(notSelected);
+  }
+
+  // @todo: let some options come through here. Currently can't be changed.
+  var dialogOptions = Drupal.media.popups.getDialogOptions();
+
+  dialogOptions.buttons[ok] = function () {
+    alert('hell yeah');
+    return "poo";
+
+    var formattedMedia = this.contentWindow.Drupal.media.formatForm.getFormattedMedia();
+    if (!formattedMedia) {
+      alert(notSelected);
+      return;
+    }
+    onSelect(formattedMedia);
+    $(this).dialog("close");
+  };
+
+  dialogOptions.buttons[cancel] = function () {
+    $(this).dialog("close");
+  };
+
+  Drupal.media.popups.setDialogPadding(mediaIframe.dialog(dialogOptions));
+  // Remove the title bar.
+  mediaIframe.parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
+  return mediaIframe;
+}
+
+Drupal.media.popups.mediaFieldEditor.mediaBrowserOnLoad = function(e) {
+}
+
+Drupal.media.popups.mediaFieldEditor.getDefaults = function() {
+  return {
+    // @todo: do this for real
+    src: '/media/-media_id-/edit?render=media-popup',
+    onLoad: Drupal.media.popups.mediaFieldEditor.mediaBrowserOnLoad
+  };
+}
+
+
 /**
  * Generic functions to both the media-browser and style selector
  */

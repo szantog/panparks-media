@@ -5,10 +5,10 @@
   
 Drupal.behaviors.mediaBrowserFields ={
   attach: function (context, settings) {
-    // For each media field
+    // For each media field on the page.
     $('.field-type-media', context).each(function () {
       var options = Drupal.settings.media.fields[this.id];
-      // For each widget
+      // For each widget (in case of multi-entry)
       $('.media-widget', this).once('mediaBrowserLaunch', function () {
 
         //options = Drupal.settings.media.fields[this.id];
@@ -21,7 +21,7 @@ Drupal.behaviors.mediaBrowserFields ={
           var debugField = $('.file_info', this);
         }
 
-        // When someone clicks the link to pick media:
+        // When someone clicks the link to pick media (or clicks on an existing thumbnail)
         $('.launcher', this).bind('click', function () {
           // Launch the browser, providing the following callback function
           // @TODO: This should not be an anomyous function.
@@ -41,6 +41,23 @@ Drupal.behaviors.mediaBrowserFields ={
           }, options);
           return false;
         });
+
+        $('.media-edit-link', this).bind('click', function() {
+          var fid = fidField.val()
+          if (fid) {
+            Drupal.media.popups.mediaFieldEditor(fid, function(r) { alert(r);});
+          }
+          return false;
+          
+          $('<iframe></iframe>')
+            .attr('src', $(this).attr('href'))
+            .dialog({
+              height:500,
+              width:500
+            });
+          return false;
+        });
+
       });
     });
   }

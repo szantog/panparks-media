@@ -197,17 +197,32 @@ function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
  *  @see media_parse_to_uri().
  */
 function media_add_from_url_validate($form, &$form_state) {
+  if (!file_uri_scheme($form_state['values']['url']) || !file_uri_target($form_state['values']['url'])) {
+    form_set_error('url', t('Invalid URL'));
+    return;
+  }
+
+  if (!url_is_external($form_state['values']['url'])) {
+    form_set_error('url', t('Only extenal urls are supported.'));
+  }
+
   // We have a dry-run of the parsing process to allow specific streams to
   // catch an error, for instance to inform us that a video is no longer
   // available or that a specific URL structure is not supported.
   try {
+    // Returns the URI, or NULL on failure.
     $uri = media_parse_to_uri($form_state['values']['url']);
   }
   catch (Exception $e) {
     // Pass the error back to the user.
     form_set_error('url', $e->getMessage());
+    return;
   }
 
+  if (empty($uri)) {
+    // @todo - at the moment we don't actual do any real validation.
+    // form_set_error('url', t('Invalid URL'));
+  }
   // @TODO: Validate that if we have no $uri that this is a valid file to
   // save. For instance, we may only be interested in images, and it would
   // be helpful to let the user know they passed the HTML page containing
