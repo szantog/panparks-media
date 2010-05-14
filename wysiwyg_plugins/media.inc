@@ -23,6 +23,8 @@ function media_media_plugin() {
     'icon title' => t(media_variable_get('wysiwyg_icon_title')),
     'js path' => drupal_get_path('module','media').'/javascript/',
     'js file' => 'wysiwyg-media.js',
+    'css file' => NULL,
+    'css path' => NULL,
     'settings' => array(),
    );
 
