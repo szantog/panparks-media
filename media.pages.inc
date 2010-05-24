@@ -100,10 +100,13 @@ function media_add_upload_validate($form, &$form_state) {
   // Save the file as a temporary file.
   $file = file_save_upload('upload', $form['#validators']);
 
-  if ($file === FALSE) {
+  if ($file === NULL) {
+    form_set_error('upload', t("No file appears to have been selected."));
+  }
+  elseif ($file === FALSE) {
     form_set_error('upload', t("Failed to upload the file."));
   }
-  elseif ($file !== NULL) {
+  else {
     $form_state['values']['upload'] = $file;
   }
 }

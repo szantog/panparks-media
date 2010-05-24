@@ -99,7 +99,9 @@ function media_type_save(&$type) {
  * This function will assign a format to each view mode. For instance, images
  * would want to use a thumbnail format for files when in the "preview"
  * view_mode.  The called would pass in 'image' for $name and
- * array('preview' => 'styles_file_square_thumbnail') to $view_modes_to_formatters.
+ * array('media_preview' => 'styles_file_square_thumbnail') to $view_modes_to_formatters.
+ *
+ * This will also set the "custom_settings" bit to make sure it actually takes effect.
  *
  * @param string $name
  * @param array $view_modes_to_formatters
@@ -108,14 +110,18 @@ function media_type_save(&$type) {
  */
 function media_type_configure_formatters($name, $view_modes_to_formatters) {
   $instance = field_info_instance('media', 'file', $name);
+  $bundle_settings = field_bundle_settings('media', $name);
+
   if (!$instance) {
     throw new Exception('Unable to set formatter preferences for '. $name);
   }
   foreach ($instance['display'] as $view_mode => $display) {
     if (isset($view_modes_to_formatters[$view_mode])) {
+      $bundle_settings['view_modes'][$view_mode]['custom_settings'] = 1;
       $instance['display'][$view_mode]['type'] = $view_modes_to_formatters[$view_mode];
     }
   }
+  field_bundle_settings('media', $name, $bundle_settings);
   field_update_instance($instance);
 }
 
