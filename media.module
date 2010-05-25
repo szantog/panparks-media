@@ -338,7 +338,6 @@ function media_file_update($file) {
  * in the URL.
  */
 function media_page_alter(&$page) {
-  media_type_configure_formatters('image', array('media_preview' => 'styles_file_square_thumbnail'));
   if (isset($_GET['render']) && $_GET['render'] == 'media-popup') {
     $page['#theme'] = 'media_dialog_page';
     foreach (element_children($page) as $key) {
