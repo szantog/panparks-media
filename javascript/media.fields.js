@@ -1,9 +1,11 @@
+// $Id$
+
 (function ($) {
+
 /**
  * Loads media browsers and callbacks, specifically for media as a field.
  */
-  
-Drupal.behaviors.mediaBrowserFields ={
+Drupal.behaviors.mediaBrowserFields = {
   attach: function (context, settings) {
     // For each media field on the page.
     $('.field-type-media', context).each(function () {
@@ -14,7 +16,7 @@ Drupal.behaviors.mediaBrowserFields ={
         //options = Drupal.settings.media.fields[this.id];
         var fidField = $('.fid', this);
         var previewField = $('.preview', this);
-        
+
         if (Drupal.settings.media.debug) {
           // @TODO: Remove this, here for debugging purposes.
           fidField.show();
@@ -42,13 +44,13 @@ Drupal.behaviors.mediaBrowserFields ={
           return false;
         });
 
-        $('.media-edit-link', this).bind('click', function() {
-          var fid = fidField.val()
+        $('.media-edit-link', this).bind('click', function () {
+          var fid = fidField.val();
           if (fid) {
-            Drupal.media.popups.mediaFieldEditor(fid, function(r) { alert(r);});
+            Drupal.media.popups.mediaFieldEditor(fid, function (r) { alert(r); });
           }
           return false;
-          
+
           $('<iframe></iframe>')
             .attr('src', $(this).attr('href'))
             .dialog({
@@ -62,4 +64,5 @@ Drupal.behaviors.mediaBrowserFields ={
     });
   }
 };
+
 })(jQuery);

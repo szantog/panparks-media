@@ -47,7 +47,7 @@ Drupal.behaviors.mediaAdmin = {
     });
     var fieldset = $('#edit-options');
     // Only show update options if anything gets checked.
-    $('input[type=checkbox]').bind('change.media', function() {
+    $('input[type=checkbox]').bind('change.media', function () {
       if (!$('input[type=checkbox]:checked').size()) {
         fieldset.slideUp('fast');
       }

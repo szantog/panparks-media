@@ -16,7 +16,7 @@ Drupal.behaviors.mediaTypesAdmin = {
     if ($('.form-item-match-type input:checked').val() != '0') {
       $('.form-item-match-type-other').hide();
     }
-    $('.form-item-match-type input').change(function() {
+    $('.form-item-match-type input').change(function () {
       if ($(this).val() == '0') {
         $('.form-item-match-type-other').slideDown('fast');
       }

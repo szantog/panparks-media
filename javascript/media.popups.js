@@ -1,3 +1,5 @@
+// $Id$
+
 /**
  * @file: Popup dialog interfaces for the media project.
  *
@@ -11,7 +13,6 @@
  */
 
 (function ($) {
-
 namespace('Drupal.media.popups');
 
 /**
@@ -38,7 +39,7 @@ namespace('Drupal.media.popups');
  *          modal dialog.
  *          @see Drupal.media.popups.mediaBrowser.getDefaults();
  */
-Drupal.media.popups.mediaBrowser = function(onSelect, globalOptions, pluginOptions, widgetOptions) {
+Drupal.media.popups.mediaBrowser = function (onSelect, globalOptions, pluginOptions, widgetOptions) {
   var options = Drupal.media.popups.mediaBrowser.getDefaults();
   options.global = $.extend({}, options.global, globalOptions);
   options.plugins = pluginOptions;
@@ -49,7 +50,7 @@ Drupal.media.popups.mediaBrowser = function(onSelect, globalOptions, pluginOptio
   // Params to send along to the iframe.  WIP.
   var params = {};
   $.extend(params, options.global);
-  params.plugins = options.plugins
+  params.plugins = options.plugins;
 
   browserSrc += '&' + $.param(params);
   var mediaIframe = Drupal.media.popups.getPopupIframe(browserSrc, 'mediaBrowser');
@@ -101,7 +102,7 @@ Drupal.media.popups.mediaBrowser.mediaBrowserOnLoad = function (e) {
   }
 };
 
-Drupal.media.popups.mediaBrowser.getDefaults = function() {
+Drupal.media.popups.mediaBrowser.getDefaults = function () {
   return {
     global: {
       types: [], // Types to allow, defaults to all.
@@ -113,7 +114,7 @@ Drupal.media.popups.mediaBrowser.getDefaults = function() {
     },
     dialog: Drupal.media.popups.getDialogOptions()
   };
-}
+};
 
 /**
  * Style chooser Popup. Creates a dialog for a user to choose a media style.
@@ -129,7 +130,7 @@ Drupal.media.popups.mediaBrowser.getDefaults = function() {
  * @param Object
  *          options Options for the mediaStyleChooser dialog.
  */
-Drupal.media.popups.mediaStyleSelector = function(mediaFile, onSelect, options) {
+Drupal.media.popups.mediaStyleSelector = function (mediaFile, onSelect, options) {
   var defaults = Drupal.media.popups.mediaStyleSelector.getDefaults();
   // @todo: remove this awful hack :(
   defaults.src = defaults.src.replace('-media_id-', mediaFile.fid);
@@ -174,17 +175,17 @@ Drupal.media.popups.mediaStyleSelector = function(mediaFile, onSelect, options) 
   // Remove the title bar.
   mediaIframe.parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
   return mediaIframe;
-}
+};
 
-Drupal.media.popups.mediaStyleSelector.mediaBrowserOnLoad = function(e) {
-}
+Drupal.media.popups.mediaStyleSelector.mediaBrowserOnLoad = function (e) {
+};
 
-Drupal.media.popups.mediaStyleSelector.getDefaults = function() {
+Drupal.media.popups.mediaStyleSelector.getDefaults = function () {
   return {
     src: Drupal.settings.media.styleSelectorUrl,
     onLoad: Drupal.media.popups.mediaStyleSelector.mediaBrowserOnLoad
   };
-}
+};
 
 
 
@@ -202,7 +203,7 @@ Drupal.media.popups.mediaStyleSelector.getDefaults = function() {
  * @param Object
  *          options Options for the mediaStyleChooser dialog.
  */
-Drupal.media.popups.mediaFieldEditor = function(fid, onSelect, options) {
+Drupal.media.popups.mediaFieldEditor = function (fid, onSelect, options) {
   var defaults = Drupal.media.popups.mediaFieldEditor.getDefaults();
   // @todo: remove this awful hack :(
   defaults.src = defaults.src.replace('-media_id-', fid);
@@ -249,18 +250,19 @@ Drupal.media.popups.mediaFieldEditor = function(fid, onSelect, options) {
   // Remove the title bar.
   mediaIframe.parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
   return mediaIframe;
-}
+};
 
-Drupal.media.popups.mediaFieldEditor.mediaBrowserOnLoad = function(e) {
-}
+Drupal.media.popups.mediaFieldEditor.mediaBrowserOnLoad = function (e) {
 
-Drupal.media.popups.mediaFieldEditor.getDefaults = function() {
+};
+
+Drupal.media.popups.mediaFieldEditor.getDefaults = function () {
   return {
     // @todo: do this for real
     src: '/media/-media_id-/edit?render=media-popup',
     onLoad: Drupal.media.popups.mediaFieldEditor.mediaBrowserOnLoad
   };
-}
+};
 
 
 /**
@@ -270,7 +272,7 @@ Drupal.media.popups.mediaFieldEditor.getDefaults = function() {
 /**
  * Returns the commonly used options for the dialog.
  */
-Drupal.media.popups.getDialogOptions = function() {
+Drupal.media.popups.getDialogOptions = function () {
   return {
     buttons: {},
     modal: true,
@@ -293,19 +295,19 @@ Drupal.media.popups.getDialogOptions = function() {
  * @param jQuery dialogElement
  *  The element which has .dialog() attached to it.
  */
-Drupal.media.popups.setDialogPadding = function(dialogElement) {
+Drupal.media.popups.setDialogPadding = function (dialogElement) {
   // @TODO: Perhaps remove this hardcoded reference
   var horizontalPadding = 30;
   var verticalPadding = 30;
 
-  dialogElement.width(dialogElement.dialog('option', 'width') - horizontalPadding)
+  dialogElement.width(dialogElement.dialog('option', 'width') - horizontalPadding);
   dialogElement.height(dialogElement.dialog('option', 'height') - verticalPadding);
 };
 
 /**
  * Get an iframe to serve as the dialog's contents. Common to both plugins.
  */
-Drupal.media.popups.getPopupIframe = function(src, id, options) {
+Drupal.media.popups.getPopupIframe = function (src, id, options) {
   var defaults = {width: '800px', scrolling: 'no'};
   var options = $.extend({}, defaults, options);
 
@@ -313,8 +315,7 @@ Drupal.media.popups.getPopupIframe = function(src, id, options) {
   .attr('src', src)
   .attr('width', options.width)
   .attr('id', id)
-  .attr('scrolling', options.scrolling)
+  .attr('scrolling', options.scrolling);
 };
 
-// end of closure
 })(jQuery);
