@@ -235,7 +235,7 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     'data' => NULL
   );
 
-  $permission = user_access('use media browser');
+  $permission = user_access('edit media');
   if (!$permission) {
     // @todo: show the default file upload field.
     // Maybe...
