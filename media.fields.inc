@@ -80,7 +80,7 @@ function media_field_formatter_prepare_view($obj_type, $objects, $field, $instan
 function media_field_widget_info() {
   return array(
     'media_generic' => array(
-      'label' => t('File (media)'),
+      'label' => t('Media file selector'),
       'field types' => array('media'),
       'settings' => array(
         'progress_indicator' => 'throbber',

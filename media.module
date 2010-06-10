@@ -190,8 +190,9 @@ function media_menu() {
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'media.pages.inc',
+     // Use the same setting as node module
+    'theme callback' => '_node_custom_theme',
   );
-
 
   $items['media/add/upload'] = array(
     'title' => 'Upload new file',
