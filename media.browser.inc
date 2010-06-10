@@ -35,9 +35,25 @@ function media_browser($selected = NULL) {
   }
 
   // Normal browser operation.
-  // See hook_media_browser_new_plugins
-  $plugins = module_invoke_all('media_browser_plugins', $params);
+  foreach (module_implements('media_browser_plugin_info') as $module) {
+    foreach(module_invoke($module, 'media_browser_plugin_info') as $key => $plugin_data) {
+      $plugins[$key] = $plugin_data;
+      $plugins[$key]['#module'] = $module;
+    }
+  }
+  
+  // Only the plugins in this array are loaded.
+  if (!empty($params['enabledPlugins'])) {
+    $plugins = array_intersect_key($plugins, array_fill_keys($params['enabledPlugins'], 1));
+  }
+  elseif (!empty($params['disabledPlugins'])) {
+    $plugins = array_diff_key($plugins, array_fill_keys($params['disabledPlugins'], 1));
+  }
 
+  foreach ($plugins as $key => &$plugin) {
+    $plugin += module_invoke($plugin['#module'], 'media_browser_plugin_view', $key, $params);
+  }
+  
   $tabs = array(); // List of tabs to render.
 
   $settings = array('media' => array('browser' => array()));
@@ -117,70 +133,82 @@ function media_browser_list() {
     $media->preview = drupal_render(media_get_thumbnail_preview($media));
   }
   drupal_json_output(array('media' => array_values($media_entities)));
-  die();
+  exit();
 
 }
 
-function media_media_browser_plugins($params) {
-  $plugins = array();
-  $path = drupal_get_path('module', 'media');
-
-  $types = isset($params['types']) ? $params['types'] : array();
-  include_once($path . '/media.admin.inc');
-  include_once($path . '/media.pages.inc');
-
-  $redirect = array('media/browser', array('query' => array('render' => 'media-popup')));
-
-  $upload_form = drupal_get_form('media_add_upload', $redirect);
-  $from_url_form = drupal_get_form('media_add_from_url', $redirect);
-  // These changes to #type = tabpage probably
-  // Add the Upload tab.
-  $plugins['upload'] = array(
-    '#title' => t('Upload'),
-    '#markup' => drupal_render($upload_form),
-    '#attached' => array(
-      //'js' => array($path . '/javascript/plugins/media.upload.js'),
-    ),
-  );
-
-  // Add the 'From URL' tab.
-  $plugins['fromurl'] = array(
-    '#title' => t('From URL'),
-    '#markup' => drupal_render($from_url_form),
-    '#attached' => array(
-      //'js' => array($path . '/javascript/plugins/media.fromurl.js'),
-    ),
-  );
-
-  // Add the default 'Library' tab.
-  $plugins['library'] = array(
-    '#title' => t('Library'),
-    '#attached' => array(
-      'js' => array(
-        $path . '/javascript/plugins/media.library.js',
-      ),
-      'css' => array(
-        $path . '/javascript/plugins/media.library.css',
-      ),
-    ),
-    '#settings' => array(
-      'viewMode' => 'thumbnails',
-      'getMediaUrl' => url('media/browser/list'),
-      'types' => $types,
-    // We should probably change this to load dynamically when requested
-    // via the JS file.
-    ),
-    '#markup' => '<div id="container"><div id="scrollbox"><ul id="media-browser-library-list" class="media-list media-list-thumbnails"></ul></div><div id="status"></div></div>',
-  );
-
-//  $plugins['remote'] = array(
-//    '#title' => 'Internet',
-//    '#markup' => drupal_render(drupal_get_form('media_add_remote')),
-//  );
-
+/**
+ * Implements hook_media_browser_plugin_info().
+ */
+function media_media_browser_plugin_info() {
+  $plugins = array(
+    'upload' => array(
+     ),
+    'fromurl' => array(
+     ),
+    'library' => array(
+     ),
+   );
   return $plugins;
 }
+/**
+ * Implementaion of hook_media_browser_plugin_view().
+ */
+function media_media_browser_plugin_view($plugin_name, $params) {
+  $path = drupal_get_path('module', 'media');
+  
+  module_load_include('inc', 'media', 'media.admin');
+  module_load_include('inc', 'media', 'media.pages');
 
+  $types = isset($params['types']) ? $params['types'] : array();
+  $redirect = array('media/browser', array('query' => array('render' => 'media-popup')));
+  switch ($plugin_name) {
+    case 'upload':
+      $upload_form = drupal_get_form('media_add_upload', $redirect);
+      return array(
+        '#title' => t('Upload'),
+        '#markup' => drupal_render($upload_form),
+        '#attached' => array(
+          //'js' => array($path . '/javascript/plugins/media.upload.js'),
+        ),
+      );
+      break;
+    case 'fromurl':
+      $from_url_form = drupal_get_form('media_add_from_url', $redirect);
+      return array(
+        '#title' => t('From URL'),
+        '#markup' => drupal_render($from_url_form),
+        '#attached' => array(
+          //'js' => array($path . '/javascript/plugins/media.fromurl.js'),
+        ),
+      );
+      break;
+    case 'library':
+      return array(
+        '#title' => t('Library'),
+        '#attached' => array(
+          'js' => array(
+            $path . '/javascript/plugins/media.library.js',
+          ),
+          'css' => array(
+            //@todo: should move this.
+            $path . '/javascript/plugins/media.library.css',
+          ),
+        ),
+        '#settings' => array(
+          'viewMode' => 'thumbnails',
+          'getMediaUrl' => url('media/browser/list'),
+          'types' => $types,
+        // We should probably change this to load dynamically when requested
+        // via the JS file.
+        ),
+        '#markup' => '<div id="container"><div id="scrollbox"><ul id="media-browser-library-list" class="media-list-thumbnails"></ul></div><div id="status"></div></div>',
+      );
+    break;
+  }
+  
+  return array();
+ }
 /**
  * @todo: Re-integrate the stream based filters, etc
  * Currently this function is not being used.  See media_browser_list
@@ -249,7 +277,6 @@ function media_browser_fid_list($options = array()) {
 function _media_recursive_check_plain(&$value, $key) {
   $value = check_plain($value);
 }
-
 
 /**
  * Prepares the page to be able to launch the media browser.

@@ -11,6 +11,10 @@
  */
 function media_admin($form, $form_state) {
   global $user;
+
+  require_once dirname(__FILE__) . '/media.browser.inc';
+  media_include_browser_js();
+  
   $types = media_display_types();
 
   if (arg(3)) {

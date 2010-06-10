@@ -15,6 +15,29 @@
  */
 Drupal.behaviors.mediaAdmin = {
   attach: function (context) {
+
+    // Configure the "Add file" link to fire the media browser popup.
+    $('ul.action-links li', context).remove();
+    var $launcherLink = $('<a class="media-launcher" href="#"></a>').html('Add file');
+    $launcherLink.bind('click', function () {
+      // This option format needs *serious* work.
+      // Not even bothering documenting it because it needs to be thrown.
+      // See media.browser.js and media.browser.inc - media_browser()
+      // For how it gets passed.
+      var options = {
+        params: {
+          disabledPlugins: ['library']
+        }
+      };
+      Drupal.media.popups.mediaBrowser(function (mediaFiles) {
+        window.location.reload();
+        return false;
+      }, options);
+    });
+
+    
+    $('ul.action-links', context).append($('<li></li>').append($launcherLink));
+
     // Implements 'select all/none'.
     $('<div class="media-thumbnails-select" />')
       .append('<strong>' + Drupal.t('Select') + ':</strong> <a href="#">' + Drupal.t('all') + '</a>, <a href="#">' + Drupal.t('none') + '</a>')
@@ -59,7 +82,6 @@ Drupal.behaviors.mediaAdmin = {
       }
     });
     fieldset.hide();
-    
   }
 };
 

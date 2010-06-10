@@ -296,7 +296,7 @@ function media_theme() {
     // Dialog page.
     'media_dialog_page' => array(
       'render element' => 'page',
-      'template' => 'media-dialog-page',
+      'template' => 'theme/media-dialog-page',
       'file' => 'media.theme.inc',
     ),
 

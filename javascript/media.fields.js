@@ -9,6 +9,8 @@ Drupal.behaviors.mediaBrowserFields = {
   attach: function (context, settings) {
     // For each media field on the page.
     $('.field-type-media', context).each(function () {
+
+      // Options set from media.fields.inc for the types, etc to show in the browser.
       var options = Drupal.settings.media.fields[this.id];
       // For each widget (in case of multi-entry)
       $('.media-widget', this).once('mediaBrowserLaunch', function () {
