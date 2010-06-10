@@ -14,10 +14,17 @@
 /* INCLUDES                                  */
 /* ***************************************** */
 
-include_once('media.variables.inc'); // A registry of variable_get defaults.
-include_once('media.types.inc'); // Creating media types, entity definition
-include_once('media.fields.inc'); // Code relating to using media as a field
-include_once('media.filter.inc'); // Code related to [[inline tags]] and wysiwyg
+// A registry of variable_get defaults.
+require_once ( dirname(__FILE__) . '/includes/media.variables.inc');
+
+// Creating media types, entity definition
+require_once ( dirname(__FILE__) . '/media.types.inc');
+
+// Code relating to using media as a field
+require_once ( dirname(__FILE__) . '/media.fields.inc');
+
+ // Functions for working with [[inline tags]] and wysiwyg editors
+require_once ( dirname(__FILE__) . '/media.filter.inc');
 
 /* ***************************************** */
 /* Hook Implementations                      */
