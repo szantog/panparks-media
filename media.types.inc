@@ -3,54 +3,11 @@
 
 /**
  *  @file
- *  Define Media entity types, also provides support for the base types.
+ *  Helper functions related to media types.  CRUD for saving their settings mainly.
  *
- *  See media.install for a list of the base types.
- *  @TODO: Make media types have their own table.
+ *  Also contains the media entity class definition.
+ *  @see media.install for a list of the base types.
  */
-
-/**
- * Implement hook_entity_info().
- *
- */
-function media_entity_info() {
-  $view_modes = media_field_view_modes('media');
-  $return = array(
-    'media' => array(
-      'label' => t('Media'),
-  	  'entity class' => 'Media',
-      'controller class' => 'MediaEntityController',
-      'base table' => 'file_managed',
-      'fieldable' => TRUE,
-      'view modes' => $view_modes,
-      'entity keys' => array(
-        'id' => 'fid',
-        'bundle' => 'type', // @TODO: Why 'type' here...
-      ),
-      'bundle keys' => array(
-        'bundle' => 'name', // @TODO: But 'name' here?
-      ),
-      'bundles' => array(),
-    ),
-  );
-
-  $media_types = media_type_get_types();
-
-  foreach ($media_types as $type => $bundle_info) {
-    $return['media']['bundles'][$type] = (array)$bundle_info;
-    $return['media']['bundles'][$type]['admin'] = array(
-      'label' => $bundle_info->label,
-      'path' => 'admin/structure/media/manage/%media_type',
-      'real path' => 'admin/structure/media/manage/' . $type,
-      'bundle argument' => 4,
-      // @TODO: Add an 'administer media types' perm?
-      'access arguments' => array('administer site configuration'),
-    );
-  }
-
-  // @TODO: Do we need to define search-related view modes for attached fields?
-  return $return;
-}
 
 /**
  *  Update an existing media type or create a new one.
