@@ -402,7 +402,7 @@ function media_admin_type_manage_form($form, &$form_state, $media_type) {
       '#title' => t('Other match type value'),
       '#default_value' => $other_default_value,
       '#attached' => array(
-        'js' => array(drupal_get_path('module', 'media') . '/javascript/media-types-admin.js'),
+        'js' => array(drupal_get_path('module', 'media') . '/javascript/media-admin.js'),
       ),
     );
 
