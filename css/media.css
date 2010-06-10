@@ -45,11 +45,6 @@
   color: #fff;
 }
 
-/* Hide the checkboxes on the browser display */
-.pane_content  .media-thumbnail .form-item.form-type-checkbox .form-checkbox {
-  display: none;
-}
-
 /* Set the height to auto */
 #media_content_browser .media-thumbnail {
   height: auto;
@@ -99,11 +94,24 @@
 }
 
 
+.media-list-thumbnails li {
+  float: left;
+  width: 120px;
+  padding-right: 5px;
+  text-align: center;
+}
+
+.media-list-thumbnails > li{
+	color:#666;
+	font-family:Arial, sans-serif; font-size:0.75em;
+	padding:5px; margin:0;
+}
+/*
 .media-display-thumbnails .media-thumbnail {
   width: 150px;
   float: left;
   margin-bottom: 20px;
-}
+}*/
 
 /* Cut off long filenames to prevent a messed up layout. */
 div.media-thumbnail .media-filename  {
@@ -134,7 +142,7 @@ div.media-thumbnail img {
 
 /* For thumbnails that have been choosen by a user */
 div.media-thumbnail img.selected {
-  background: #cccccc;
+  background: #3333FF;
 }
 
 .media-modal-frame {

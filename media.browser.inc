@@ -114,21 +114,11 @@ function media_browser_list() {
   $media_entities = $entity_controller->load(NULL, $conditions, $start, $limit);
 
   foreach ($media_entities as &$media) {
-    $media->preview = drupal_render(_media_format_for_browser($media));
+    $media->preview = drupal_render(media_get_thumbnail_preview($media));
   }
   drupal_json_output(array('media' => array_values($media_entities)));
   die();
 
-}
-
-function _media_format_for_browser($media) {
-  $media->override = array('browser' => TRUE);
-  // Generate a preview of the file
-  // @todo: Should generate placeholders for audio
-  // Add yet another wrapper so we can style it as a preview :(
-  // Otherwise it isn't really possible to know because the user can pick anything for their preview mode.
-  $preview = media_get_thumbnail_preview($media);
-  return $preview;
 }
 
 function media_media_browser_plugins($params) {
@@ -180,7 +170,7 @@ function media_media_browser_plugins($params) {
     // We should probably change this to load dynamically when requested
     // via the JS file.
     ),
-    '#markup' => '<div id="container"><div id="scrollbox"><ul id="media-browser-library-list"></ul></div><div id="status"></div></div>',
+    '#markup' => '<div id="container"><div id="scrollbox"><ul id="media-browser-library-list" class="media-list media-list-thumbnails"></ul></div><div id="status"></div></div>',
   );
 
 //  $plugins['remote'] = array(

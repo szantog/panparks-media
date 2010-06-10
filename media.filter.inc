@@ -294,8 +294,7 @@ function media_format_form($form, $form_state, $media) {
     '#markup' => t('Embedding %filename', array('%filename' => $media->filename)),
   );
   
-  $preview = field_view_field('media', $media, 'file', 'media_preview');
-  $preview['#theme_wrappers'][] = 'media_thumbnail';
+  $preview = media_get_thumbnail_preview($media);
 
   $form['preview'] = array(
     '#type' => 'markup',

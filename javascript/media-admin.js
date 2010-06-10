@@ -31,17 +31,17 @@ Drupal.behaviors.mediaAdmin = {
       });
 
     // Add an extra class to selected thumbnails.
-    $('div.media-thumbnail :checkbox', '.media-display-thumbnails').each(function () {
+    $('li.media-item :checkbox', '.media-display-thumbnails').each(function () {
       var checkbox = $(this);
       if (checkbox.is(':checked')) {
-        checkbox.parents('div.media-thumbnail').addClass('media-thumbnail-checked');
+        $('img', checkbox.parents('li.media-item')).addClass('selected');
       }
       checkbox.change(function () {
         if (checkbox.is(':checked')) {
-          checkbox.parents('div.media-thumbnail').addClass('media-thumbnail-checked');
+          $('img', checkbox.parents('li.media-item')).addClass('selected');
         }
         else {
-          checkbox.parents('div.media-thumbnail-checked').removeClass('media-thumbnail-checked');
+          $('img', checkbox.parents('li.media-item')).removeClass('selected');
         }
       });
     });

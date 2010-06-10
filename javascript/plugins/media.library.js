@@ -135,8 +135,8 @@ Drupal.media.browser.library.prototype.render = function (renderElement) {
     }
 
     var listItem = $('<li></li>').appendTo(mediaList)
-      .attr('id', 'media-file-' + mediaFile.fid)
-      .addClass('media-file');
+      .attr('id', 'media-item-' + mediaFile.fid)
+      .addClass('media-item');
 
     var imgLink = $('<a href="#"></a>').appendTo(listItem)
       .html(mediaFile.preview)

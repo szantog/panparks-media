@@ -136,32 +136,28 @@ function media_admin_list() {
  * Form builder: Builds the media thumbnails administration overview.
  */
 function media_admin_thumbnails() {
-  $query = db_select('file_managed', 'f')->extend('PagerDefault');
-  $query->join('users', 'u', 'f.uid = u.uid');
+  $limit = variable_get('media_admin_limit', 50);
 
-  $result = $query
-   ->fields('f')
-   ->fields('u', array('name'))
-   ->limit(50)
-   ->orderBy('f.timestamp', 'desc')
-   ->execute();
+  $entity_controller = entity_get_controller('media');
+  $media_entities = $entity_controller->load(NULL, array(), 0, $limit);
 
   $destination = drupal_get_destination();
   $rows = array();
   $options = array();
   $form['files'] = array(
    '#tree' => TRUE,
-   '#prefix' => '<div class ="media-display-thumbnails clearfix">',
-   '#suffix' => '</div>',
+   '#prefix' => '<div class="media-display-thumbnails clearfix"><ul class="media-list-thumbnails">',
+   '#suffix' => '</ul></div>',
   );
 
-  if (count($result)) {
-    foreach ($result as $file) {
+
+  if (count($media_entities)) {
+    foreach ($media_entities as $file) {
      $form['files'][$file->fid] = array(
        '#type' => 'checkbox',
-       '#title' => check_plain($file->filename),
-       '#prefix' => '<div class="media-thumbnail">' . theme('media_admin_thumbnail', array('file' => $file)),
-       '#suffix' => theme('media_admin_thumbnail_operations', array('file' => $file)) . '</div>',
+       '#title' => '',
+       '#prefix' => '<li class="media-item">' . drupal_render(media_get_thumbnail_preview($file)),
+       '#suffix' => theme('media_admin_thumbnail_operations', array('file' => $file)) . '</li>',
      );
     }
   }
