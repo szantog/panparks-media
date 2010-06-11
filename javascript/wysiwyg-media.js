@@ -159,7 +159,7 @@ Drupal.wysiwyg.plugins.media = {
 
     var imgElement = imgNode[0];
 
-    //@todo: this does not work in IE, width and height are always 0.
+    // @todo: this does not work in IE, width and height are always 0.
     for (i=0; i< imgElement.attributes.length; i++) {
       var attr = imgElement.attributes[i];
       if (attr.specified == true) {
@@ -172,7 +172,7 @@ Drupal.wysiwyg.plugins.media = {
     }
     tagContent = {
       "type": 'media',
-      //@todo: This will be selected from the format form
+      // @todo: This will be selected from the format form
       "view_mode": imgNode.attr('view_mode'),
       "fid" : imgNode.attr('fid'),
       "attributes": mediaAttributes
