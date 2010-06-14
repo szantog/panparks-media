@@ -310,7 +310,6 @@ function media_theme() {
 
 /**
  * Implement hook_image_default_styles().
- *
  */
 function media_image_default_styles() {
   $styles = array();
@@ -858,10 +857,9 @@ function media_get_thumbnail_preview($media) {
  * Implements hook_file_references().
  */
 function media_file_references($file) {
-  // I guess this is what we want...
-  if ($file->status == FILE_STATUS_PERMANENT) {
-    return array('media' => 1);
-  }
+  // Go through every field and look for any fields referencing media which is being used.
+  $count = file_get_file_reference_count($file, NULL, 'media');
+  return $count ? array('media' => $count) : NULL;
 }
 
 
