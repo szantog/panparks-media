@@ -138,6 +138,7 @@ function media_variable_default($name = NULL) {
       'browser_library_empty_message' => 'There are currently no media in this library to select.',
 
       'import_batch_size' => 20,
+      'fromurl_supported_schemes' => array('http', 'https', 'ftp', 'smb', 'ftps'),
     );
   }
 

@@ -47,6 +47,14 @@ function media_page_edit($media) {
 }
 
 /**
+ * Menu callback; shows delete confirmation form.
+ */
+function media_page_delete($media) {
+  $files = array($media);
+  return drupal_get_form('media_multiple_delete_confirm', $files);
+}
+
+/**
  * Form callback for adding media via an upload form.
  * @todo: should use the AJAX uploader
  */
@@ -200,15 +208,14 @@ function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
  *  @see media_parse_to_uri().
  */
 function media_add_from_url_validate($form, &$form_state) {
-  if (!file_uri_scheme($form_state['values']['url']) || !file_uri_target($form_state['values']['url'])) {
-    form_set_error('url', t('Invalid URL'));
+  // Supported Schemes for media:
+  $supported_schemes = media_variable_get('fromurl_supported_schemes');
+  $scheme = file_uri_scheme($form_state['values']['url']);
+  if (!in_array($scheme, $supported_schemes)) {
+    form_set_error('url', t('Invalid URL: Only the following types of urls are supported: @supported_schemes', array('@supported_schemes' => implode(', ', $supported_schemes))));
     return;
   }
-
-  if (!url_is_external($form_state['values']['url'])) {
-    form_set_error('url', t('Only extenal urls are supported.'));
-  }
-
+  
   // We have a dry-run of the parsing process to allow specific streams to
   // catch an error, for instance to inform us that a video is no longer
   // available or that a specific URL structure is not supported.
@@ -248,7 +255,9 @@ function media_add_from_url_submit($form, &$form_state) {
     $form_state['redirect'] = $form_state['values']['redirect'];
   }
 
-  // Save the remote file.
+  // Save the remote file
+  // @TODO: We should really separate parsing the URL, retreiving the file
+  // and inserting into different operations.
   try {
     $file = media_parse_to_file($url);
   }

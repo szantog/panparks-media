@@ -194,6 +194,20 @@ function media_menu() {
     'theme callback' => '_node_custom_theme',
   );
 
+  $items['media/%media/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'media_page_delete',
+    'page arguments'  => array(1),
+    'access callback' => 'media_access',
+    'access arguments' => array('edit'),
+    'weight' => 0,
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'media.pages.inc',
+     // Use the same setting as node module
+    'theme callback' => '_node_custom_theme',
+  );
+
   $items['media/add/upload'] = array(
     'title' => 'Upload new file',
     'page callback' => 'drupal_get_form',
@@ -857,7 +871,6 @@ function media_get_thumbnail_preview($media) {
  * Implements hook_file_references().
  */
 function media_file_references($file) {
-  // Go through every field and look for any fields referencing media which is being used.
   $count = file_get_file_reference_count($file, NULL, 'media');
   return $count ? array('media' => $count) : NULL;
 }
