@@ -111,8 +111,14 @@
 }
 
 .media-item img {
+  border: 2px solid transparent;
+  margin-left: -2px;
   height: auto;
   width: 100%;
+}
+
+.media-item img:hover {
+  border-color: #058AC5;
 }
 
 .media-item .label-wrapper {
