@@ -87,17 +87,17 @@ Drupal.media.browser.library.prototype.loadMedia = function () {
 };
 
 Drupal.media.browser.library.prototype.scrollUpdater = function (){
-	var scrolltop = $('#scrollbox').attr('scrollTop');
-	var scrollheight = $('#scrollbox').attr('scrollHeight');
-	var windowheight = $('#scrollbox').attr('clientHeight');
-	var scrolloffset = 20;
+  var scrolltop = $('#scrollbox').attr('scrollTop');
+  var scrollheight = $('#scrollbox').attr('scrollHeight');
+  var windowheight = $('#scrollbox').attr('clientHeight');
+  var scrolloffset = 20;
 
-	if(scrolltop >= (scrollheight - (windowheight + scrolloffset))) {
-		//fetch new items
+  if(scrolltop >= (scrollheight - (windowheight + scrolloffset))) {
+    //fetch new items
     this.loadMedia();
-	}
+  }
   var that = this;
-	this.updaterTimeout = setTimeout(function () { that.scrollUpdater(); }, 1500);
+  this.updaterTimeout = setTimeout(function () { that.scrollUpdater(); }, 1500);
 };
 
 /**
@@ -136,15 +136,13 @@ Drupal.media.browser.library.prototype.render = function (renderElement) {
 
     var listItem = $('<li></li>').appendTo(mediaList)
       .attr('id', 'media-item-' + mediaFile.fid)
-      .addClass('media-item');
-
-    var imgLink = $('<a href="#"></a>').appendTo(listItem)
+      .addClass('media-item')
       .html(mediaFile.preview)
       .bind('click', mediaFile, function (e) {
         // Notify the main browser
         //this.selectedMedia = mediaFile;
-        $('div.media-thumbnail img').removeClass('selected');
-        $('div.media-thumbnail img', $(this)).addClass('selected');
+        $('.media-item').removeClass('selected');
+        $(this).addClass('selected');
         that.mediaSelected([e.data]);
         //that.settings.onSelect(mediaFile);
         return false;

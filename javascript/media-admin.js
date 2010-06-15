@@ -47,27 +47,37 @@ Drupal.behaviors.mediaAdmin = {
         var link = $(this);
         switch ($(this).text()) {
           case Drupal.t('all'):
-            link.parents('.media-display-thumbnails').find('div.media-thumbnail :checkbox').attr('checked', true).change();
+            link.parents('.media-display-thumbnails').find('.media-item :checkbox').attr('checked', true).change();
             break;
           case Drupal.t('none'):
-            link.parents('.media-display-thumbnails').find('div.media-thumbnail :checkbox').attr('checked', false).change();
+            link.parents('.media-display-thumbnails').find('.media-item :checkbox').attr('checked', false).change();
             break;
         }
         return false;
       });
 
+    $('.media-item').bind('click', function () {
+      var checkbox = $(this).find(':checkbox');
+      
+      if (checkbox.is(':checked')) {
+        checkbox.attr('checked', false).change();
+      } else {
+        checkbox.attr('checked', true).change();
+      }
+    });
+
     // Add an extra class to selected thumbnails.
     $('li.media-item :checkbox', '.media-display-thumbnails').each(function () {
       var checkbox = $(this);
       if (checkbox.is(':checked')) {
-        $('img', checkbox.parents('li.media-item')).addClass('selected');
+        $(checkbox.parents('li.media-item')).addClass('selected');
       }
-      checkbox.change(function () {
+      checkbox.bind('change.media', function () {
         if (checkbox.is(':checked')) {
-          $('img', checkbox.parents('li.media-item')).addClass('selected');
+          $(checkbox.parents('li.media-item')).addClass('selected');
         }
         else {
-          $('img', checkbox.parents('li.media-item')).removeClass('selected');
+          $(checkbox.parents('li.media-item')).removeClass('selected');
         }
       });
     });
@@ -82,6 +92,7 @@ Drupal.behaviors.mediaAdmin = {
       }
     });
     fieldset.hide();
+
   }
 };
 

@@ -278,7 +278,7 @@ function theme_media_thumbnail($variables) {
 
   // Element should be a field renderable array... This is a little wonky - admitted.
   if (!empty($element['#show_names']) && $element['#object']->filename) {
-    $label = '<label class="media-filename">' . $element['#object']->filename . '</label>';
+    $label = '<div class="label-wrapper"><label class="media-filename">' . $element['#object']->filename . '</label></div>';
   }
 
   // How can I attach CSS here?
