@@ -134,7 +134,7 @@ function media_variable_default($name = NULL) {
 
       // Browser defaults in media.browser.inc.
       'browser_viewtype_default' => 'thumbnails',
-      'browser_pager_limit' => 10,
+      'browser_pager_limit' => 40,
       'browser_library_empty_message' => 'There are currently no media in this library to select.',
 
       'import_batch_size' => 20,

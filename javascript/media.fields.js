@@ -12,18 +12,13 @@ Drupal.behaviors.mediaBrowserFields = {
 
       // Options set from media.fields.inc for the types, etc to show in the browser.
       var options = Drupal.settings.media.fields[this.id];
+      
       // For each widget (in case of multi-entry)
       $('.media-widget', this).once('mediaBrowserLaunch', function () {
 
         //options = Drupal.settings.media.fields[this.id];
         var fidField = $('.fid', this);
         var previewField = $('.preview', this);
-
-        if (Drupal.settings.media.debug) {
-          // @TODO: Remove this, here for debugging purposes.
-          fidField.show();
-          var debugField = $('.file_info', this);
-        }
 
         // When someone clicks the link to pick media (or clicks on an existing thumbnail)
         $('.launcher', this).bind('click', function () {
@@ -38,11 +33,7 @@ Drupal.behaviors.mediaBrowserFields = {
             fidField.val(mediaFile.fid);
             // Set the preview field HTML
             previewField.html(mediaFile.preview);
-            if (Drupal.settings.media.debug) {
-              // @TODO: Remove this, here for debugging purposes.
-              debugField.html(JSON.stringify(mediaFile));
-            }
-          }, options);
+          }, options.global);
           return false;
         });
 

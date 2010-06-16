@@ -11,8 +11,6 @@ Drupal.behaviors.mediaLibrary = {
         // @todo: implement the types param here.
         var params = {};
         params.types = Drupal.settings.media.browser.library.types;
-
-        //$(ui.panel).addClass('throbber');
         library.reset($(ui.panel));
         library.start($(ui.panel), params);
       }

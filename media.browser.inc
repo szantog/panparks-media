@@ -9,13 +9,12 @@
 function media_browser($selected = NULL) {
   $output = array();
   $output['#attached']['library'][] = array('media', 'media_browser_page');
-
-  $get = drupal_get_query_parameters();
-  array_walk_recursive($get, '_media_recursive_check_plain');
+  
+  $params = drupal_get_query_parameters();
+  array_walk_recursive($params, '_media_recursive_check_plain');
 
   // We don't want everything, just this array.
-  $params = isset($get['params']) ? $get['params'] : array();
-
+  
   // How do we validate these?  I don't know.
   // I think PDO should protect them, but I'm not 100% certain.
 
@@ -102,36 +101,48 @@ function media_browser_list() {
   // How do we validate these?  I don't know.
   // I think PDO should protect them, but I'm not 100% certain.
   array_walk_recursive($params, '_media_recursive_check_plain');
-
+  
   $types = isset($params['types']) ? $params['types'] : NULL;
   $url_include_patterns = isset($params['url_include_patterns']) ? $params['url_include_patterns'] : NULL;
   $url_exclude_patterns = isset($params['url_exclude_patterns']) ? $params['url_exclude_patterns'] : NULL;
 
 
-  $start = isset($params['start']) ? $params['start'] : NULL;
-  $limit = isset($params['limit']) ? $params['limit'] : NULL;
-
+  $start = isset($params['start']) ? $params['start'] : 0;
+  $limit = isset($params['limit']) ? $params['limit'] : media_variable_get('browser_pager_limit');
+  
   $conditions = array();
 
+  $query = new EntityFieldQuery();
+  
+  $query->range($start, $limit);
+  $query->entityCondition('entity_type', 'media');
+
   if ($types) {
-    $conditions[] = array('type', $types, 'IN');
+    $query->entityCondition('bundle', $types, 'IN');
   }
 
   if ($url_include_patterns) {
-    $conditions[] = array('uri', "%$v%", 'like');
+    $query->propertyCondition('uri', $v, 'CONTAINS');
     // Insert stream related restrictions here.
   }
   if ($url_exclude_patterns) {
-    $conditions[] = array('uri', "%$v%", 'not like');
-    // Insert stream related restrictions here.
+    $query->propertyCondition('uri', "%$v%", 'NOT LIKE');
   }
 
   $entity_controller = entity_get_controller('media');
-  $media_entities = $entity_controller->load(NULL, $conditions, $start, $limit);
-
+  $result = $query->execute();
+  $ids = array_keys($result['media']);
+  if ($ids) {
+    $media_entities = entity_load('media', $ids);
+  }
+  else {
+    $media_entities = array();
+  }
+  
   foreach ($media_entities as &$media) {
     $media->preview = drupal_render(media_get_thumbnail_preview($media));
   }
+  
   drupal_json_output(array('media' => array_values($media_entities)));
   exit();
 

@@ -257,7 +257,7 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     // @TODO: Not implemented yet.
     '#media_options' => array(
       'global' => array(
-        'types' => $instance['widget']['settings']['allowed_types'],
+        'types' => array_filter($instance['widget']['settings']['allowed_types']),
         // @todo: Not implemented
         'schemes' => $instance['widget']['settings']['allowed_schemes'],
       ),
