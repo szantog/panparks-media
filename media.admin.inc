@@ -372,16 +372,13 @@ function media_admin_type_list() {
  *  The administration form for managing media types.
  */
 function media_admin_type_manage_form($form, &$form_state, $media_type) {
+  drupal_set_title(t('@media media type settings', array('@media' => $media_type->label)));
   $form = array();
   $form['media_type'] = array(
     '#type' => 'value',
     '#value' => $media_type->name,
   );
-  $form['type'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('@media media type', array('@media' => $media_type->label)),
-  );
-
+  
   // If this Media type is handled by us, then we can put in some default
   // options. Otherwise, we leave it to the implementing module to form_alter.
   if ($media_type->type_callback == 'media_is_type') {
@@ -399,13 +396,13 @@ function media_admin_type_manage_form($form, &$form_state, $media_type) {
       $default_value = 0;
       $other_default_value = $media_type->type_callback_args['match_type'];
     }
-    $form['type']['match_type'] = array(
+    $form['match_type'] = array(
       '#type' => 'radios',
       '#title' => t('Match type'),
       '#options' => $options,
       '#default_value' => $default_value,
     );
-    $form['type']['match_type_other'] = array(
+    $form['match_type_other'] = array(
       '#type' => 'textfield',
       '#title' => t('Other match type value'),
       '#default_value' => $other_default_value,
@@ -426,7 +423,7 @@ function media_admin_type_manage_form($form, &$form_state, $media_type) {
         $default_value[$stream] = $stream;
       }
     }
-    $form['type']['streams'] = array(
+    $form['streams'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Allowed streams'),
       '#options' => $options,
@@ -435,14 +432,14 @@ function media_admin_type_manage_form($form, &$form_state, $media_type) {
 
     // Options for allowed mimetypes & extensions.
     $default_value = isset($media_type->type_callback_args['mimetypes']) ? implode(' ', $media_type->type_callback_args['mimetypes']) : '';
-    $form['type']['mimetypes'] = array(
+    $form['mimetypes'] = array(
       '#type' => 'textfield',
       '#title' => t('Allowed mimetypes'),
       '#description' => t('You may optionally enter one or more allowed file mimetypes for this Media type, if appropriate, separating each with a space. You may use a regular expression for matching, such as %image_match (which would match any mimetype beginning with %image) or %any_match, which would match any file mimetype.', array('%image_match' => '/^image/', '%image' => t('image'), '%any_match' => '/.*/')),
       '#default_value' => check_plain($default_value),
     );
     $default_value = isset($media_type->type_callback_args['extensions']) ? implode(' ', $media_type->type_callback_args['extensions']) : '';
-    $form['type']['extensions'] = array(
+    $form['extensions'] = array(
       '#type' => 'textfield',
       '#title' => t('Allowed extensions'),
       '#description' => t('You may optionally enter one or more allowed file extensions for this Media type, if appropriate, separating each with a space (and no dots).'),
