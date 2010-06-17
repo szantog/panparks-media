@@ -4,18 +4,16 @@
   margin:30px;
 }
 
-#media-format-form div div.media-thumbnail {
-  
+#edit-options {
+  margin: 0;
 }
 
-#format-group-wrapper fieldset{
-  border: none;
-  padding: 0;
+#edit-options .form-item-format label {
+  display: inline;
 }
 
-#format-group-wrapper fieldset legend {
-  display: none;
+#media-format-form .media-item {
+  float: left;
+  margin-left: 0;
+  margin-top: 0;
 }
-
-
-

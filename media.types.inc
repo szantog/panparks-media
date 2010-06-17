@@ -266,6 +266,7 @@ function media_media_format_form_prepare_alter(&$form, &$form_state, $media) {
         '#type' => 'textfield',
         '#title' => t('Description'),
         '#default_value' => $description,
+        '#description' => t('Alternate text a user will see if the image is not available'),
       );
       break;
   }

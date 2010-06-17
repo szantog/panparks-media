@@ -13,14 +13,7 @@ Drupal.media.mediaFormatSelected = {};
 
 Drupal.behaviors.mediaFormatForm = {
   attach: function (context, settings) {
-    $('#format-group-wrapper fieldset').hide();
-    $('<a href="#">' + Drupal.t('Change') + '</a>')
-      .bind('click', function (e) {
-        $('#format-group-wrapper fieldset').show();
-        $('#format-group-wrapper fieldset').removeClass('collapsed');
-        $('#format-description').remove();
-      })
-      .appendTo('#format-description');
+    
   }
 };
 
@@ -31,7 +24,7 @@ Drupal.media.formatForm.getOptions = function () {
 };
 
 Drupal.media.formatForm.getFormattedMedia = function () {
-  var formatType = $("input[name='format']:checked").val();
+  var formatType = $("select#edit-format option:selected").val();
   return { type: formatType, options: Drupal.media.formatForm.getOptions(), html: Drupal.settings.media.formatFormFormats[formatType] };
 };
 

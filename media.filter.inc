@@ -310,27 +310,17 @@ function media_format_form($form, $form_state, $media) {
     '#markup' => drupal_render($preview),
   );
 
-  $form['format_group'] = array(
-    '#type' => 'fieldset',
-    '#title' => 'format',
-    '#prefix' => t('<div class="clearfix" id="format-group-wrapper"><span id="format-description">Adding in <span id="selected-format">%currently_selected</span> format.  </span>', array('%currently_selected' => $options[$default_view_mode])),
-    '#suffix' => t('</div>'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-  );
-
-  $form['format_group']['format'] = array(
-    '#type' => 'radios',
-    '#title' => t('Format'),
-    '#options' => $options,
-    '#default_value' => $default_view_mode,
-  );
-
   // These will get passed on to WYSIWYG
   $form['options'] = array(
     '#type' => 'fieldset',
     '#title' => t('options'),
-    '#description' => t('Alternate text a user will see if the image is not available'),
+  );
+
+  $form['options']['format'] = array(
+    '#type' => 'select',
+    '#title' => t('Current format is'),
+    '#options' => $options,
+    '#default_value' => $default_view_mode
   );
 
   // Similar to a form_alter, but we want this to run first so that media.types.inc
