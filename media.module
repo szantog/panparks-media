@@ -319,6 +319,11 @@ function media_theme() {
       'render element' => 'element',
       'file' => 'media.theme.inc',
     ),
+
+    'media_type_icon' => array(
+      'variables' => array('type' => NULL),
+      'file' => 'media.theme.inc',
+    )
   );
 }
 

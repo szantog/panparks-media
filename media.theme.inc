@@ -302,3 +302,16 @@ function theme_media_element($variables) {
   $output .= '</div>';
   return $output;
 }
+
+/**
+ * Theme a media type icon.
+ */
+  function theme_media_type_icon($variables) {
+    $type = $variables['type'];
+    $icon = media_type_get_icon($type);
+
+    $variables = array();
+    $variables['path'] = $icon;
+    $variables['attributes'] = array('class' => array('media-type-icon'));
+    return theme('image', $variables);
+  }
