@@ -18,11 +18,11 @@ function media_browser($selected = NULL) {
   // How do we validate these?  I don't know.
   // I think PDO should protect them, but I'm not 100% certain.
 
-  if (isset($get['fid'])) {
+  if (isset($params['fid'])) {
     // A form has submitted, selected a piece (or pieces) of media and we refreshed.
     // So we're just going to send the media entity out as a JS setting so the browser can close itself.
-    if (!is_array($get['fid'])) {
-      $selected = array($get['fid']);
+    if (!is_array($params['fid'])) {
+      $selected = array($params['fid']);
     }
     $selectedMedia = entity_load('media', $selected);
     foreach ($selectedMedia as &$media) {
