@@ -69,6 +69,8 @@ function media_menu() {
 
   $items['admin/structure/media/manage/%media_type'] = array(
     'title' => 'Manage media',
+    'title callback' => 'media_type_page_title',
+    'title arguments' => array(4),
     'description' => 'Manage files used on your site.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_admin_type_manage_form', 4),
@@ -476,6 +478,13 @@ function media_save($media) {
  */
 function media_access($op) {
   return (user_access('administer media') || user_access($op . ' media'));
+}
+
+/**
+ * Returns the type of the media file to be used as a page title.
+ */
+function media_type_page_title($type) {
+  return t('@type media type settings', array('@type' => $type->label));
 }
 
 /**

@@ -372,7 +372,6 @@ function media_admin_type_list() {
  *  The administration form for managing media types.
  */
 function media_admin_type_manage_form($form, &$form_state, $media_type) {
-  drupal_set_title(t('@media media type settings', array('@media' => $media_type->label)));
   $form = array();
   $form['media_type'] = array(
     '#type' => 'value',
