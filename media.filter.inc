@@ -262,7 +262,6 @@ function media_format_form($form, $form_state, $media) {
     //@TODO: Display more verbose information about which formatter and what it does.
     $options[$key] = $title['label'];
     $file_field = media_get_file_without_label($media, $key, array('wysiwyg' => TRUE));
-
     
     if (preg_match('/styles_file_(.*)/', $format['type'], $matches)) {
       $style_name = $matches[1];
@@ -282,6 +281,7 @@ function media_format_form($form, $form_state, $media) {
   if (!isset($formats[$default_view_mode])) {
     $default_view_mode = key($formats);
   }
+  
 
   // Add JS and settings array of formats.
   $settings = array();

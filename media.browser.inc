@@ -175,7 +175,8 @@ function media_media_browser_plugin_view($plugin_name, $params) {
   $redirect = array('media/browser', array('query' => array('render' => 'media-popup')));
   switch ($plugin_name) {
     case 'upload':
-      $upload_form = drupal_get_form('media_add_upload', $redirect);
+      $types = array('image', 'audio');
+      $upload_form = drupal_get_form('media_add_upload', $types);
       return array(
         '#title' => t('Upload'),
         '#markup' => drupal_render($upload_form),
@@ -185,7 +186,7 @@ function media_media_browser_plugin_view($plugin_name, $params) {
       );
       break;
     case 'fromurl':
-      $from_url_form = drupal_get_form('media_add_from_url', $redirect);
+      $from_url_form = drupal_get_form('media_add_from_url', $types);
       return array(
         '#title' => t('From URL'),
         '#markup' => drupal_render($from_url_form),

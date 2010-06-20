@@ -931,3 +931,26 @@ function media_entity_info() {
   // @TODO: Do we need to define search-related view modes for attached fields?
   return $return;
 }
+
+/**
+ * Check that the media is one of the selected types.
+ *
+ * @param $file
+ *   A Drupal file object.
+ * @param $types
+ *   An array of media type names
+ * @return
+ *   An array. If the file type is not allowed, it will contain an error
+ *   message.
+ *
+ * @see hook_file_validate()
+ */
+function media_file_validate_types(stdClass $file, $types) {
+  $errors = array();
+  if (!in_array(media_get_type($file), $types)) {
+    $errors[] = t('Only the following types of files are allowed to be uploaded: %types-allowed', array('%types-allowed' => implode(', ', $types)));
+  }
+  
+  return $errors;
+}
+

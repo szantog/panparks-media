@@ -58,14 +58,18 @@ function media_page_delete($media) {
  * Form callback for adding media via an upload form.
  * @todo: should use the AJAX uploader
  */
-function media_add_upload($form, &$form_state, $redirect = NULL) {
+function media_add_upload($form, &$form_state, $types = NULL) {
 
   $validators = array(
    'file_validate_extensions' => array(media_variable_get('file_extensions')),
    'file_validate_size' => array(parse_size(media_variable_get('max_filesize'))),
   );
 
-
+  //@todo add additional validators for media types allowed.
+  if ($types) {
+    $validators['media_file_validate_types'] = array($types);
+  }
+  
   // A blank set of allowed file extensions means no need to validate.
   if (!$validators['file_validate_extensions'][0]) {
     unset($validators['file_validate_extensions']);
@@ -80,11 +84,6 @@ function media_add_upload($form, &$form_state, $redirect = NULL) {
   }
 
   $form['#validators'] = $validators;
-
-  $form['redirect'] = array(
-    '#type' => 'value',
-    '#value' => $redirect,
-  );
 
   $form['upload'] = array(
     '#type' => 'file',
@@ -141,18 +140,11 @@ function media_add_upload_submit($form, &$form_state) {
   }
   else {
     drupal_set_message(t('An error occurred and no file was uploaded.'), 'error');
+    return;
   }
-  if (empty($form_state['values']['redirect'])) {
-    $form_state['redirect'] = 'media/' . $file->fid . '/edit';
-  }
-  else {
-    // Eek, this is a hack isn't it...
-    if ($form_state['values']['redirect'][0] = 'media/browser' && $file->fid) {
-      $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
-    }
-  }
-}
 
+  $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
+}
 
 /**
  *  Callback for /media/add/upload and /admin/content/media/add/upload.
@@ -160,7 +152,7 @@ function media_add_upload_submit($form, &$form_state) {
  *  @TODO: allow stream wrappers to add to the description.
  *  @see media_media_browser_plugins().
  */
-function media_add_from_url($form, &$form_state = array(), $redirect = NULL) {
+function media_add_from_url($form, &$form_state = array(), $types = NULL) {
   $form['url'] = array(
     '#type' => 'textfield',
     '#title' => 'URL',
@@ -238,6 +230,9 @@ function media_add_from_url_validate($form, &$form_state) {
   // be helpful to let the user know they passed the HTML page containing
   // the image accidentally. That would also save us from saving the file
   // in the submit step.
+
+  // This should use the file_validate routines that the upload form users.
+  // We need to fix the media_parse_to_file routine to allow for a validation.
 }
 
 /**
@@ -271,15 +266,7 @@ function media_add_from_url_submit($form, &$form_state) {
     return;
   }
 
-  if (!$form_state['redirect']) {
-    $form_state['redirect'] = 'media/' . $file->fid . '/edit';
-  }
-  else {
-    if ($form_state['values']['redirect'][0] = 'media/browser' && $file->fid) {
-      $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
-//       $form_state['redirect'] = array('media/'. $file->fid .'/format-form', array('query' => array('render' => 'media-popup')));
-    }
-  }
+  $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
 }
 
 /**
