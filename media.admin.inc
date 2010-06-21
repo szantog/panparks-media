@@ -164,7 +164,7 @@ function media_admin_thumbnails() {
         // I'm not sure this (icon) is where we want it, but putting it here for example's sake of how to get it.
         // It could go in the preview function too I suppose, but then we'd probably want some params
         // because I could see cases where it would not be desired but the rest of the preview is...
-        . '<div class="media-item-icons">' . theme('media_type_icon', array('type' => $file->type)) . '</div>',
+        . '<div class="media-item-icons">' . theme('media_icon', array('file' => $file)) . '</div>',
        '#suffix' => theme('media_admin_thumbnail_operations', array('file' => $file)) . '</li>',
      );
     }

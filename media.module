@@ -322,10 +322,15 @@ function media_theme() {
       'file' => 'media.theme.inc',
     ),
 
-    'media_type_icon' => array(
-      'variables' => array('type' => NULL),
+    'media_icon' => array(
+      'variables' => array('file' => NULL),
       'file' => 'media.theme.inc',
-    )
+    ),
+
+    'media_formatter_large_icon' => array(
+      'variables' => array('file' => NULL),
+      'file' => 'media.theme.inc',
+    ),
   );
 }
 

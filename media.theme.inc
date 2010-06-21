@@ -305,13 +305,27 @@ function theme_media_element($variables) {
 
 /**
  * Theme a media type icon.
+ * @todo: Merge this with theme_media_formatter_large_icon or the core file_icon_path.
  */
-  function theme_media_type_icon($variables) {
-    $type = $variables['type'];
-    $icon = media_type_get_icon($type);
+function theme_media_icon($variables) {
+  $file = $variables['file'];
+  // We can use this if we want, but going for core icons for now because they are
+  // sized appropriately.
+  //$icon_dir = media_variable_get('icon_base_directory') . '/' . media_variable_get('icon_set');
+  $icon = file_icon_path($file);
+  return theme('image', array('path' => $icon));
+  $variables = array();
+  $variables['path'] = $icon;
+  $variables['attributes'] = array('class' => array('media-type-icon'));
+  return theme('image', $variables);
+}
 
-    $variables = array();
-    $variables['path'] = $icon;
-    $variables['attributes'] = array('class' => array('media-type-icon'));
-    return theme('image', $variables);
+  /**
+   *
+   */
+  function theme_media_formatter_large_icon($variables) {
+    $file = $variables['file'];
+    $icon_dir = media_variable_get('icon_base_directory') . '/' . media_variable_get('icon_set');
+    $icon = file_icon_path($file, $icon_dir);
+    return theme('image', array('path' => $icon));
   }

@@ -52,7 +52,7 @@ function media_enable() {
   // @TODO: We may need to disable the media bundle & field in hook_disable.
 
   $view_mode_defaults = array(
-    'media_preview' => 'styles_file_square_thumbnail',
+    'media_preview' => 'media_large_icon',
     //@TODO: We need a real "original" formatter
     'media_original' => 'styles_file_original',
     //@TODO: Non-sequiter small == medium.  Why medium if there is no small?
@@ -85,6 +85,7 @@ function media_enable() {
   $types['image']->label = "Image";
   $types['image']->base = TRUE;
   $view_mode_settings['image'] = $view_mode_defaults;
+  $view_mode_settings['image']['media_preview'] = 'styles_file_square_thumbnail';
 
   $types['image']->type_callback_args =
   array(
@@ -332,5 +333,16 @@ function media_update_7006() {
   // In case the user has used the head2head upgrade.
   if (!db_table_exists('file') && !db_table_exists('file_managed')) {
     db_rename_table('file', 'file_managed');
+  }
+}
+
+/**
+ * Changes the preview formatter for non-image types to the icon view.
+ */
+function media_update_7007() {
+  foreach (media_type_get_types() as $type => $info) {
+    if ($type != 'image') {
+      media_type_configure_formatters($type, array('media_preview' => 'media_large_icon'));
+    }
   }
 }

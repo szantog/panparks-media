@@ -100,6 +100,8 @@ function media_field_widget_info() {
  */
 function media_field_formatter_info() {
   $formatters = array();
+
+  // Formatters for media are the same as build modes for media.
   $build_modes = media_field_view_modes('media');
   foreach ($build_modes as $key => $mode) {
     $formatters[$key] = array(
@@ -107,6 +109,13 @@ function media_field_formatter_info() {
       'field types' => array('media'),
     );
   }
+
+  // Also add a formatter for files to show larger icons based on mimetype
+  $formatters['media_large_icon'] = array(
+    'label' => t('Large filetype icon'),
+    'field types' => array('file'),
+  );
+  
   return $formatters;
 }
 
@@ -148,7 +157,27 @@ function media_field_prepare_view($obj_type, $objects, $field, $instances, $lang
  * Implement hook_field_formatter_view
  */
 function media_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  
   $element = array();
+  
+  // This block handles fallback file type icons for media which doesn't have
+  // a thumbnail.  It's kind of a hack, and belongs in the file module.
+  if ($display['type'] == 'media_large_icon') {
+    foreach ($items as $delta => $item) {
+      // Display all values in a single element..
+      $element[$delta] = array(
+        '#theme' => 'media_formatter_large_icon',
+        '#file' => $item,
+      );
+    }
+    return $element;
+  }
+  
+  // The rest of this hook invocation is for rendering media when it is attached
+  // as a field to other entities.  The formatter on the media field is equivilent
+  // to the media view_mode.  So if someone configures a media field on a node
+  // and says that the teaser formatter for the media is "large", it will render
+  // the media entity as per the large view_mode.
 
   // An array of media items to pass into entity rendering functions.
   $media_items = array();
