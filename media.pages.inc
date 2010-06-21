@@ -159,12 +159,7 @@ function media_add_from_url($form, &$form_state = array(), $types = NULL) {
     '#description' => 'Input any url which Drupal can handle',
     '#attributes' => array('class' => array('media-add-from-url')),
   );
-
-  $form['redirect'] = array(
-    '#type' => 'value',
-    '#value' => $redirect,
-  );
-
+  
   $form['preview'] = array(
     '#type' => 'item',
     '#title' => t('Preview'),
@@ -245,10 +240,6 @@ function media_add_from_url_validate($form, &$form_state) {
 function media_add_from_url_submit($form, &$form_state) {
   $url = $form_state['values']['url'];
   $uri = ''; // The URI we are eventually saving to the files table
-
-  if (!empty($form_state['values']['redirect'])) {
-    $form_state['redirect'] = $form_state['values']['redirect'];
-  }
 
   // Save the remote file
   // @TODO: We should really separate parsing the URL, retreiving the file
