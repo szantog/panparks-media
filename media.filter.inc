@@ -262,12 +262,16 @@ function media_format_form($form, $form_state, $media) {
     //@TODO: Display more verbose information about which formatter and what it does.
     $options[$key] = $title['label'];
     $file_field = media_get_file_without_label($media, $key, array('wysiwyg' => TRUE));
-    
+
+    /**
+     * Currently not used in UI.
+     * Will provide more information in style selection from file_styles.
+     */
     if (preg_match('/styles_file_(.*)/', $format['type'], $matches)) {
       $style_name = $matches[1];
+      $style_info = styles_containers_available_styles('file', $media->type, $style_name);
     }
-
-    $style_info = styles_containers_available_styles('file', $media->type, $style_name);
+    
     // Make a pretty name out of this.
     $formats[$key] = drupal_render($file_field);
   }
