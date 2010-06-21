@@ -175,7 +175,6 @@ function media_media_browser_plugin_view($plugin_name, $params) {
   $redirect = array('media/browser', array('query' => array('render' => 'media-popup')));
   switch ($plugin_name) {
     case 'upload':
-      $types = array('image', 'audio');
       $upload_form = drupal_get_form('media_add_upload', $types);
       return array(
         '#title' => t('Upload'),

@@ -117,7 +117,10 @@ function media_variable_default($name = NULL) {
     $defaults = array(
       'wysiwyg_title' => 'Media browser',
       'wysiwyg_icon_title' => 'Add media',
+      //@todo: We should do this per type actually.  For "other" it should be a link.
       'wysiwyg_default_view_mode' => 'media_large',
+      // Types which can be selected when embedding media vs wysiwyg.
+      'wysiwyg_allowed_types' => array('image'),
 
       'field_select_media_text' => 'Select media',
 

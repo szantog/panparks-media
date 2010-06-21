@@ -19,7 +19,7 @@ Drupal.wysiwyg.plugins.media = {
     if (data.format == 'html') {
       Drupal.media.popups.mediaBrowser(function (mediaFiles) {
         Drupal.wysiwyg.plugins.media.mediaBrowserOnSelect(mediaFiles, instanceId);
-      });
+      }, settings['global']);
     }
   },
 
@@ -31,7 +31,6 @@ Drupal.wysiwyg.plugins.media = {
     var mediaFile = mediaFiles[0];
     var options = {};
     Drupal.media.popups.mediaStyleSelector(mediaFile, function (formattedMedia) {
-      debug.debug(formattedMedia);
       Drupal.wysiwyg.plugins.media.insertMediaFile(mediaFile, formattedMedia.type, formattedMedia.html, formattedMedia.options, Drupal.wysiwyg.instances[instanceId]);
     }, options);
 
