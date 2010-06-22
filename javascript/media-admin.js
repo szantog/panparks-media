@@ -25,9 +25,7 @@ Drupal.behaviors.mediaAdmin = {
       // See media.browser.js and media.browser.inc - media_browser()
       // For how it gets passed.
       var options = {
-        params: {
-          disabledPlugins: ['library']
-        }
+        disabledPlugins: ['library']
       };
       Drupal.media.popups.mediaBrowser(function (mediaFiles) {
         window.location.reload();
