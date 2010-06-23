@@ -181,7 +181,7 @@ function theme_media_admin_thumbnail($variables) {
 function theme_media_admin_thumbnail_operations($variables) {
   $destination = drupal_get_destination();
   $file = $variables['file'];
-  $output = l(t('edit'), 'admin/content/media/' . $file->fid . '/edit', array('query' => $destination));
+  $output = l(t('edit'), 'media/' . $file->fid . '/edit', array('query' => $destination));
   return $output;
 }
 
@@ -275,6 +275,17 @@ function theme_media_link($variables) {
 function theme_media_thumbnail($variables) {
   $label = '';
   $element = $variables['element'];
+  $icon = theme('media_type_icon', array('type' => $element['#object']->type));
+  $destination = drupal_get_destination();
+
+  // Wrappers to go around the thumbnail
+  $prefix = '<div class="media-item"><div class="media-thumbnail">';
+  $suffix = '</div></div>';
+
+  // Arguments for the thumbnail link
+  $thumb = $element['#children'];
+  $target = 'media/' . $element['#object']->fid . '/edit';
+  $options = array('query' => $destination, 'html' => true, 'attributes' => array('title' => t('Click to edit details')));
 
   // Element should be a field renderable array... This is a little wonky - admitted.
   if (!empty($element['#show_names']) && $element['#object']->filename) {
@@ -284,9 +295,12 @@ function theme_media_thumbnail($variables) {
   // How can I attach CSS here?
   //$element['#attached']['css'][] = drupal_get_path('module', 'media') . '/css/media.css';
   drupal_add_css(drupal_get_path('module', 'media') . '/css/media.css');
+
+  
   
   // I'm sure this is the wrong way to do this, but can't figure it out... :(
-  return '<div class="media-thumbnail">' . $element['#children'] . $label . '</div>';
+  return  $prefix . l($thumb, $target, $options) . $label . $suffix;
+
 }
 
 /**
@@ -302,8 +316,23 @@ function theme_media_element($variables) {
   $output .= '</div>';
   return $output;
 }
+
 /**
  * Field formatter for displaying a file as a large icon.
+ */
+function theme_media_formatter_large_icon($variables) {
+  $file = $variables['file'];
+  $icon_dir = media_variable_get('icon_base_directory') . '/' . media_variable_get('icon_set');
+  $icon = file_icon_path($file, $icon_dir);
+  return theme('image', array('path' => $icon));
+  $variables = array();
+  $variables['path'] = $icon;
+  $variables['attributes'] = array('class' => array('media-type-icon'));
+  return theme('image', $variables);
+}
+
+/**
+ *
  */
 function theme_media_formatter_large_icon($variables) {
   $file = $variables['file'];

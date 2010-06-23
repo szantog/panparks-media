@@ -160,8 +160,8 @@ function media_admin_thumbnails() {
      $form['files'][$file->fid] = array(
        '#type' => 'checkbox',
        '#title' => '',
-       '#prefix' => '<li class="media-item">' . drupal_render(media_get_thumbnail_preview($file)),
-       '#suffix' => theme('media_admin_thumbnail_operations', array('file' => $file)) . '</li>',
+       '#prefix' => '<li>' . drupal_render(media_get_thumbnail_preview($file, true)),
+       '#suffix' => '</li>',
      );
     }
   }

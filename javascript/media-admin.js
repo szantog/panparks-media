@@ -45,18 +45,20 @@ Drupal.behaviors.mediaAdmin = {
         var link = $(this);
         switch ($(this).text()) {
           case Drupal.t('all'):
-            link.parents('.media-display-thumbnails').find('.media-item :checkbox').attr('checked', true).change();
+            link.parents('.media-display-thumbnails').find(':checkbox').attr('checked', true).change();
             break;
           case Drupal.t('none'):
-            link.parents('.media-display-thumbnails').find('.media-item :checkbox').attr('checked', false).change();
+            link.parents('.media-display-thumbnails').find(':checkbox').attr('checked', false).change();
             break;
         }
         return false;
       });
 
-    $('.media-item').bind('click', function () {
-      var checkbox = $(this).find(':checkbox');
-      
+    $('.media-item').bind('click', function (e) {
+      if ($(e.target).is('img, a')) {
+        return;
+      }
+      var checkbox = $(this).parent().find(':checkbox');
       if (checkbox.is(':checked')) {
         checkbox.attr('checked', false).change();
       } else {
@@ -65,31 +67,30 @@ Drupal.behaviors.mediaAdmin = {
     });
 
     // Add an extra class to selected thumbnails.
-    $('li.media-item :checkbox', '.media-display-thumbnails').each(function () {
+    $('.media-display-thumbnails :checkbox').each(function () {
       var checkbox = $(this);
       if (checkbox.is(':checked')) {
-        $(checkbox.parents('li.media-item')).addClass('selected');
+        $(checkbox.parents('li').find('.media-item')).addClass('selected');
       }
       checkbox.bind('change.media', function () {
         if (checkbox.is(':checked')) {
-          $(checkbox.parents('li.media-item')).addClass('selected');
+          $(checkbox.parents('li').find('.media-item')).addClass('selected');
         }
         else {
-          $(checkbox.parents('li.media-item')).removeClass('selected');
+          $(checkbox.parents('li').find('.media-item')).removeClass('selected');
+        }
+
+        var fieldset = $('#edit-options');
+        if (!$('input[type=checkbox]:checked').size()) {
+          fieldset.slideUp('fast');
+        }
+        else {
+          fieldset.slideDown('fast');
         }
       });
     });
-    var fieldset = $('#edit-options');
-    // Only show update options if anything gets checked.
-    $('input[type=checkbox]').bind('change.media', function () {
-      if (!$('input[type=checkbox]:checked').size()) {
-        fieldset.slideUp('fast');
-      }
-      else {
-        fieldset.slideDown('fast');
-      }
-    });
-    fieldset.hide();
+   
+    $('#edit-options').hide();
 
   }
 };

@@ -134,13 +134,12 @@ Drupal.media.browser.library.prototype.render = function (renderElement) {
 
     var listItem = $('<li></li>').appendTo(mediaList)
       .attr('id', 'media-item-' + mediaFile.fid)
-      .addClass('media-item')
       .html(mediaFile.preview)
       .bind('click', mediaFile, function (e) {
         // Notify the main browser
         //this.selectedMedia = mediaFile;
         $('.media-item').removeClass('selected');
-        $(this).addClass('selected');
+        $('.media-item', $(this)).addClass('selected');
         that.mediaSelected([e.data]);
         //that.settings.onSelect(mediaFile);
         return false;
