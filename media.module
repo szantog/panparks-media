@@ -543,7 +543,8 @@ if (!function_exists('file_uri_to_object')) {
     $file->filename = basename($uri);
     $file->uri = $uri;
     $file->filemime = file_get_mimetype($uri);
-    $file->filesize = filesize($uri);
+    // This is gagged because some uris will not support it.
+    $file->filesize = @filesize($uri);
     $file->timestamp = REQUEST_TIME;
     $file->status = FILE_STATUS_PERMANENT;
     return $file;
@@ -697,7 +698,6 @@ function media_parse_to_uri($url) {
   $url = trim($url);
   foreach (module_implements('media_parse') as $module) {
     $success = module_invoke($module, 'media_parse', $url);
-
     if (isset($success)) {
       return $success;
     }

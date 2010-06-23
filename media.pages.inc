@@ -171,6 +171,11 @@ function media_add_from_url($form, &$form_state = array(), $types = NULL) {
     '#value' => 'Submit',
   );
 
+  $form['#validators'] = array();
+  if ($types) {
+    $form['#validators']['media_file_validate_types'] = array($types);
+  }
+
   // Add the javascript for live previews on textfield change.
   $form['#attached'] = array(
     'js' => array(drupal_get_path('module', 'media') . '/javascript/media-add_from_url.js'),
@@ -216,6 +221,34 @@ function media_add_from_url_validate($form, &$form_state) {
     return;
   }
 
+  // This is just stupid, but I need to validate something here.
+  // @TODO: We really should retreive the file and validate its mime-type here.
+  // This is not a reliable way to get it.
+
+  if (!$uri) {
+    $uri = $form_state['values']['url'];
+  }
+  $validators = $form['#validators'];
+  if ($validators) {
+    $file = file_uri_to_object($uri);
+    // Check for errors. @see media_add_upload_validate calls file_save_upload().
+    // this code is ripped from file_save_upload because we just want the validation part.
+    // Call the validation functions specified by this function's caller.
+    $errors = file_validate($file, $validators);
+    
+    if (!empty($errors)) {
+      $message = t('%url could not be added.', array('%url' => $form_state['values']['url']));
+      if (count($errors) > 1) {
+        $message .= theme('item_list', array('items' => $errors));
+      }
+      else {
+        $message .= ' ' . array_pop($errors);
+      }
+      form_set_error('url', $message);
+      return FALSE;
+    }
+  }
+
   if (empty($uri)) {
     // @todo - at the moment we don't actual do any real validation.
     // form_set_error('url', t('Invalid URL'));
@@ -225,6 +258,8 @@ function media_add_from_url_validate($form, &$form_state) {
   // be helpful to let the user know they passed the HTML page containing
   // the image accidentally. That would also save us from saving the file
   // in the submit step.
+  
+  // This is kinda a hack of the same.
 
   // This should use the file_validate routines that the upload form users.
   // We need to fix the media_parse_to_file routine to allow for a validation.
