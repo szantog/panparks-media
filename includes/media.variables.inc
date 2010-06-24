@@ -144,7 +144,7 @@ function media_variable_default($name = NULL) {
       'fromurl_supported_schemes' => array('http', 'https', 'ftp', 'smb', 'ftps'),
       'type_icon_directory' => drupal_get_path('module', 'media') . '/images/types',
       'icon_base_directory' => drupal_get_path('module', 'media') . '/images/icons',
-      'icon_set' => 'acquia',
+      'icon_set' => 'ricebowl',
     );
   }
 

@@ -325,18 +325,4 @@ function theme_media_formatter_large_icon($variables) {
   $icon_dir = media_variable_get('icon_base_directory') . '/' . media_variable_get('icon_set');
   $icon = file_icon_path($file, $icon_dir);
   return theme('image', array('path' => $icon));
-  $variables = array();
-  $variables['path'] = $icon;
-  $variables['attributes'] = array('class' => array('media-type-icon'));
-  return theme('image', $variables);
-}
-
-/**
- *
- */
-function theme_media_formatter_large_icon($variables) {
-  $file = $variables['file'];
-  $icon_dir = media_variable_get('icon_base_directory') . '/' . media_variable_get('icon_set');
-  $icon = file_icon_path($file, $icon_dir);
-  return theme('image', array('path' => $icon));
 }
