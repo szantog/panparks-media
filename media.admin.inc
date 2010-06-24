@@ -7,6 +7,12 @@
  */
 
 /**
+ * Include media.pages.inc since it has some form definitions we will use.
+ */
+
+require_once dirname(__FILE__) . '/media.pages.inc';
+
+/**
  * Display the list or thumbnails media admin display.
  */
 function media_admin($form, $form_state) {
@@ -254,63 +260,6 @@ function media_admin_submit($form, &$form_state) {
     // We need to rebuild the form to go to a second step. For example, to
     // show the confirmation form for the deletion of nodes.
     $form_state['rebuild'] = TRUE;
-  }
-}
-
-/**
- * Confirm the request to delete files.
- */
-function media_multiple_delete_confirm($form, &$form_state, $files) {
-  $form['files'] = array('#prefix' => '<ul>', '#suffix' => '</ul>', '#tree' => TRUE);
-  // array_filter returns only elements with TRUE values
-  foreach ($files as $fid => $value) {
-    $title = db_query('SELECT filename FROM {file_managed} WHERE fid = :fid', array(':fid' => $fid))->fetchField();
-    $form['files'][$fid] = array(
-      '#type' => 'hidden',
-      '#value' => $fid,
-      '#prefix' => '<li>',
-      '#suffix' => check_plain($title) . "</li>\n",
-    );
-  }
-  $form['operation'] = array('#type' => 'hidden', '#value' => 'delete');
-  $form['#submit'][] = 'media_multiple_delete_confirm_submit';
-
-  $confirm_question = format_plural(count($files),
-                                  'Are you sure you want to delete this item?',
-                                  'Are you sure you want to delete these items?');
-
-  return confirm_form($form,
-                    $confirm_question,
-                    $_GET['q'], t('This action cannot be undone.'),
-                    t('Delete'), t('Cancel'));
-}
-
-/**
- * Attempt to delete files and notify the user of the result.
- */
-function media_multiple_delete_confirm_submit($form, &$form_state) {
-  if ($form_state['values']['confirm']) {
-    $results = array();
-    $files = array_keys($form_state['values']['files']);
-    foreach ($files as $fid) {
-      $file = file_load($fid);
-      $files[$fid] = $file;
-      $results[$fid] = file_delete($file);
-    }
-    // The result of file_delete can be an array if the file is in use, or TRUE/FALSE.
-    foreach ($results as $fid => $result) {
-      if (is_array($result)) {
-        drupal_set_message(t('The file @title is in use and cannot be deleted.', array('@title' => $files[$fid]->filename)), 'warning');
-      }
-      elseif (!$result) {
-        drupal_set_message(t('The file @title was not deleted due to an error.', array('@title' => $files[$fid]->filename)), 'error');
-      }
-      else {
-        $message = t('File @title was deleted', array('@title' => $files[$fid]->filename));
-        watchdog('media', $message);
-        drupal_set_message($message);
-      }
-    }
   }
 }
 

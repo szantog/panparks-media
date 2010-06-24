@@ -272,29 +272,6 @@ function media_media_format_form_prepare_alter(&$form, &$form_state, $media) {
   }
 }
 
-/**
- * Helper function, returns the path to the most appropriate icon for a given
- * media type.
- *
- * @param string $type
- *  If a "base" type that ships with media, will be provided in the module itself.
- *  In the future, will probably support icons being uploaded in the type admin form.
- *
- * @return string
- *   Path to the icon.
- */
-function media_type_get_icon($type) {
-  // Custom types will require their icons in the theme or eventually they may
-  // be handled via an upload on the type settings.
-  $dir = media_variable_get('type_icon_directory');
-  foreach (array("$dir/$type", "$dir/default.png") as $icon) {
-    if (file_exists($icon)) {
-      $vars = array('path' => $icon);
-      return $icon;
-    }
-  }
-}
-
 if (!class_exists('EntityDB')) {
   if (basename($_SERVER["SCRIPT_NAME"]) == 'index.php') {
     // Don't show the warning if they are on update.php or running via drush.

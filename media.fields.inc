@@ -62,19 +62,6 @@ function media_field_is_empty($item, $field) {
 }
 
 /**
- *  Implements hook_field_formatter_prepare_view().
- */
-function media_field_formatter_prepare_view($obj_type, $objects, $field, $instances, $langcode, &$items, $displays) {
-  // Load the file items here?
-  foreach ($items as $delta => $item) {
-    foreach ($item as $file_delta => $file) {
-      $file = (array)$file;
-      $items[$delta][$file_delta] = media_load($file['fid']);
-    }
-  }
-}
-
-/**
  * Implement hook_field_widget_info().
  */
 function media_field_widget_info() {
