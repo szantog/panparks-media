@@ -11,63 +11,11 @@ Drupal.media = Drupal.media || {};
 
 // Define the behavior.
 Drupal.wysiwyg.plugins.media = {
-
-  /**
-   * Called by wysiwyg. @see ckeditor-3.0.js
-   */
-  ckeditorInit: function (editor) {
-    // If the "menu" plugin is loaded, register the menu items.
-      if ( editor.addMenuItems )
-      {
-
-      editor.addMenuGroup('media');
-        editor.addMenuItems(
-        {
-          media :
-          {
-            label : "Media",
-            command : 'media',
-            group : 'media'
-          }
-        });
-      }
-      
-      editor._.menuItems['image'] = null;
-      
-      // If the "contextmenu" plugin is loaded, register the listeners.
-      if ( editor.contextMenu )
-      {
-        editor.contextMenu.addListener( function( element, selection )
-        {
-          if ( !element || !element.is( 'img' ) || element.getAttribute( '_cke_realelement' ) )
-            return null;
-
-          return {
-            media : CKEDITOR.TRISTATE_OFF
-          };
-        });
-      }
-  },
-  
   /**
    * Execute the button.
    * @TODO: Debug calls from this are never called. What's its function?
    */
   invoke: function (data, settings, instanceId) {
-    if (data.node) {
-      var selectedElement = data.node['$'];
-      var fidAttr = selectedElement.attributes.getNamedItem('fid');
-      if (fidAttr) {
-        var fid = fid.nodeValue
-      } else {
-        tagContent = Drupal.wysiwyg.plugins.media.createTag($(this));
-      }
-      debug.debug(fid);
-      debug.debug(data.node['$']);
-      debug.debug('poo');
-      // This means there is a selected element
-      debug.debug(data)
-    }
     if (data.format == 'html') {
       Drupal.media.popups.mediaBrowser(function (mediaFiles) {
         Drupal.wysiwyg.plugins.media.mediaBrowserOnSelect(mediaFiles, instanceId);
