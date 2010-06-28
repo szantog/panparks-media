@@ -133,13 +133,19 @@ function media_field_ui_view_modes_tabs() {
   return $modes;
 }
 
-/**
- * Implements hook_field_prepare_view().
- */
-function media_field_prepare_view($obj_type, $objects, $field, $instances, $langcode, &$items) {
-  // @TODO: Do we wish to allow default files here?
-}
-
+ function media_field_formatter_prepare_view($obj_type, $objects, $field, $instances, $langcode, &$items, $displays) {
+   
+   if ($field['type'] != 'media') {
+     return;
+   }
+   // Load the file items here?
+   foreach ($items as $delta => $item) {
+     foreach ($item as $file_delta => $file) {
+       $file = (array)$file;
+       $items[$delta][$file_delta] = media_load($file['fid']);
+     }
+   }
+ }
 /**
  * Implement hook_field_formatter_view
  */
@@ -171,10 +177,13 @@ function media_field_formatter_view($entity_type, $entity, $field, $instance, $l
 
   foreach ($items as $delta => $item) {
     $media_items[$item->fid] = $item;
+    //$media_items[$item['fid']] = media_load($item['fid']);
   }
 
   field_attach_prepare_view('media', $media_items, $display['type']);
   entity_prepare_view('media', $media_items);
+
+
 
   foreach ($items as $delta => $item) {
     // @TODO:
