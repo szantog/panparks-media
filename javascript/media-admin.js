@@ -18,6 +18,7 @@ Drupal.behaviors.mediaAdmin = {
 
     // Configure the "Add file" link to fire the media browser popup.
     $('ul.action-links li', context).remove();
+
     var $launcherLink = $('<a class="media-launcher" href="#"></a>').html('Add file');
     $launcherLink.bind('click', function () {
       // This option format needs *serious* work.
@@ -28,15 +29,16 @@ Drupal.behaviors.mediaAdmin = {
         disabledPlugins: ['library']
       };
       Drupal.media.popups.mediaBrowser(function (mediaFiles) {
+        // When the media browser succeeds, we refresh
+        // @TODO: Should jump to the new media file and perhaps highlight it.
         window.location.reload();
         return false;
       }, options);
     });
-
-    
     $('ul.action-links', context).append($('<li></li>').append($launcherLink));
 
-    // Implements 'select all/none'.
+    // Implements 'select all/none' for thumbnail view.
+    // @TODO: Support grabbing more than one page of thumbnails.
     $('<div class="media-thumbnails-select" />')
       .append('<strong>' + Drupal.t('Select') + ':</strong> <a href="#">' + Drupal.t('all') + '</a>, <a href="#">' + Drupal.t('none') + '</a>')
       .prependTo('.media-display-thumbnails')
@@ -54,6 +56,8 @@ Drupal.behaviors.mediaAdmin = {
         return false;
       });
 
+    // If the media item is clicked anywhere other than on the image itself
+    // check the checkbox. For the record, JS thinks this is wonky.
     $('.media-item').bind('click', function (e) {
       if ($(e.target).is('img, a')) {
         return;
@@ -72,6 +76,7 @@ Drupal.behaviors.mediaAdmin = {
       if (checkbox.is(':checked')) {
         $(checkbox.parents('li').find('.media-item')).addClass('selected');
       }
+
       checkbox.bind('change.media', function () {
         if (checkbox.is(':checked')) {
           $(checkbox.parents('li').find('.media-item')).addClass('selected');
@@ -79,19 +84,28 @@ Drupal.behaviors.mediaAdmin = {
         else {
           $(checkbox.parents('li').find('.media-item')).removeClass('selected');
         }
-
-        var fieldset = $('#edit-options');
-        if (!$('input[type=checkbox]:checked').size()) {
-          fieldset.slideUp('fast');
-        }
-        else {
-          fieldset.slideDown('fast');
-        }
       });
     });
-   
-    $('#edit-options').hide();
 
+    // When any checkboxes are clicked on this form check to see if any are checked.
+    // If any checkboxes are checked, show the edit options (@todo rename to edit-actions).
+    $('#media-admin :checkbox').bind('change', function () {
+      Drupal.behaviors.mediaAdmin.showOrHideEditOptions();
+    });
+
+    $('#edit-options').hide();
+  },
+
+  // Checks if any checkboxes on the form are checked, if so it will show the
+  // edit-options panel.
+  showOrHideEditOptions: function() {
+    var fieldset = $('#edit-options');
+    if (!$('#media-admin input[type=checkbox]:checked').size()) {
+      fieldset.slideUp('fast');
+    }
+    else {
+      fieldset.slideDown('fast');
+    }
   }
 };
 
