@@ -31,7 +31,7 @@ Drupal.behaviors.mediaAdmin = {
       Drupal.media.popups.mediaBrowser(function (mediaFiles) {
         // When the media browser succeeds, we refresh
         // @TODO: Should jump to the new media file and perhaps highlight it.
-        window.location.reload();
+        parent.window.location.reload();
         return false;
       }, options);
     });
