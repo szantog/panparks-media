@@ -316,23 +316,13 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
  */
 function media_generic_widget_process($element, &$form_state, $form) {
   $fid = isset($element['#default_value']['fid']) ? $element['#default_value']['fid'] : 0;
-  $file = media_load($fid);
+  $media = media_load($fid);
   $path = drupal_get_path('module', 'media');
-
-  if ($file) {
-    $element['filename'] = array(
-      '#type' => 'item',
-      '#title' => $file->filename,
-      '#markup' => '',
-      '#prefix' => '<h3 class="media-filename">',
-      '#suffix' => '</h3>',
-    );
-  }
 
   //@TODO: This should be loaded from the JS in case of a failed form submission.
   $element['preview'] = array(
     '#type' => 'item',
-    '#markup' => empty($file) ? '<div class="empty-preview"><a class="launcher" href="#">' . t(media_variable_get('field_select_media_text')) . '</a></div>' : theme('media_admin_thumbnail', array('file' => $file, 'style_name' => 'thumbnail')),
+    '#markup' => empty($media) ? '<div class="empty-preview"><a class="launcher" href="#">' . t(media_variable_get('field_select_media_text')) . '</a></div>' : drupal_render(media_get_thumbnail_preview($media)),
     '#prefix' => '<div class="preview launcher">',
     '#suffix' => '</div>',
   );
