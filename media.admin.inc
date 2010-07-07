@@ -162,8 +162,8 @@ function media_admin_thumbnails() {
 
 
   if (count($media_entities)) {
-    foreach ($media_entities as $file) {
-     $form['files'][$file->fid] = array(
+    foreach ($media_entities as $media) {
+     $form['files'][$media->fid] = array(
        '#type' => 'checkbox',
        '#title' => '',
        '#prefix' => '<li>' . drupal_render(media_get_thumbnail_preview($media)),
