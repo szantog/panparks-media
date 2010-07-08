@@ -52,12 +52,13 @@ function media_enable() {
   // @TODO: We may need to disable the media bundle & field in hook_disable.
 
   $view_mode_defaults = array(
+    'media_link'   => 'file_generic',
     'media_preview' => 'media_large_icon',
     //@TODO: We need a real "original" formatter
-    'media_original' => 'styles_file_original',
+    'media_original' => 'file_generic',
     //@TODO: Non-sequiter small == medium.  Why medium if there is no small?
     'media_small'   => 'hidden',
-    'media_large'   => 'styles_file_large',
+    'media_large'   => 'file_generic',
   );
 
   $types = array();
@@ -86,6 +87,8 @@ function media_enable() {
   $types['image']->base = TRUE;
   $view_mode_settings['image'] = $view_mode_defaults;
   $view_mode_settings['image']['media_preview'] = 'styles_file_square_thumbnail';
+  $view_mode_settings['image']['media_large'] = 'styles_file_large';
+  $view_mode_settings['image']['media_original'] = 'styles_file_original';
 
   $types['image']->type_callback_args =
   array(

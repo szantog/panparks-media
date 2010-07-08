@@ -16,7 +16,7 @@ function media_field_info() {
       'settings' => array(),
       'instance_settings' => array(),
       'default_widget' => 'media_generic',
-      'default_formatter' => 'media_preview',
+      'default_formatter' => 'media_large',
     ),
   );
 }
@@ -105,7 +105,6 @@ function media_field_formatter_info() {
   
   return $formatters;
 }
-
 
 /**
  * Used to Implement hook_field_view_modes().
@@ -253,6 +252,7 @@ function media_field_widget_settings_form($field, $instance) {
 
 function media_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
   $element = $base;
+
   $widget_settings = $instance['widget']['settings'];
 
   $defaults = array(
@@ -288,86 +288,7 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
         'schemes' => $instance['widget']['settings']['allowed_schemes'],
       ),
     ),
-    // Required to attach behaviors to the widget, @see theme_media_element();
-    '#attributes' => array(
-      'class' => array('media-widget'),
-    ),
-    '#process' => array('media_generic_widget_process'),
-    // Add extra Field properties.
-    '#field_name' => $field['field_name'],
-    '#bundle' => $instance['bundle'],
-    '#entity_type' => $instance['entity_type'],
-    '#value_callback' => 'media_field_widget_value',
   );
-
-  // This seems like a roayl hack.  What's a better way to do this?
-  $settings = array('media' => array('fields' => array('edit-' . str_replace('_', '-', $instance['field_name']) => $element['#media_options'])));
-  // hmm... Might need to think about this.
-  // All settings would likely apply to all media in a multi-value, but what about passing the existing fid?
-  drupal_add_js($settings, 'setting');
-
-  return $element;
-}
-
-/**
- * An element #process callback for the media_managed_file type.
- *
- * Expands the media_managed_file type to include the uri field.
- */
-function media_generic_widget_process($element, &$form_state, $form) {
-  $fid = isset($element['#default_value']['fid']) ? $element['#default_value']['fid'] : 0;
-  $media = media_load($fid);
-  $path = drupal_get_path('module', 'media');
-
-  //@TODO: This should be loaded from the JS in case of a failed form submission.
-  $element['preview'] = array(
-    '#type' => 'item',
-    '#markup' => empty($media) ? '<div class="empty-preview"><a class="launcher" href="#">' . t(media_variable_get('field_select_media_text')) . '</a></div>' : drupal_render(media_get_thumbnail_preview($media)),
-    '#prefix' => '<div class="preview launcher">',
-    '#suffix' => '</div>',
-  );
-
-  /**
-   * This section handles fields on media when media is added as a field.
-   * It is pretty unpolished, so hiding it for now.
-   */
-//  $element['more_fields_wrapper'] = array(
-//    '#type' => 'fieldset',
-//    '#collapsible' => TRUE,
-//    '#collapsed' => TRUE,
-//    '#title' => t('Meta-data'),
-//  );
-//
-//  $element['more_fields_wrapper']['edit'] = array(
-//    '#type' => 'markup',
-//    '#markup' => l(t('Edit'), 'media/' . $fid . '/edit', array('query' => array('render' => 'media-popup'), 'attributes' => array('class'=> array('media-edit-link')))),
-//  );
-//
-//  // Oh god, there must be a better way to add a wrapper.
-//  $parents = $element['#parents'];
-//  array_push($parents, 'more_fields');
-//
-//  if ($file) {
-//    $media_wo_file = $file;
-//    $media_wo_file->file = array(); // heh, let's see how this works.
-//    field_attach_prepare_view('media', array($file->fid => $media_wo_file));
-//    entity_prepare_view('media', array($file->fid => $media_wo_file));
-//    $element['more_fields_wrapper']['more_fields'] = field_attach_view('media', $media_wo_file, 'media_preview');
-//  }
-
-  //@HACK: @todo: this is so I can find it in media.js without putting every field in a settings variable.
-  // If I make it hidden (which it should be) it will go to the top of the form... I know this sucks.
-  // This is hidden in media.css
-  $element['fid'] = array(
-    '#type' => 'textfield',
-    '#default_value' => $fid,
-    '#attributes' => array('class' => array('fid')),
-  );
-
-  // Media browser attach code.
-  $element['#attached']['js'][] = drupal_get_path('module', 'media') . '/javascript/media.fields.js';
-  module_load_include('inc', 'media', 'media.browser');
-  media_include_browser_js();
 
   return $element;
 }
@@ -405,6 +326,7 @@ function media_field_validate($obj_type, $object, $field, $instance, $langcode, 
 
 function media_field_widget_value($element, $input, $form_state) {
   $return = $input;
+  
   if (!is_array($return)) {
     $return = array();
   }

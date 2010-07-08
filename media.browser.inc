@@ -325,6 +325,16 @@ function media_include_browser_js() {
  */
 function media_browser_testbed($form) {
   media_include_browser_js();
+
+  $form['test_element'] = array(
+    '#type' => 'media',
+    '#media_options' => array(
+      'global' => array(
+        'types' => array('video', 'audio'),
+      ),
+    )
+  );
+  
   $launcher = '<a href="#" id="launcher"> Launch Media Browser</a>';
 
   $form['options'] = array(

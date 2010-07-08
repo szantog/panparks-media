@@ -304,20 +304,6 @@ function theme_media_thumbnail($variables) {
 }
 
 /**
- * Theme a managed file element.
- */
-function theme_media_element($variables) {
-  $element = $variables['element'];
-
-  // This wrapper is required to apply JS behaviors and CSS styling.
-  $output = '';
-  $output .= '<div ' . drupal_attributes($element['#attributes']) . '>';
-  $output .= drupal_render_children($element);
-  $output .= '</div>';
-  return $output;
-}
-
-/**
  * Field formatter for displaying a file as a large icon.
  */
 function theme_media_formatter_large_icon($variables) {
