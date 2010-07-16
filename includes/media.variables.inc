@@ -121,6 +121,8 @@ function media_variable_default($name = NULL) {
       'wysiwyg_default_view_mode' => 'media_large',
       // Types which can be selected when embedding media vs wysiwyg.
       'wysiwyg_allowed_types' => array('image'),
+      // Attributes which can be modified via the wysiwyg and persist.
+      'wysiwyg_allowed_attributes' => array('height', 'width', 'hspace', 'vspace', 'border', 'align', 'style', 'alt', 'title', 'class', 'id'),
 
       'field_select_media_text' => 'Select media',
 

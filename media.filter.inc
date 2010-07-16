@@ -125,12 +125,14 @@ function _media_markup($match, $wysiwyg = FALSE) {
   $match = str_replace("[[","",$match);
   $match = str_replace("]]","",$match);
   $tag = $match[0];
-
+  
   try {
     if (!is_string($tag)) {
       throw new Exception('Unable to find matching tag');
     }
+    
     $media = drupal_json_decode($tag);
+  
     if (!isset($media['fid'])) {
       throw new Exception('No file Id');
     }
@@ -144,6 +146,9 @@ function _media_markup($match, $wysiwyg = FALSE) {
      throw new Exception('Could not load media object');
     }
     $settings = is_array($media['attributes']) ? $media['attributes'] : array();
+    $attribute_whitelist = media_variable_get('wysiwyg_allowed_attributes');
+    $settings = array_intersect_key($settings, array_flip($attribute_whitelist));
+    
     // @TODO: What case does this provide for?  Can we add this logic in JS when we embed it?
     // This doesn't look great to me.  Also won't work if the style has anything
     // between width and height (or if they are in reverse order).

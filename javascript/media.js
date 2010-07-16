@@ -44,8 +44,6 @@ Drupal.behaviors.mediaElement = {
     // For each widget (in case of multi-entry)
     $('.media-widget', context).once('mediaBrowserLaunch', function () {
       var options = settings.media.elements[this.id];
-      debug.debug(this);
-      debug.debug(this.id);
       globalOptions = {};
       if (options.global != undefined) {
         var globalOptions = options.global;
