@@ -353,6 +353,31 @@ function media_image_default_styles() {
 }
 
 /**
+ * Implement hook_file_load().
+ */
+function media_file_load($files) {
+  foreach ($files as $file) {
+    // The media module maintains "media" entities whose entity id correspond to
+    // the file's fid. These entities have a "file" field, which like all file
+    // fields, references the file's fid. This creates a self-referential
+    // problem, where each media file always has one field item referencing it
+    // (the one by its own media entity), making file_delete() always fail,
+    // unless we correct it. So, we correct it by telling
+    // file_get_file_reference_count() to ignore these self-references.
+    // @todo Since these are scalar variables rather than arrays, they can be
+    //   clobbered by other modules implementing their own reference ignoring
+    //   logic (for example, file.module itself sets these variables under
+    //   certain conditions). When these variables are clobbered, the
+    //   self-reference problem resurfaces and prevents file deletion. We should
+    //   submit a core patch for file_get_file_reference_count() to support more
+    //   flexibility and module interoperability in this regard.
+    $file->file_field_name = 'file';
+    $file->file_field_type = 'media';
+    $file->file_field_id = $file->fid;
+  }
+}
+
+/**
  * Implement hook_file_insert().
  */
 function media_file_insert($file) {
