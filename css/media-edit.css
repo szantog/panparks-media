@@ -1,0 +1,26 @@
+
+/**
+ * @file
+ * Styles for the media edit page
+ */
+
+.no-overflow {
+   overflow: hidden;
+}
+
+#media-edit .field-name-file {
+  float: left;
+  margin-bottom: 2em;
+  margin-right: 2em;
+}
+
+#media-edit .field-name-file img {
+  background: #FFFFFF;
+  border: 1px solid #CCCCCC;
+  margin-top: 0.9em;
+  padding: 1em;
+}
+
+.form-actions {
+  clear: both;
+}

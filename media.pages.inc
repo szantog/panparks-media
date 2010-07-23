@@ -361,12 +361,18 @@ function media_edit($form, $form_state, $media) {
   drupal_set_title($media->filename);
   field_attach_form('media', $media, $form, $form_state);
   unset($form['file']);
+
+  $form['#attached'] = array(
+    'css' => array(drupal_get_path('module', 'media') . '/css/media-edit.css'),
+  );
   
   $form['preview'] = field_view_field('media', $media, 'file', 'media_preview');
   $form['preview']['#weight'] = -10;
+  $form['preview']['#suffix'] = '<div class="no-overflow">';
 
   // Add the buttons.
   $form['actions'] = array('#type' => 'actions');
+  $form['actions']['#prefix'] = '</div>';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
