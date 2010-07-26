@@ -90,6 +90,7 @@ Drupal.media.popups.mediaBrowser = function (onSelect, globalOptions, pluginOpti
   Drupal.media.popups.setDialogPadding(mediaIframe.dialog(dialogOptions));
   // Remove the title bar.
   //mediaIframe.parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
+  Drupal.media.popups.overlayDisplace(mediaIframe.parents(".ui-dialog"));
   return mediaIframe;
 };
 
@@ -174,6 +175,7 @@ Drupal.media.popups.mediaStyleSelector = function (mediaFile, onSelect, options)
   Drupal.media.popups.setDialogPadding(mediaIframe.dialog(dialogOptions));
   // Remove the title bar.
   mediaIframe.parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
+  Drupal.media.popups.overlayDisplace(mediaIframe.parents(".ui-dialog"));
   return mediaIframe;
 };
 
@@ -249,6 +251,7 @@ Drupal.media.popups.mediaFieldEditor = function (fid, onSelect, options) {
   Drupal.media.popups.setDialogPadding(mediaIframe.dialog(dialogOptions));
   // Remove the title bar.
   mediaIframe.parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
+  Drupal.media.popups.overlayDisplace(mediaIframe.parents(".ui-dialog"));
   return mediaIframe;
 };
 
@@ -317,5 +320,14 @@ Drupal.media.popups.getPopupIframe = function (src, id, options) {
   .attr('id', id)
   .attr('scrolling', options.scrolling);
 };
+
+Drupal.media.popups.overlayDisplace = function (dialog) {
+  if (parent.window.Drupal.overlay) {
+    var overlayDisplace = parent.window.Drupal.overlay.getDisplacement('top');
+    if (dialog.offset().top < overlayDisplace) {
+      dialog.css('top', overlayDisplace);
+    }
+  }
+}
 
 })(jQuery);
