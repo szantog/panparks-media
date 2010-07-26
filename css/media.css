@@ -201,3 +201,94 @@
   margin: 0 0 -5px;
   width: auto;
 }
+
+/* @group media browser */
+
+body.page-media-browser {
+  background-color: #fff;
+}
+
+div#media-browser-tabs {
+  -moz-border-radius: 0;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  border: 0;
+}
+
+body.page-media-browser {
+  background-color: #fff;
+}
+
+/* show the throbber on the page */
+div#media-browser .throbber {
+  height:100%;
+  width:100%;
+  position:absolute;
+  background: transparent url('images/loading.gif') no-repeat center center;
+}
+
+#media-browser .ui-tabs-panel {
+  /**
+   * This sucks, I don't want to hardcode this, but don't know how else
+   * to keep the scrollbar INSIDE the iframe.
+   */
+  height: 410px;
+  overflow-y: auto;
+}
+
+#media-browser-library-list .label-wrapper {
+  margin-left: 0;
+}
+
+/* @end media browser */
+
+/* @group media edit page */
+
+.no-overflow {
+   overflow: hidden;
+}
+
+.media-image-left .field-name-file {
+  float: left;
+  margin-bottom: 2em;
+  margin-right: 2em;
+}
+
+.media-image-left .field-name-file img {
+  background: #FFFFFF;
+  border: 1px solid #CCCCCC;
+  margin-top: 0.9em;
+  padding: 1em;
+}
+
+.media-image-left .form-actions {
+  clear: both;
+}
+
+/* @end media edit page */
+
+/* @group Styles for the media format form */
+
+#media-format-form {
+  margin:30px;
+}
+
+#edit-options {
+  margin: 0;
+}
+
+#edit-options .form-item-format label {
+  display: inline;
+}
+
+#media-format-form .media-item {
+  float: left;
+  margin-left: 0;
+  margin-top: 0;
+}
+
+#media-format-form .label-wrapper {
+  margin-left: 0;
+}
+
+/* @end media format form */

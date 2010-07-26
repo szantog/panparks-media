@@ -387,8 +387,10 @@ function media_edit($form, $form_state, $media) {
   unset($form['file']);
 
   $form['#attached'] = array(
-    'css' => array(drupal_get_path('module', 'media') . '/css/media-edit.css'),
+    'css' => array(drupal_get_path('module', 'media') . '/css/media.css'),
   );
+
+  $form['#attributes'] = array('class' => 'media-image-left');
   
   $form['preview'] = field_view_field('media', $media, 'file', 'media_preview');
   $form['preview']['#weight'] = -10;
