@@ -1,7 +1,7 @@
 
 ul#media-browser-library-list {
 	list-style: none;
-	margin: 0;
+	margin: -10px 0 0 0;
 	padding: 0px;
 	background-color: white;
 }
@@ -13,4 +13,10 @@ ul#media-browser-library-list {
 #media-tab-library #scrollbox{
 	height:300px;
 	overflow:auto; overflow-x:hidden;
+}
+
+#scrollbox #status {
+  clear: both;
+  text-align: center;
+  margin-top: 10px;
 }

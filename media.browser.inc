@@ -213,7 +213,7 @@ function media_media_browser_plugin_view($plugin_name, $params) {
         // We should probably change this to load dynamically when requested
         // via the JS file.
         ),
-        '#markup' => '<div id="container"><div id="scrollbox"><ul id="media-browser-library-list" class="media-list-thumbnails"></ul></div><div id="status"></div></div>',
+        '#markup' => '<div id="container"><div id="scrollbox"><ul id="media-browser-library-list" class="media-list-thumbnails"></ul><div id="status"></div></div></div>',
       );
     break;
   }

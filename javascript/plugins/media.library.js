@@ -11,8 +11,10 @@ Drupal.behaviors.mediaLibrary = {
         // @todo: implement the types param here.
         var params = {};
         params.types = Drupal.settings.media.browser.library.types;
-        library.reset($(ui.panel));
+        // Why did we destroy the thumbnails to rebuild them?
+        //library.reset($(ui.panel));
         library.start($(ui.panel), params);
+        $('#scrollbox').bind('scroll', library, library.scrollUpdater);
       }
     });
   }
@@ -44,8 +46,7 @@ Drupal.media.browser.library.prototype.reset = function (renderElement) {
 Drupal.media.browser.library.prototype.start = function (renderElement, params) {
   this.renderElement = renderElement;
   this.params = params;
-  //this.loadMedia();
-  this.scrollUpdater();
+  this.loadMedia();
 };
 
 /**
@@ -53,25 +54,23 @@ Drupal.media.browser.library.prototype.start = function (renderElement, params) 
  */
 Drupal.media.browser.library.prototype.loadMedia = function () {
   var that = this;
-  $('#status').text('Loading...');
+  $('#status').text('Loading...').show();
   $.extend(this.params, {start: this.cursor, limit: this.settings.limit});
 
   var gotMedia = function (data, status) {
-    $('#status').text('');
-    if (data.media.length == 0) {
-      // we're at the end of the line
-      clearTimeout(that.updaterTimeout);
-      // There must be a better way to do this.
-      //that.done = true;
-      return;
+    $('#status').text('').hide();
+    if (data.media.length < that.params.limit) {
+      // We remove the scroll event listener, nothing more to load after this.
+      $('#scrollbox').unbind('scroll');
     }
     that.mediaFiles = that.mediaFiles.concat(data.media);
     that.render(that.renderElement);
+    // Remove the flag that prevents loading of more media
+    that.loading = false;
   };
 
   var errorCallback = function () {
     alert('Error getting media.');
-    clearTimeout(that.updaterTimeout);
   };
 
   $.ajax({
@@ -84,18 +83,21 @@ Drupal.media.browser.library.prototype.loadMedia = function () {
   });
 };
 
-Drupal.media.browser.library.prototype.scrollUpdater = function (){
-  var scrolltop = $('#scrollbox').attr('scrollTop');
-  var scrollheight = $('#scrollbox').attr('scrollHeight');
-  var windowheight = $('#scrollbox').attr('clientHeight');
-  var scrolloffset = 20;
+Drupal.media.browser.library.prototype.scrollUpdater = function (e){
+  if (!e.data.loading) {
+    var scrollbox = $('#scrollbox');
+    var scrolltop = scrollbox.attr('scrollTop');
+    var scrollheight = scrollbox.attr('scrollHeight');
+    var windowheight = scrollbox.attr('clientHeight');
+    var scrolloffset = 20;
 
-  if(scrolltop >= (scrollheight - (windowheight + scrolloffset))) {
-    //fetch new items
-    this.loadMedia();
+    if(scrolltop >= (scrollheight - (windowheight + scrolloffset))) {
+      // Set a flag so we don't make multiple concurrent AJAX calls
+      e.data.loading = true;
+      // Fetch new items
+      e.data.loadMedia();
+    }
   }
-  var that = this;
-  this.updaterTimeout = setTimeout(function () { that.scrollUpdater(); }, 1500);
 };
 
 /**
@@ -126,11 +128,8 @@ Drupal.media.browser.library.prototype.render = function (renderElement) {
     }
   }
 
-  while (1) {
+  while (this.cursor < this.mediaFiles.length) {
     var mediaFile = this.getNextMedia();
-    if (mediaFile === false) {
-      break;
-    }
 
     var listItem = $('<li></li>').appendTo(mediaList)
       .attr('id', 'media-item-' + mediaFile.fid)
