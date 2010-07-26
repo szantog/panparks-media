@@ -180,6 +180,43 @@ Drupal.wysiwyg.plugins.media = {
       mediaAttributes[sorter[prop].name] = sorter[prop].value;
     }
 
+    // The following 5 ifs are dedicated to IE7
+    // If the style is null, it is because IE7 can't read values from itself
+    if (jQuery.browser.msie && jQuery.browser.version == '7.0') {
+      if (mediaAttributes.style === "null") {
+        var imgHeight = imgNode.css('height');
+        var imgWidth = imgNode.css('width');
+        mediaAttributes.style = {
+          height: imgHeight,
+          width: imgWidth
+        }
+        if (!mediaAttributes['width']) {
+          mediaAttributes['width'] = imgWidth;
+        }
+        if (!mediaAttributes['height']) {
+          mediaAttributes['height'] = imgHeight;
+        }
+      }
+      // If the attribute width is zero, get the CSS width
+      if (Number(mediaAttributes['width']) === 0) {
+        mediaAttributes['width'] = imgNode.css('width');
+      }
+      // IE7 does support 'auto' as a value of the width attribute. It will not
+      // display the image if this value is allowed to pass through
+      if (mediaAttributes['width'] === 'auto') {
+        delete mediaAttributes['width'];
+      }
+      // If the attribute height is zero, get the CSS height
+      if (Number(mediaAttributes['height']) === 0) {
+        mediaAttributes['height'] = imgNode.css('height');
+      }
+      // IE7 does support 'auto' as a value of the height attribute. It will not
+      // display the image if this value is allowed to pass through
+      if (mediaAttributes['height'] === 'auto') {
+        delete mediaAttributes['height'];
+      }
+    }
+
     // Remove elements from attribs using the blacklist
     for (var blackList in Drupal.settings.media.blacklist) {
       delete mediaAttributes[Drupal.settings.media.blacklist[blackList]];
