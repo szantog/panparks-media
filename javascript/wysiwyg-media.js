@@ -94,7 +94,15 @@ Drupal.wysiwyg.plugins.media = {
    * @return HTML of <img> tag inside formattedMedia
    */
   stripDivs: function (formattedMedia) {
-    return $('<div>').append( $('img', $(formattedMedia)).eq(0).clone() ).html();
+    // Check to see if the image tag has divs to strip
+    var stripped = null;
+    if ($(formattedMedia).is('img')) {
+      stripped = this.outerHTML($(formattedMedia));
+    } else {
+      stripped = this.outerHTML($('img', $(formattedMedia)));
+    }
+    // This will fail if we pass the img tag without anything wrapping it, like we do when re-enabling WYSIWYG
+    return stripped;
   },
 
   /**
@@ -155,16 +163,23 @@ Drupal.wysiwyg.plugins.media = {
     // Currently this is the <img> itself
     // Collect all attribs to be stashed into tagContent
     var mediaAttributes = {};
-
     var imgElement = imgNode[0];
+    var sorter = [];
 
     // @todo: this does not work in IE, width and height are always 0.
     for (i=0; i< imgElement.attributes.length; i++) {
       var attr = imgElement.attributes[i];
       if (attr.specified == true) {
-        mediaAttributes[attr.name] = attr.value;
+        sorter[i] = attr;
       }
     }
+
+    sorter.sort(this.sortAttributes);
+    
+    for (var prop in sorter) {
+      mediaAttributes[sorter[prop].name] = sorter[prop].value;
+    }
+
     // Remove elements from attribs using the blacklist
     for (var blackList in Drupal.settings.media.blacklist) {
       delete mediaAttributes[Drupal.settings.media.blacklist[blackList]];
@@ -177,6 +192,20 @@ Drupal.wysiwyg.plugins.media = {
       "attributes": mediaAttributes
     };
     return '[[' + JSON.stringify(tagContent) + ']]';
+  },
+  /*
+   * 
+   */
+  sortAttributes: function (a, b) {
+    var nameA = a.name.toLowerCase();
+    var nameB = b.name.toLowerCase();
+    if (nameA < nameB) {
+      return -1;
+    }
+    if (nameA > nameB) {
+      return 1;
+    }
+    return 0;
   }
 };
 
