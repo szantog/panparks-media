@@ -89,7 +89,7 @@ Drupal.media.popups.mediaBrowser = function (onSelect, globalOptions, pluginOpti
 
   Drupal.media.popups.setDialogPadding(mediaIframe.dialog(dialogOptions));
   // Remove the title bar.
-  //mediaIframe.parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
+  mediaIframe.parents(".ui-dialog").find(".ui-dialog-titlebar").remove();
   Drupal.media.popups.overlayDisplace(mediaIframe.parents(".ui-dialog"));
   return mediaIframe;
 };
