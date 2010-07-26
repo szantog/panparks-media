@@ -196,6 +196,19 @@ function media_menu() {
     'theme callback' => '_node_custom_theme',
   );
 
+  $items['media/%media_multi/multiedit'] = array(
+    'title' => 'Multi Edit',
+    'page callback' => 'media_page_multiedit',
+    'page arguments'  => array(1),
+    'access callback' => 'media_access',
+    'access arguments' => array('edit'),
+    'weight' => 0,
+    'type' => MENU_CALLBACK,
+    'file' => 'media.pages.inc',
+     // Use the same setting as node module
+    'theme callback' => '_node_custom_theme',
+  );
+
   $items['media/%media/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'media_page_delete',
@@ -459,8 +472,33 @@ function media_media_operations() {
       'label' => t('Delete'),
       'callback' => NULL,
     ),
+    'edit' => array(
+      'label' => t('Edit'),
+      'callback' => NULL,
+      'redirect' => 'media/%fids/multiedit'
+    ),
   );
+  
+  if (!module_exists('multiform')) {
+    // If the multiform module is not installed, do not show this option.
+    unset($operations['edit']);
+  }
   return $operations;
+}
+
+/**
+ * Implementation of hook_forms()
+ */ 
+function media_forms($form_id, $args) {
+  // To support the multiedit form, each form has to have a unique ID.
+  // So we name all the forms media_edit_N where the first requested form is
+  // media_edit_0, 2nd is media_edit_1, etc.
+  if ($form_id != 'media_edit' && (strpos($form_id, 'media_edit') == 0)){
+    $forms[$form_id] = array(
+      'callback' => 'media_edit',
+    );
+  }
+  return $forms;
 }
 
 /* ***************************************** */
@@ -470,12 +508,28 @@ function media_media_operations() {
 /**
  * Loads a Media Asset
  *
- * @param $fid
- * @return StdClass
+ * @param string $fid
+ * @return Media
  */
 function media_load($fid) {
   if ($files = entity_load('media', array($fid))) {
     return array_shift($files);
+  }
+}
+
+/**
+ * Loads multiple media Assets
+ *
+ * @param string $fids
+ *  Separated by plus(+) signs. e.g. 3+6+12+99
+ *
+ * @return array
+ *  An array of corresponding media entities.
+ */ 
+function media_multi_load($fids) {
+  $fids = explode(" ", $fids);
+  if ($files = entity_load('media', $fids)) {
+    return $files;
   }
 }
 

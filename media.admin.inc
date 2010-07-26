@@ -253,8 +253,11 @@ function media_admin_submit($form, &$form_state) {
       $args = array($files);
     }
     call_user_func_array($function, $args);
-
     cache_clear_all();
+  }
+  elseif ($operation['redirect']) {
+    $fids = implode(' ', array_keys(array_filter($form_state['values']['files'])));
+    $form_state['redirect'] = array(str_replace('%fids', $fids, $operation['redirect']), array('query' => array('destination' => 'admin/content/media')));
   }
   else {
     // We need to rebuild the form to go to a second step. For example, to

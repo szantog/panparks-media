@@ -39,11 +39,35 @@ function media_preview_ajax() {
 }
 
 /**
- * Menu callback; presents the Media editing form, or redirects to delete confirmation.
+ * Menu callback; presents the Media editing form.
  */
 function media_page_edit($media) {
   drupal_set_title(t('Edit @title', array('@title' => drupal_set_title($media->filename))));
   return drupal_get_form('media_edit', $media);
+}
+
+/**
+ * Menu callback; presents the Media editing form for multiple items.
+ */
+function media_page_multiedit($media_items) {
+  if (!module_exists('multiform')) {
+    drupal_set_message('To edit multiple media items, you must install the multiform module.');
+  }
+  $i = 0;
+  foreach ($media_items as $item) {
+    // To maintain unique form_ids, increment this counter.
+    // @see media_forms().
+    $i++;
+    $forms[] = array("media_edit_$i", $item);
+  }
+  $form = call_user_func_array('multiform_get_form', $forms);
+  
+  unset($form['buttons']['Delete']);
+  
+  // Would be nice to add this to show a message, but not working.
+  // Can debug.
+  //$form['buttons']['Save']['#submit'][] = 'media_page_multiedit_submit';
+  return $form;
 }
 
 /**
