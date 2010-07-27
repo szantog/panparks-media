@@ -57,10 +57,10 @@ function media_admin($form, $form_state) {
     return media_multiple_delete_confirm($form, $form_state, array_filter($form_state['values']['files']));
   }
 
-  // Build the 'Update options' form.
+  // Build the 'Media operations' form.
   $form['options'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Update options'),
+    '#title' => t('Operations'),
     '#prefix' => '<div class="container-inline">',
     '#suffix' => '</div>',
   );
@@ -76,7 +76,7 @@ function media_admin($form, $form_state) {
   $options = array();
   $form['options']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Update'),
+    '#value' => t('Submit'),
     '#submit' => array('media_admin_submit'),
     '#validate' => array('media_admin_validate'),
   );

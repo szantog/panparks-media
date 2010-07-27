@@ -93,7 +93,7 @@ Drupal.behaviors.mediaAdmin = {
       Drupal.behaviors.mediaAdmin.showOrHideEditOptions();
     });
 
-    $('#edit-options').hide();
+    Drupal.behaviors.mediaAdmin.showOrHideEditOptions();
   },
 
   // Checks if any checkboxes on the form are checked, if so it will show the
