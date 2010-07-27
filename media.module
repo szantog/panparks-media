@@ -464,7 +464,6 @@ function media_media_display_types() {
 
 /**
  * Implement hook_media_operations().
- * @TODO: Shouldn't this be using actions or something?
  */
 function media_media_operations() {
   $operations = array(
