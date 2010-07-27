@@ -489,6 +489,7 @@ function media_media_operations() {
  * Implementation of hook_forms()
  */ 
 function media_forms($form_id, $args) {
+  $forms = array();
   // To support the multiedit form, each form has to have a unique ID.
   // So we name all the forms media_edit_N where the first requested form is
   // media_edit_0, 2nd is media_edit_1, etc.
