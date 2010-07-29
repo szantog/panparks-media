@@ -132,19 +132,22 @@ function media_field_ui_view_modes_tabs() {
   return $modes;
 }
 
- function media_field_formatter_prepare_view($obj_type, $objects, $field, $instances, $langcode, &$items, $displays) {
-   
-   if ($field['type'] != 'media') {
-     return;
-   }
-   // Load the file items here?
-   foreach ($items as $delta => $item) {
-     foreach ($item as $file_delta => $file) {
-       $file = (array)$file;
-       $items[$delta][$file_delta] = media_load($file['fid']);
-     }
-   }
- }
+/**
+ * Implements hook_field_prepare_view().
+ */
+function media_field_prepare_view($obj_type, $objects, $field, $instances, $langcode, &$items) {   
+  if ($field['type'] != 'media') {
+    return;
+  }
+  // Load the file items here?
+  foreach ($items as $delta => $item) {
+    foreach ($item as $file_delta => $file) {
+      $file = (array)$file;
+      $items[$delta][$file_delta] = media_load($file['fid']);
+    }
+  }
+}
+
 /**
  * Implement hook_field_formatter_view
  */
