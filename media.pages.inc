@@ -404,18 +404,18 @@ function media_edit($form, $form_state, $media) {
   // Add the buttons.
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['#prefix'] = '</div>';
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Save'),
-    '#weight' => 5,
-    '#submit' => array('media_edit_submit'),
-  );
-  
   $form['actions']['delete'] = array(
     '#type' => 'submit',
     '#value' => t('Delete'),
     '#weight' => 15,
     '#submit' => array('media_edit_delete_submit'),
+  );
+  
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#weight' => 5,
+    '#submit' => array('media_edit_submit'),
   );
 
   $form['fid'] = array(
