@@ -254,10 +254,13 @@ function media_format_form($form, $form_state, $media) {
 
   $instance_info = field_info_instance('media', 'file', $media->type);
   $entity_info = entity_get_info('media');
+  $view_modes = $entity_info['view modes'];
 
   $options = array();
+  
+  drupal_alter('media_wysiwyg_allowed_view_modes', $media_type, $view_modes);
 
-  foreach ($entity_info['view modes'] as $key => $title) {
+  foreach ($view_modes as $key => $title) {
     $format = $instance_info['display'][$key];
     //If the format is set to hidden, don't offer it
     if ($format['type'] == 'hidden') {
