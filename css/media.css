@@ -291,4 +291,10 @@ div#media-browser .throbber {
   margin-left: 0;
 }
 
+.media-multiedit-form .media-edit-form {
+   border-bottom: 1px solid #aaa;
+   padding: 10px 0;
+   margin-top:2em;
+}
+
 /* @end media format form */

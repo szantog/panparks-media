@@ -60,13 +60,16 @@ function media_page_multiedit($media_items) {
     $i++;
     $forms[] = array("media_edit_$i", $item);
   }
+  
   $form = call_user_func_array('multiform_get_form', $forms);
+  $form['#attributes']['class'][] = 'media-multiedit-form';
   
   unset($form['buttons']['Delete']);
-  
   // Would be nice to add this to show a message, but not working.
   // Can debug.
   //$form['buttons']['Save']['#submit'][] = 'media_page_multiedit_submit';
+  
+  drupal_set_title(t('Editing multiple media files'));
   return $form;
 }
 
@@ -390,7 +393,9 @@ function media_edit($form, $form_state, $media) {
     'css' => array(drupal_get_path('module', 'media') . '/css/media.css'),
   );
 
-  $form['#attributes'] = array('class' => array('media-image-left'));
+  // Not sure about this class name, seems to indicate the style.
+  $form['#attributes']['class'][] = 'media-image-left';
+  $form['#attributes']['class'][] = 'media-edit-form';
   
   $form['preview'] = field_view_field('media', $media, 'file', 'media_preview');
   $form['preview']['#weight'] = -10;
