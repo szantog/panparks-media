@@ -264,6 +264,18 @@ function media_menu() {
 }
 
 /**
+ * Implements hook_admin_paths().
+ */
+function media_admin_paths() {
+  $paths = array(
+    'media/*/edit' => TRUE,
+    'media/*/multiedit' => TRUE,
+    'media/*/delete' => TRUE,
+  );
+  return $paths;
+}
+
+/**
  * Implement hook_permission().
  */
 function media_permission() {
