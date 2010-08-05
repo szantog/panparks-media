@@ -135,6 +135,12 @@ function media_enable() {
     media_type_save($type);
     media_type_configure_formatters($type->name, $view_mode_settings[$type->name]);
   }
+  
+  // Set permissions
+  $roles = user_roles();
+  foreach ($roles as $rid => $role) {
+    user_role_grant_permissions($rid, array('view media'));
+  }
 }
 
 /**
@@ -350,5 +356,15 @@ function media_update_7007() {
     if ($type != 'image') {
       media_type_configure_formatters($type, array('media_preview' => 'media_large_icon'));
     }
+  }
+}
+
+/**
+ * Give all users view media perm by default
+ */
+function media_update_7008() {
+  $roles = user_roles();
+  foreach ($roles as $rid => $role) {
+    user_role_grant_permissions($rid, array('view media'));
   }
 }
