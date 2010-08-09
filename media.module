@@ -215,7 +215,7 @@ function media_menu() {
     'page arguments'  => array(1),
     'access callback' => 'media_access',
     'access arguments' => array('edit'),
-    'weight' => 0,
+    'weight' => 1,
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'media.pages.inc',
