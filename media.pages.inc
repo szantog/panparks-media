@@ -42,7 +42,7 @@ function media_preview_ajax() {
  * Menu callback; presents the Media editing form.
  */
 function media_page_edit($media) {
-  drupal_set_title(t('Edit @title', array('@title' => drupal_set_title($media->filename))));
+  drupal_set_title(t('<em>Edit @type</em> @title', array('@type' => $media->type, '@title' => $media->filename)), PASS_THROUGH);
   return drupal_get_form('media_edit', $media);
 }
 
@@ -385,7 +385,6 @@ function media_add_from_url_submit($form, &$form_state) {
  * Form builder: Builds the edit file form.
  */
 function media_edit($form, $form_state, $media) {
-  drupal_set_title($media->filename);
   field_attach_form('media', $media, $form, $form_state);
   unset($form['file']);
 
