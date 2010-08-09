@@ -437,6 +437,7 @@ function media_edit_submit($form, &$form_state) {
   $media = media_load($form_state['values']['fid']);
   field_attach_submit('media', $media, $form, $form_state);
   media_save($media);
+  $form_state['redirect'] = 'media/' . $media->fid;
 }
 
 function media_edit_delete_submit($form, &$form_state) {
