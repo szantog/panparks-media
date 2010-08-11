@@ -540,9 +540,29 @@ function media_load($fid) {
  */ 
 function media_multi_load($fids) {
   $fids = explode(" ", $fids);
-  if ($files = entity_load('media', $fids)) {
+  if ($files = media_load_multiple('media', $fids)) {
     return $files;
   }
+}
+
+/**
+ * Load media entities from the database.
+ *
+ * @see entity_load()
+ *
+ * @param $fids
+ *   An array of media file IDs.
+ * @param $conditions
+ *   An array of conditions on the {file_managed} table in the form
+ *   'field' => $value.
+ * @param $reset
+ *   Whether to reset the internal media_load cache.
+ *
+ * @return
+ *   An array of media objects indexed by fid.
+ */
+function media_load_multiple($fids = array(), $conditions = array(), $reset = FALSE) {
+  return entity_load('media', $fids, $conditions, $reset);
 }
 
 /**

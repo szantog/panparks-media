@@ -134,16 +134,30 @@ function media_field_ui_view_modes_tabs() {
 
 /**
  * Implements hook_field_prepare_view().
+ *
+ * @todo Get resolution on http://drupal.org/node/879034 regarding using this
+ *   hook to load referenced entities.
  */
-function media_field_prepare_view($obj_type, $objects, $field, $instances, $langcode, &$items) {   
-  if ($field['type'] != 'media') {
-    return;
+function media_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
+  // Collect all media IDs that need loading.
+  $fids = array();
+  foreach ($entities as $id => $entity) {
+    foreach ($items[$id] as $delta => $item) {
+      if (is_array($item) && !empty($item['fid'])) {
+        $fids[$item['fid']] = $item['fid'];
+      }
+    }
   }
-  // Load the file items here?
-  foreach ($items as $delta => $item) {
-    foreach ($item as $file_delta => $file) {
-      $file = (array)$file;
-      $items[$delta][$file_delta] = media_load($file['fid']);
+
+  // Load the entities in a single operation.
+  $media_entities = media_load_multiple(array_values($fids));
+
+  // Populate that item data with the loaded entities.
+  foreach ($entities as $id => $entity) {
+    foreach ($items[$id] as $delta => $item) {
+      if (is_array($item) && !empty($item['fid'])) {
+        $items[$id][$delta] = $media_entities[$item['fid']];
+      }
     }
   }
 }
