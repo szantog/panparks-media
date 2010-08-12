@@ -540,7 +540,7 @@ function media_load($fid) {
  */ 
 function media_multi_load($fids) {
   $fids = explode(" ", $fids);
-  if ($files = media_load_multiple('media', $fids)) {
+  if ($files = media_load_multiple($fids)) {
     return $files;
   }
 }
