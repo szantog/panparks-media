@@ -232,6 +232,46 @@ function media_add_upload_submit($form, &$form_state) {
   $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
 }
 
+function media_add_upload_multiple($form, &$form_state, $types) {
+  $form = media_add_upload($form, $form_state, $types);
+  $form['upload']['#type'] = 'plupload';
+  return $form;
+}
+
+function media_add_upload_multiple_submit($form, &$form_state) {
+  $scheme = variable_get('file_default_scheme', 'public') . '://';
+  $saved_files = array();
+  // We can't use file_save_upload() because of http://www.jacobsingh.name/content/tight-coupling-no-not
+  foreach ($form_state['values']['upload'] as $uploaded_file) {
+    if ($uploaded_file['status'] == 'done') {
+      
+      $source = "temporary://" . $uploaded_file['tmpname'];
+      $destination = file_stream_wrapper_uri_normalize($scheme . $uploaded_file['name']);
+      // Rename it to its original name, and put it in its final home.
+      // Note - not using file_move here because if we call file_get_mime
+      // (in file_uri_to_object) while it has a .tmp extension, it horks.
+      
+      $destination = file_unmanaged_move($source, $destination, FILE_EXISTS_RENAME);
+      
+      $file = file_uri_to_object($destination);
+      file_save($file);
+      _media_save_file_permenently($file);
+      
+      $saved_files[] = $file;
+    }
+    else {
+      // @todo: move this to element validate or something and clean up t().
+      form_set_error('pud', "Upload of {$uploaded_file['name']} failed");
+    }
+  }
+  // Get a list of fids to pass back.
+  $fids = array();
+  foreach ($saved_files as $file) {
+    $fids[] = $file->fid;
+  }
+  $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $fids)));
+}
+
 /**
  *  Callback for /media/add/upload and /admin/content/media/add/upload.
  *  @TODO: work on the description.

@@ -26,7 +26,8 @@ Drupal.behaviors.mediaAdmin = {
       // See media.browser.js and media.browser.inc - media_browser()
       // For how it gets passed.
       var options = {
-        disabledPlugins: ['library']
+        disabledPlugins: ['library'],
+        multiselect: true
       };
       Drupal.media.popups.mediaBrowser(function (mediaFiles) {
         // When the media browser succeeds, we refresh

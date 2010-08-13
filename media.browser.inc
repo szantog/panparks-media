@@ -12,17 +12,18 @@ function media_browser($selected = NULL) {
   
   $params = drupal_get_query_parameters();
   array_walk_recursive($params, '_media_recursive_check_plain');
-
-  // We don't want everything, just this array.
   
   // How do we validate these?  I don't know.
   // I think PDO should protect them, but I'm not 100% certain.
-
   if (isset($params['fid'])) {
     // A form has submitted, selected a piece (or pieces) of media and we refreshed.
     // So we're just going to send the media entity out as a JS setting so the browser can close itself.
+    $selected = $params['fid'];
     if (!is_array($params['fid'])) {
       $selected = array($params['fid']);
+    }
+    if (!is_numeric($selected[0])) {
+      throw new Exception('Error selecting media, fid param is not an fid or an array of fids');
     }
     $selectedMedia = entity_load('media', $selected);
     foreach ($selectedMedia as &$media) {
@@ -172,12 +173,14 @@ function media_media_browser_plugin_view($plugin_name, $params) {
   module_load_include('inc', 'media', 'media.pages');
 
   $types = isset($params['types']) ? $params['types'] : array();
-  $multiple = isset($params['multiple']) ? $params['multiple'] : array();
+  $multiselect = isset($params['multiselect']) ? $params['multiselect'] : FALSE;
   
   $redirect = array('media/browser', array('query' => array('render' => 'media-popup')));
   switch ($plugin_name) {
     case 'upload':
-      $upload_form = drupal_get_form('media_add_upload', $types, $multiple);
+      $upload_form_id = ($multiselect == TRUE && module_exists('plupload')) ? 'media_add_upload_multiple' : 'media_add_upload';
+      
+      $upload_form = drupal_get_form($upload_form_id, $types);  
       return array(
         '#title' => t('Upload'),
         'form' => array($upload_form),
@@ -187,7 +190,8 @@ function media_media_browser_plugin_view($plugin_name, $params) {
       );
       break;
     case 'fromurl':
-      $from_url_form = drupal_get_form('media_add_from_url',  $types, $multiple);
+      // @todo: implement the multiselect argument here.
+      $from_url_form = drupal_get_form('media_add_from_url',  $types, $multiselect);
       return array(
         '#title' => t('From URL'),
         'form' => array($from_url_form),
