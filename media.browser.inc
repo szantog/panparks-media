@@ -172,23 +172,25 @@ function media_media_browser_plugin_view($plugin_name, $params) {
   module_load_include('inc', 'media', 'media.pages');
 
   $types = isset($params['types']) ? $params['types'] : array();
+  $multiple = isset($params['multiple']) ? $params['multiple'] : array();
+  dpr($multiple);
   $redirect = array('media/browser', array('query' => array('render' => 'media-popup')));
   switch ($plugin_name) {
     case 'upload':
-      $upload_form = drupal_get_form('media_add_upload', $types);
+      $upload_form = drupal_get_form('media_add_upload', $types, $multiple);
       return array(
         '#title' => t('Upload'),
-        '#markup' => drupal_render($upload_form),
+        'form' => array($upload_form),
         '#attached' => array(
           //'js' => array($path . '/javascript/plugins/media.upload.js'),
         ),
       );
       break;
     case 'fromurl':
-      $from_url_form = drupal_get_form('media_add_from_url', $types);
+      $from_url_form = drupal_get_form('media_add_from_url',  $types, $multiple);
       return array(
         '#title' => t('From URL'),
-        '#markup' => drupal_render($from_url_form),
+        'form' => array($from_url_form),
         '#attached' => array(
           //'js' => array($path . '/javascript/plugins/media.fromurl.js'),
         ),
