@@ -8,11 +8,11 @@ Drupal.behaviors.mediaLibrary = {
     var library = new Drupal.media.browser.library(Drupal.settings.media.browser.library);
     $('#media-browser-tabset').bind('tabsselect', function (event, ui) {
       if (ui.tab.hash === '#media-tab-library') {
-        // @todo: implement the types param here.
+        // Grab the parameters from the Drupal.settings object
         var params = {};
-        params.types = Drupal.settings.media.browser.library.types;
-        // Why did we destroy the thumbnails to rebuild them?
-        //library.reset($(ui.panel));
+        for (var parameter in Drupal.settings.media.browser.library) {
+          params[parameter] = Drupal.settings.media.browser.library[parameter];
+        }
         library.start($(ui.panel), params);
         $('#scrollbox').bind('scroll', library, library.scrollUpdater);
       }
@@ -28,6 +28,7 @@ Drupal.media.browser.library = function (settings) {
 
   this.cursor = 0; // keeps track of what the last requested media object was.
   this.mediaFiles = []; // An array of loaded media files from the server.
+  this.selectedMediaFiles = [];
 };
 
 Drupal.media.browser.library.getDefaults = function () {
@@ -37,15 +38,15 @@ Drupal.media.browser.library.getDefaults = function () {
   };
 };
 
-Drupal.media.browser.library.prototype.reset = function (renderElement) {
-  this.cursor = 0;
-  this.mediaFiles = [];
-  $('#media-browser-library-list', renderElement).html('');
-};
-
 Drupal.media.browser.library.prototype.start = function (renderElement, params) {
   this.renderElement = renderElement;
   this.params = params;
+  // Change the behavior dependent on multiselect
+  if (params.multiselect) {
+    this.clickFunction = this.multiSelect;
+  } else {
+    this.clickFunction = this.singleSelect;
+  }
   this.loadMedia();
 };
 
@@ -113,8 +114,7 @@ Drupal.media.browser.library.prototype.getNextMedia = function () {
 };
 
 Drupal.media.browser.library.prototype.render = function (renderElement) {
-  var that = this;
-
+  
   if (this.mediaFiles.length < 1) {
     $('<div id="media-empty-message" class="media-empty-message"></div>').appendTo(renderElement)
       .html(this.emptyMessage);
@@ -131,23 +131,55 @@ Drupal.media.browser.library.prototype.render = function (renderElement) {
   while (this.cursor < this.mediaFiles.length) {
     var mediaFile = this.getNextMedia();
 
+    var data = {};
+    data.obj = this;
+    data.file = mediaFile;
+
     var listItem = $('<li></li>').appendTo(mediaList)
       .attr('id', 'media-item-' + mediaFile.fid)
       .html(mediaFile.preview)
-      .bind('click', mediaFile, function (e) {
-        // Notify the main browser
-        //this.selectedMedia = mediaFile;
-        $('.media-item').removeClass('selected');
-        $('.media-item', $(this)).addClass('selected');
-        that.mediaSelected([e.data]);
-        //that.settings.onSelect(mediaFile);
-        return false;
-      });
+      .bind('click', data, this.clickFunction);
   }
 };
 
 Drupal.media.browser.library.prototype.mediaSelected = function (media) {
   Drupal.media.browser.selectMedia(media);
 };
+
+Drupal.media.browser.library.prototype.singleSelect = function (event) {
+  var lib = event.data.obj;
+  var file = event.data.file;
+  event.preventDefault();
+  event.stopPropagation();
+
+  $('.media-item').removeClass('selected');
+  $('.media-item', $(this)).addClass('selected');
+  lib.mediaSelected([event.data.file]);
+  return false;
+}
+
+Drupal.media.browser.library.prototype.multiSelect = function (event) {
+  var lib = event.data.obj
+  var file = event.data.file;
+  event.preventDefault();
+  event.stopPropagation();
+
+  // Turn off or on the selection of this item
+  $('.media-item', $(this)).toggleClass('selected');
+
+  // Add or remove the media file from the array
+  var index = lib.selectedMediaFiles.indexOf(event.data.file);
+  if (index == -1) {
+    // Media file isn't selected, add it
+    lib.selectedMediaFiles.push(event.data.file);
+  } else {
+    // Media file has previously been selected, remove it
+    lib.selectedMediaFiles.splice(index, 1);
+  }
+
+  // Pass the array of selected media files to the invoker
+  lib.mediaSelected(lib.selectedMediaFiles);
+  return false;
+}
 
 }(jQuery));

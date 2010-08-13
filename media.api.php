@@ -35,6 +35,7 @@
  *  An array of parameters which came in is $_GET['params'].
  *  The expected parameters is still being defined.
  *   - types: Array of media types to support
+ *   - multiselect: Boolean enabling or disabling multiselect
  *
  * @return
  *  Renderable array.

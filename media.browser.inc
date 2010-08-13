@@ -173,7 +173,7 @@ function media_media_browser_plugin_view($plugin_name, $params) {
 
   $types = isset($params['types']) ? $params['types'] : array();
   $multiple = isset($params['multiple']) ? $params['multiple'] : array();
-  dpr($multiple);
+  
   $redirect = array('media/browser', array('query' => array('render' => 'media-popup')));
   switch ($plugin_name) {
     case 'upload':
@@ -212,6 +212,7 @@ function media_media_browser_plugin_view($plugin_name, $params) {
           'viewMode' => 'thumbnails',
           'getMediaUrl' => url('media/browser/list'),
           'types' => $types,
+          'multiselect' => isset($params['multiselect']) ? $params['multiselect'] : false,
         // We should probably change this to load dynamically when requested
         // via the JS file.
         ),
@@ -272,8 +273,6 @@ function media_browser_fid_list($options = array()) {
    if (!empty($fids)) {
     // Now load the desired media to display.
     $medias = entity_load('media', $fids);
-
-
   }
 
   return $selections;
