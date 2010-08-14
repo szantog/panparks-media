@@ -244,8 +244,7 @@ function media_add_upload_multiple_submit($form, &$form_state) {
   // We can't use file_save_upload() because of http://www.jacobsingh.name/content/tight-coupling-no-not
   foreach ($form_state['values']['upload'] as $uploaded_file) {
     if ($uploaded_file['status'] == 'done') {
-      
-      $source = "temporary://" . $uploaded_file['tmpname'];
+      $source = $uploaded_file['tmppath'];
       $destination = file_stream_wrapper_uri_normalize($scheme . $uploaded_file['name']);
       // Rename it to its original name, and put it in its final home.
       // Note - not using file_move here because if we call file_get_mime
