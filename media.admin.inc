@@ -166,7 +166,7 @@ function media_admin_thumbnails() {
      $form['files'][$media->fid] = array(
        '#type' => 'checkbox',
        '#title' => '',
-       '#prefix' => '<li>' . drupal_render(media_get_thumbnail_preview($media)),
+       '#prefix' => '<li>' . drupal_render(media_get_thumbnail_preview($media, TRUE)),
        '#suffix' => '</li>',
      );
     }

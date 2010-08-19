@@ -1063,9 +1063,10 @@ function _media_save_file_permenently(&$file) {
  * @return array
  *   Renderable array.
  */
-function media_get_thumbnail_preview($media) {
+function media_get_thumbnail_preview($media, $link = NULL) {
   $preview = field_view_field('media', $media, 'file', 'media_preview');
   $preview['#show_names'] = TRUE;
+  $preview['#add_link'] = $link;
   $preview['#theme_wrappers'][] = 'media_thumbnail';
   //$preview['#markup'] = $preview[0]['#markup'];
   return $preview;

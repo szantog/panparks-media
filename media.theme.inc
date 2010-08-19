@@ -296,11 +296,15 @@ function theme_media_thumbnail($variables) {
   //$element['#attached']['css'][] = drupal_get_path('module', 'media') . '/css/media.css';
   drupal_add_css(drupal_get_path('module', 'media') . '/css/media.css');
 
-  
-  
-  // I'm sure this is the wrong way to do this, but can't figure it out... :(
-  return  $prefix . l($thumb, $target, $options) . $label . $suffix;
-
+  $output = $prefix;
+  if (!empty($element['#add_link'])) {
+    $output .= l($thumb, $target, $options);
+  }
+  else {
+    $output .= $thumb;
+  }
+  $output .= $label . $suffix;
+  return $output;
 }
 
 /**
