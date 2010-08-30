@@ -13,15 +13,21 @@
 Drupal.behaviors.mediaAddFromURLPreview = {
   attach: function (context, settings) {
     $('.media-add-from-url', context).once('mediaAddFromURLPreview', function () {
+      /*  If you paste into the textbox and then click submit directly, the AJAX GET
+       *  returns a 404.  As I don't think this is doing anything currently, I've
+       *  commented it out.
       $(this).bind('change', function () {
         $preset = $(this);
         if ($preset.val()) {
           $.getJSON(Drupal.settings.media.add_from_url_preview + '?url=' + $preset.val(), function (data) {
-            // @todo: Check for errors.
-            $('#media-add-from-url-preview').html(data.preview);
+            // @todo: Perform better error checking.
+            if (data && data.preview) {
+              $('#media-add-from-url-preview').html(data.preview);
+            }
           });
         }
       });
+      */
     });
   }
 };
