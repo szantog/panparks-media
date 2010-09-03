@@ -247,9 +247,6 @@ function media_is_type($media, $args) {
   }
 
   if (!empty($args['streams'])) {
-    // @TODO: Write this.
-    // Note that this will ultimately need to be above mimetypes and extensions
-    // so that we can allow for things like flickr photos vs. slideshows, etc.
   }
 }
 

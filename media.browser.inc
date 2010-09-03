@@ -156,8 +156,6 @@ function media_media_browser_plugin_info() {
   $plugins = array(
     'upload' => array(
      ),
-    'fromurl' => array(
-     ),
     'library' => array(
      ),
    );
@@ -186,17 +184,6 @@ function media_media_browser_plugin_view($plugin_name, $params) {
         'form' => array($upload_form),
         '#attached' => array(
           //'js' => array($path . '/javascript/plugins/media.upload.js'),
-        ),
-      );
-      break;
-    case 'fromurl':
-      // @todo: implement the multiselect argument here.
-      $from_url_form = drupal_get_form('media_add_from_url',  $types, $multiselect);
-      return array(
-        '#title' => t('From URL'),
-        'form' => array($from_url_form),
-        '#attached' => array(
-          //'js' => array($path . '/javascript/plugins/media.fromurl.js'),
         ),
       );
       break;
