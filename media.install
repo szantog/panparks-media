@@ -120,6 +120,7 @@ function media_enable() {
 
   // @todo: these are image specific, needs to change
   $view_mode_settings['video'] = $view_mode_defaults;
+  $view_mode_settings['video']['media_large'] = 'styles_file_large';
 
   // This is the default, otherwise could provide
   //$types['video']->type_callback = 'media_default_is_type';
