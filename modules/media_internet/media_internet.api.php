@@ -6,7 +6,7 @@
  * with the following elements:
  *
  * - title
- * - logo (optional)
+ * - image (optional)
  * - hidden: bool If the logo should be shown on form. (optional)
  * - weight (optional)
  */
@@ -14,7 +14,7 @@ function hook_media_internet_providers() {
   return array(
     'youtube' => array(
       'title' => 'youtube',
-      'logo' => 'youtube.jpg'
+      'image' => 'youtube.jpg'
     ),
   );
 }

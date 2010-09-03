@@ -111,8 +111,7 @@ function media_enable() {
     'extensions' => array('mp3', 'ogg', 'wma'),
     'streams' => array('public', 'private'),
   );
-
-
+  
   $types['video'] = new StdClass();
   $types['video']->name = 'video';
   $types['video']->label = "Video";

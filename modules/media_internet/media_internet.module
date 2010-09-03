@@ -79,7 +79,11 @@ function media_internet_add($form, &$form_state = array(), $types = NULL) {
   $form['providers']['header'] = array('#markup' => '<h2> Supported Providers </h2>');
   foreach (media_internet_get_providers() as $key => $provider) {
     if (empty($provider['hidden']) || $provider['hidden'] != TRUE) {
-      $form['providers'][$key] = array('#markup' => $provider['title']);
+      if (isset($provider['image'])) {
+        $form['providers'][$key] = array('#markup' => theme('image', array('path' => $provider['image'], 'title' => $provider['title'])));
+      } else {
+        $form['providers'][$key] = array('#markup' => $provider['title']);
+      }
     }
   }
   if (count($form['providers']) == 1) {
