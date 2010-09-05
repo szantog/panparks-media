@@ -158,7 +158,7 @@ function media_add_upload($form, &$form_state, $types = NULL) {
   
   // A blank set of allowed file extensions means no need to validate.
   if (!$validators['file_validate_extensions'][0]) {
-    $validators['file_validate_extensions'] = array(0 => '');
+    unset($validators['file_validate_extensions']);
   }
   // Use the PHP limit for filesize if no variable was set.
   if (!$validators['file_validate_size']) {
