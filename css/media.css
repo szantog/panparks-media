@@ -274,7 +274,16 @@ div#media-browser .throbber {
 }
 
 #edit-options {
+  clear: both;
   margin: 0;
+}
+
+.media-clear {
+  clear: both;
+}
+
+.media-thumbnails-select {
+  float: left;
 }
 
 #edit-options .form-item-format label {

@@ -53,6 +53,9 @@ function media_admin($form, $form_state) {
     'css' => array($path . '/css/media.css'),
   );
 
+  // Build the display switch.
+  $form['switch'] = media_admin_display_switch(array('active display' => $display));
+
   if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
     return media_multiple_delete_confirm($form, $form_state, array_filter($form_state['values']['files']));
   }
@@ -84,9 +87,6 @@ function media_admin($form, $form_state) {
   include_once $types[$display]['file'];
 
   $form['admin'] = $types[$display]['callback']();
-
-  // Build the display switch.
-  $form['switch'] = media_admin_display_switch(array('active display' => $display));
 
   return $form;
 }
@@ -136,6 +136,7 @@ function media_admin_list() {
    '#header' => $header,
    '#options' => $options,
    '#empty' => t('No media available.'),
+   '#attributes' => array('class' => array('media-display-table', 'media-clear')),
   );
   $form['pager'] = array('#markup' => theme('pager', array('tags' => NULL)));
 
@@ -156,7 +157,7 @@ function media_admin_thumbnails() {
   $options = array();
   $form['files'] = array(
    '#tree' => TRUE,
-   '#prefix' => '<div class="media-display-thumbnails clearfix"><ul class="media-list-thumbnails">',
+   '#prefix' => '<div class="media-display-thumbnails media-clear clearfix"><ul class="media-list-thumbnails">',
    '#suffix' => '</ul></div>',
   );
 

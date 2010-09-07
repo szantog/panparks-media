@@ -42,7 +42,7 @@ Drupal.behaviors.mediaAdmin = {
     // @TODO: Support grabbing more than one page of thumbnails.
     $('<div class="media-thumbnails-select" />')
       .append('<strong>' + Drupal.t('Select') + ':</strong> <a href="#">' + Drupal.t('all') + '</a>, <a href="#">' + Drupal.t('none') + '</a>')
-      .prependTo('.media-display-thumbnails')
+      .prependTo('#media-admin > div')
       .find('a')
       .click(function () {
         var link = $(this);
