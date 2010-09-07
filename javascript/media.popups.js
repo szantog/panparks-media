@@ -80,11 +80,13 @@ Drupal.media.popups.mediaBrowser = function (onSelect, globalOptions, pluginOpti
       return;
     }
     onSelect(selected);
-    $(this).dialog("close");
+    $(this).dialog("destroy");
+    $(this).remove();
   };
 
   dialogOptions.buttons[cancel] = function () {
-    $(this).dialog("close");
+    $(this).dialog("destroy");
+    $(this).remove();
   };
 
   Drupal.media.popups.setDialogPadding(mediaIframe.dialog(dialogOptions));
@@ -116,6 +118,17 @@ Drupal.media.popups.mediaBrowser.getDefaults = function () {
     dialog: Drupal.media.popups.getDialogOptions()
   };
 };
+
+Drupal.media.popups.mediaBrowser.finalizeSelection = function () {
+  var selected = this.contentWindow.Drupal.media.browser.selectedMedia;
+  if (selected.length < 1) {
+    alert(notSelected);
+    return;
+  }
+  onSelect(selected);
+  $(this).dialog("destroy");
+  $(this).remove();
+}
 
 /**
  * Style chooser Popup. Creates a dialog for a user to choose a media style.
@@ -165,11 +178,13 @@ Drupal.media.popups.mediaStyleSelector = function (mediaFile, onSelect, options)
       return;
     }
     onSelect(formattedMedia);
-    $(this).dialog("close");
+    $(this).dialog("destroy");
+    $(this).remove();
   };
 
   dialogOptions.buttons[cancel] = function () {
-    $(this).dialog("close");
+    $(this).dialog("destroy");
+    $(this).remove();
   };
 
   Drupal.media.popups.setDialogPadding(mediaIframe.dialog(dialogOptions));
@@ -188,7 +203,6 @@ Drupal.media.popups.mediaStyleSelector.getDefaults = function () {
     onLoad: Drupal.media.popups.mediaStyleSelector.mediaBrowserOnLoad
   };
 };
-
 
 
 /**
@@ -241,11 +255,13 @@ Drupal.media.popups.mediaFieldEditor = function (fid, onSelect, options) {
       return;
     }
     onSelect(formattedMedia);
-    $(this).dialog("close");
+    $(this).dialog("destroy");
+    $(this).remove();
   };
 
   dialogOptions.buttons[cancel] = function () {
-    $(this).dialog("close");
+    $(this).dialog("destroy");
+    $(this).remove();
   };
 
   Drupal.media.popups.setDialogPadding(mediaIframe.dialog(dialogOptions));
@@ -278,13 +294,14 @@ Drupal.media.popups.mediaFieldEditor.getDefaults = function () {
 Drupal.media.popups.getDialogOptions = function () {
   return {
     buttons: {},
+    dialogClass: 'media-wrapper',
     modal: true,
-    draggable: true,
-    resizable: true,
+    draggable: false,
+    resizable: false,
     minWidth: 600,
     width: 800,
-    height:500,
-    position: 'top',
+    height: 500,
+    position: 'center',
     overlay: {
       backgroundColor: '#000000',
       opacity: 0.4

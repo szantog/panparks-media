@@ -202,10 +202,19 @@
   width: auto;
 }
 
+.ui-dialog.media-wrapper .ui-dialog-buttonpane {
+  display: none;
+}
+
+.ui-widget.ui-widget-content.media-wrapper {
+  background: none;
+  border: none;
+}
+
 /* @group media browser */
 
 body.page-media-browser {
-  background-color: #fff;
+  background: none;
 }
 
 div#media-browser-tabs {
@@ -213,10 +222,6 @@ div#media-browser-tabs {
   -webkit-border-radius: 0;
   border-radius: 0;
   border: 0;
-}
-
-body.page-media-browser {
-  background-color: #fff;
 }
 
 /* show the throbber on the page */
@@ -238,6 +243,33 @@ div#media-browser .throbber {
 
 #media-browser-library-list .label-wrapper {
   margin-left: 0;
+}
+
+#mediaBrowser body {
+  background: none;
+}
+
+#media-browser-tabset {
+  background: #FFF;
+}
+
+#media-browser-tabset .media-browser-tab {
+  border: 1px solid #aaa;
+}
+
+#media-browser-tabset .ui-tabs-nav {
+  border-left: 1px solid #aaa;
+  border-right: 1px solid #aaa;
+  border-top: 1px solid #aaa;
+}
+
+.fake-ok {
+  margin-right: 5px;
+}
+
+a.button {
+  display: inline-block;
+  line-height: 21px;
 }
 
 /* @end media browser */
@@ -304,6 +336,23 @@ div#media-browser .throbber {
    border-bottom: 1px solid #aaa;
    margin-bottom:1em;
    margin-top:1.5em;
+}
+
+body.page-media-format-form {
+  background: none;
+}
+
+#media-browser-page {
+  background: #FFF;
+  padding: 1px 0;
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+}
+
+a.button {
+  display: inline-block;
+  margin: 10px 5px 0 0;
 }
 
 /* @end media format form */
