@@ -22,36 +22,6 @@ function media_field_info() {
 }
 
 /**
- * Implements hook_field_schema().
- */
-function media_field_schema($field) {
-  return array(
-    'columns' => array(
-      'fid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => FALSE,
-      ),
-      'title' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => FALSE,
-      ),
-      'data' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'size' => 'big',
-        'serialize' => TRUE,
-        //'description' => 'Used for storing additional information.  Can be harnessed by widgets',
-      ),
-    ),
-    'indexes' => array(
-      'fid' => array('fid'),
-    ),
-  );
-}
-
-/**
  * Implements hook_field_is_empty().
  */
 function media_field_is_empty($item, $field) {
