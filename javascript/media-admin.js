@@ -18,7 +18,9 @@ Drupal.behaviors.mediaAdmin = {
 
     // Configure the "Add file" link to fire the media browser popup.
     $('ul.action-links li', context).remove();
-
+    if ($('form.media-list-operation', context).length != 0) {
+      return;  
+    }
     var $launcherLink = $('<a class="media-launcher" href="#"></a>').html('Add file');
     $launcherLink.bind('click', function () {
       // This option format needs *serious* work.

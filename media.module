@@ -527,6 +527,7 @@ function media_load($fid) {
   if ($files = entity_load('media', array($fid))) {
     return array_shift($files);
   }
+  return FALSE;
 }
 
 /**

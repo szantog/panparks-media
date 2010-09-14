@@ -77,27 +77,42 @@ function media_page_multiedit($media_items) {
  * Menu callback; shows delete confirmation form.
  */
 function media_page_delete($media) {
-  $files = array($media->fid => $media);
-  return drupal_get_form('media_multiple_delete_confirm', $files);
+  drupal_set_title(t('<em>Delete @type</em> @title', array('@type' => $media->type, '@title' => $media->filename)), PASS_THROUGH);
+  // Don't bother showing the form if the item is in use, since we won't allow
+  // them to delete it anyway. Note that file_usage_list() requires a stdClass,
+  // so we can't pass the $media object in directly.
+  $file = file_load($media->fid);
+  $references = file_usage_list($file);
+  if (!empty($references)) {
+    return t('The file %title is in use and cannot be deleted.', array('%title' => $media->filename));
+  }
+  else {
+    $files = array($media->fid => $media);
+    return drupal_get_form('media_multiple_delete_confirm', $files, '<front>', 'media/' . $media->fid);
+  }
 }
-
 
 /**
  * Confirm the request to delete files.
  */
-function media_multiple_delete_confirm($form, &$form_state, $files) {
-  $form['files'] = array('#prefix' => '<ul>', '#suffix' => '</ul>', '#tree' => TRUE);
-  // array_filter returns only elements with TRUE values
+function media_multiple_delete_confirm($form, &$form_state, $files, $redirect_on_success = NULL, $redirect_on_cancel = NULL) {
+  $form['files'] = array('#tree' => TRUE);
+  $form['file_titles'] = array('#theme' => 'item_list');
   foreach ($files as $fid => $value) {
     $title = db_query('SELECT filename FROM {file_managed} WHERE fid = :fid', array(':fid' => $fid))->fetchField();
     $form['files'][$fid] = array(
-      '#type' => 'hidden',
+      '#type' => 'value',
       '#value' => $fid,
-      '#prefix' => '<li>',
-      '#suffix' => check_plain($title) . "</li>\n",
     );
+    $form['file_titles']['#items'][] = check_plain($title);
   }
   $form['operation'] = array('#type' => 'hidden', '#value' => 'delete');
+  if (isset($redirect_on_success)) {
+    $form['redirect_on_success'] = array(
+      '#type' => 'value',
+      '#value' => $redirect_on_success,
+    );
+  }
   $form['#submit'][] = 'media_multiple_delete_confirm_submit';
 
   $confirm_question = format_plural(count($files),
@@ -105,9 +120,11 @@ function media_multiple_delete_confirm($form, &$form_state, $files) {
                                   'Are you sure you want to delete these items?');
 
   return confirm_form($form,
-                    $confirm_question,
-                    $_GET['q'], t('This action cannot be undone.'),
-                    t('Delete'), t('Cancel'));
+    $confirm_question,
+    isset($redirect_on_cancel) ? $redirect_on_cancel : current_path(),
+    t('This action cannot be undone.'),
+    t('Delete'),
+    t('Cancel'));
 }
 
 /**
@@ -135,6 +152,9 @@ function media_multiple_delete_confirm_submit($form, &$form_state) {
         watchdog('media', $message);
         drupal_set_message($message);
       }
+    }
+    if (isset($form_state['values']['redirect_on_success'])) {
+      $form_state['redirect'] = $form_state['values']['redirect_on_success'];
     }
   }
 }

@@ -17,6 +17,18 @@ require_once dirname(__FILE__) . '/media.pages.inc';
  */
 function media_admin($form, $form_state) {
   global $user;
+  
+  $path = drupal_get_path('module', 'media');
+
+  $form['#attached'] = array(
+    'js' => array($path . '/javascript/media-admin.js'),
+    'css' => array($path . '/css/media.css'),
+  );
+
+  if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
+    $form['#attributes']['class'][] = "media-list-operation";
+    return media_multiple_delete_confirm($form, $form_state, array_filter($form_state['values']['files']), 'admin/content/media', 'admin/content/media');
+  }
 
   require_once dirname(__FILE__) . '/media.browser.inc';
   media_include_browser_js();
@@ -46,19 +58,8 @@ function media_admin($form, $form_state) {
     }
   }
 
-  $path = drupal_get_path('module', 'media');
-
-  $form['#attached'] = array(
-    'js' => array($path . '/javascript/media-admin.js'),
-    'css' => array($path . '/css/media.css'),
-  );
-
   // Build the display switch.
   $form['switch'] = media_admin_display_switch(array('active display' => $display));
-
-  if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
-    return media_multiple_delete_confirm($form, $form_state, array_filter($form_state['values']['files']));
-  }
 
   // Build the 'Media operations' form.
   $form['options'] = array(
@@ -256,7 +257,7 @@ function media_admin_submit($form, &$form_state) {
     call_user_func_array($function, $args);
     cache_clear_all();
   }
-  elseif ($operation['redirect']) {
+  elseif (!empty($operation['redirect'])) {
     $fids = implode(' ', array_keys(array_filter($form_state['values']['files'])));
     $form_state['redirect'] = array(str_replace('%fids', $fids, $operation['redirect']), array('query' => array('destination' => 'admin/content/media')));
   }
