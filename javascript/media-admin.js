@@ -38,55 +38,57 @@ Drupal.behaviors.mediaAdmin = {
     });
     $('ul.action-links', context).append($('<li></li>').append($launcherLink));
 
-    // Implements 'select all/none' for thumbnail view.
-    // @TODO: Support grabbing more than one page of thumbnails.
-    $('<div class="media-thumbnails-select" />')
-      .append('<strong>' + Drupal.t('Select') + ':</strong> <a href="#">' + Drupal.t('all') + '</a>, <a href="#">' + Drupal.t('none') + '</a>')
-      .prependTo('#media-admin > div')
-      .find('a')
-      .click(function () {
-        var link = $(this);
-        switch ($(this).text()) {
-          case Drupal.t('all'):
-            link.parents('.media-display-thumbnails').find(':checkbox').attr('checked', true).change();
-            break;
-          case Drupal.t('none'):
-            link.parents('.media-display-thumbnails').find(':checkbox').attr('checked', false).change();
-            break;
+
+    if ($('body.page-admin-content-media-thumbnails').length != 0) {
+      // Implements 'select all/none' for thumbnail view.
+      // @TODO: Support grabbing more than one page of thumbnails.
+      var allLink = $('<a href="#">' + Drupal.t('all') + '</a>')
+        .click(function () {
+          $('.media-display-thumbnails', $(this).parents('form')).find(':checkbox').attr('checked', true).change();
+          return false;
+        });
+      var noneLink = $('<a href="#">' + Drupal.t('none') + '</a>')
+        .click(function () {
+          $('.media-display-thumbnails', $(this).parents('form')).find(':checkbox').attr('checked', false).change();
+          return false;
+        });
+      $('<div class="media-thumbnails-select" />')
+        .append('<strong>' + Drupal.t('Select') + ':</strong> ')
+        .append(allLink)
+        .append(', ')
+        .append(noneLink)
+        .prependTo('#media-admin > div')
+      // If the media item is clicked anywhere other than on the image itself
+      // check the checkbox. For the record, JS thinks this is wonky.
+      $('.media-item').bind('click', function (e) {
+        if ($(e.target).is('img, a')) {
+          return;
         }
-        return false;
+        var checkbox = $(this).parent().find(':checkbox');
+        if (checkbox.is(':checked')) {
+          checkbox.attr('checked', false).change();
+        } else {
+          checkbox.attr('checked', true).change();
+        }
       });
-
-    // If the media item is clicked anywhere other than on the image itself
-    // check the checkbox. For the record, JS thinks this is wonky.
-    $('.media-item').bind('click', function (e) {
-      if ($(e.target).is('img, a')) {
-        return;
-      }
-      var checkbox = $(this).parent().find(':checkbox');
-      if (checkbox.is(':checked')) {
-        checkbox.attr('checked', false).change();
-      } else {
-        checkbox.attr('checked', true).change();
-      }
-    });
-
-    // Add an extra class to selected thumbnails.
-    $('.media-display-thumbnails :checkbox').each(function () {
-      var checkbox = $(this);
-      if (checkbox.is(':checked')) {
-        $(checkbox.parents('li').find('.media-item')).addClass('selected');
-      }
-
-      checkbox.bind('change.media', function () {
+  
+      // Add an extra class to selected thumbnails.
+      $('.media-display-thumbnails :checkbox').each(function () {
+        var checkbox = $(this);
         if (checkbox.is(':checked')) {
           $(checkbox.parents('li').find('.media-item')).addClass('selected');
         }
-        else {
-          $(checkbox.parents('li').find('.media-item')).removeClass('selected');
-        }
+  
+        checkbox.bind('change.media', function () {
+          if (checkbox.is(':checked')) {
+            $(checkbox.parents('li').find('.media-item')).addClass('selected');
+          }
+          else {
+            $(checkbox.parents('li').find('.media-item')).removeClass('selected');
+          }
+        });
       });
-    });
+    }
 
     // When any checkboxes are clicked on this form check to see if any are checked.
     // If any checkboxes are checked, show the edit options (@todo rename to edit-actions).
