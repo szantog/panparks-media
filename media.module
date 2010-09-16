@@ -378,31 +378,6 @@ function media_image_default_styles() {
 }
 
 /**
- * Implement hook_file_load().
- */
-function media_file_load($files) {
-  foreach ($files as $file) {
-    // The media module maintains "media" entities whose entity id correspond to
-    // the file's fid. These entities have a "file" field, which like all file
-    // fields, references the file's fid. This creates a self-referential
-    // problem, where each media file always has one field item referencing it
-    // (the one by its own media entity), making file_delete() always fail,
-    // unless we correct it. So, we correct it by telling
-    // file_get_file_reference_count() to ignore these self-references.
-    // @todo Since these are scalar variables rather than arrays, they can be
-    //   clobbered by other modules implementing their own reference ignoring
-    //   logic (for example, file.module itself sets these variables under
-    //   certain conditions). When these variables are clobbered, the
-    //   self-reference problem resurfaces and prevents file deletion. We should
-    //   submit a core patch for file_get_file_reference_count() to support more
-    //   flexibility and module interoperability in this regard.
-    $file->file_field_name = 'file';
-    $file->file_field_type = 'media';
-    $file->file_field_id = $file->fid;
-  }
-}
-
-/**
  * Implement hook_file_insert().
  */
 function media_file_insert($file) {
@@ -588,6 +563,23 @@ function media_save($media) {
   }
   else {
     field_attach_update('media', $media);
+  }
+
+  // Since the Media module can't make files into fieldable entities directly
+  // without hacking Drupal core, it does so indirectly via a "media" entity
+  // type. The indirection requires media entities to have one of its fields be
+  // a file field containing the file that defines the media entity itself.
+  // The File module treats this media entity / file field relationship like
+  // any other entity / file field relationship, and increments the file usage
+  // count whenever the media entity is saved, as part of the
+  // field_attach_(insert|update)() execution above. However, we don't want the
+  // media entity's reference to itself to count as usage, since that would
+  // result in all media entities being "in use" and undeletable, so we remove
+  // the self-referential usage record.
+  if ($media->fid) {
+    // file_usage_delete() requires the first argument to be an instance of
+    // stdClass, but $media is an instance of some other class, so we cast it.
+    file_usage_delete((object)(array) $media, 'file', 'media', $media->fid);
   }
 }
 
@@ -913,7 +905,10 @@ function media_save_attached_file($file) {
       field_attach_presave('media', $media);
       field_attach_update('media', $media);
       //field_attach_insert('media', $media);
-
+      // @todo Why aren't we calling media_save() instead of the above code.
+      //   Since we aren't, we have to update usage here too, as we do in
+      //   media_save().
+      file_usage_delete((object)(array) $media, 'file', 'media', $media->fid);
     }
   }
 
