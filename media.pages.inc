@@ -254,6 +254,11 @@ function media_add_upload_submit($form, &$form_state) {
 
 function media_add_upload_multiple($form, &$form_state, $types) {
   $form = media_add_upload($form, $form_state, $types);
+  unset($form['upload']['#title']);
+  // The validators will be set from plupload anyway.  This isn't pretty, but don't
+  // it to show up twice.
+  unset($form['upload']['#description']);
+  
   $form['upload']['#type'] = 'plupload';
   return $form;
 }
