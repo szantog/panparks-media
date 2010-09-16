@@ -1069,15 +1069,6 @@ function media_get_thumbnail_preview($media, $link = NULL) {
 }
 
 /**
- * Implements hook_file_references().
- */
-function media_file_references($file) {
-  $count = file_get_file_reference_count($file, NULL, 'media');
-  return $count ? array('media' => $count) : NULL;
-}
-
-
-/**
  * Implements hook_entity_info().
  */
 function media_entity_info() {

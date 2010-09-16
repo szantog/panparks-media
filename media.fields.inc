@@ -330,3 +330,105 @@ function media_field_widget_value($element, $input, $form_state) {
 
   return $return;
 }
+
+/**
+ * @todo The following hook_field_(insert|update|delete|delete_revision)
+ *   implementations are nearly identical to the File module implementations of
+ *   the same field hooks. The only differences are:
+ *   - We pass 'media' rather than 'file' as the module argument to the
+ *     file_usage_(add|delete)() functions.
+ *   - We do not delete the file / media entity when its usage count goes to 0.
+ *   We should submit a core patch to File module to make it flexible with
+ *   respect to the above, so that we can reuse its implementation rather than
+ *   duplicating it.
+ */
+
+/**
+ * Implements hook_field_insert().
+ */
+function media_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+
+  // Add a new usage of each uploaded file.
+  foreach ($items as $item) {
+    $file = (object) $item;
+    file_usage_add($file, 'media', $entity_type, $id);
+  }
+}
+
+/**
+ * Implements hook_field_update().
+ *
+ * Checks for files that have been removed from the object.
+ */
+function media_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+
+  // On new revisions, all files are considered to be a new usage and no
+  // deletion of previous file usages are necessary.
+  if (!empty($entity->revision)) {
+    foreach ($items as $item) {
+      $file = (object) $item;
+      file_usage_add($file, 'media', $entity_type, $id);
+    }
+    return;
+  }
+  
+  // Build a display of the current FIDs.
+  $current_fids = array();
+  foreach ($items as $item) {
+    $current_fids[] = $item['fid'];
+  }
+  
+  // Create a bare-bones entity so that we can load its previous values.
+  $original = entity_create_stub_entity($entity_type, array($id, $vid, $bundle));
+  field_attach_load($entity_type, array($id => $original), FIELD_LOAD_CURRENT, array('field_id' => $field['id']));
+
+  // Compare the original field values with the ones that are being saved.
+  $original_fids = array();
+  if (!empty($original->{$field['field_name']}[$langcode])) {
+    foreach ($original->{$field['field_name']}[$langcode] as $original_item) {
+      $original_fids[] = $original_item['fid'];
+      if (isset($original_item['fid']) && !in_array($original_item['fid'], $current_fids)) {
+        // Decrement the file usage count by 1.
+        $file = (object)$original_item;
+        file_usage_delete($file, 'media', $entity_type, $id, 1);
+      }
+    }
+  }
+
+  // Add new usage entries for newly added files.
+  foreach ($items as $item) {
+    if (!in_array($item['fid'], $original_fids)) {
+      $file = (object) $item;
+      file_usage_add($file, 'media', $entity_type, $id);
+    }
+  }
+}
+
+/**
+ * Implements hook_field_delete().
+ */
+function media_field_delete($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+
+  // Delete all file usages within this entity.
+  foreach ($items as $delta => $item) {
+    $file = (object) $item;
+    file_usage_delete($file, 'media', $entity_type, $id, 0);
+  }
+}
+
+/**
+ * Implements hook_field_delete_revision().
+ */
+function media_field_delete_revision($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+  foreach ($items as $delta => $item) {
+    // @TODO: Not sure if this is correct
+    $file = (object)$item;
+    if (file_usage_delete($file, 'media', $entity_type, $id, 1)) {
+      $items[$delta] = NULL;
+    }
+  }
+}
