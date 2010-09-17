@@ -119,6 +119,7 @@ function media_enable() {
 
   // @todo: these are image specific, needs to change
   $view_mode_settings['video'] = $view_mode_defaults;
+  $view_mode_settings['video']['media_preview'] = 'styles_file_square_thumbnail';
   $view_mode_settings['video']['media_large'] = 'styles_file_large';
 
   // This is the default, otherwise could provide
@@ -398,4 +399,24 @@ function media_update_7008() {
   foreach ($roles as $rid => $role) {
     user_role_grant_permissions($rid, array('view media'));
   }
+}
+
+/**
+ * Changes the preview formatter for video types to a square thumbnail, like for images.
+ */
+function media_update_7009() {
+  drupal_load('module', 'media');
+  drupal_load('module', 'field');
+  media_type_configure_formatters('video', array('media_preview' => 'styles_file_square_thumbnail'));
+}
+
+/**
+ * Changes the large formatter for video types to the large file style.
+ */
+function media_update_7010() {
+  // This formatter association was added to media_enable() at one point, but
+  // without a corresponding update function, so here's that update function.
+  drupal_load('module', 'media');
+  drupal_load('module', 'field');
+  media_type_configure_formatters('video', array('media_large' => 'styles_file_large'));
 }
