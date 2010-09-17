@@ -350,6 +350,10 @@ body.page-media-format-form {
   border-radius: 4px;
 }
 
+#media-browser-page .plupload_start {
+  display:none;
+}
+
 a.button {
   display: inline-block;
   margin: 10px 5px 0 0;
