@@ -60,7 +60,11 @@ Drupal.media.browser.validateButtons = function() {
       $('<a class="button fake-cancel">Cancel</a>').appendTo(this).bind('click', Drupal.media.browser.submit);
     }
   } else if (!($('.fake-cancel', this).length > 0)) {
-    $('<a class="button fake-cancel">Cancel</a>').appendTo('form > div', this).bind('click', Drupal.media.browser.submit);
+    var parent = $('.form-actions', this);
+    if (!parent.length) {
+      parent = $('form > div', this);
+    }
+    $('<a class="button fake-cancel">Cancel</a>').appendTo(parent).bind('click', Drupal.media.browser.submit);
   }
 };
 

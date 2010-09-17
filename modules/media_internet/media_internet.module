@@ -65,11 +65,6 @@ function media_internet_add($form, &$form_state = array(), $types = NULL) {
   //  '#markup' => '<div id="media-add-from-url-preview"></div>'
   //);
 
-  $form['submit'] = array(
-    '#type' => 'submit',
-    '#value' => 'Submit',
-  );
-
   $form['#validators'] = array();
   if ($types) {
     $form['#validators']['media_file_validate_types'] = array($types);
@@ -90,6 +85,9 @@ function media_internet_add($form, &$form_state = array(), $types = NULL) {
     // Just the header, no actual providers
     unset($form['providers']['header']);
   }
+  
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Submit'));
   
   return $form;
 }
