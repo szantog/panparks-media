@@ -38,8 +38,11 @@ function media_browser($selected = NULL) {
   // Normal browser operation.
   foreach (module_implements('media_browser_plugin_info') as $module) {
     foreach(module_invoke($module, 'media_browser_plugin_info') as $key => $plugin_data) {
-      $plugins[$key] = $plugin_data;
-      $plugins[$key]['#module'] = $module;
+      $plugins[$key] = $plugin_data + array(
+        '#module' => $module,
+        '#weight' => 0,
+      );
+      $plugins[$key]['#weight'] += count($plugins)/1000;
     }
   }
   
@@ -66,7 +69,7 @@ function media_browser($selected = NULL) {
   $browser_settings =& $settings['media']['browser'];
 
   //@todo: replace with Tabs module if it gets upgraded.
-  foreach (element_children($plugins) as $key) {
+  foreach (element_children($plugins, TRUE) as $key) {
     $plugin =& $plugins[$key];
 
     //Add any JS settings
@@ -193,8 +196,10 @@ function media_browser_list() {
 function media_media_browser_plugin_info() {
   $plugins = array(
     'upload' => array(
+      '#weight' => -10,
      ),
     'library' => array(
+      '#weight' => 10,
      ),
    );
   return $plugins;
