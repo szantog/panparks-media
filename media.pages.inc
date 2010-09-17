@@ -260,6 +260,7 @@ function media_add_upload_multiple($form, &$form_state, $types) {
   unset($form['upload']['#description']);
   
   $form['upload']['#type'] = 'plupload';
+  $form['submit']['#value'] = t('Start upload');
   return $form;
 }
 
