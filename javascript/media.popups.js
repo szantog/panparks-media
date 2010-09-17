@@ -227,6 +227,8 @@ Drupal.media.popups.mediaFieldEditor = function (fid, onSelect, options) {
   // Create it as a modal window.
   var mediaIframe = Drupal.media.popups.getPopupIframe(options.src, 'mediaFieldEditor');
   // Attach the onLoad event
+  // @TODO - This event is firing too early in IE on Windows 7,
+  // - so the height being calculated is too short for the content.
   mediaIframe.bind('load', options, options.onLoad);
 
   /**
@@ -300,7 +302,7 @@ Drupal.media.popups.getDialogOptions = function () {
     resizable: false,
     minWidth: 600,
     width: 800,
-    height: 500,
+    height: 550,
     position: 'center',
     overlay: {
       backgroundColor: '#000000',
@@ -316,12 +318,16 @@ Drupal.media.popups.getDialogOptions = function () {
  *  The element which has .dialog() attached to it.
  */
 Drupal.media.popups.setDialogPadding = function (dialogElement) {
-  // @TODO: Perhaps remove this hardcoded reference
-  var horizontalPadding = 30;
-  var verticalPadding = 30;
-
-  dialogElement.width(dialogElement.dialog('option', 'width') - horizontalPadding);
-  dialogElement.height(dialogElement.dialog('option', 'height') - verticalPadding);
+  // @TODO: Perhaps remove this hardcoded reference to height.
+  // - It's included to make IE on Windows 7 display the dialog without
+  //   collapsing. 550 is the height that displays all of the tab panes
+  //   within the Add Media overlay. This is either a bug in the jQuery
+  //   UI library, a bug in IE on Windows 7 or a bug in the way the 
+  //   dialog is instantiated. Or a combo of the three.
+  //   All browsers except IE on Win7 ignore these defaults and adjust
+  //   the height of the iframe correctly to match the content in the panes
+  dialogElement.height(dialogElement.dialog('option', 'height'));
+  dialogElement.width(dialogElement.dialog('option', 'width'));
 };
 
 /**

@@ -18,7 +18,9 @@ Drupal.behaviors.experimentalMediaBrowser = {
       // Fire a confirmation of some sort.
       Drupal.media.browser.finalizeSelection();
     }
-    $('#media-browser-tabset').tabs();
+    $('#media-browser-tabset').tabs({
+      show: Drupal.media.browser.resizeIframe
+    });
 
     $('.media-browser-tab').each( Drupal.media.browser.validateButtons );
 
@@ -89,6 +91,11 @@ Drupal.media.browser.finalizeSelection = function () {
   else {
     Drupal.media.browser.selectionFinalized(Drupal.media.browser.selectedMedia);
   }
+};
+
+Drupal.media.browser.resizeIframe = function (event) {
+  var h = $(this).parents('body').height();
+  $(parent.window.document).find('#mediaBrowser').height(h);
 };
 
 }(jQuery));
