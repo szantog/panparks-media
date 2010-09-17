@@ -55,6 +55,11 @@ function media_browser($selected = NULL) {
     $plugin += module_invoke($plugin['#module'], 'media_browser_plugin_view', $key, $params);
   }
   
+  // Allow modules to change the tab names or whatever else they want to change
+  // before we render.  Perhaps this should be an alter on the theming function
+  // that we should write to be making the tabs.
+  drupal_alter('media_browser_plugins', $plugins);
+  
   $tabs = array(); // List of tabs to render.
 
   $settings = array('media' => array('browser' => array()));
