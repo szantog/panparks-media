@@ -1064,7 +1064,6 @@ function media_get_thumbnail_preview($media, $link = NULL) {
   $preview['#show_names'] = TRUE;
   $preview['#add_link'] = $link;
   $preview['#theme_wrappers'][] = 'media_thumbnail';
-  //$preview['#markup'] = $preview[0]['#markup'];
   return $preview;
 }
 
@@ -1131,4 +1130,3 @@ function media_file_validate_types(stdClass $file, $types) {
   
   return $errors;
 }
-

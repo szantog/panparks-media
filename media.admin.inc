@@ -162,7 +162,6 @@ function media_admin_thumbnails() {
    '#suffix' => '</ul></div>',
   );
 
-
   if (count($media_entities)) {
     foreach ($media_entities as $media) {
      $form['files'][$media->fid] = array(

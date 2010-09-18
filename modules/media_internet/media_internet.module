@@ -163,10 +163,10 @@ function media_internet_add_validate($form, &$form_state) {
  *  @see media_parse_to_file().
  */
 function media_internet_add_submit($form, &$form_state) {
-  $emebed_code = $form_state['values']['embed_code'];
+  $embed_code = $form_state['values']['embed_code'];
   try {
     // Save the remote file
-    $provider = media_internet_get_provider($emebed_code);
+    $provider = media_internet_get_provider($embed_code);
     // Providers decide if they need to save locally or somewhere else.
     // This method returns a file object
     $file = $provider->save();
@@ -177,7 +177,7 @@ function media_internet_add_submit($form, &$form_state) {
   }
 
   if (!$file->fid) {
-    form_set_error('url', 'Unknown error: unable to add file, please check URL / Embed code and try again ' . $emebed_code);
+    form_set_error('url', 'Unknown error: unable to add file, please check URL / Embed code and try again ' . $embed_code);
     return;
   }
 

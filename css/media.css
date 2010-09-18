@@ -7,9 +7,8 @@
  * Styles for the media library.
  */
 
-/**
- * Display switch
- */
+/* @group media item list */
+
 .item-list .media-display-switch {
   float: right;
   line-height: 0;
@@ -94,6 +93,10 @@
   padding: 4px 17px;
   text-align: center;
 }
+
+/* @end */
+
+/* @group media item */
 
 .media-item {
   background: #FFF;
@@ -211,6 +214,8 @@
   border: none;
 }
 
+/* @end */
+
 /* @group media browser */
 
 body.page-media-browser {
@@ -299,7 +304,7 @@ a.button {
 
 /* @end media edit page */
 
-/* @group Styles for the media format form */
+/* @group media format form */
 
 #media-format-form {
   margin:30px;
