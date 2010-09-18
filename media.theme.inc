@@ -288,8 +288,8 @@ function theme_media_thumbnail($variables) {
   $options = array('query' => $destination, 'html' => true, 'attributes' => array('title' => t('Click to edit details')));
 
   // Element should be a field renderable array... This is a little wonky - admitted.
-  if (!empty($element['#show_names']) && $element['#object']->filename) {
-    $label = '<div class="label-wrapper"><label class="media-filename">' . $element['#object']->filename . '</label></div>';
+  if (!empty($element['#show_names']) && $element['#name']) {
+    $label = '<div class="label-wrapper"><label class="media-filename">' . $element['#name'] . '</label></div>';
   }
 
   // How can I attach CSS here?
@@ -305,6 +305,13 @@ function theme_media_thumbnail($variables) {
   }
   $output .= $label . $suffix;
   return $output;
+}
+
+function template_preprocess_media_thumbnail(&$variables) {
+  // Set the name for the thumbnail to be the filename.  This is done here so
+  // that other modules can hijack the name displayed if it should not be the
+  // filename.
+  $variables['element']['#name'] = isset($variables['element']['#object']->filename) ? $variables['element']['#object']->filename : NULL;
 }
 
 /**
