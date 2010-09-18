@@ -289,13 +289,24 @@ a.button {
   float: left;
   margin-bottom: 2em;
   margin-right: 2em;
+  padding-top: 12px;
+}
+
+.media-image-left .field-name-file .field-item {
+  width: 180px;
+  word-break: break-word;
+}
+
+.media-image-left .styles-field-file {
+  background-color: #FFFFFF;
+  border: 1px solid #CCCCCC;
+  padding: 2%;
+  width: 96%;
 }
 
 .media-image-left .field-name-file img {
-  background: #FFFFFF;
-  border: 1px solid #CCCCCC;
-  margin-top: 0.9em;
-  padding: 1em;
+  height: auto;
+  width: 100%;
 }
 
 .media-image-left .form-actions {
