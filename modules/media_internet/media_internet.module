@@ -79,16 +79,18 @@ function media_internet_add($form, &$form_state = array(), $types = NULL) {
       } else {
         $form['providers'][$key] = array('#markup' => $provider['title']);
       }
+      // Wrap the provider in a div so we can make a nice list
+      $form['providers'][$key]['#prefix'] = '<div class="media-provider">';
+      $form['providers'][$key]['#suffix'] = '</div>';
     }
   }
   if (count($form['providers']) == 1) {
     // Just the header, no actual providers
     unset($form['providers']['header']);
   }
-  
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Submit'));
-  
   return $form;
 }
 
