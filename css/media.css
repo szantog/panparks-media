@@ -220,6 +220,7 @@
 
 body.page-media-browser {
   background: none;
+  overflow: hidden;
 }
 
 div#media-browser-tabs {
