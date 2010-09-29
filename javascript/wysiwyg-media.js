@@ -11,6 +11,15 @@ Drupal.media = Drupal.media || {};
 
 // Define the behavior.
 Drupal.wysiwyg.plugins.media = {
+
+  /**
+   * Initializes the tag map.
+   */
+  initializeTagMap: function () {
+    if (typeof Drupal.settings.tagmap == 'undefined') {
+      Drupal.settings.tagmap = { };
+    }
+  },
   /**
    * Execute the button.
    * @TODO: Debug calls from this are never called. What's its function?
@@ -39,9 +48,7 @@ Drupal.wysiwyg.plugins.media = {
 
   insertMediaFile: function (mediaFile, viewMode, formattedMedia, options, wysiwygInstance) {
 
-    if (typeof Drupal.settings.tagmap == 'undefined') {
-      Drupal.settings.tagmap = { };
-    }
+    this.initializeTagMap();
     // @TODO: the folks @ ckeditor have told us that there is no way
     // to reliably add wrapper divs via normal HTML.
     // There is some method of adding a "fake element"
@@ -69,15 +76,20 @@ Drupal.wysiwyg.plugins.media = {
   },
 
   addImageAttributes: function (imgElement, fid, view_mode, additional) {
-    imgElement.attr('fid', fid);
-    imgElement.attr('view_mode', view_mode);
-    if (additional) {
-      for (k in additional) {
-        imgElement.attr(k, additional[k]);
-      }
-    }
+    //    imgElement.attr('fid', fid);
+    //    imgElement.attr('view_mode', view_mode);
     // Class so we can find this image later.
     imgElement.addClass('media-image');
+    this.forceAttributesIntoClass(imgElement, fid, view_mode, additional);
+    if (additional) {
+      for (k in additional) {
+        if (additional.hasOwnProperty(k)) {
+          if (k === 'attr') {
+            imgElement.attr(k, additional[k]);
+          }
+        }
+      }
+    }
   },
 
   /**
@@ -113,6 +125,7 @@ Drupal.wysiwyg.plugins.media = {
    */
   attach: function (content, settings, instanceId) {
     var matches = content.match(/\[\[.*?\]\]/g);
+    this.initializeTagMap();
     var tagmap = Drupal.settings.tagmap;
     if (matches) {
       var inlineTag = "";
@@ -170,7 +183,21 @@ Drupal.wysiwyg.plugins.media = {
     for (i=0; i< imgElement.attributes.length; i++) {
       var attr = imgElement.attributes[i];
       if (attr.specified == true) {
-        sorter[i] = attr;
+        if (attr.name !== 'class') {
+          sorter.push(attr);
+        }
+        else {
+          // Exctract expando properties from the class field.
+          var attributes = this.getAttributesFromClass(attr.value);
+          for (var name in attributes) {
+            if (attributes.hasOwnProperty(name)) {
+              var value = attributes[name];
+              if (value.type && value.type === 'attr') {
+                sorter.push(value);
+              }
+            }
+          }
+        }
       }
     }
 
@@ -224,12 +251,93 @@ Drupal.wysiwyg.plugins.media = {
     tagContent = {
       "type": 'media',
       // @todo: This will be selected from the format form
-      "view_mode": imgNode.attr('view_mode'),
-      "fid" : imgNode.attr('fid'),
+      "view_mode": attributes['view_mode'].value,
+      "fid" : attributes['fid'].value,
       "attributes": mediaAttributes
     };
     return '[[' + JSON.stringify(tagContent) + ']]';
   },
+
+  /**
+   * Forces custom attributes into the class field of the specified image.
+   *
+   * Due to a bug in some versions of Firefox
+   * (http://forums.mozillazine.org/viewtopic.php?f=9&t=1991855), the
+   * custom attributes used to share information about the image are
+   * being stripped as the image markup is set into the rich text
+   * editor.  Here we encode these attributes into the class field so
+   * the data survives.
+   *
+   * @param imgElement
+   *   The image
+   * @fid
+   *   The file id.
+   * @param view_mode
+   *   The view mode.
+   * @param additional
+   *   Additional attributes to add to the image.
+   */
+  forceAttributesIntoClass: function (imgElement, fid, view_mode, additional) {
+    var wysiwyg = imgElement.attr('wysiwyg');
+    if (wysiwyg) {
+      imgElement.addClass('attr__wysiwyg__' + wysiwyg);
+    }
+    var format = imgElement.attr('format');
+    if (format) {
+      imgElement.addClass('attr__format__' + format);
+    }
+    var typeOf = imgElement.attr('typeof');
+    if (typeOf) {
+      imgElement.addClass('attr__typeof__' + typeOf);
+    }
+    if (fid) {
+      imgElement.addClass('img__fid__' + fid);
+    }
+    if (view_mode) {
+      imgElement.addClass('img__view_mode__' + view_mode);
+    }
+    if (additional) {
+      for (var name in additional) {
+        if (additional.hasOwnProperty(name)) {
+          if (name !== 'alt') {
+            imgElement.addClass('attr__' + name + '__' + additional[name]);
+          }
+        }
+      }
+    }
+  },
+
+  /**
+   * Retrieves encoded attributes from the specified class string.
+   *
+   * @param classString
+   *   A string containing the value of the class attribute.
+   * @return
+   *   An array containing the attribute names as keys, and an object
+   *   with the name, value, and attribute type (either 'attr' or
+   *   'img', depending on whether it is an image attribute or should
+   *   be it the attributes section)
+   */
+  getAttributesFromClass: function (classString) {
+    var actualClasses = [];
+    var otherAttributes = [];
+    var classes = classString.split(' ');
+    var regexp = new RegExp('^(attr|img)__([^\S]*)__([^\S]*)$');
+    for (var index = 0; index < classes.length; index++) {
+      var matches = classes[index].match(regexp);
+      if (matches && matches.length === 4) {
+        otherAttributes[matches[2]] = {name: matches[2], value: matches[3], type: matches[1]};
+      }
+      else {
+        actualClasses.push(classes[index]);
+      }
+    }
+    if (actualClasses.length > 0) {
+      otherAttributes['class'] = {name: 'class', value: actualClasses.join(' '), type: 'attr'};
+    }
+    return otherAttributes;
+  },
+
   /*
    * 
    */
