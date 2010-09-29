@@ -219,15 +219,20 @@ function media_media_browser_plugin_view($plugin_name, $params) {
   $redirect = array('media/browser', array('query' => array('render' => 'media-popup')));
   switch ($plugin_name) {
     case 'upload':
-      $upload_form_id = ($multiselect == TRUE && module_exists('plupload')) ? 'media_add_upload_multiple' : 'media_add_upload';
+      $attached = array();
+      if ($multiselect == TRUE && module_exists('plupload')) {
+        $upload_form_id = 'media_add_upload_multiple';
+        $attached['js'] = array($path . '/javascript/plugins/media.upload_multiple.js');
+      }
+      else {
+        $upload_form_id = 'media_add_upload';
+      }
       
       $upload_form = drupal_get_form($upload_form_id, $types);  
       return array(
         '#title' => t('Upload'),
         'form' => array($upload_form),
-        '#attached' => array(
-          //'js' => array($path . '/javascript/plugins/media.upload.js'),
-        ),
+        '#attached' => $attached,
       );
       break;
     case 'library':

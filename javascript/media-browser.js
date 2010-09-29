@@ -94,7 +94,7 @@ Drupal.media.browser.finalizeSelection = function () {
 };
 
 Drupal.media.browser.resizeIframe = function (event) {
-  var h = $(this).parents('body').height();
+  var h = $('body').height();
   $(parent.window.document).find('#mediaBrowser').height(h);
 };
 
