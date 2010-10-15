@@ -959,6 +959,13 @@ function media_element_process(&$element, &$form_state, $form) {
   $media = media_load($fid);
   $path = drupal_get_path('module', 'media');
 
+  $element['title'] = array(
+    '#type' => 'item',
+    '#title' => $element['#title'],
+    '#markup' => '',
+    '#description' => $element['#description'],
+  );
+
   //@TODO: This should be loaded from the JS in case of a failed form submission.
   $element['preview'] = array(
     '#type' => 'item',
