@@ -404,7 +404,9 @@ function media_page_alter(&$page) {
   if (isset($_GET['render']) && $_GET['render'] == 'media-popup') {
     $page['#theme'] = 'media_dialog_page';
     // temporary fix while awaiting fix for 914786
-    admin_menu_suppress();
+    if (module_exists('admin_menu')) {
+      admin_menu_suppress();
+    }
     foreach (element_children($page) as $key) {
       if ($key != 'content') {
         unset($page[$key]);
