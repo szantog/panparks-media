@@ -75,7 +75,6 @@ function media_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_admin_type_manage_form', 4),
     'access arguments' => array('administer media'),
-    'type' => MENU_CALLBACK,
     'file' => 'media.admin.inc',
   );
 
@@ -162,7 +161,6 @@ function media_menu() {
     'page arguments' => array('media_format_form', 1),
     'access arguments' => array('administer media'),
     'weight' => 0,
-    'type' => MENU_CALLBACK,
     'file' => 'media.filter.inc',
     'theme callback' => 'media_dialog_get_theme_name',
   );
@@ -172,7 +170,6 @@ function media_menu() {
     'page arguments' => array(1),
     'access callback' => 'media_access',
     'access arguments' => array('view'),
-    'type' => MENU_CALLBACK,
     'file' => 'media.pages.inc',
   );
 
@@ -203,7 +200,6 @@ function media_menu() {
     'access callback' => 'media_access',
     'access arguments' => array('edit'),
     'weight' => 0,
-    'type' => MENU_CALLBACK,
     'file' => 'media.pages.inc',
      // Use the same setting as node module
     'theme callback' => '_node_custom_theme',
