@@ -53,6 +53,7 @@ function media_internet_add($form, &$form_state = array(), $types = NULL) {
     '#title' => 'URL or Embed code',
     '#description' => 'Input a url or embed code from one of the listed providers.',
     '#attributes' => array('class' => array('media-add-from-url')),
+    '#maxlength' => 2000,
   );
   
   
