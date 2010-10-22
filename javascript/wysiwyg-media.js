@@ -162,8 +162,11 @@ Drupal.wysiwyg.plugins.media = {
   detach: function (content, settings, instanceId) {
     var content = $('<div>' + content + '</div>');
     $('img.media-image',content).each(function (elem) {
-      tagContent = Drupal.wysiwyg.plugins.media.createTag($(this));
-      $(this).replaceWith(tagContent);
+      var tag = Drupal.wysiwyg.plugins.media.createTag($(this));
+      $(this).replaceWith(tag);
+      var newContent = content.html();
+      var tagContent = $('<div></div>').append($(this)).html();
+      Drupal.settings.tagmap[tag] = tagContent;
     });
     return content.html();
   },
