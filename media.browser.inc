@@ -209,26 +209,32 @@ function media_media_browser_plugin_info() {
  */
 function media_media_browser_plugin_view($plugin_name, $params) {
   $path = drupal_get_path('module', 'media');
-  
+
   module_load_include('inc', 'media', 'media.admin');
   module_load_include('inc', 'media', 'media.pages');
 
   $types = isset($params['types']) ? $params['types'] : array();
-  $multiselect = isset($params['multiselect']) ? $params['multiselect'] : FALSE;
-  
+
+  // The multiselect parameter is a string.  So we check to see if it is set and
+  // adjust the local variable accordingly.
+  $multiselect = FALSE;
+  if (isset($params['multiselect']) && $params['multiselect'] != 'false') {
+    $multiselect = TRUE;
+  }
+
   $redirect = array('media/browser', array('query' => array('render' => 'media-popup')));
   switch ($plugin_name) {
     case 'upload':
       $attached = array();
-      if ($multiselect == TRUE && module_exists('plupload')) {
+      if ($multiselect && module_exists('plupload')) {
         $upload_form_id = 'media_add_upload_multiple';
         $attached['js'] = array($path . '/javascript/plugins/media.upload_multiple.js');
       }
       else {
         $upload_form_id = 'media_add_upload';
       }
-      
-      $upload_form = drupal_get_form($upload_form_id, $types);  
+
+      $upload_form = drupal_get_form($upload_form_id, $types);
       return array(
         '#title' => t('Upload'),
         'form' => array($upload_form),
@@ -251,7 +257,7 @@ function media_media_browser_plugin_view($plugin_name, $params) {
           'viewMode' => 'thumbnails',
           'getMediaUrl' => url('media/browser/list'),
           'types' => $types,
-          'multiselect' => isset($params['multiselect']) ? $params['multiselect'] : false,
+          'multiselect' => $multiselect,
         // We should probably change this to load dynamically when requested
         // via the JS file.
         ),
@@ -259,7 +265,7 @@ function media_media_browser_plugin_view($plugin_name, $params) {
       );
     break;
   }
-  
+
   return array();
  }
 /**
