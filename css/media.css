@@ -327,7 +327,7 @@ a.button {
   margin:30px;
 }
 
-#edit-options {
+#media-admin #edit-options {
   clear: both;
   margin: 0;
 }
@@ -366,7 +366,7 @@ body.page-media-format-form {
 
 #media-browser-page {
   background: #FFF;
-  padding: 0px 0;
+  padding: 1px 0;
   -moz-border-radius: 4px;
   -webkit-border-radius: 4px;
   border-radius: 4px;
