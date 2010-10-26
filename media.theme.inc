@@ -275,7 +275,6 @@ function theme_media_link($variables) {
 function theme_media_thumbnail($variables) {
   $label = '';
   $element = $variables['element'];
-  $icon = theme('media_type_icon', array('type' => $element['#object']->type));
   $destination = drupal_get_destination();
 
   // Wrappers to go around the thumbnail
