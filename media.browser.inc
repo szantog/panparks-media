@@ -359,7 +359,7 @@ function media_include_browser_js() {
 
     // Adding src to blacklist; fid and view_mode we capture outside attribs so adding
     // them too to the blacklist.
-    'blacklist' => array('src','fid','view_mode'), // Only applies to WYSIWG - should be removed;
+    'blacklist' => array('src','fid','view_mode','format'), // Only applies to WYSIWG - should be removed;
   );
 
   drupal_add_js(array('media' => $settings), 'setting');

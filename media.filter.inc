@@ -221,7 +221,8 @@ function _media_generate_tagMap($text) {
   preg_match_all("/\[\[.*?]]/s", $text, $matches, PREG_SET_ORDER);
   foreach($matches as $match) {
     // We see if tagContent is already in $tagMap, if not we add it
-    // to $tagmap otherwise return a empty error
+    // to $tagmap.  If we return an empty array, we break embeddings of the same
+    // media multiple times.
     if(empty($tagmap[$match[0]])) {
       // @TODO: Total HACK, but better than nothing.
       // We should find a better way of cleaning this up.
@@ -230,9 +231,6 @@ function _media_generate_tagMap($text) {
       } else {
         $tagmap[$match[0]] = '<div><img src="/broken.jpg" height="50px" width="100px"/></div>';
       }
-    }
-    else {
-      return array();
     }
   }
   return $tagmap;

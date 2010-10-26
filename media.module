@@ -591,6 +591,15 @@ function media_access($op) {
 }
 
 /**
+ * Implements hook_file_download_access().
+ */
+function media_file_download_access($field, $entity_type, $entity) {
+  if ($entity_type == 'media') {
+    return media_access('view');
+  }
+}
+
+/**
  * Returns the type of the media file to be used as a page title.
  */
 function media_type_page_title($type) {
