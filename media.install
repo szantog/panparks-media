@@ -420,3 +420,10 @@ function media_update_7010() {
   drupal_load('module', 'field');
   media_type_configure_formatters('video', array('media_large' => 'styles_file_large'));
 }
+
+/**
+ * Allows video as a type of media in the WYSIWYG
+ */
+function media_update_7011() {
+  media_variable_set('wysiwyg_allowed_types', array('image','video'));
+}
