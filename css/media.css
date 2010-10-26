@@ -170,7 +170,7 @@
 .media-item .label-wrapper:hover .media-filename {
   border: 1px solid #888;
   display: inline-block;
-  margin-left: -1px;
+  margin: 0 0 -2px -1px;
 }
 
 .media-item.selected .media-filename {
