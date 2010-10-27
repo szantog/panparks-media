@@ -29,6 +29,7 @@ function media_media_plugin() {
     'settings' => array(
       'global' => array(
         'types' => media_variable_get('wysiwyg_allowed_types'),
+	'id' => 'media_wysiwyg',
       )
     ),
    );
