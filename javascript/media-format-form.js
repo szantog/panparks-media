@@ -18,6 +18,10 @@ Drupal.behaviors.mediaFormatForm = {
     // IFRAME. See Drupal.media.browser.validateButtons() for more details.
     $('<a class="button fake-ok">Submit</a>').appendTo($('#media-format-form')).bind('click', Drupal.media.formatForm.submit);
     $('<a class="button fake-cancel">Cancel</a>').appendTo($('#media-format-form')).bind('click', Drupal.media.formatForm.submit);
+
+    if (Drupal.settings.media_format_form.autosubmit) {
+      $('.button.fake-ok').click();
+    }
   }
 };
 
