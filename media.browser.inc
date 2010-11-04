@@ -158,6 +158,7 @@ function media_browser_list() {
   
   $query->range($start, $limit);
   $query->entityCondition('entity_type', 'media');
+  $query->entityOrderBy('entity_id', 'DESC');
 
   if ($types) {
     $query->entityCondition('bundle', $types, 'IN');
