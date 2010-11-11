@@ -55,7 +55,9 @@ abstract class MediaReadOnlyStreamWrapper implements DrupalStreamWrapperInterfac
   );
 
   function interpolateUrl() {
-    return $this->base_url .'?'. http_build_query($this->parameters);
+    if ($parameters = $this->get_parameters()) {
+      return $this->base_url .'?'. http_build_query($parameters);
+    }
   }
 
   /**
