@@ -171,8 +171,7 @@ function media_browser_list() {
   if ($url_exclude_patterns) {
     $query->propertyCondition('uri', "%$v%", 'NOT LIKE');
   }
-
-  $entity_controller = entity_get_controller('media');
+  
   $result = $query->execute();
   $ids = array_keys($result['media']);
   if ($ids) {
@@ -269,60 +268,6 @@ function media_media_browser_plugin_view($plugin_name, $params) {
 
   return array();
  }
-/**
- * @todo: Re-integrate the stream based filters, etc
- * Currently this function is not being used.  See media_browser_list
- *
- *  Any options needed to retrieve the file select options. An associate array
- *  with the following optional keys:
- *    'conditions' => An array of 'column' => 'value' to pass to the db query,
- *    'streams' => An array of streams to filter,
- *    'limit' => The number of results to return.
- */
-function media_browser_fid_list($options = array()) {
-  $conditions = isset($options['conditions']) ? $options['conditions'] : array();
-  $streams = isset($options['streams']) ? $options['streams'] : array();
-  $limit = isset($options['limit']) ? $options['limit'] : media_variable_get('browser_pager_limit');
-
-
-  $entity_controller = entity_get_controller('media');
-
-  $results = $entity_controller->load(NULL, $conditions);
-  return $results;
-  // @TODO: re-integrate this stuff.
-
-  // First get the fid's to load. We have to do that first, because
-  // entity_load doesn't accept a condition of LIKE, which we need for streams.
-  $select = db_select('file', 'f')
-    ->extend('PagerDefault')
-    ->fields('f', array('fid'));
-
-  // Filter on streams.
-  foreach ($streams as $stream) {
-    $select->condition('uri', db_like($stream) . '%', 'LIKE');
-  }
-
-  // Add our conditions.
-  foreach ($conditions as $field => $condition) {
-    $select->condition($field, $condition);
-  }
-
-  // Add our pager limit filter.
-  $select->limit($limit);
-
-  // Grab the uri's.
-  $fids = $select->execute()
-    ->fetchCol();
-
-  $selections = array();
-
-   if (!empty($fids)) {
-    // Now load the desired media to display.
-    $medias = entity_load('media', $fids);
-  }
-
-  return $selections;
-}
 
 /**
  * Silly function to recursively run check_plain on an array.
