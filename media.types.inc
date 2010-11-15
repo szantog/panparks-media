@@ -278,12 +278,6 @@ if (!class_exists('EntityDB')) {
 else {
 
   class Media extends EntityDB {
-    public function __construct($values = array()) {
-      parent::__construct($values, 'media');
-      // Add the public url to this file (if applicable)
-      $this->url = file_create_url($this->uri);
-    }
-
   }
 
   // Historically, this Entitycontroller has a point, now it is simply here
