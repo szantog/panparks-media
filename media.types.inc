@@ -268,23 +268,3 @@ function media_media_format_form_prepare_alter(&$form, &$form_state, $media) {
       break;
   }
 }
-
-if (!class_exists('EntityDB')) {
-  if (basename($_SERVER["SCRIPT_NAME"]) == 'index.php') {
-    // Don't show the warning if they are on update.php or running via drush.
-    //drupal_set_message('You must run update.php immediately to enable the entity module or Media will not function.', 'error');
-  }
-}
-else {
-
-  class Media extends EntityDB {
-  }
-
-  // Historically, this Entitycontroller has a point, now it is simply here
-  // so that the EntityAPI can be used.  Media isn't really using this API much anyway
-  // since the main benefits are CRUD extensions and media is based on the files API
-  // which has its own (bad) CRUD stuff.
-  // @todo: remove coupling on entity API (needs issue).
-  class MediaEntityController extends EntityAPIController{}
-}
-

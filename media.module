@@ -1091,8 +1091,6 @@ function media_entity_info() {
   $return = array(
     'media' => array(
       'label' => t('Media'),
-  	  'entity class' => 'Media',
-      'controller class' => 'MediaEntityController',
       'base table' => 'file_managed',
       'fieldable' => TRUE,
       'view modes' => $view_modes,
