@@ -70,7 +70,7 @@ function media_menu() {
   $items['admin/config/media/types/manage/%media_type'] = array(
     'title' => 'Manage media',
     'title callback' => 'media_type_page_title',
-    'title arguments' => array(4),
+    'title arguments' => array(5),
     'description' => 'Manage files used on your site.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_admin_type_manage_form', 4),
@@ -1115,7 +1115,7 @@ function media_entity_info() {
       'label' => $bundle_info->label,
       'path' => 'admin/config/media/types/manage/%media_type',
       'real path' => 'admin/config/media/types/manage/' . $type,
-      'bundle argument' => 4,
+      'bundle argument' => 5,
       // @TODO: Add an 'administer media types' perm?
       'access arguments' => array('administer site configuration'),
     );

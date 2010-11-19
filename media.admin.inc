@@ -297,19 +297,19 @@ function media_admin_type_list() {
     $row[] = array('data' => t($info->label));
 
     // Set the edit column.
-    $row[] = array('data' => l(t('settings'), 'admin/structure/media/manage/' . $type_url_str));
+    $row[] = array('data' => l(t('settings'), 'admin/config/media/types/manage/' . $type_url_str));
 
     if ($field_ui) {
       // Manage fields.
-      $row[] = array('data' => l(t('manage fields'), 'admin/structure/media/manage/' . $type_url_str . '/fields'));
+      $row[] = array('data' => l(t('manage fields'), 'admin/config/media/types/manage/' . $type_url_str . '/fields'));
 
       // Display fields.
-      $row[] = array('data' => l(t('manage display'), 'admin/structure/media/manage/' . $type_url_str . '/display'));
+      $row[] = array('data' => l(t('manage display'), 'admin/config/media/types/manage/' . $type_url_str . '/display'));
     }
 
     // Set the delete column.
     if (empty($type->base)) {
-      $row[] = array('data' => l(t('delete'), 'admin/structure/media/manage/' . $type_url_str . '/delete'));
+      $row[] = array('data' => l(t('delete'), 'admin/config/media/types/manage/' . $type_url_str . '/delete'));
     }
     else {
       $row[] = array('data' => '');
