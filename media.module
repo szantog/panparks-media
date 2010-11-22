@@ -73,7 +73,7 @@ function media_menu() {
     'title arguments' => array(5),
     'description' => 'Manage files used on your site.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('media_admin_type_manage_form', 4),
+    'page arguments' => array('media_admin_type_manage_form', 5),
     'access arguments' => array('administer media'),
     'file' => 'media.admin.inc',
   );
