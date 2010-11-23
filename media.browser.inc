@@ -28,7 +28,7 @@ function media_browser($selected = NULL) {
     }
     $selectedMedia = entity_load('media', $selected);
     foreach ($selectedMedia as &$media) {
-      $media->preview = drupal_render(media_get_thumbnail_preview($media));
+      media_browser_build_media_item($media);
     }
     $setting = array('media' => array('selectedMedia' => array_values($selectedMedia)));
     drupal_add_js($setting, 'setting');
@@ -182,7 +182,7 @@ function media_browser_list() {
   }
   
   foreach ($media_entities as &$media) {
-    $media->preview = drupal_render(media_get_thumbnail_preview($media));
+    media_browser_build_media_item($media);
   }
   
   drupal_json_output(array('media' => array_values($media_entities)));
@@ -392,4 +392,15 @@ EOF;
 
   drupal_add_js($js, array('type' => 'inline'));
   return $form;
+}
+
+/**
+ * Adds on properties to the media item which are expected by callers who are
+ * going to act on the returned item.
+ *
+ * @param Object &$media;
+ */
+function media_browser_build_media_item(&$media) {
+  $media->preview = drupal_render(media_get_thumbnail_preview($media));
+  $media->url = file_create_url($media->uri);
 }
