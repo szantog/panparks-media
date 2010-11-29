@@ -218,16 +218,6 @@ function media_menu() {
      // Use the same setting as node module
     'theme callback' => '_node_custom_theme',
   );
-  $items['media/browser'] = array(
-    'title' => 'Media browser',
-    'description' => 'Media Browser for picking media and uploading new media',
-    'page callback' => 'media_browser',
-    'access callback' => 'media_access',
-    'access arguments' => array('view'),
-    'type' => MENU_CALLBACK,
-    'file' => 'media.browser.inc',
-    'theme callback' => 'media_dialog_get_theme_name',
-  );
 
   $items['admin/content/media/browser'] = $items['media/browser'];
   $items['admin/content/media/browser']['type'] = MENU_LOCAL_ACTION;
