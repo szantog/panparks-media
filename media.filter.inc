@@ -259,7 +259,7 @@ function media_format_form($form, $form_state, $media) {
   drupal_alter('media_wysiwyg_allowed_view_modes', $media_type, $view_modes);
 
   foreach ($view_modes as $key => $title) {
-    $format = $instance_info['display'][$key];
+    $format = field_get_display($instance_info, $key, $media);
     //If the format is set to hidden, don't offer it
     if ($format['type'] == 'hidden') {
       continue;
@@ -352,7 +352,7 @@ function media_format_form($form, $form_state, $media) {
  */
 function media_get_file_without_label($media, $view_mode, $settings = array()) {
   $instance = field_info_instance('media', 'file', $media->type);
-  $format = $instance['display'][$view_mode];
+  $format = field_get_display($instance, $view_mode, $media);
   $format['label'] = 'hidden';
   $format['settings'] = array_merge($format['settings'], $settings);
   $media->override = $settings;

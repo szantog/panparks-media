@@ -72,11 +72,12 @@ function media_type_configure_formatters($name, $view_modes_to_formatters) {
   if (!$instance) {
     throw new Exception('Unable to set formatter preferences for '. $name);
   }
-  foreach ($instance['display'] as $view_mode => $display) {
-    if (isset($view_modes_to_formatters[$view_mode])) {
-      $bundle_settings['view_modes'][$view_mode]['custom_settings'] = 1;
-      $instance['display'][$view_mode]['type'] = $view_modes_to_formatters[$view_mode];
+  foreach ($view_modes_to_formatters as $view_mode => $formatter) {
+    $bundle_settings['view_modes'][$view_mode]['custom_settings'] = 1;
+    if (!isset($instance['display'][$view_mode])) {
+      $instance['display'][$view_mode] = $instance['display']['default'];
     }
+    $instance['display'][$view_mode]['type'] = $formatter;
   }
   field_bundle_settings('media', $name, $bundle_settings);
   field_update_instance($instance);
