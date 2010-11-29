@@ -218,36 +218,24 @@ function media_menu() {
      // Use the same setting as node module
     'theme callback' => '_node_custom_theme',
   );
-
-  $items['media/add/upload'] = array(
-    'title' => 'Upload new file',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('media_add_upload'),
-    'access arguments' => array('administer media'),
-    'type' => MENU_LOCAL_ACTION,
-    'file' => 'media.pages.inc',
-    'weight' => -1,
+  $items['media/browser'] = array(
+    'title' => 'Media browser',
+    'description' => 'Media Browser for picking media and uploading new media',
+    'page callback' => 'media_browser',
+    'access callback' => 'media_access',
+    'access arguments' => array('view'),
+    'type' => MENU_CALLBACK,
+    'file' => 'media.browser.inc',
+    'theme callback' => 'media_dialog_get_theme_name',
   );
 
-  $items['admin/content/media/add/upload'] = $items['media/add/upload'];
+  $items['admin/content/media/browser'] = $items['media/browser'];
+  $items['admin/content/media/browser']['type'] = MENU_LOCAL_ACTION;
 
   /**
    * End-user CRUD screens
    * @var unknown_type
    */
-
-  $items['media/add/from_url'] = array(
-    'title' => 'Add media from URL',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('media_add_from_url'),
-    'access arguments' => array('administer media'),
-    'type' => MENU_LOCAL_ACTION,
-    'file' => 'media.pages.inc',
-    'weight' => -1,
-  );
-
-  $items['admin/content/media/add/from_url'] = $items['media/add/from_url'];
-
   $items['media/js'] = array(
     'page callback' => 'media_preview_ajax',
     'access callback' => 'media_access',

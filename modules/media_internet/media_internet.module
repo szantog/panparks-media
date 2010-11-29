@@ -5,18 +5,31 @@
  * Implements hook_media_browser_plugin_info().
  */
 function media_internet_media_browser_plugin_info() {
-  $plugins = array(
-    /*
-     @todo: Coming soon.
-     'search' => array(
-     ),
-    */
-    'media_internet' => array(
-     ),
-   );
+  $plugins = array();
+  /*
+   @todo: Coming soon.
+   'search' => array(
+   ),
+  */
+  if (user_access('administer media') || user_access('add media from remote sources')) {
+    $plugins['media_internet'] = array(
+      '#weight' => -10,
+    );
+  }
   return $plugins;
 }
 
+/**
+ * Implement hook_permission().
+ */
+function media_internet_permission() {
+  return array(
+    'add media from remote sources' => array(
+      'title' => t('Add media from remote services'),
+      'description' => t('Add media from remote sources such as other websites, YouTube, etc'),
+    ),
+  );
+}
 /**
  * Implements hook_media_browser_plugin_view().
  */

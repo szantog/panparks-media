@@ -172,6 +172,11 @@ function media_browser_list() {
     $query->propertyCondition('uri', "%$v%", 'NOT LIKE');
   }
   
+  if (!user_access('administer media')) {
+    $query->propertyCondition('uri', 'private://%', 'NOT LIKE');
+  }
+  
+  
   $result = $query->execute();
   $ids = array_keys($result['media']);
   if ($ids) {
@@ -194,14 +199,18 @@ function media_browser_list() {
  * Implements hook_media_browser_plugin_info().
  */
 function media_media_browser_plugin_info() {
-  $plugins = array(
-    'upload' => array(
+  $plugins = array();
+
+  // @TODO: Should we add a permission around this?
+  $plugins['library'] = array(
+    '#weight' => 10,
+  );
+
+  if (user_access('administer media') || user_access('edit media')) {
+    $plugins['upload'] = array(
       '#weight' => -10,
-     ),
-    'library' => array(
-      '#weight' => 10,
-     ),
-   );
+     );
+  }
   return $plugins;
 }
 /**
