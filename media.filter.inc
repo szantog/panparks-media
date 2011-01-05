@@ -27,7 +27,7 @@ function media_wysiwyg_include_directory($type) {
  */
 function media_filter($text) {
   $text = ' ' . $text . ' ';
-  $text = preg_replace_callback("/\[\[.*?]]/s",'_media_markup', $text);
+  $text = preg_replace_callback("/\[\[.*?]]/s",'media_token_to_markup', $text);
 
   return $text;
 }
@@ -112,6 +112,7 @@ function _media_url_curry($func, $arity) {
   ");
 }
 
+
 /**
  * Replace callback to convert tag into markup
  * @param string $match
@@ -121,7 +122,7 @@ function _media_url_curry($func, $arity) {
  * @return
  * Return the replaced markup
  */
-function _media_markup($match, $wysiwyg = FALSE) {
+function media_token_to_markup($match, $wysiwyg = FALSE) {
   $match = str_replace("[[","",$match);
   $match = str_replace("]]","",$match);
   $tag = $match[0];
@@ -130,7 +131,7 @@ function _media_markup($match, $wysiwyg = FALSE) {
     if (!is_string($tag)) {
       throw new Exception('Unable to find matching tag');
     }
-
+    
     $media = drupal_json_decode($tag);
 
     if (!isset($media['fid'])) {
@@ -207,7 +208,7 @@ function media_pre_render_text_format($element) {
  *
  * @see
  * media_process_form
- * _media_markup
+ * media_token_to_markup
  */
 function _media_generate_tagMap($text) {
   // Making $tagmap static as this function is called many times and
@@ -226,7 +227,7 @@ function _media_generate_tagMap($text) {
     if(empty($tagmap[$match[0]])) {
       // @TODO: Total HACK, but better than nothing.
       // We should find a better way of cleaning this up.
-      if ($markup_for_media = _media_markup($match, TRUE)) {
+      if ($markup_for_media = media_token_to_markup($match, TRUE)) {
         $tagmap[$match[0]] = $markup_for_media;
       } else {
         $tagmap[$match[0]] = '<div><img src="/broken.jpg" height="50px" width="100px"/></div>';

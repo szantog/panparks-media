@@ -442,7 +442,7 @@ function media_media_operations() {
       'redirect' => 'media/%fids/multiedit'
     ),
   );
-  
+
   if (!module_exists('multiform')) {
     // If the multiform module is not installed, do not show this option.
     unset($operations['edit']);
@@ -452,7 +452,7 @@ function media_media_operations() {
 
 /**
  * Implementation of hook_forms()
- */ 
+ */
 function media_forms($form_id, $args) {
   $forms = array();
   // To support the multiedit form, each form has to have a unique ID.
@@ -491,7 +491,7 @@ function media_load($fid) {
  *
  * @return array
  *  An array of corresponding media entities.
- */ 
+ */
 function media_multi_load($fids) {
   $fids = explode(" ", $fids);
   if ($files = media_load_multiple($fids)) {
@@ -665,9 +665,9 @@ function media_library() {
   $libraries['media_base'] = array(
     'title' => 'Media base',
     'js' => array(
-      $path . '/javascript/media.core.js' => array('weight' => JS_LIBRARY - 5),
-      $path . '/javascript/util/json2.js' => array('weight' => JS_LIBRARY),
-      $path . '/javascript/util/ba-debug.min.js' => array('weight' => JS_LIBRARY),
+      $path . '/javascript/media.core.js' => array('group' => JS_LIBRARY, 'weight' => - 5),
+      $path . '/javascript/util/json2.js' => array('group' => JS_LIBRARY),
+      $path . '/javascript/util/ba-debug.min.js' => array('group' => JS_LIBRARY),
     ),
     'css' => array(
       $path . '/css/media.css',
@@ -681,7 +681,7 @@ function media_library() {
   $libraries['media_browser'] = array(
     'title' => 'Media Browser popup libraries',
     'js' => array(
-      $path . '/javascript/media.popups.js' => array('weight' => JS_DEFAULT),
+      $path . '/javascript/media.popups.js' => array('group' => JS_DEFAULT),
     ),
     'dependencies' => array(
       array('media', 'media_base'),
@@ -697,10 +697,10 @@ function media_library() {
   $libraries['media_browser_page'] = array(
     'title' => 'Media browser',
     'js' => array(
-      $path . '/javascript/media-browser.js'  => array('weight' => JS_DEFAULT),
+      $path . '/javascript/media-browser.js'  => array('group' => JS_DEFAULT),
     ),
     'css' => array(
-      $path . '/css/media.browser.css' => array('weight' => CSS_DEFAULT),
+      $path . '/css/media.browser.css' => array('group' => CSS_DEFAULT),
     ),
     'dependencies' => array(
       array('media', 'media_base'),
@@ -1006,10 +1006,10 @@ function media_element_process(&$element, &$form_state, $form) {
     'type' => 'setting',
     'data' => $setting,
   );
-  
+
   // hmm... Might need to think about this.
   // All settings would likely apply to all media in a multi-value, but what about passing the existing fid?
-  
+
   module_load_include('inc', 'media', 'media.browser');
   media_include_browser_js();
 
@@ -1119,6 +1119,6 @@ function media_file_validate_types(stdClass $file, $types) {
   if (!in_array(media_get_type($file), $types)) {
     $errors[] = t('Only the following types of files are allowed to be uploaded: %types-allowed', array('%types-allowed' => implode(', ', $types)));
   }
-  
+
   return $errors;
 }
