@@ -125,6 +125,7 @@ function media_variable_default($name = NULL) {
       'wysiwyg_allowed_attributes' => array('height', 'width', 'hspace', 'vspace', 'border', 'align', 'style', 'alt', 'title', 'class', 'id'),
 
       'field_select_media_text' => 'Select media',
+      'field_remove_media_text' => 'Remove media',
 
       // Name of the theme to use in media popup dialogs
       'dialog_get_theme_name' => 'seven',
