@@ -369,6 +369,40 @@ function media_file_update($file) {
 }
 
 /**
+ * Implements hook_file_delete().
+ */
+function media_file_delete($file) {
+  // @todo: call field_attach_delete() from here, or add media_delete().
+
+  // Remove this file from the {media_filter_usage} table.
+  db_delete('media_filter_usage')->condition('fid', $file->fid)->execute();
+}
+
+/**
+ * Implements hook_file_style_flush().
+ *
+ * This hook is invoked by File Styles module in Styles 1.x.
+ *
+ * @see media_styles_style_flush()
+ */
+function media_file_style_flush($style) {
+  // When a file style is flushed, clear the filter and field caches.
+  media_filter_invalidate_caches();
+}
+
+/**
+ * Implements hook_styles_style_flush().
+ *
+ * This hook is invoked by Styles module in Styles 2.x.
+ *
+ * @see media_file_style_flush()
+ */
+function media_styles_style_flush($style) {
+  // When a style is flushed, clear the filter and field caches.
+  media_filter_invalidate_caches();
+}
+
+/**
  * Implement hook_page_alter().
  *
  * This is used to use our alternate template when ?render=media-popup is passed
@@ -541,6 +575,7 @@ function media_save($media) {
   }
   else {
     field_attach_update('media', $media);
+    media_filter_invalidate_caches($media->fid);
   }
 
   // Since the Media module can't make files into fieldable entities directly
@@ -896,6 +931,9 @@ function media_save_attached_file($file) {
       //   Since we aren't, we have to update usage here too, as we do in
       //   media_save().
       file_usage_delete((object)(array) $media, 'file', 'media', $media->fid);
+
+      // Also clear cached text formats from here.
+      media_filter_invalidate_caches($media->fid);
     }
   }
 
@@ -1018,7 +1056,16 @@ function media_element_process(&$element, &$form_state, $form) {
 }
 
 /**
- * Implement hook_filter_info
+ * Implements hook_filter_info().
+ *
+ * For performance, the media filter is allowed to be cached by default. See
+ * media_filter_invalidate_caches() for details. Some sites may use advanced
+ * media styles with rendering implentations that differs per theme or based on
+ * other runtime information. For these sites, it may be necessary to implement
+ * a module with a hook_filter_info_alter() implementation that sets
+ * $info['media_filter']['cache'] to FALSE.
+ *
+ * @see media_filter_invalidate_caches()
  */
 function media_filter_info() {
   $filters['media_filter'] = array(
@@ -1026,7 +1073,6 @@ function media_filter_info() {
     'description' => t('This filter will convert [[{type:media... ]] tags into markup'),
     'process callback' => 'media_filter',
     'tips callback' => 'media_filter_tips', // @TODO not implemented
-    'cache' => FALSE,
   );
   return $filters;
 }
@@ -1121,4 +1167,18 @@ function media_file_validate_types(stdClass $file, $types) {
   }
 
   return $errors;
+}
+
+/**
+ * Implements hook_flush_caches().
+ */
+function media_flush_caches() {
+  // Garbage collection for the {media_filter_usage} table. If an fid was last
+  // recorded four months ago (minimum three months due to logic in
+  // media_filter_track_usage()), remove it from this table while the filter
+  // and field caches are being cleared. If the fid is still in use, it will
+  // be added back to the table the next time check_markup() runs on that
+  // content. This prevents fids from staying in this table indefinitely,
+  // even if the post that references them is edited or deleted.
+  db_delete('media_filter_usage')->condition('timestamp', REQUEST_TIME - 86400 * 120, '<')->execute();
 }
