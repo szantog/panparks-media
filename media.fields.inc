@@ -237,16 +237,11 @@ function media_field_widget_settings_form($field, $instance) {
   return $form;
 }
 
-function media_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $base) {
-  $element = $base;
-
+/**
+ * Implements hook_field_widget_form().
+ */
+function media_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   $widget_settings = $instance['widget']['settings'];
-
-  $defaults = array(
-    'fid' => 0,
-    'title' => '',
-    'data' => NULL
-  );
 
   $permission = user_access('edit media');
   if (!$permission) {
@@ -254,11 +249,21 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     return;
   }
 
+  // @todo The Field API supports automatic serialization / unserialization, so
+  //   this should no longer be needed. After verifying with a module that uses
+  //   the 'data' column, remove this.
+  // @see media_field_widget_value()
   $current_value = array();
-  // Obviously doesn't belong here, but in some lower level implementation.
   if (isset($items[$delta])) {
     $current_value = $items[$delta];
-    $current_value['data'] = unserialize($current_value['data']);
+    // @todo $items[$delta] is sometimes a loaded media entity (an object)
+    //   rather than an array. This conflicts with Field API expectations (for
+    //   example, it results in fatal errors when previewing a node with a
+    //   multi-valued media field), so should be fixed. In the meantime, don't
+    //   assume that $current_value is an array.
+    if (is_array($current_value) && isset($current_value['data']) && is_string($current_value['data'])) {
+      $current_value['data'] = unserialize($current_value['data']);
+    }
   }
 
   $element += array(
@@ -311,6 +316,14 @@ function media_field_validate($obj_type, $object, $field, $instance, $langcode, 
   }
 }
 
+/**
+ * @todo Is this function ever called? If not, remove it. The Field API now
+ *   supports automatic serialization / unserialization, so this should no
+ *   longer be needed. After verifying with a module that uses the 'data'
+ *   column, remove this.
+ *
+ * @see media_field_widget_form()
+ */
 function media_field_widget_value($element, $input, $form_state) {
   $return = $input;
   
