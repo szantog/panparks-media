@@ -171,12 +171,14 @@ function media_browser_list() {
   if ($url_exclude_patterns) {
     $query->propertyCondition('uri', "%$v%", 'NOT LIKE');
   }
-  
+
+  // @todo Implement granular editorial access: http://drupal.org/node/696970.
+  //   In the meantime, protect information about private files from being
+  //   discovered by unprivileged users. See also media_file_view().
   if (!user_access('administer media')) {
     $query->propertyCondition('uri', 'private://%', 'NOT LIKE');
   }
-  
-  
+
   $result = $query->execute();
   $ids = array_keys($result['media']);
   if ($ids) {
