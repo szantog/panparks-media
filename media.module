@@ -379,9 +379,23 @@ function media_file_delete($file) {
 }
 
 /**
+ * Implements hook_image_style_flush().
+ *
+ * This hook is invoked by Drupal core when cached image derivatives are no
+ * longer valid.
+ *
+ * @see media_styles_style_flush()
+ * @see media_file_style_flush()
+ */
+function media_image_style_flush($style) {
+  // When a image style is flushed, clear the filter and field caches.
+  media_filter_invalidate_caches();
+}
+
+/**
  * Implements hook_file_style_flush().
  *
- * This hook is invoked by File Styles module in Styles 1.x.
+ * This hook is invoked by the File Styles module in Styles 1.x.
  *
  * @see media_styles_style_flush()
  */
@@ -393,7 +407,7 @@ function media_file_style_flush($style) {
 /**
  * Implements hook_styles_style_flush().
  *
- * This hook is invoked by Styles module in Styles 2.x.
+ * This hook is invoked by the Styles module in Styles 2.x.
  *
  * @see media_file_style_flush()
  */
