@@ -83,11 +83,11 @@ function media_field_view_modes($obj_type) {
   $modes = array();
   if ($obj_type == 'media') {
     $modes = array(
-      'media_link' => array('label' => t('Link')),
-      'media_preview' => array('label' => t('Preview')),
-      'media_small' => array('label' => t('Small')),
-      'media_large' => array('label' => t('Large')),
-      'media_original' => array('label' => t('Original')),
+      'media_link' => array('label' => t('Link'), 'custom settings' => FALSE),
+      'media_preview' => array('label' => t('Preview'), 'custom settings' => FALSE),
+      'media_small' => array('label' => t('Small'), 'custom settings' => FALSE),
+      'media_large' => array('label' => t('Large'), 'custom settings' => FALSE),
+      'media_original' => array('label' => t('Original'), 'custom settings' => FALSE),
     );
   }
   return $modes;
