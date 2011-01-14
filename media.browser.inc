@@ -412,6 +412,7 @@ EOF;
  * @param Object &$media;
  */
 function media_browser_build_media_item(&$media) {
-  $media->preview = drupal_render(media_get_thumbnail_preview($media));
+  $preview = media_get_thumbnail_preview($media);
+  $media->preview = drupal_render($preview);
   $media->url = file_create_url($media->uri);
 }

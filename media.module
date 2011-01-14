@@ -1021,9 +1021,14 @@ function media_element_process(&$element, &$form_state, $form) {
   );
 
   //@TODO: This should be loaded from the JS in case of a failed form submission.
+  $markup = '';
+  if (!empty($media)) {
+    $preview = media_get_thumbnail_preview($media);
+    $markup = drupal_render($preview);
+  }
   $element['preview'] = array(
     '#type' => 'item',
-    '#markup' => empty($media) ? '' : drupal_render(media_get_thumbnail_preview($media)),
+    '#markup' => $markup,
     '#prefix' => '<div class="preview launcher">',
     '#suffix' => '</div><a class="launcher" href="#">' . t(media_variable_get('field_select_media_text')) . '</a><a class="remove" href="#">' . t(media_variable_get('field_remove_media_text')) . '</a>',
   );
