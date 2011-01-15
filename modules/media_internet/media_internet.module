@@ -343,14 +343,14 @@ abstract class MediaInternetBaseHandler {
    * 
    * @param $file_obj;
    */
-  public function postSave($file_obj) {
+  public function postSave(&$file_obj) {
     
   }
   
   /**
    * Before the file has been saved, implementors may do additional operations.
    */
-  public function preSave($file_obj) {
+  public function preSave(&$file_obj) {
     
   }
 }
