@@ -97,6 +97,10 @@ function media_admin($form, $form_state) {
  * Form builder: Builds the media list administration overview.
  */
 function media_admin_list() {
+  // @todo Change to media_variable_get('admin_pager_limit') for consistency
+  //   with browser_pager_limit?
+  $limit = variable_get('media_admin_limit', 50);
+
   // Build the sortable table header.
   $header = array(
    'title' => array('data' => t('Title'), 'field' => 'f.filename'),
@@ -113,7 +117,7 @@ function media_admin_list() {
   $result = $query
    ->fields('f')
    ->fields('u', array('name'))
-   ->limit(50)
+   ->limit($limit)
    ->orderByHeader($header)
    ->execute();
 
@@ -148,11 +152,13 @@ function media_admin_list() {
  * Form builder: Builds the media thumbnails administration overview.
  */
 function media_admin_thumbnails() {
+  // @todo Change to media_variable_get('admin_pager_limit') for consistency
+  //   with browser_pager_limit?
   $limit = variable_get('media_admin_limit', 50);
 
   $query = new EntityFieldQuery();
 
-  $query->range(0, $limit);
+  $query->pager($limit);
   $query->entityCondition('entity_type', 'media');
   
   $result = $query->execute();
