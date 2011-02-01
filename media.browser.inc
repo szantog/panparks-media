@@ -4,7 +4,6 @@
 /**
  * @file
  * Media Browser page callback
- *
  */
 function media_browser($selected = NULL) {
   $output = array();
@@ -116,7 +115,6 @@ EOS;
  * @param array $params
  *  An array of parameters provided when a media_browser is launched.
  *  See media_browser().
- *
  */
 function media_set_browser_params(&$params = NULL) {
   static $stored_params;
@@ -215,6 +213,7 @@ function media_media_browser_plugin_info() {
   }
   return $plugins;
 }
+
 /**
  * Implementaion of hook_media_browser_plugin_view().
  */

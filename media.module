@@ -67,6 +67,7 @@ function media_menu() {
     'file' => 'media.admin.inc',
   );
 
+  // Settings used for determining the type of media a file is.
   $items['admin/config/media/types/manage/%media_type'] = array(
     'title' => 'Manage media',
     'title callback' => 'media_type_page_title',
@@ -84,10 +85,7 @@ function media_menu() {
     'weight' => -1,
   );
 
-  /**
-   * Administrative screens for managing media
-   * @var unknown_type
-   */
+  // Administrative screens for managing media.
   $items['admin/content/media'] = array(
     'title' => 'Media',
     'description' => 'Manage files used on your site.',
@@ -98,6 +96,7 @@ function media_menu() {
     'file' => 'media.admin.inc',
   );
 
+  // Used to import files from a local filesystem into Drupal.
   $items['admin/content/media/import'] = array(
     'title' => 'Import media',
     'description' => 'Import files into your media library.',
@@ -119,6 +118,7 @@ function media_menu() {
     'theme callback' => 'media_dialog_get_theme_name',
   );
 
+  // A testbed to try out the media browser with different launch commands.
   $items['media/browser/testbed'] = array(
     'title' => 'Media Browser test',
     'description' => 'Make it easier to test media browser',
@@ -221,11 +221,7 @@ function media_menu() {
 
   $items['admin/content/media/browser'] = $items['media/browser'];
   $items['admin/content/media/browser']['type'] = MENU_LOCAL_ACTION;
-
-  /**
-   * End-user CRUD screens
-   * @var unknown_type
-   */
+  
   $items['media/js'] = array(
     'page callback' => 'media_preview_ajax',
     'access callback' => 'media_access',
@@ -967,17 +963,12 @@ function media_save_attached_file($file) {
       media_filter_invalidate_caches($media->fid);
     }
   }
-
-
-
   return $media;
 }
 
 
 /**
  * Implements hook_element_info().
- *
- * Media field... Not sure if this is going to work :)
  */
 function media_element_info() {
   $types = array();

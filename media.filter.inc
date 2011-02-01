@@ -112,7 +112,6 @@ function _media_url_curry($func, $arity) {
   ");
 }
 
-
 /**
  * Replace callback to convert tag into markup
  * @param string $match
@@ -177,9 +176,11 @@ function media_token_to_markup($match, $wysiwyg = FALSE) {
 }
 
 /**
- * Process a text format widget to load and attach editors.
+ * Builds a map of media tags in the element being rendered to their rendered HTML.
  *
- * The element's #id is used as reference to attach client-side editors.
+ * The map is stored in JS, so we can transform them when the editor is being displayed.
+ *
+ * @param array $element
  */
 function media_pre_render_text_format($element) {
   // filter_process_format() copies properties to the expanded 'value' child
@@ -187,8 +188,7 @@ function media_pre_render_text_format($element) {
   if (!isset($element['format'])) {
     return $element;
   }
-
-  $format_field = &$element['format'];
+  
   $field = &$element['value'];
   $settings = array(
     'field' => $field['#id'],
@@ -242,13 +242,10 @@ function _media_generate_tagMap($text) {
 }
 
 /**
- * Used when embedding media.  Allows the user to pick a format for their media file.
+ * Form callback used when embedding media.
  *
+ * Allows the user to pick a format for their media file.
  * Can also have additional params depending on the media type.
- *
- * @param unknown_type $form
- * @param unknown_type $media
- * @return unknown_type
  */
 function media_format_form($form, $form_state, $media) {
   // This will vary depending on the media type.

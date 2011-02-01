@@ -444,10 +444,8 @@ function media_admin_type_manage_form_submit($form, &$form_state) {
 
 /**
  * Form callback for mass import.
- *
  */
 function media_import($form, &$form_state) {
-
   if (!isset($form_state['storage']['files'])) {
     $form_state['storage']['step'] = 'choose';
     $form_state['storage']['next_step'] = 'preview';
@@ -479,6 +477,9 @@ function media_import($form, &$form_state) {
 
 }
 
+/**
+ * Validate handler for media_import().
+ */
 function media_import_validate($form, &$form_state) {
   if ($form_state['values']['op'] != 'Confirm') {
     $directory = $form_state['values']['directory'];
@@ -496,7 +497,7 @@ function media_import_validate($form, &$form_state) {
 }
 
 /**
- * Submit handler for media_import()
+ * Submit handler for media_import().
  */
 function media_import_submit($form, &$form_state) {
   if ($form_state['values']['op'] == 'Confirm') {
@@ -516,6 +517,9 @@ function media_import_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 
+/**
+ * BatchAPI callback op for media import.
+ */
 function media_import_batch_import_files($files, &$context) {
   if (!isset($context['sandbox']['files'])) {
     // This runs the first time the batch runs.
@@ -552,6 +556,9 @@ function media_import_batch_import_files($files, &$context) {
 
 }
 
+/**
+ * BatchAPI complete callback for media import.
+ */
 function media_import_batch_import_complete($success, $results, $operations) {
   if ($results['errors']) {
     drupal_set_message(theme('item_list', array('items' => $results['errors'])), 'error');

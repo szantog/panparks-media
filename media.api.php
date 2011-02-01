@@ -67,7 +67,7 @@ function hook_media_browser_plugin_info() {
 }
 
 /**
- * Returns an array of operations which can be taked on media items.
+ * Returns an array of operations which can be taken on media items.
  *
  * This is used on the admin/content/media page so users can select multiple
  * items and do something with them.
