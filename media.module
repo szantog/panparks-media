@@ -985,10 +985,11 @@ function media_element_info() {
     '#input' => TRUE,
     '#process' => array('media_element_process'),
     //'#value_callback' => 'media_element_value',
-    //'#element_validate' => array('file_managed_file_validate'),
+    '#element_validate' => array('media_element_validate'),
     '#theme_wrappers' => array('container'),
     '#progress_indicator' => 'throbber',
     '#extended' => FALSE,
+    '#required' => FALSE,
     '#media_options' => array(
       'global' => array(
         'types' => array(), // Example: array('image', 'audio');
@@ -1018,6 +1019,7 @@ function media_element_process(&$element, &$form_state, $form) {
     '#title' => $element['#title'],
     '#markup' => '',
     '#description' => $element['#description'],
+    '#required' => $element['#required'],
   );
 
   //@TODO: This should be loaded from the JS in case of a failed form submission.
@@ -1089,6 +1091,27 @@ function media_element_process(&$element, &$form_state, $form) {
 
   return $element;
   // @todo: make this work for file and image fields
+}
+
+/**
+ * Validate media form elements. The file type is validated during the upload process, but this is
+ * necessary in order to respect the #required property.
+ */
+function media_element_validate(&$element, &$form_state) {
+  if ($element['#required']) {
+    $field_name = $element['#field_name'];
+    $lang = $element['#language'];
+
+    $has_value = FALSE;
+    foreach ($form_state['values'][$field_name][$lang] as $value) {
+      if ($value['fid']) {
+        $has_value = TRUE;
+      }
+    }
+    if (!$has_value) {
+      form_error($element, t('%element_title is required.', array('%element_title' => $element['#title'])));
+    }
+  }
 }
 
 /**
