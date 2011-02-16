@@ -583,7 +583,7 @@ function media_admin_config_browser($form, &$form_state) {
     '#type' => 'select',
     '#title' => t('Media browser theme'),
     '#options' => $theme_options,
-    '#description' => t("This theme will be used for all media related dialogs.  It can be different from your site's theme because the many site themes do not work well in the small windows which media uses."),
+    '#description' => t("This theme will be used for all media related dialogs.  It can be different from your site's theme because many site themes do not work well in the small windows which media uses."),
     '#default_value' => media_variable_get('dialog_theme'),
   );
 
