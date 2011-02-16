@@ -1023,7 +1023,7 @@ function media_element_process(&$element, &$form_state, $form) {
     '#type' => 'item',
     '#markup' => $markup,
     '#prefix' => '<div class="preview launcher">',
-    '#suffix' => '</div><a class="launcher" href="#">' . t(media_variable_get('field_select_media_text')) . '</a><a class="remove" href="#">' . t(media_variable_get('field_remove_media_text')) . '</a>',
+    '#suffix' => '</div><a class="button launcher" href="#">' . t(media_variable_get('field_select_media_text')) . '</a><a class="button remove" href="#">' . t(media_variable_get('field_remove_media_text')) . '</a>',
   );
 
   /**

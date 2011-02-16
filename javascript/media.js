@@ -28,7 +28,7 @@ Drupal.behaviors.mediaElement = {
 
       // Show the Remove button if there's an already selected media.
       if (fidField.val() != 0) {
-        removeButton.show();
+        removeButton.css('display', 'inline-block');
       }
 
       // When someone clicks the link to pick media (or clicks on an existing thumbnail)
