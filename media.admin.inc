@@ -567,3 +567,32 @@ function media_import_batch_import_complete($success, $results, $operations) {
     drupal_set_message(theme('item_list', array('items' => $results['success'])));
   }
 }
+
+/**
+ * Admin configruation form for media browser settings.
+ */
+function media_admin_config_browser($form, &$form_state) {
+  $theme_options = array();
+  foreach (list_themes() as $key => $theme) {
+    if ($theme->status) {
+      $theme_options[] = $key;
+    }
+  }
+
+  $form[media_variable_name('dialog_theme')] = array(
+    '#type' => 'select',
+    '#title' => t('Media browser theme'),
+    '#options' => $theme_options,
+    '#description' => t("This theme will be used for all media related dialogs.  It can be different from your site's theme because the many site themes do not work well in the small windows which media uses."),
+    '#default_value' => media_variable_get('dialog_theme'),
+  );
+
+  $form[media_variable_name('file_extensions')] = array(
+    '#type' => 'textfield',
+    '#title' => 'Allowed file extensions',
+    '#default_value' => media_variable_get('file_extensions'),
+    '#description' => t('File extensions which are accepted in the media browser.  Use spaces to separate (e.g. "jpg gif pdf doc"). <br/><em>Note that this can be overriden on a per-field basis when creating multimedia asset fields and files of certain extensions cannot be embedded at this time.</em>'),
+  );
+
+  return system_settings_form($form);
+}

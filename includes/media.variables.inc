@@ -128,7 +128,7 @@ function media_variable_default($name = NULL) {
       'field_remove_media_text' => 'Remove media',
 
       // Name of the theme to use in media popup dialogs
-      'dialog_get_theme_name' => 'seven',
+      'dialog_theme' => 'seven',
       // @TODO: Make a configuration form with this.
       'file_extensions' => 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp mp3 mov m4v mp4 mpeg avi ogg wmv ico',
       'max_filesize' => '',

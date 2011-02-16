@@ -488,3 +488,14 @@ function media_update_7013() {
     filter_format_save($format);
   }
 }
+
+/**
+ * Renames the badly named variable for the theme used for the media browser
+ * and other media related dialogs.
+ */
+function media_update_7014() {
+  if ($old_value = variable_get('media__dialog_get_theme_name')) {
+    variable_del('media__dialog_get_theme_name');
+    variable_set('media__dialog_theme', $old_value);
+  }
+}

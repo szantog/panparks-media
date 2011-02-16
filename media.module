@@ -59,6 +59,15 @@ function media_help($path,$arg) {
  */
 function media_menu() {
   // For managing different types of media and the fields associated with them.
+  $items['admin/config/media/browser'] = array(
+    'title' => 'Media browser settings',
+    'description' => 'Configure the behavior and display of the media browser.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_admin_config_browser'),
+    'access arguments' => array('administer media'),
+    'file' => 'media.admin.inc',
+  );
+  // For managing different types of media and the fields associated with them.
   $items['admin/config/media/types'] = array(
     'title' => 'Media Types',
     'description' => 'Manage files used on your site.',
@@ -788,7 +797,7 @@ function media_library() {
  */
 function media_dialog_get_theme_name() {
   // Set to empty to get the default theme.
-  return media_variable_get('dialog_get_theme_name');
+  return media_variable_get('dialog_theme');
 }
 
 /**
