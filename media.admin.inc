@@ -481,7 +481,7 @@ function media_import($form, &$form_state) {
  * Validate handler for media_import().
  */
 function media_import_validate($form, &$form_state) {
-  if ($form_state['values']['op'] != 'Confirm') {
+  if ($form_state['values']['op'] != t('Confirm')) {
     $directory = $form_state['values']['directory'];
     $pattern = $form_state['values']['pattern'];
     if (!is_dir($directory)) {
