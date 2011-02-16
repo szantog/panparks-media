@@ -162,7 +162,7 @@ function media_admin_thumbnails() {
   $query->entityCondition('entity_type', 'media');
   
   $result = $query->execute();
-  $ids = array_keys($result['media']);
+  $ids = key_exists('media', $result) ? array_keys($result['media']) : FALSE;
   if ($ids) {
     $media_entities = entity_load('media', $ids);
   }
