@@ -11,7 +11,9 @@
  */
 function media_media_plugin() {
   // Include the required browser JS.
-  module_load_include('inc', 'media', 'media.browser');
+  // @todo: wyswiyg should allow libraries and multiple js files
+  // to be defined by this hook.
+  // @see http://drupal.org/node/1039076
   media_include_browser_js();
 
   // Plugin definition
@@ -35,4 +37,32 @@ function media_media_plugin() {
    );
 
    return $plugins;
+}
+
+/**
+ * Prepares the page to be able to launch the media browser.
+ *
+ * Defines default variables.
+ */
+function media_include_browser_js() {
+  static $included;
+  if ($included) {
+    return;
+  }
+  $included = TRUE;
+  module_load_include('inc', 'media', 'media.browser');
+  $javascript = media_browser_js();
+  foreach ($javascript as $key => $definitions) {
+    foreach ($definitions as $definition) {
+      $function = 'drupal_add_' . $key;
+      // Since the arguments to pass are variable, use call_user_func_array().
+      // This will not handle all potential drupal_add_*() functions directly
+      // but covers the js and library needed here, which are unlikely to be
+      // expanded since this function is only a workaround for a wysiwyg limitation.
+      call_user_func_array($function, $definition);
+    }
+  }
+  // Add wysiwyg-specific settings.
+  $settings = array('blacklist' => array('src','fid','view_mode','format'));
+  drupal_add_js(array('media' => $settings), 'setting');
 }

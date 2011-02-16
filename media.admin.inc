@@ -31,7 +31,7 @@ function media_admin($form, $form_state) {
   }
 
   require_once dirname(__FILE__) . '/media.browser.inc';
-  media_include_browser_js();
+  media_attach_browser_js($form);
   
   $types = media_display_types();
 

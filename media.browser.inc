@@ -292,41 +292,50 @@ function _media_recursive_check_plain(&$value, $key) {
 }
 
 /**
- * Prepares the page to be able to launch the media browser.
+ * Attaches media browser javascript to an element.
  *
- * @TODO: This is a WTF at present.  Basically, the browser is launched from wysiwyg
- * and from fields, so having a common function makes sense.  But not like this.
- *
- * Defines default variables.
+ * @param $element
+ *  The element array to attach to.
  */
-function media_include_browser_js() {
-  static $included;
-  if ($included) {
-    return;
+function media_attach_browser_js(&$element) {
+  $javascript = media_browser_js();
+  foreach ($javascript as $key => $definitions) {
+    foreach ($definitions as $definition) {
+      $element['#attached'][$key][] = $definition;
+    }
   }
-  $included = TRUE;
-  drupal_add_library('media', 'media_browser');
+}
 
+/**
+ * Helper function to define browser javascript.
+ */
+function media_browser_js() {
   $settings = array(
     'browserUrl' => url('media/browser',
       array('query' => array('render' => 'media-popup'))),
     'styleSelectorUrl' => url('media/-media_id-/format-form',
       array('query' => array('render' => 'media-popup'))),
-
-    // Adding src to blacklist; fid and view_mode we capture outside attribs so adding
-    // them too to the blacklist.
-    'blacklist' => array('src','fid','view_mode','format'), // Only applies to WYSIWG - should be removed;
   );
 
-  drupal_add_js(array('media' => $settings), 'setting');
+  $js = array(
+    'library' => array(
+      array('media', 'media_browser'),
+    ),
+    'js' => array(
+      array(
+       'data' => array('media' => $settings),
+       'type' => 'setting',
+      ),
+    ),
+  );
+  return $js;
 }
-
 
 /**
  * Menu callback for testing the media browser
  */
 function media_browser_testbed($form) {
-  media_include_browser_js();
+  media_attach_browser_js($form);
 
   $form['test_element'] = array(
     '#type' => 'media',

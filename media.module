@@ -1078,7 +1078,7 @@ function media_element_process(&$element, &$form_state, $form) {
   // All settings would likely apply to all media in a multi-value, but what about passing the existing fid?
 
   module_load_include('inc', 'media', 'media.browser');
-  media_include_browser_js();
+  media_attach_browser_js($element);
 
   return $element;
   // @todo: make this work for file and image fields
