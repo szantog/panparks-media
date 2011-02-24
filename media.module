@@ -796,8 +796,7 @@ function media_library() {
  * @return string
  */
 function media_dialog_get_theme_name() {
-  // Set to empty to get the default theme.
-  return media_variable_get('dialog_theme');
+  return media_variable_get('dialog_theme', variable_get('admin_theme'));
 }
 
 /**

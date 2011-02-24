@@ -127,8 +127,8 @@ function media_variable_default($name = NULL) {
       'field_select_media_text' => 'Select media',
       'field_remove_media_text' => 'Remove media',
 
-      // Name of the theme to use in media popup dialogs
-      'dialog_theme' => 'seven',
+      // Name of the theme to use in media popup dialogs, defaults to admin_theme
+      'dialog_theme' => '',
       // @TODO: Make a configuration form with this.
       'file_extensions' => 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp mp3 mov m4v mp4 mpeg avi ogg wmv ico',
       'max_filesize' => '',

@@ -573,9 +573,10 @@ function media_import_batch_import_complete($success, $results, $operations) {
  */
 function media_admin_config_browser($form, &$form_state) {
   $theme_options = array();
+  $theme_options[NULL] = 'Default administration theme';
   foreach (list_themes() as $key => $theme) {
     if ($theme->status) {
-      $theme_options[] = $key;
+      $theme_options[$key] = $theme->info['name'];
     }
   }
 
@@ -594,5 +595,13 @@ function media_admin_config_browser($form, &$form_state) {
     '#description' => t('File extensions which are accepted in the media browser.  Use spaces to separate (e.g. "jpg gif pdf doc"). <br/><em>Note that this can be overriden on a per-field basis when creating multimedia asset fields and files of certain extensions cannot be embedded at this time.</em>'),
   );
 
+  $form['#submit'][] = 'media_admin_config_browser_pre_submit';
   return system_settings_form($form);
+}
+
+function media_admin_config_browser_pre_submit(&$form, &$form_state) {
+  if (!$form_state['values'][media_variable_name('dialog_theme')]) {
+    media_variable_del('dialog_theme');
+    unset($form_state['values'][media_variable_name('dialog_theme')]);
+  }
 }
