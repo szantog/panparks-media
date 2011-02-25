@@ -1,4 +1,3 @@
-// $Id$
 
 (function ($) {
 namespace('Drupal.media.browser.plugin');

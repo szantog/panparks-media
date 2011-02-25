@@ -1,4 +1,3 @@
-// $Id$
 
 /**
  * @file: Popup dialog interfaces for the media project.

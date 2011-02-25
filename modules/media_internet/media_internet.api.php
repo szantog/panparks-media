@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * Implementors return an multidim array, keyed by a class name

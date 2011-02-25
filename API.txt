@@ -1,4 +1,3 @@
-// $Id$
 
 /**
  *  API documentation for the Media module.

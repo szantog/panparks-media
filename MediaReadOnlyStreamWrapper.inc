@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * A base class for Resource Stream Wrappers.

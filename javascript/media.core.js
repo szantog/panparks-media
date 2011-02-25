@@ -1,4 +1,3 @@
-// $Id$
 
 /**
  * Creates a namespace.

@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file: Provides a "Multimedia asset" field to the fields API
