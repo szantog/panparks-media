@@ -3,7 +3,7 @@ name = Media
 description = Provides the core Media API
 package = Media
 core = 7.x
-php = 5.2
+
 files[] = media.install
 files[] = media.module
 files[] = includes/media.admin.inc
@@ -14,8 +14,8 @@ files[] = includes/MediaReadOnlyStreamWrapper.inc
 files[] = test/media.types.test
 files[] = test/media.entity.test
 files[] = test/media.filter.test
-dependencies[] = file
+
+dependencies[] = file_entity
 dependencies[] = image
-dependencies[] = file_styles
 
 testing_api = 2.x

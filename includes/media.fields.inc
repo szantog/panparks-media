@@ -57,48 +57,35 @@ function media_field_widget_info() {
 function media_field_formatter_info() {
   $formatters = array();
 
-  // Formatters for media are the same as build modes for media.
-  $build_modes = media_field_view_modes('media');
-  foreach ($build_modes as $key => $mode) {
-    $formatters[$key] = array(
-      'label' => t($mode['label']),
-      'field types' => array('media'),
-    );
+  // Add a media field formatter for each file entity view mode.
+  $entity_info = entity_get_info('file');
+  foreach ($entity_info['view modes'] as $view_mode => $view_mode_info) {
+    // @todo Modules other than Media can also add view modes to file entities.
+    //   No reason not to allow them to be chosen when formatting a Media field,
+    //   but because Field API keeps all formatters across all field types in a
+    //   single array, we run the risk of name collission. The best way to solve
+    //   this is to convert this into a single formatter with a setting for the
+    //   view mode, similar to how the "Image" formatter has a setting for the
+    //   "Image Style".
+    if (strpos($view_mode, 'media_') === 0) {
+      $formatters[$view_mode] = array(
+        'label' => t($view_mode_info['label']),
+        'field types' => array('media'),
+      );
+    }
   }
 
-  // Also add a formatter for files to show larger icons based on mimetype
+  // Also add a formatter for files to show larger icons based on mimetype. This
+  // was originally used when media entities contained file fields. The current
+  // file entity architecture no longer needs this, but people may have used
+  // this formatter for other file fields on their website.
+  // @todo Some day, remove this.
   $formatters['media_large_icon'] = array(
     'label' => t('Large filetype icon'),
     'field types' => array('file'),
   );
-  
+
   return $formatters;
-}
-
-/**
- * Used to Implement hook_field_view_modes().
- */
-function media_field_view_modes($obj_type) {
-  $modes = array();
-  if ($obj_type == 'media') {
-    $modes = array(
-      'media_link' => array('label' => t('Link'), 'custom settings' => FALSE),
-      'media_preview' => array('label' => t('Preview'), 'custom settings' => FALSE),
-      'media_small' => array('label' => t('Small'), 'custom settings' => FALSE),
-      'media_large' => array('label' => t('Large'), 'custom settings' => FALSE),
-      'media_original' => array('label' => t('Original'), 'custom settings' => FALSE),
-    );
-  }
-  return $modes;
-}
-
-function media_field_ui_view_modes_tabs() {
-  $modes = array(
-    'basic' => array(
-      'view modes' => array_keys(media_field_view_modes('media')),
-    ),
-  );
-  return $modes;
 }
 
 /**
@@ -108,7 +95,7 @@ function media_field_ui_view_modes_tabs() {
  *   hook to load referenced entities.
  */
 function media_field_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items) {
-  // Collect all media IDs that need loading.
+  // Collect all file ids that need loading.
   $fids = array();
   foreach ($entities as $id => $entity) {
     foreach ($items[$id] as $delta => $item) {
@@ -118,31 +105,30 @@ function media_field_prepare_view($entity_type, $entities, $field, $instances, $
     }
   }
 
-  // Load the entities in a single operation.
-  $media_entities = media_load_multiple(array_values($fids));
+  // Load them.
+  $files = file_load_multiple(array_values($fids));
 
-  // Populate that item data with the loaded entities.
+  // Replace the item data with loaded files instead of just the file ids.
+  // @todo This causes problems with some Field API and other module
+  //   integration. It would be better for the loaded file to be added into
+  //   $item, not replace it. See http://drupal.org/node/1005642.
   foreach ($entities as $id => $entity) {
     foreach ($items[$id] as $delta => $item) {
       if (is_array($item) && !empty($item['fid'])) {
-        $items[$id][$delta] = $media_entities[$item['fid']];
+        $items[$id][$delta] = $files[$item['fid']];
       }
     }
   }
 }
 
 /**
- * Implement hook_field_formatter_view
+ * Implement hook_field_formatter_view().
  */
 function media_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-  
-  $element = array();
-  
-  // This block handles fallback file type icons for media which doesn't have
-  // a thumbnail.  It's kind of a hack, and belongs in the file module.
+  // @todo Legacy support for the extra formatter added to file fields. See
+  //   media_field_formatter_info().
   if ($display['type'] == 'media_large_icon') {
     foreach ($items as $delta => $item) {
-      // Display all values in a single element..
       $element[$delta] = array(
         '#theme' => 'media_formatter_large_icon',
         '#file' => $item,
@@ -150,48 +136,14 @@ function media_field_formatter_view($entity_type, $entity, $field, $instance, $l
     }
     return $element;
   }
-  
-  // The rest of this hook invocation is for rendering media when it is attached
-  // as a field to other entities.  The formatter on the media field is equivilent
-  // to the media view_mode.  So if someone configures a media field on a node
-  // and says that the teaser formatter for the media is "large", it will render
-  // the media entity as per the large view_mode.
 
-  // An array of media items to pass into entity rendering functions.
-  $media_items = array();
-
-  foreach ($items as $delta => $item) {
-    $media_items[$item->fid] = $item;
-    //$media_items[$item['fid']] = media_load($item['fid']);
+  // @todo media_field_prepare_view() ensures that $items is an array of loaded
+  //   files, but that will need to change. See that function for details.
+  $files = array();
+  foreach ($items as $file) {
+    $files[$file->fid] = $file;
   }
-
-  field_attach_prepare_view('media', $media_items, $display['type']);
-  entity_prepare_view('media', $media_items);
-
-
-
-  foreach ($items as $delta => $item) {
-    // @TODO:
-    // This works fine for Media styles, just not the default file types.
-    // Find out why this doesn't automatically already route through file.
-    // We're using a filefield in theory, created during the media_type
-    // instantiation at media_type_configure_fields().
-    // Other fields are routed properly, but not that default field...
-
-    // First check if the default File formatters are sufficient.
-//     $element[$delta] = file_field_formatter_view($obj_type, $object, $field, $instance, $langcode, $items, $display);
-
-    // If this is not handled by the File module, then defer to Styles.
-//     if (!$element[$delta]) {
-      $element[$delta] = field_attach_view('media', $item, $display['type'], $langcode);
-
-      // We'll defer to the Styles module to route formatting for the 'file'.
-      $element[$delta]['file']['#theme'] = 'styles_field_formatter';
-      $element[$delta]['file']['#element'] = $element[$delta]['file'];
-//     }
-  }
-
-  return $element;
+  return file_view_multiple($files, $display['type'], 0, $langcode);
 }
 
 /**
