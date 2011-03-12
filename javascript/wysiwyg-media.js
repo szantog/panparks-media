@@ -140,12 +140,18 @@ Drupal.wysiwyg.plugins.media = {
           var _tag = inlineTag;
           _tag = _tag.replace('[[','');
           _tag = _tag.replace(']]','');
-          mediaObj = JSON.parse(_tag);
-
-          var imgElement = $(mediaMarkup);
-          this.addImageAttributes(imgElement, mediaObj.fid, mediaObj.view_mode);
-          var toInsert = this.outerHTML(imgElement);
-          content = content.replace(inlineTag, toInsert);
+          try {
+            mediaObj = JSON.parse(_tag);
+          }
+          catch(err) {
+            mediaObj = null;
+          }
+          if(mediaObj) {
+            var imgElement = $(mediaMarkup);
+            this.addImageAttributes(imgElement, mediaObj.fid, mediaObj.view_mode);
+            var toInsert = this.outerHTML(imgElement);
+            content = content.replace(inlineTag, toInsert);
+          }
         }
         else {
           debug.debug("Could not find content for " + inlineTag);
