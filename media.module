@@ -1145,10 +1145,16 @@ function media_element_validate(&$element, &$form_state) {
 function media_filter_info() {
   $filters['media_filter'] = array(
     'title' => t('Converts Media tags to Markup'),
-    'description' => t('This filter will convert [[{type:media... ]] tags into markup'),
+    'description' => t('This filter will convert [[{type:media... ]] tags into markup.'),
     'process callback' => 'media_filter',
     'tips callback' => 'media_filter_tips', // @TODO not implemented
   );
+
+  // If the WYSIWYG module is enabled, add additional help.
+  if (module_exists('wysiwyg')) {
+    $filters['media_filter']['description'] .= ' ' . t('This must be enabled for the WYSIWYG integration to work correctly with this text filter.');
+  }
+
   return $filters;
 }
 
