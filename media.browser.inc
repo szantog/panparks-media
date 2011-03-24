@@ -176,6 +176,8 @@ function media_browser_list() {
     $query->propertyCondition('uri', 'private://%', 'NOT LIKE');
   }
 
+  $query->propertyCondition('status', FILE_STATUS_PERMANENT);
+
   $result = $query->execute();
   $ids = array_keys($result['media']);
   if ($ids) {

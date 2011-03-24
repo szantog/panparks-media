@@ -116,6 +116,7 @@ function media_admin_list() {
   $result = $query
    ->fields('f')
    ->fields('u', array('name'))
+   ->condition('f.status', FILE_STATUS_PERMANENT)
    ->limit($limit)
    ->orderByHeader($header)
    ->execute();
@@ -159,7 +160,8 @@ function media_admin_thumbnails() {
 
   $query->pager($limit);
   $query->entityCondition('entity_type', 'media');
-  
+  $query->propertyCondition('status', FILE_STATUS_PERMANENT);
+
   $result = $query->execute();
   $ids = key_exists('media', $result) ? array_keys($result['media']) : FALSE;
   if ($ids) {
