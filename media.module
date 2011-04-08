@@ -330,7 +330,7 @@ function media_theme() {
     // Dialog page.
     'media_dialog_page' => array(
       'render element' => 'page',
-      'template' => 'theme/media-dialog-page',
+      'template' => 'templates/media-dialog-page',
       'file' => 'includes/media.theme.inc',
     ),
 
@@ -753,9 +753,9 @@ function media_library() {
   $libraries['media_base'] = array(
     'title' => 'Media base',
     'js' => array(
-      $path . '/javascript/media.core.js' => array('group' => JS_LIBRARY, 'weight' => - 5),
-      $path . '/javascript/util/json2.js' => array('group' => JS_LIBRARY),
-      $path . '/javascript/util/ba-debug.min.js' => array('group' => JS_LIBRARY),
+      $path . '/js/media.core.js' => array('group' => JS_LIBRARY, 'weight' => - 5),
+      $path . '/js/util/json2.js' => array('group' => JS_LIBRARY),
+      $path . '/js/util/ba-debug.min.js' => array('group' => JS_LIBRARY),
     ),
     'css' => array(
       $path . '/css/media.css',
@@ -769,7 +769,7 @@ function media_library() {
   $libraries['media_browser'] = array(
     'title' => 'Media Browser popup libraries',
     'js' => array(
-      $path . '/javascript/media.popups.js' => array('group' => JS_DEFAULT),
+      $path . '/js/media.popups.js' => array('group' => JS_DEFAULT),
     ),
     'dependencies' => array(
       array('media', 'media_base'),
@@ -785,7 +785,7 @@ function media_library() {
   $libraries['media_browser_page'] = array(
     'title' => 'Media browser',
     'js' => array(
-      $path . '/javascript/media-browser.js'  => array('group' => JS_DEFAULT),
+      $path . '/js/media-browser.js'  => array('group' => JS_DEFAULT),
     ),
     'css' => array(
       $path . '/css/media.browser.css' => array('group' => CSS_DEFAULT),
@@ -1089,7 +1089,7 @@ function media_element_process(&$element, &$form_state, $form) {
   );
 
   // Media browser attach code.
-  $element['#attached']['js'][] = drupal_get_path('module', 'media') . '/javascript/media.js';
+  $element['#attached']['js'][] = drupal_get_path('module', 'media') . '/js/media.js';
 
   $settings = array();
   $setting['media']['elements'][$element['#id']] = $element['#media_options'];

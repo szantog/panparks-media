@@ -17,7 +17,7 @@
  *  '#title' => t('Library'),
  *  '#attached' => array(
  *    'js' => array(
- *       $path . '/javascript/plugins/media.library.js',
+ *       $path . '/js/plugins/media.library.js',
  *     ),
  *   ),
  *   '#settings' => array(

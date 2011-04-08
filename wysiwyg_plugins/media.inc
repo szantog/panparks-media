@@ -23,7 +23,7 @@ function media_media_plugin() {
     'icon file' => 'wysiwyg-media.gif',
     'icon title' => t(media_variable_get('wysiwyg_icon_title')),
     // @todo: move this to the plugin directory for the wysiwyg plugin.
-    'js path' => drupal_get_path('module','media').'/javascript/',
+    'js path' => drupal_get_path('module','media').'/js/',
     'js file' => 'wysiwyg-media.js',
     'css file' => NULL,
     'css path' => NULL,

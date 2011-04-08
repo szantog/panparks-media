@@ -239,7 +239,7 @@ function media_media_browser_plugin_view($plugin_name, $params) {
       $attached = array();
       if ($multiselect && module_exists('plupload')) {
         $upload_form_id = 'media_add_upload_multiple';
-        $attached['js'] = array($path . '/javascript/plugins/media.upload_multiple.js');
+        $attached['js'] = array($path . '/js/plugins/media.upload_multiple.js');
       }
       else {
         $upload_form_id = 'media_add_upload';
@@ -257,11 +257,11 @@ function media_media_browser_plugin_view($plugin_name, $params) {
         '#title' => t('Library'),
         '#attached' => array(
           'js' => array(
-            $path . '/javascript/plugins/media.library.js',
+            $path . '/js/plugins/media.library.js',
           ),
           'css' => array(
             //@todo: should move this.
-            $path . '/javascript/plugins/media.library.css',
+            $path . '/js/plugins/media.library.css',
           ),
         ),
         '#settings' => array(
