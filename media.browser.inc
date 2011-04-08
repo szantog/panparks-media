@@ -221,8 +221,8 @@ function media_media_browser_plugin_info() {
 function media_media_browser_plugin_view($plugin_name, $params) {
   $path = drupal_get_path('module', 'media');
 
-  module_load_include('inc', 'media', 'media.admin');
-  module_load_include('inc', 'media', 'media.pages');
+  module_load_include('inc', 'media', 'includes/media.admin');
+  module_load_include('inc', 'media', 'includes/media.pages');
 
   $types = isset($params['types']) ? $params['types'] : array();
 

@@ -6,10 +6,10 @@ core = 7.x
 php = 5.2
 files[] = media.install
 files[] = media.module
-files[] = media.admin.inc
-files[] = media.theme.inc
-files[] = media.types.inc
-files[] = MediaReadOnlyStreamWrapper.inc
+files[] = includes/media.admin.inc
+files[] = includes/media.theme.inc
+files[] = includes/media.types.inc
+files[] = includes/MediaReadOnlyStreamWrapper.inc
 ; Tests
 files[] = test/media.types.test
 files[] = test/media.entity.test

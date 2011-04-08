@@ -509,7 +509,7 @@ function media_import_submit($form, &$form_state) {
         array('media_import_batch_import_files', array($files)),
       ),
       'finished' => 'media_import_batch_import_complete',
-      'file' => drupal_get_path('module', 'media') . '/media.admin.inc',
+      'file' => drupal_get_path('module', 'media') . '/includes/media.admin.inc',
     );
     batch_set($batch);
     return;
@@ -635,7 +635,7 @@ function media_admin_rebuild_types_form_submit(&$form, &$form_state) {
       array('media_admin_rebuild_types_batch_op', array($total)),
     ),
     'finished' => 'media_admin_rebuild_types_batch_complete',
-    'file' => drupal_get_path('module', 'media') . '/media.admin.inc',
+    'file' => drupal_get_path('module', 'media') . '/includes/media.admin.inc',
   );
   batch_set($batch);
 }

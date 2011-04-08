@@ -17,13 +17,13 @@
 require_once ( dirname(__FILE__) . '/includes/media.variables.inc');
 
 // Creating media types, entity definition
-require_once ( dirname(__FILE__) . '/media.types.inc');
+require_once ( dirname(__FILE__) . '/includes/media.types.inc');
 
 // Code relating to using media as a field
-require_once ( dirname(__FILE__) . '/media.fields.inc');
+require_once ( dirname(__FILE__) . '/includes/media.fields.inc');
 
  // Functions for working with [[inline tags]] and wysiwyg editors
-require_once ( dirname(__FILE__) . '/media.filter.inc');
+require_once ( dirname(__FILE__) . '/includes/media.filter.inc');
 
 /* ***************************************** */
 /* Hook Implementations                      */
@@ -64,7 +64,7 @@ function media_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_admin_config_browser'),
     'access arguments' => array('administer media'),
-    'file' => 'media.admin.inc',
+    'file' => 'includes/media.admin.inc',
   );
   // For managing different types of media and the fields associated with them.
   $items['admin/config/media/rebuild_types'] = array(
@@ -73,7 +73,7 @@ function media_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_admin_rebuild_types_form'),
     'access arguments' => array('administer media'),
-    'file' => 'media.admin.inc',
+    'file' => 'includes/media.admin.inc',
   );
   // For managing different types of media and the fields associated with them.
   $items['admin/config/media/types'] = array(
@@ -81,7 +81,7 @@ function media_menu() {
     'description' => 'Manage files used on your site.',
     'page callback' => 'media_admin_type_list',
     'access arguments' => array('administer media'),
-    'file' => 'media.admin.inc',
+    'file' => 'includes/media.admin.inc',
   );
 
   // Settings used for determining the type of media a file is.
@@ -93,7 +93,7 @@ function media_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_admin_type_manage_form', 5),
     'access arguments' => array('administer media'),
-    'file' => 'media.admin.inc',
+    'file' => 'includes/media.admin.inc',
   );
 
   $items['admin/config/media/types/manage/%media_type/settings'] = array(
@@ -110,7 +110,7 @@ function media_menu() {
     'page arguments' => array('media_admin'),
     'access arguments' => array('administer media'),
     'type' => MENU_LOCAL_TASK,
-    'file' => 'media.admin.inc',
+    'file' => 'includes/media.admin.inc',
   );
 
   // Used to import files from a local filesystem into Drupal.
@@ -119,7 +119,7 @@ function media_menu() {
     'description' => 'Import files into your media library.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_import'),
-    'file' => 'media.admin.inc',
+    'file' => 'includes/media.admin.inc',
     'access arguments' => array('import media'),
     'type' => MENU_LOCAL_ACTION,
   );
@@ -131,7 +131,7 @@ function media_menu() {
     'access callback' => 'media_access',
     'access arguments' => array('view'),
     'type' => MENU_CALLBACK,
-    'file' => 'media.browser.inc',
+    'file' => 'includes/media.browser.inc',
     'theme callback' => 'media_dialog_get_theme_name',
   );
 
@@ -141,7 +141,7 @@ function media_menu() {
     'description' => 'Make it easier to test media browser',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_browser_testbed'),
-    'file' => 'media.browser.inc',
+    'file' => 'includes/media.browser.inc',
     'access arguments' => array('administer media'),
     'type' => MENU_CALLBACK,
   );
@@ -158,7 +158,7 @@ function media_menu() {
     'access callback' => 'media_access',
     'access arguments' => array('view'),
     'type' => MENU_CALLBACK,
-    'file' => 'media.browser.inc',
+    'file' => 'includes/media.browser.inc',
   );
 
   $items['media/browser/library'] = array(
@@ -168,7 +168,7 @@ function media_menu() {
     'access callback' => 'media_access',
     'access arguments' => array('view'),
     'type' => MENU_CALLBACK,
-    'file' => 'media.browser.inc',
+    'file' => 'includes/media.browser.inc',
   );
 
   $items['media/%media/format-form'] = array(
@@ -178,7 +178,7 @@ function media_menu() {
     'page arguments' => array('media_format_form', 1),
     'access arguments' => array('administer media'),
     'weight' => 0,
-    'file' => 'media.filter.inc',
+    'file' => 'includes/media.filter.inc',
     'theme callback' => 'media_dialog_get_theme_name',
   );
 
@@ -187,7 +187,7 @@ function media_menu() {
     'page arguments' => array(1),
     'access callback' => 'media_access',
     'access arguments' => array('view'),
-    'file' => 'media.pages.inc',
+    'file' => 'includes/media.pages.inc',
   );
 
   $items['media/%media/view'] = array(
@@ -205,7 +205,7 @@ function media_menu() {
     'weight' => 0,
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    'file' => 'media.pages.inc',
+    'file' => 'includes/media.pages.inc',
      // Use the same setting as node module
     'theme callback' => '_node_custom_theme',
   );
@@ -217,7 +217,7 @@ function media_menu() {
     'access callback' => 'media_access',
     'access arguments' => array('edit'),
     'weight' => 0,
-    'file' => 'media.pages.inc',
+    'file' => 'includes/media.pages.inc',
      // Use the same setting as node module
     'theme callback' => '_node_custom_theme',
   );
@@ -231,7 +231,7 @@ function media_menu() {
     'weight' => 1,
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    'file' => 'media.pages.inc',
+    'file' => 'includes/media.pages.inc',
      // Use the same setting as node module
     'theme callback' => '_node_custom_theme',
   );
@@ -244,7 +244,7 @@ function media_menu() {
     'access callback' => 'media_access',
     'access arguments' => array('view'),
     'type' => MENU_CALLBACK,
-    'file' => 'media.pages.inc',
+    'file' => 'includes/media.pages.inc',
   );
 
   return $items;
@@ -301,48 +301,48 @@ function media_theme() {
     // A link for a file w/ an icon to the media/$fid page.
     'media_link' => array(
       'variables' => array('file' => NULL),
-      'file' => 'media.theme.inc',
+      'file' => 'includes/media.theme.inc',
     ),
 
     // A preview of the uploaded file.
     'media_thumbnail' => array(
       'render element' => 'element',
-      'file' => 'media.theme.inc',
+      'file' => 'includes/media.theme.inc',
     ),
 
     // Administrative thumbnail previews.
     'media_admin_thumbnail' => array(
       'variables' => array('file' => array(), 'style_name' => 'thumbnail'),
-      'file' => 'media.theme.inc',
+      'file' => 'includes/media.theme.inc',
     ),
 
     // Administrative thumbnail previews.
     'media_admin_thumbnail_operations' => array(
       'variables' => array('file' => NULL),
-      'file' => 'media.theme.inc',
+      'file' => 'includes/media.theme.inc',
     ),
 
     // Tabs in the media browser.
     'media_browser_tabs' => array(
-      'file' => 'media.theme.inc',
+      'file' => 'includes/media.theme.inc',
     ),
 
     // Dialog page.
     'media_dialog_page' => array(
       'render element' => 'page',
       'template' => 'theme/media-dialog-page',
-      'file' => 'media.theme.inc',
+      'file' => 'includes/media.theme.inc',
     ),
 
     //
     'media_element' => array(
       'render element' => 'element',
-      'file' => 'media.theme.inc',
+      'file' => 'includes/media.theme.inc',
     ),
 
     'media_formatter_large_icon' => array(
       'variables' => array('file' => NULL),
-      'file' => 'media.theme.inc',
+      'file' => 'includes/media.theme.inc',
     ),
   );
 }
@@ -482,7 +482,7 @@ function media_media_display_types() {
     'icon' => $path . '/images/display-list.png',
     'icon_active' => $path . '/images/display-list-active.png',
     'callback' => 'media_admin_list',
-    'file' => drupal_get_path('module', 'media') . '/media.admin.inc',
+    'file' => drupal_get_path('module', 'media') . '/includes/media.admin.inc',
   );
 
   $display_types['thumbnails'] = array(
@@ -491,7 +491,7 @@ function media_media_display_types() {
     'icon' => $path . '/images/display-thumbnails.png',
     'icon_active' => $path . '/images/display-thumbnails-active.png',
     'callback' => 'media_admin_thumbnails',
-    'file' => drupal_get_path('module', 'media') . '/media.admin.inc',
+    'file' => drupal_get_path('module', 'media') . '/includes/media.admin.inc',
   );
 
   return $display_types;
@@ -831,7 +831,7 @@ function media_dialog_get_theme_name() {
  *    A fully populated object, or FALSE on an error.
  */
 function media_retrieve_xml($url, $display_errors = FALSE, $refresh = FALSE) {
-  module_load_include('inc', 'media', 'media.xml');
+  module_load_include('inc', 'media', 'includes/media.xml');
   return _media_retrieve_xml($url, $display_errors, $refresh);
 }
 
@@ -1102,7 +1102,7 @@ function media_element_process(&$element, &$form_state, $form) {
   // hmm... Might need to think about this.
   // All settings would likely apply to all media in a multi-value, but what about passing the existing fid?
 
-  module_load_include('inc', 'media', 'media.browser');
+  module_load_include('inc', 'media', 'includes/media.browser');
   media_attach_browser_js($element);
 
   return $element;

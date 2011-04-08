@@ -1,5 +1,10 @@
 <?php
-
+/**
+ *  DO NOT EDIT THIS. IT WILL BE REMOVED IN THE NEXT RELEASE.
+ *   This file is only here so that the class autoloader doesn't barf.
+ *
+ * It has been moved to includes
+ */
 /**
  * Extends DrupalEntityControllerInterface.
  *

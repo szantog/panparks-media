@@ -49,7 +49,7 @@ function media_include_browser_js() {
     return;
   }
   $included = TRUE;
-  module_load_include('inc', 'media', 'media.browser');
+  module_load_include('inc', 'media', 'includes/media.browser');
   $javascript = media_browser_js();
   foreach ($javascript as $key => $definitions) {
     foreach ($definitions as $definition) {

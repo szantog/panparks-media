@@ -512,3 +512,10 @@ function media_update_7014() {
     variable_set('media__dialog_theme', $old_value);
   }
 }
+
+/**
+ * Rebuild the registry to locate class files in new location.
+ */
+function media_update_7015() {
+  registry_rebuild();
+}
