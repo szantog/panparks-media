@@ -20,7 +20,7 @@ function media_admin($form, $form_state) {
   $path = drupal_get_path('module', 'media');
 
   $form['#attached'] = array(
-    'js' => array($path . '/js/media-admin.js'),
+    'js' => array($path . '/js/media.admin.js'),
     'css' => array($path . '/css/media.css'),
   );
 
@@ -374,7 +374,7 @@ function media_admin_type_manage_form($form, &$form_state, $media_type) {
       '#title' => t('Other match type value'),
       '#default_value' => $other_default_value,
       '#attached' => array(
-        'js' => array(drupal_get_path('module', 'media') . '/js/media-admin.js'),
+        'js' => array(drupal_get_path('module', 'media') . '/js/media.admin.js'),
       ),
     );
 

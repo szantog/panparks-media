@@ -785,7 +785,7 @@ function media_library() {
   $libraries['media_browser_page'] = array(
     'title' => 'Media browser',
     'js' => array(
-      $path . '/js/media-browser.js'  => array('group' => JS_DEFAULT),
+      $path . '/js/media.browser.js'  => array('group' => JS_DEFAULT),
     ),
     'css' => array(
       $path . '/css/media.browser.css' => array('group' => CSS_DEFAULT),
