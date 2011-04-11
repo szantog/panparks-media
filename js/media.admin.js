@@ -122,11 +122,11 @@ Drupal.behaviors.mediaTypesAdmin = {
       return;
     }
     // Toggle the 'other' text field on Match type.
-    if ($('.form-item-match-type input:checked').val() != '0') {
+    if ($('.form-item-match-type input:checked').val() != 'other') {
       $('.form-item-match-type-other').hide();
     }
     $('.form-item-match-type input').change(function () {
-      if ($(this).val() == '0') {
+      if ($(this).val() == 'other') {
         $('.form-item-match-type-other').slideDown('fast');
       }
       else {

@@ -353,14 +353,14 @@ function media_admin_type_manage_form($form, &$form_state, $media_type) {
     $options = array(
       'all' => t('All'),
       'any' => t('Any'),
-      '0' => t('Other'),
+      'other' => t('Other'),
     );
     if ($media_type->type_callback_args['match_type'] && isset($options[$media_type->type_callback_args['match_type']])) {
       $default_value = $media_type->type_callback_args['match_type'];
       $other_default_value = '';
     }
     else {
-      $default_value = 0;
+      $default_value = 'other';
       $other_default_value = $media_type->type_callback_args['match_type'];
     }
     $form['match_type'] = array(
