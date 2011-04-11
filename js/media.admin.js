@@ -14,6 +14,13 @@
  */
 Drupal.behaviors.mediaAdmin = {
   attach: function (context) {
+    var show_confirm_if_existing_selections = function () {
+      if ($(':checkbox:checked', $('form#media-admin')).length != 0) {
+        return confirm(Drupal.t('If you switch views, you will lose your selection.'));
+      }
+    }
+    
+    $('.media-display-switch a').bind('click', show_confirm_if_existing_selections)
     // Configure the "Add file" link to fire the media browser popup.
     $('ul.action-links li', context).remove();
     if ($('form.media-list-operation', context).length != 0) {
