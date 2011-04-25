@@ -271,6 +271,7 @@ class MediaInternetFileHandler extends MediaInternetBaseHandler {
   public function preSave(&$file_obj) {
     // Coppies the remote file locally.
     $remote_uri = $file_obj->uri;
+    //@TODO: we should follow redirection here an save the final filename, not just the basename.
     $local_uri = file_stream_wrapper_uri_normalize('temporary://' . basename($remote_uri));
     if (!@copy($remote_uri, $local_uri)) {
       throw new Exception('Unable to add file ' . $remote_uri);
