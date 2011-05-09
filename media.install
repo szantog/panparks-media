@@ -11,13 +11,6 @@ define('MEDIA_UPDATE_RECORDS_ON_INSTALL', 200);
  * Implements hook_install().
  */
 function media_install() {
-  // @todo Move some of what's in media_enable() into here.
-}
-
-/**
- *  Implement hook_enable().
- */
-function media_enable() {
   // @TODO: We may need to disable the media bundle & field in hook_disable.
 
   $types = array();
@@ -100,6 +93,19 @@ function media_enable() {
 }
 
 /**
+ * Implement hook_uninstall().
+ */
+function media_uninstall() {
+  drupal_uninstall_schema('media_list_type');
+  drupal_uninstall_schema('media_type');
+  drupal_uninstall_schema('cache_media_xml');
+  drupal_uninstall_schema('media_filter_usage');
+  foreach (media_variable_default() as $name => $value) {
+    media_variable_del($name);
+  }
+}
+
+/**
  * Implement hook_schema().
  */
 function media_schema() {
@@ -166,15 +172,6 @@ function media_field_schema($field) {
       'fid' => array('fid'),
     ),
   );
-}
-
-/**
- * Implement hook_uninstall().
- */
-function media_uninstall() {
-  foreach (media_variable_default() as $name => $value) {
-    media_variable_del($name);
-  }
 }
 
 /**
