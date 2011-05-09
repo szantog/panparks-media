@@ -5,4 +5,4 @@ package = Testing
 core = 7.x
 php = 5.2
 dependencies[] = media_youtube
-;hidden=TRUE
+hidden = TRUE

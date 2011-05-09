@@ -3,4 +3,4 @@ description = "Support module for File Entity tests."
 package = Testing
 core = 7.x
 dependencies[] = file_entity
-;hidden=TRUE
+hidden = TRUE
