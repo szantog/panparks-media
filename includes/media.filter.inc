@@ -181,7 +181,7 @@ function media_token_to_markup($match, $wysiwyg = FALSE) {
     if (isset($settings['attributes']['style'])) {
       $css_properties = media_parse_css_declarations($settings['attributes']['style']);
       foreach (array('width', 'height') as $dimension) {
-        if (substr($css_properties[$dimension], -2) == 'px') {
+        if (isset($css_properties[$dimension]) && substr($css_properties[$dimension], -2) == 'px') {
           $settings[$dimension] = substr($css_properties[$dimension], 0, -2);
         }
         elseif (isset($settings['attributes'][$dimension])) {
