@@ -106,6 +106,30 @@ function _media_url_curry($func, $arity) {
 }
 
 /**
+ * Parses the contents of a CSS declaration block and returns a keyed array of property names and values.
+ *
+ * @param $declarations
+ *   One or more CSS declarations delimited by a semicolon. The same as a CSS
+ *   declaration block (see http://www.w3.org/TR/CSS21/syndata.html#rule-sets),
+ *   but without the opening and closing curly braces. Also the same as the
+ *   value of an inline HTML style attribute.
+ *
+ * @return
+ *   A keyed array. The keys are CSS property names, and the values are CSS
+ *   property values.
+ */
+function media_parse_css_declarations($declarations) {
+  $properties = array();
+  foreach(array_map('trim', explode(";", $declarations)) as $declaration) {
+    if ($declaration != '') {
+      list($name, $value) = array_map('trim', explode(':', $declaration, 2));
+      $properties[strtolower($name)] = $value;
+    }
+  }
+  return $properties;
+}
+
+/**
  * Replace callback to convert tag into markup
  * @param string $match
  * Takes a match of tag code
@@ -147,15 +171,25 @@ function media_token_to_markup($match, $wysiwyg = FALSE) {
     $attribute_whitelist = media_variable_get('wysiwyg_allowed_attributes');
     $settings['attributes'] = array_intersect_key($attributes, array_flip($attribute_whitelist));
 
-    // @TODO: What case does this provide for?  Can we add this logic in JS when we embed it?
-    // This doesn't look great to me.  Also won't work if the style has anything
-    // between width and height (or if they are in reverse order).
+    // Many media formatters will want to apply width and height independently
+    // of the style attribute or the corresponding HTML attributes, so pull
+    // these two out into top-level settings. Different WYSIWYG editors have
+    // different behavior with respect to whether they store user-specified
+    // dimensions in the HTML attributes or the style attribute, so check both.
+    // Per http://www.w3.org/TR/html5/the-map-element.html#attr-dim-width, the
+    // HTML attributes are merely hints: CSS takes precedence.
     if (isset($settings['attributes']['style'])) {
-      if (preg_match('@width: (.+?)px; height: (.+?)px;@i', $settings['attributes']['style'], $matches)) {
-        $settings['width'] = $matches[1];
-        $settings['height'] = $matches[2];
+      $css_properties = media_parse_css_declarations($settings['attributes']['style']);
+      foreach (array('width', 'height') as $dimension) {
+        if (substr($css_properties[$dimension], -2) == 'px') {
+          $settings[$dimension] = substr($css_properties[$dimension], 0, -2);
+        }
+        elseif (isset($settings['attributes'][$dimension])) {
+          $settings[$dimension] = $settings['attributes'][$dimension];
+        }
       }
     }
+
     if ($wysiwyg) {
       $settings['wysiwyg'] = $wysiwyg;
     }
