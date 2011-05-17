@@ -572,3 +572,10 @@ function media_update_7017() {
     file_entity_update_7001();
   }
 }
+
+/**
+ * Rebuild the menu to fix access for WYSIWYG.
+ */
+function media_update_7018() {
+  menu_rebuild();
+}
