@@ -557,3 +557,18 @@ function media_update_7016() {
 
   field_cache_clear();
 }
+
+/**
+ * Move file display configurations from the 'file_displays' variable to the
+ * {file_display} table.
+ */
+function media_update_7017() {
+  // If the {file_display} table doesn't exist, then the File Entity module's
+  // update functions will automatically take care of migrating the
+  // configurations. However, if file_entity_update_7001() has already run
+  // prior to media_update_7016(), run it again in order to capture those
+  // configurations too.
+  if (db_table_exists('file_display')) {
+    file_entity_update_7001();
+  }
+}

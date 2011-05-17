@@ -1093,3 +1093,19 @@ function media_flush_caches() {
   // even if the post that references them is edited or deleted.
   db_delete('media_filter_usage')->condition('timestamp', REQUEST_TIME - 86400 * 120, '<')->execute();
 }
+
+/**
+ * Implements hook_ctools_plugin_api().
+ *
+ * Lets CTools know which plugin APIs are implemented by Media module.
+ */
+function media_ctools_plugin_api($owner, $api) {
+  static $api_versions = array(
+    'file_entity' => array(
+      'file_default_displays' => 1,
+    ),
+  );
+  if (isset($api_versions[$owner][$api])) {
+    return array('version' => $api_versions[$owner][$api]);
+  }
+}
