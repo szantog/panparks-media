@@ -135,17 +135,12 @@ function media_field_prepare_view($entity_type, $entities, $field, $instances, $
     }
   }
 
-  // Load them.
+  // Load the files and add the loaded file entity to the item data.
   $files = file_load_multiple(array_values($fids));
-
-  // Replace the item data with loaded files instead of just the file ids.
-  // @todo This causes problems with some Field API and other module
-  //   integration. It would be better for the loaded file to be added into
-  //   $item, not replace it. See http://drupal.org/node/1005642.
   foreach ($entities as $id => $entity) {
     foreach ($items[$id] as $delta => $item) {
       if (is_array($item) && !empty($item['fid'])) {
-        $items[$id][$delta] = $files[$item['fid']];
+        $items[$id][$delta]['file'] = $files[$item['fid']];
       }
     }
   }
@@ -167,11 +162,9 @@ function media_field_formatter_view($entity_type, $entity, $field, $instance, $l
     return $element;
   }
 
-  // @todo media_field_prepare_view() ensures that $items is an array of loaded
-  //   files, but that will need to change. See that function for details.
   $files = array();
-  foreach ($items as $file) {
-    $files[$file->fid] = $file;
+  foreach ($items as $delta => $item) {
+    $files[$item['fid']] = $item['file'];
   }
   return file_view_multiple($files, $display['settings']['file_view_mode'], 0, $langcode);
 }
