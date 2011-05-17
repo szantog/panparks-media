@@ -52,40 +52,70 @@ function media_field_widget_info() {
 }
 
 /**
- * Implement hook_field_formatter_info
+ * Implements hook_field_formatter_info().
  */
 function media_field_formatter_info() {
-  $formatters = array();
-
-  // Add a media field formatter for each file entity view mode.
-  $entity_info = entity_get_info('file');
-  foreach ($entity_info['view modes'] as $view_mode => $view_mode_info) {
-    // @todo Modules other than Media can also add view modes to file entities.
-    //   No reason not to allow them to be chosen when formatting a Media field,
-    //   but because Field API keeps all formatters across all field types in a
-    //   single array, we run the risk of name collission. The best way to solve
-    //   this is to convert this into a single formatter with a setting for the
-    //   view mode, similar to how the "Image" formatter has a setting for the
-    //   "Image Style".
-    if (strpos($view_mode, 'media_') === 0) {
-      $formatters[$view_mode] = array(
-        'label' => t($view_mode_info['label']),
-        'field types' => array('media'),
-      );
-    }
-  }
-
-  // Also add a formatter for files to show larger icons based on mimetype. This
-  // was originally used when media entities contained file fields. The current
-  // file entity architecture no longer needs this, but people may have used
-  // this formatter for other file fields on their website.
-  // @todo Some day, remove this.
-  $formatters['media_large_icon'] = array(
-    'label' => t('Large filetype icon'),
-    'field types' => array('file'),
+  $formatters = array(
+    'media' => array(
+      'label' => t('Media'),
+      'field types' => array('media'),
+      'settings' => array('file_view_mode' => 'default'),
+    ),
+    // This was originally used when media entities contained file fields. The
+    // current file entity architecture no longer needs this, but people may
+    // have used this formatter for other file fields on their website.
+    // @todo Some day, remove this.
+    'media_large_icon' => array(
+      'label' => t('Large filetype icon'),
+      'field types' => array('file'),
+    ),
   );
 
   return $formatters;
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function media_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $element = array();
+
+  if ($display['type'] == 'media') {
+    $entity_info = entity_get_info('file');
+    $options = array('default' => t('Default'));
+    foreach ($entity_info['view modes'] as $file_view_mode => $file_view_mode_info) {
+      $options[$file_view_mode] = $file_view_mode_info['label'];
+    }
+    $element['file_view_mode'] = array(
+      '#title' => t('File view mode'),
+      '#type' => 'select',
+      '#default_value' => $settings['file_view_mode'],
+      '#options' => $options,
+    );
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function media_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $summary = '';
+
+  if ($display['type'] == 'media') {
+    $entity_info = entity_get_info('file');
+    $file_view_mode_label = isset($entity_info['view modes'][$settings['file_view_mode']]) ? $entity_info['view modes'][$settings['file_view_mode']]['label'] : t('Default');
+    $summary = t('File view mode: @view_mode', array('@view_mode' => $file_view_mode_label));
+  }
+
+  return $summary;
 }
 
 /**
@@ -143,7 +173,7 @@ function media_field_formatter_view($entity_type, $entity, $field, $instance, $l
   foreach ($items as $file) {
     $files[$file->fid] = $file;
   }
-  return file_view_multiple($files, $display['type'], 0, $langcode);
+  return file_view_multiple($files, $display['settings']['file_view_mode'], 0, $langcode);
 }
 
 /**

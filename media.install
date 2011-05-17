@@ -579,3 +579,27 @@ function media_update_7017() {
 function media_update_7018() {
   menu_rebuild();
 }
+
+/**
+ * Update old per-view-mode media field formatters to the generic media formatter with a setting.
+ */
+function media_update_7019() {
+  $instances = array();
+  $fields = field_read_fields(array('type' => 'media'), array('include_inactive' => TRUE));
+  foreach ($fields as $field) {
+    $instances = array_merge($instances, field_read_instances(array('field_id' => $field['id']), array('include_inactive' => TRUE)));
+  }
+  foreach ($instances as $instance) {
+    $update_instance = FALSE;
+    foreach ($instance['display'] as $view_mode => $display) {
+      if (in_array($display['type'], array('media_link', 'media_preview', 'media_small', 'media_large', 'media_original'))) {
+        $update_instance = TRUE;
+        $instance['display'][$view_mode]['type'] = 'media';
+        $instance['display'][$view_mode]['settings'] = array('file_view_mode' => $display['type']);
+      }
+    }
+    if ($update_instance) {
+      field_update_instance($instance);
+    }
+  }
+}
