@@ -65,8 +65,9 @@ function media_install() {
   foreach ($types as $name => $type) {
     media_type_save($type);
 
-    // @todo We hide the file display in the 'small' view mode for legacy
-    //   reasons. Does it still make sense to do so?
+    // @todo By default, we hide the file display in the 'small' view mode for
+    //   legacy reasons. Does it still make sense to do so? See
+    //   http://drupal.org/node/1051090.
     $bundle_settings = field_bundle_settings('file', $name);
     $bundle_settings['extra_fields']['display']['file']['media_small'] = array('weight' => 0, 'visible' => FALSE);
     field_bundle_settings('file', $name, $bundle_settings);
