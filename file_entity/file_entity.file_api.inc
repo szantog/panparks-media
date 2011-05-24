@@ -194,8 +194,8 @@ function file_view_file($file, $displays = 'default', $langcode = NULL) {
       }
       if (isset($formatter_info['view callback']) && ($function = $formatter_info['view callback']) && function_exists($function)) {
         $display['type'] = $formatter_type;
-        if (isset($formatter_info['default settings'])) {
-          if (!isset($display['settings'])) {
+        if (!empty($formatter_info['default settings'])) {
+          if (empty($display['settings'])) {
             $display['settings'] = array();
           }
           $display['settings'] += $formatter_info['default settings'];
