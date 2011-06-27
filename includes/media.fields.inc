@@ -37,7 +37,7 @@ function media_field_widget_info() {
   return array(
     'media_generic' => array(
       'label' => t('Media file selector'),
-      'field types' => array('media'),
+      'field types' => array('media', 'file', 'image'),
       'settings' => array(
         'progress_indicator' => 'throbber',
         'allowed_types' => array('image'),
@@ -256,6 +256,13 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     ),
   );
 
+  if ($field['type'] == 'file') {
+    $element['display'] = array(
+      '#type' => 'value',
+      '#value' => 1,
+    );
+  }
+
   return $element;
 }
 
@@ -300,7 +307,7 @@ function media_field_validate($obj_type, $object, $field, $instance, $langcode, 
  */
 function media_field_widget_value($element, $input, $form_state) {
   $return = $input;
-  
+
   if (!is_array($return)) {
     $return = array();
   }
@@ -360,13 +367,13 @@ function media_field_update($entity_type, $entity, $field, $instance, $langcode,
     }
     return;
   }
-  
+
   // Build a display of the current FIDs.
   $current_fids = array();
   foreach ($items as $item) {
     $current_fids[] = $item['fid'];
   }
-  
+
   // Create a bare-bones entity so that we can load its previous values.
   $original = entity_create_stub_entity($entity_type, array($id, $vid, $bundle));
   field_attach_load($entity_type, array($id => $original), FIELD_LOAD_CURRENT, array('field_id' => $field['id']));
