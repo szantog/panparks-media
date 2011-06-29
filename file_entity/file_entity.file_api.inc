@@ -73,6 +73,14 @@ function file_info_formatter_types($formatter_type = NULL) {
 }
 
 /**
+ * Clears the file info cache.
+ */
+function file_info_cache_clear() {
+  drupal_static_reset('file_info_file_types');
+  drupal_static_reset('file_info_formatter_types');
+}
+
+/**
  * Construct a drupal_render() style array from an array of loaded files.
  *
  * @param $files

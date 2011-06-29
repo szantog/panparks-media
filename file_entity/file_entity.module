@@ -386,3 +386,17 @@ function _file_entity_view_mode_menu_access($file_type, $view_mode, $access_call
     return call_user_func_array($access_callback, $args);
   }
 }
+
+/**
+ * Implements hook_modules_enabled().
+ */
+function file_entity_modules_enabled($modules) {
+  file_info_cache_clear();
+}
+
+/**
+ * Implements hook_modules_disabled().
+ */
+function file_entity_modules_disabled($modules) {
+  file_info_cache_clear();
+}
