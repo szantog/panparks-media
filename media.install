@@ -97,6 +97,9 @@ function media_install() {
  * Implement hook_uninstall().
  */
 function media_uninstall() {
+  // #1169472: Manually load media.module for media_variable_default().
+  drupal_load('module', 'media');
+
   drupal_uninstall_schema('media_list_type');
   drupal_uninstall_schema('media_type');
   drupal_uninstall_schema('cache_media_xml');
