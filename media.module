@@ -989,6 +989,16 @@ function _media_save_file_permenently(&$file) {
  *   Renderable array.
  */
 function media_get_thumbnail_preview($file, $link = NULL) {
+  // Adjust files that do not use a media type to use 'default'.
+  static $media_types;
+  if (!isset($media_types)) {
+    $media_types = media_type_get_types();
+  }
+  if (!isset($media_types[$file->type])) {
+    $file = clone $file;
+    $file->type = 'default';
+  }
+
   $preview = file_view_file($file, 'media_preview');
   $preview['#show_names'] = TRUE;
   $preview['#add_link'] = $link;
