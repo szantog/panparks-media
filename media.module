@@ -105,7 +105,7 @@ function media_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_admin'),
     'access arguments' => array('administer media'),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
     'file' => 'includes/media.admin.inc',
   );
 
