@@ -203,8 +203,6 @@ function media_menu() {
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'includes/media.pages.inc',
-     // Use the same setting as node module
-    'theme callback' => '_node_custom_theme',
   );
 
   $items['media/%media_multi/multiedit'] = array(
@@ -215,8 +213,6 @@ function media_menu() {
     'access arguments' => array('edit'),
     'weight' => 0,
     'file' => 'includes/media.pages.inc',
-     // Use the same setting as node module
-    'theme callback' => '_node_custom_theme',
   );
 
   $items['media/%file/delete'] = array(
@@ -229,8 +225,6 @@ function media_menu() {
     'type' => MENU_LOCAL_TASK,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'includes/media.pages.inc',
-     // Use the same setting as node module
-    'theme callback' => '_node_custom_theme',
   );
 
   $items['admin/content/media/browser'] = $items['media/browser'];
