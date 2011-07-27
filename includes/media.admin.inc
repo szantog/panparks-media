@@ -449,7 +449,7 @@ function media_import_validate($form, &$form_state) {
     }
     $pattern = !empty($pattern) ? $pattern :  '*';
     $files = glob("$directory/$pattern");
-    if (count($files) == 1) {
+    if (empty($files)) {
       form_set_error('pattern', t('No files were found in %directory matching %pattern', array('%directory' => $directory, '%pattern' => $pattern)));
     }
     $form_state['storage']['files'] = $files;
