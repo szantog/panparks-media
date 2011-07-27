@@ -460,7 +460,7 @@ function media_import_validate($form, &$form_state) {
  * Submit handler for media_import().
  */
 function media_import_submit($form, &$form_state) {
-  if ($form_state['values']['op'] == 'Confirm') {
+  if ($form_state['values']['op'] == t('Confirm')) {
     $files = $form_state['storage']['files'];
     $batch = array(
       'title' => t('Importing'),
