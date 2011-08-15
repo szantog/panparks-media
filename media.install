@@ -275,7 +275,7 @@ function media_update_7003() {
  * Removed /media from the menu.
  */
 function media_update_7004() {
-  menu_rebuild();
+  // Do nothing. Running an update function will trigger a menu rebuild.
 }
 
 /**
@@ -427,7 +427,7 @@ function media_update_7014() {
  * Rebuild the registry to locate class files in new location.
  */
 function media_update_7015() {
-  registry_rebuild();
+  // Do nothing. Running an update function will trigger a registry rebuild.
 }
 
 /**
@@ -566,7 +566,7 @@ function media_update_7017() {
  * Rebuild the menu to fix access for WYSIWYG.
  */
 function media_update_7018() {
-  menu_rebuild();
+  // Do nothing. Running an update function will trigger a menu rebuild.
 }
 
 /**
