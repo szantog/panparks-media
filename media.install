@@ -350,7 +350,7 @@ function media_update_7010() {
  * Allows video as a type of media in the WYSIWYG
  */
 function media_update_7011() {
-  media_variable_set('wysiwyg_allowed_types', array('image', 'video'));
+  // Do nothing - default variables automatically update.
 }
 
 /**
@@ -590,5 +590,14 @@ function media_update_7019() {
     if ($update_instance) {
       field_update_instance($instance);
     }
+  }
+}
+
+/**
+ * Delete the wysiwyg_allowed_types variable if it is the same as default.
+ */
+function media_update_7020() {
+  if (variable_get('media__wysiwyg_allowed_types') == array('image', 'video')) {
+    variable_del('media__wysiwyg_allowed_types');
   }
 }
