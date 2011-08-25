@@ -396,7 +396,7 @@ function media_get_file_without_label($file, $view_mode, $settings = array()) {
     // special-case logic. Image formatters using other theme functions are
     // responsible for their own 'alt' attribute handling. See
     // theme_media_formatter_large_icon() for an example.
-    if (isset($settings['attributes']['alt']) && !array_key_exists('#alt', $element) && isset($element['#theme']) && in_array($element['#theme'], array('image', 'image_style'))) {
+    if (isset($settings['attributes']['alt']) &&  !isset($element['#alt']) && isset($element['#theme']) && in_array($element['#theme'], array('image', 'image_style'))) {
       $element['#alt'] = $settings['attributes']['alt'];
     }
   }

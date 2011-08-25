@@ -83,9 +83,9 @@ Drupal.wysiwyg.plugins.media = {
     if (additional) {
       for (k in additional) {
         if (additional.hasOwnProperty(k)) {
-          if (k === 'attr') {
+          //if (k === 'attr') {
             imgElement.attr(k, additional[k]);
-          }
+          //}
         }
       }
     }
