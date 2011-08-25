@@ -221,6 +221,12 @@ function media_media_format_form_prepare_alter(&$form, &$form_state, $file) {
         '#default_value' => $file->filename,
         '#description' => t('Alternate text a user will see if the image is not available'),
       );
+      $form['options']['title'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Title'),
+        '#default_value' => $file->filename,
+        '#description' => t('Title text a user will see when hovering on the image'),
+      );
       break;
   }
 }
