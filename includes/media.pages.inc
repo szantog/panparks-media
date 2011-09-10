@@ -146,7 +146,24 @@ function media_multiple_delete_confirm_submit($form, &$form_state) {
     // The result of file_delete can be an array if the file is in use, or TRUE/FALSE.
     foreach ($results as $fid => $result) {
       if (is_array($result)) {
-        drupal_set_message(t('The file @title is in use and cannot be deleted.', array('@title' => $files[$fid]->filename)), 'warning');
+        foreach ($result as $filetype => $file_entity_name) {
+          foreach ($file_entity_name as $entity_type => $used_in) {
+            $entity = entity_load($entity_type, array($used_in['id']));
+            if (isset($entity[$used_in['id']])) {
+              $path = entity_uri($entity_type, $entity[$used_in['id']]);
+              $label = entity_label($entity_type, $entity[$used_in['id']]);
+              $link = l($label, $path['path']);
+              drupal_set_message(t('The file @title is in use and cannot be deleted:' . '</br>' . $link, array('@title' => $files[$fid]->filename)), 'warning');
+            }
+            else {
+              file_delete($file, TRUE);
+              $message = t('File @title was deleted', array('@title' => $files[$fid]->filename));
+              watchdog('media', $message);
+              drupal_set_message($message);
+            }
+          }
+        }
+
       }
       elseif (!$result) {
         drupal_set_message(t('The file @title was not deleted due to an error.', array('@title' => $files[$fid]->filename)), 'error');
