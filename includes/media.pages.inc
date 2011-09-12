@@ -152,17 +152,17 @@ function media_multiple_delete_confirm_submit($form, &$form_state) {
             if (isset($entity[$used_in['id']])) {
               $path = entity_uri($entity_type, $entity[$used_in['id']]);
               $label = entity_label($entity_type, $entity[$used_in['id']]);
-              $warning = 'warning';
               $link = l($label, $path['path']);
+              drupal_set_message(t('The file @title is in use and cannot be deleted:' . '</br>' . $link, array('@title' => $files[$fid]->filename)), 'warning');
             }
             else {
-              //This is is because of http://drupal.org/node/1240834
-              $warning = 'error';
-              $link = t('There is not @entity content with this id: @id', array('@entity' => $entity_type, '@id' => $used_in['id']));
+              file_delete($file, TRUE);
+              $message = t('File @title was deleted', array('@title' => $files[$fid]->filename));
+              watchdog('media', $message);
+              drupal_set_message($message);
             }
           }
         }
-        drupal_set_message(t('The file @title is in use and cannot be deleted:' . '</br>' . $link, array('@title' => $files[$fid]->filename)), $warning);
       }
       elseif (!$result) {
         drupal_set_message(t('The file @title was not deleted due to an error.', array('@title' => $files[$fid]->filename)), 'error');
