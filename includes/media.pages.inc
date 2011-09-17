@@ -237,6 +237,7 @@ function media_add_upload_submit($form, &$form_state) {
   _media_save_file_permenently($file);
 
   $destination = file_stream_wrapper_uri_normalize($scheme . $file->filename);
+  drupal_alter('media_upload_destination', $destination, clone($file));
 
   $defaults = array(
     'display' => TRUE,
@@ -252,7 +253,7 @@ function media_add_upload_submit($form, &$form_state) {
     drupal_set_message(t('An error occurred and no file was uploaded.'), 'error');
     return;
   }
-
+  
   $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
 }
 
@@ -276,6 +277,7 @@ function media_add_upload_multiple_submit($form, &$form_state) {
     if ($uploaded_file['status'] == 'done') {
       $source = $uploaded_file['tmppath'];
       $destination = file_stream_wrapper_uri_normalize($scheme . $uploaded_file['name']);
+      drupal_alter('media_upload_destination', $destination, clone($uploaded_file));
       // Rename it to its original name, and put it in its final home.
       // Note - not using file_move here because if we call file_get_mime
       // (in file_uri_to_object) while it has a .tmp extension, it horks.
