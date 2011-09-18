@@ -248,6 +248,7 @@ function media_add_upload_validate($form, &$form_state) {
  * Upload a file.
  */
 function media_add_upload_submit($form, &$form_state) {
+<<<<<<< HEAD
   $scheme = variable_get('file_default_scheme', 'public') . '://';
   $file = $form_state['values']['upload'];
   _media_save_file_permenently($file);
@@ -261,6 +262,9 @@ function media_add_upload_submit($form, &$form_state) {
 
   // Save the uploaded file.
   $file = file_move($file, $destination, FILE_EXISTS_RENAME);
+=======
+  $file = media_file_build($form_state['values'], $form_state['values']['upload']);
+>>>>>>> #1283000: #1 Remove media building process from form submit
 
   if ($file) {
     drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
@@ -297,13 +301,8 @@ function media_add_upload_multiple_submit($form, &$form_state) {
       // Rename it to its original name, and put it in its final home.
       // Note - not using file_move here because if we call file_get_mime
       // (in file_uri_to_object) while it has a .tmp extension, it horks.
-
       $destination = file_unmanaged_move($source, $destination, FILE_EXISTS_RENAME);
-
-      $file = file_uri_to_object($destination);
-      file_save($file);
-      _media_save_file_permenently($file);
-
+      $file = media_file_build($form_state['values'], file_uri_to_object($destination));
       $saved_files[] = $file;
     }
     else {
@@ -318,6 +317,30 @@ function media_add_upload_multiple_submit($form, &$form_state) {
   }
   $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $fids)));
 }
+
+function media_file_build($values, $file) {
+  $scheme = variable_get('file_default_scheme', 'public') . '://';
+  //This prevent to delete file, if cron is running under media object building. @todo: is this right?
+  _media_save_file_permenently($file);
+
+  $destination = file_stream_wrapper_uri_normalize($scheme . $file->filename);
+
+  //Let other modules to iteract file building.
+  $context = array(
+    'destination' =>  &$destination,
+    'form_state_values' => $values,
+  );
+  drupal_alter('media_file_build', $file, $context);
+
+  // Save the uploaded file, and move, if file isn't in the right place.
+  if (!is_file($destination) && $file = file_move($file, $destination, FILE_EXISTS_RENAME)) {
+    return $file;
+  }
+  elseif (file_save($file)) {
+    return $file;
+  }
+}
+
 
 /**
  * Form builder: Builds the edit file form.
