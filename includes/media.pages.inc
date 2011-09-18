@@ -248,6 +248,8 @@ function media_add_upload_validate($form, &$form_state) {
  * Upload a file.
  */
 function media_add_upload_submit($form, &$form_state) {
+    //This prevent to delete file, if cron is running under media object building. @todo: is this right?
+  _media_save_file_permenently($form_state['values']['upload']);
   $file = media_file_build($form_state['values'], $form_state['values']['upload']);
   if ($file) {
     drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
@@ -303,8 +305,6 @@ function media_add_upload_multiple_submit($form, &$form_state) {
 
 function media_file_build($values, $file) {
   $scheme = variable_get('file_default_scheme', 'public') . '://';
-  //This prevent to delete file, if cron is running under media object building. @todo: is this right?
-  _media_save_file_permenently($file);
 
   $destination = file_stream_wrapper_uri_normalize($scheme . $file->filename);
 
