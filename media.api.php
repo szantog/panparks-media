@@ -88,3 +88,24 @@ function hook_media_browser_plugin_info() {
 function media_media_operations() {
 
 }
+
+/**
+ * Let other module to modify the uploaded file(s) parameters and destination.
+ *
+ * This is invoked when upload new file via add_upload, or add_upload_multible form.
+ * If multiple files are uploaded, every one of them is processed.
+ * @param $file
+ *  The uploaded file object.
+ *
+ * @param $context
+ *  An array of parameters.
+ *  The expected parameters is still being defined.
+ *   - &$destination: alterable - The final destination of file
+ *   - form_state_value: unalterable - The form states of upload forms
+ *
+ * @return
+ *  $file object, if it is succesfully saved..
+ */
+function media_media_file_build_alter($file, $context) {
+
+}
