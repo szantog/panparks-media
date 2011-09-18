@@ -248,24 +248,7 @@ function media_add_upload_validate($form, &$form_state) {
  * Upload a file.
  */
 function media_add_upload_submit($form, &$form_state) {
-<<<<<<< HEAD
-  $scheme = variable_get('file_default_scheme', 'public') . '://';
-  $file = $form_state['values']['upload'];
-  _media_save_file_permenently($file);
-
-  $destination = file_stream_wrapper_uri_normalize($scheme . $file->filename);
-  drupal_alter('media_upload_destination', $destination, clone($file));
-
-  $defaults = array(
-    'display' => TRUE,
-  );
-
-  // Save the uploaded file.
-  $file = file_move($file, $destination, FILE_EXISTS_RENAME);
-=======
   $file = media_file_build($form_state['values'], $form_state['values']['upload']);
->>>>>>> #1283000: #1 Remove media building process from form submit
-
   if ($file) {
     drupal_set_message(t('The file @name was uploaded', array('@name' => $file->filename)));
   }
@@ -273,7 +256,7 @@ function media_add_upload_submit($form, &$form_state) {
     drupal_set_message(t('An error occurred and no file was uploaded.'), 'error');
     return;
   }
-  
+
   $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
 }
 
