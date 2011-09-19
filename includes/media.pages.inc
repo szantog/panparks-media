@@ -282,12 +282,14 @@ function media_add_upload_multiple_submit($form, &$form_state) {
     if ($uploaded_file['status'] == 'done') {
       $source = $uploaded_file['tmppath'];
       $destination = file_stream_wrapper_uri_normalize($scheme . $uploaded_file['name']);
-      drupal_alter('media_upload_destination', $destination, clone($uploaded_file));
       // Rename it to its original name, and put it in its final home.
       // Note - not using file_move here because if we call file_get_mime
       // (in file_uri_to_object) while it has a .tmp extension, it horks.
+
       $destination = file_unmanaged_move($source, $destination, FILE_EXISTS_RENAME);
+
       $file = media_file_build($form_state['values'], file_uri_to_object($destination));
+
       $saved_files[] = $file;
     }
     else {
@@ -305,7 +307,6 @@ function media_add_upload_multiple_submit($form, &$form_state) {
 
 function media_file_build($values, $file) {
   $scheme = variable_get('file_default_scheme', 'public') . '://';
-
   $destination = file_stream_wrapper_uri_normalize($scheme . $file->filename);
 
   //Let other modules to iteract file building.
@@ -323,7 +324,6 @@ function media_file_build($values, $file) {
     return $file;
   }
 }
-
 
 /**
  * Form builder: Builds the edit file form.
