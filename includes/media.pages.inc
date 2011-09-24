@@ -198,6 +198,12 @@ function media_add_upload($form, &$form_state, $params = array()) {
     $validators['media_file_validate_types'] = array($params['types']);
   }
 
+  // Add image validators.
+  $params += array('min_resolution' => 0, 'max_resolution' => 0);
+  if ($params['min_resolution'] || $params['max_resolution']) {
+    $validators['file_validate_image_resolution'] = array($params['max_resolution'], $params['min_resolution']);
+  }
+
   $form['#validators'] = $validators;
 
   $form['upload'] = array(
@@ -247,7 +253,7 @@ function media_add_upload_submit($form, &$form_state) {
   _media_save_file_permenently($file);
 
   // Determine what URI scheme this file should use.
-  $scheme = (!empty($params['uri_scheme']) ? $params['uri_scheme'] : variable_get('file_default_scheme', 'public'));
+  $scheme = !empty($params['uri_scheme']) && file_stream_wrapper_valid_scheme($params['uri_scheme']) ? $params['uri_scheme'] : file_default_scheme();
   $scheme .= '://';
 
   // Prepare the file's subdirectory path.
