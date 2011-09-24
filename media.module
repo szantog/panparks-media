@@ -513,9 +513,6 @@ function media_form_field_ui_field_settings_form_alter(&$form, &$form_state) {
     if ($fields[$form['field']['field_name']['#value']]['widget']['type'] == 'media_generic') {
       $form['field']['settings']['display_field']['#access'] = FALSE;
       $form['field']['settings']['display_default']['#access'] = FALSE;
-      if (! empty($form['field']['settings']['#attached'])) {
-        $form['field']['settings']['#attached'] = array();
-      }
     }
   }
 }
@@ -531,9 +528,6 @@ function media_form_field_ui_field_edit_form_alter(&$form, &$form_state) {
     $form['field']['settings']['display_field']['#access'] = FALSE;
     $form['field']['settings']['display_default']['#access'] = FALSE;
     $form['instance']['settings']['description_field']['#access'] = FALSE;
-    if (! empty($form['field']['settings']['#attached'])) {
-      $form['field']['settings']['#attached'] = array();
-    }
   }
 
   // On image fields using the media widget we remove the alt/title fields
