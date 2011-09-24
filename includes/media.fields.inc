@@ -245,13 +245,14 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     '#collapsed' => TRUE,
     '#default_value' => $current_value,
     '#required' => $instance['required'],
-    //'#media_file_extensions' => $instance['settings']['file_extensions'],
-    // @TODO: Not implemented yet.
     '#media_options' => array(
       'global' => array(
         'types' => array_filter($instance['widget']['settings']['allowed_types']),
-        // @todo: Not implemented
         'schemes' => $instance['widget']['settings']['allowed_schemes'],
+        'file_directory' => $instance['settings']['file_directory'],
+        'file_extensions' => $instance['settings']['file_extensions'],
+        'max_filesize' => $instance['settings']['max_filesize'],
+        'uri_scheme' => $field['settings']['uri_scheme'],
       ),
     ),
   );

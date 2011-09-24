@@ -236,7 +236,7 @@ function media_media_browser_plugin_view($plugin_name, $params) {
         $upload_form_id = 'media_add_upload';
       }
 
-      $upload_form = drupal_get_form($upload_form_id, $types);
+      $upload_form = drupal_get_form($upload_form_id, $params);
       return array(
         '#title' => t('Upload'),
         'form' => array($upload_form),
