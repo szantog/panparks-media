@@ -981,6 +981,7 @@ function media_filter_info() {
     'title' => t('Converts Media tags to Markup'),
     'description' => t('This filter will convert [[{type:media... ]] tags into markup.'),
     'process callback' => 'media_filter',
+    'weight' => 2,
     'tips callback' => 'media_filter_tips', // @TODO not implemented
   );
 
