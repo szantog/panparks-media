@@ -137,7 +137,7 @@ function media_admin_list() {
       'author' => theme('username', array('account' => $file)),
       'timestamp' => format_date($file->timestamp, 'short'),
     );
-    $options[$file->fid]['operations'] = l(t('edit'), 'media/' . $file->fid . '/edit', array('query' => $destination));
+    $options[$file->fid]['operations'] = l(t('edit'), 'file/' . $file->fid . '/edit', array('query' => $destination));
   }
 
   $form['files'] = array(
