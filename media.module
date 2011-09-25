@@ -1046,3 +1046,13 @@ function media_ctools_plugin_api($owner, $api) {
 function media_get_hidden_stream_wrappers() {
   return array_diff_key(file_get_stream_wrappers(STREAM_WRAPPERS_ALL), file_get_stream_wrappers(STREAM_WRAPPERS_VISIBLE));
 }
+
+/**
+ * Implements hook_views_api().
+ */
+function media_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'media') . '/includes',
+  );
+}
