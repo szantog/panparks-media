@@ -528,12 +528,14 @@ function media_form_field_ui_field_edit_form_alter(&$form, &$form_state) {
     $form['field']['settings']['display_field']['#access'] = FALSE;
     $form['field']['settings']['display_default']['#access'] = FALSE;
     $form['instance']['settings']['description_field']['#access'] = FALSE;
+    $form['instance']['settings']['file_extensions']['#title'] = t('Allowed file extensions for uploaded files');
   }
 
   // On image fields using the media widget we remove the alt/title fields
   if ($form['#field']['type'] == 'image' && $form['instance']['widget']['type']['#value'] == 'media_generic') {
     $form['instance']['settings']['alt_field']['#access'] = FALSE;
     $form['instance']['settings']['title_field']['#access'] = FALSE;
+    $form['instance']['settings']['file_extensions']['#title'] = t('Allowed file extensions for uploaded files');
   }
 }
 
@@ -1087,7 +1089,7 @@ function media_ctools_plugin_api($owner, $api) {
 
 /**
  * Helper function to get a list of hidden stream wrappers.
- * 
+ *
  * This is used in several places to filter queries for media so that files in
  * temporary:// don't show up.
  */

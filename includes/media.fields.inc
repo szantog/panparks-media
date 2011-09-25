@@ -13,7 +13,9 @@ function media_field_info() {
       'label' => t('Multimedia asset'),
       'description' => t('This field stores a reference to a multimedia asset.'),
       'settings' => array(),
-      'instance_settings' => array(),
+      'instance_settings' => array(
+        'file_extensions' => media_variable_get('file_extensions'),
+      ),
       'default_widget' => 'media_generic',
       'default_formatter' => 'media_large',
     ),
@@ -178,6 +180,21 @@ function media_field_widget_settings_form($field, $instance) {
   $settings = $widget['settings'];
   $form = array();
 
+  if ($field['type'] == 'media') {
+    // Make the extension list a little more human-friendly by comma-separation.
+    $extensions = str_replace(' ', ', ', $instance['settings']['file_extensions']);
+    $form['file_extensions'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Allowed file extensions for uploaded files'),
+      '#default_value' => $extensions,
+      '#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
+      '#element_validate' => array('_file_generic_settings_extensions'),
+      // By making this field required, we prevent a potential security issue
+      // that would allow files of any type to be uploaded.
+      '#required' => TRUE,
+    );
+  }
+
   // Setup type selection form
   $types = media_type_get_types();
   $options = array();
@@ -185,16 +202,18 @@ function media_field_widget_settings_form($field, $instance) {
     $options[$key] = $definition->label;
   }
 
+  $streams = file_get_stream_wrappers();
+
   $form['allowed_types'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Allowed media types'),
+    '#title' => t('Allowed remote media types'),
     '#options' => $options,
     '#default_value' => $settings['allowed_types'],
-    '#description' => t('Media types which are allowed for this field'),
+    '#description' => t('Media types which are allowed for this field when using remote streams.'),
     '#weight' => 1,
+    '#access' => count(file_get_stream_wrappers(STREAM_WRAPPERS_LOCAL)) != count($streams),
   );
 
-  $streams = file_get_stream_wrappers();
   $options = array();
   unset($streams['temporary']);
   foreach ($streams as $scheme => $data) {
@@ -250,13 +269,16 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
       'global' => array(
         'types' => array_filter($widget_settings['allowed_types']),
         'schemes' => $widget_settings['allowed_schemes'],
-        'file_directory' => $field_settings['file_directory'],
         'file_extensions' => $field_settings['file_extensions'],
-        'max_filesize' => $field_settings['max_filesize'],
         'uri_scheme' => !empty($field_settings['uri_scheme']) ? $field_settings['uri_scheme'] : file_default_scheme(),
       ),
     ),
   );
+
+  if ($field['type'] != 'media') {
+    $element['#media_options']['global']['file_directory'] = $field_settings['file_directory'];
+    $element['#media_options']['global']['max_filesize'] = $field_settings['max_filesize'];
+  }
 
   if ($field['type'] == 'file') {
     $element['display'] = array(
