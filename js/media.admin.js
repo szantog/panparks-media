@@ -22,7 +22,7 @@ Drupal.behaviors.mediaAdmin = {
 
     $('.media-display-switch a').bind('click', show_confirm_if_existing_selections)
     // Configure the "Add file" link to fire the media browser popup.
-    $('ul.action-links li', context).remove();
+    $('ul.action-links li', context).hide();
     if ($('form.media-list-operation', context).length != 0) {
       return;
     }
