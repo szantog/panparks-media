@@ -81,11 +81,6 @@ function media_add_upload($form, &$form_state, $params = array()) {
     $validators['file_validate_size'] = array($max_filesize);
   }
 
-  // Validate media type.
-  if (!empty($params['types'])) {
-    $validators['media_file_validate_types'] = array($params['types']);
-  }
-
   // Add image validators.
   $params += array('min_resolution' => 0, 'max_resolution' => 0);
   if ($params['min_resolution'] || $params['max_resolution']) {
