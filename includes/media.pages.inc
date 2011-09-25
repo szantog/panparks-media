@@ -168,29 +168,40 @@ function media_multiple_delete_confirm_submit($form, &$form_state) {
  * Form callback for adding media via an upload form.
  * @todo: should use the AJAX uploader
  */
-function media_add_upload($form, &$form_state, $types = NULL) {
+function media_add_upload($form, &$form_state, $params = array()) {
+  // Set up file upload validators.
+  $validators = array();
 
-  $validators = array(
-   'file_validate_extensions' => array(media_variable_get('file_extensions')),
-   'file_validate_size' => array(parse_size(media_variable_get('max_filesize'))),
-  );
-
-  //@todo add additional validators for media types allowed.
-  if ($types) {
-    $validators['media_file_validate_types'] = array($types);
+  // Validate file extensions. If there are no file extensions in $params and
+  // there are no Media defaults, there is no file extension validation.
+  if (!empty($params['file_extensions'])) {
+    $validators['file_validate_extensions'] = array($params['file_extensions']);
+  }
+  elseif ($tmp = media_variable_get('file_extensions')) {
+    $validators['file_validate_extensions'] = array($tmp);
   }
 
-  // A blank set of allowed file extensions means no need to validate.
-  if (!$validators['file_validate_extensions'][0]) {
-    unset($validators['file_validate_extensions']);
+  // Validate file size but do not allow anything higher than file_upload_max_size().
+  $max_filesize = file_upload_max_size();
+  if (!empty($params['max_filesize']) && $params['max_filesize'] < $max_filesize) {
+    $validators['file_validate_size'] = array(parse_size($params['max_filesize']));
   }
-  // Use the PHP limit for filesize if no variable was set.
-  if (!$validators['file_validate_size']) {
-    $validators['file_validate_size'] = file_upload_max_size();
+  elseif (($tmp = media_variable_get('max_filesize')) && $tmp < $max_filesize) {
+    $validators['file_validate_size'] = array(parse_size($tmp));
+  }
+  else {
+    $validators['file_validate_size'] = array($max_filesize);
   }
 
-  if ($validators['file_validate_size'][0] == 0) {
-    unset($validators['file_validate_size']);
+  // Validate media type.
+  if (!empty($params['types'])) {
+    $validators['media_file_validate_types'] = array($params['types']);
+  }
+
+  // Add image validators.
+  $params += array('min_resolution' => 0, 'max_resolution' => 0);
+  if ($params['min_resolution'] || $params['max_resolution']) {
+    $validators['file_validate_image_resolution'] = array($params['max_resolution'], $params['min_resolution']);
   }
 
   $form['#validators'] = $validators;
@@ -232,17 +243,37 @@ function media_add_upload_validate($form, &$form_state) {
  * Upload a file.
  */
 function media_add_upload_submit($form, &$form_state) {
-  $scheme = variable_get('file_default_scheme', 'public') . '://';
+  $params = $form_state['build_info']['args'][0];
   $file = $form_state['values']['upload'];
+
+  // The media browser widget does not use the 'display' field.
+  $file->display = TRUE;
+
+  // Change the file status from temporary to permanent.
   _media_save_file_permenently($file);
 
-  $destination = file_stream_wrapper_uri_normalize($scheme . $file->filename);
+  // Determine what URI scheme this file should use.
+  $scheme = !empty($params['uri_scheme']) && file_stream_wrapper_valid_scheme($params['uri_scheme']) ? $params['uri_scheme'] : file_default_scheme();
+  $scheme .= '://';
 
-  $defaults = array(
-    'display' => TRUE,
-  );
+  // Prepare the file's subdirectory path.
+  $directory = '';
+  if (!empty($params['file_directory'])) {
+    $directory = $params['file_directory'] . '/';
 
-  // Save the uploaded file.
+    // If the directory isn't writable, or doesn't exist and can't be created,
+    // the upload will fail.
+    $prepare_directory = file_stream_wrapper_uri_normalize($scheme . $directory);
+    if (!file_prepare_directory($prepare_directory, FILE_CREATE_DIRECTORY)) {
+      drupal_set_message(t('The file directory @dir does not exist or is not writable. Please contact an administrator.', array('@dir' => $prepare_directory)), 'error');
+      return;
+    }
+  }
+
+  // Compose the file's permanent destination.
+  $destination = file_stream_wrapper_uri_normalize($scheme . $directory . $file->filename);
+
+  // Save the uploaded file to the permanent location.
   $file = file_move($file, $destination, FILE_EXISTS_RENAME);
 
   if ($file) {
@@ -256,8 +287,8 @@ function media_add_upload_submit($form, &$form_state) {
   $form_state['redirect'] = array('media/browser', array('query' => array('render' => 'media-popup', 'fid' => $file->fid)));
 }
 
-function media_add_upload_multiple($form, &$form_state, $types) {
-  $form = media_add_upload($form, $form_state, $types);
+function media_add_upload_multiple($form, &$form_state, $params = array()) {
+  $form = media_add_upload($form, $form_state, $params);
   unset($form['upload']['#title']);
   // The validators will be set from plupload anyway.  This isn't pretty, but don't
   // it to show up twice.

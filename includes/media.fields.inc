@@ -215,6 +215,7 @@ function media_field_widget_settings_form($field, $instance) {
  * Implements hook_field_widget_form().
  */
 function media_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $field_settings = $instance['settings'];
   $widget_settings = $instance['widget']['settings'];
 
   $permission = user_access('edit media');
@@ -245,13 +246,14 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     '#collapsed' => TRUE,
     '#default_value' => $current_value,
     '#required' => $instance['required'],
-    //'#media_file_extensions' => $instance['settings']['file_extensions'],
-    // @TODO: Not implemented yet.
     '#media_options' => array(
       'global' => array(
-        'types' => array_filter($instance['widget']['settings']['allowed_types']),
-        // @todo: Not implemented
-        'schemes' => $instance['widget']['settings']['allowed_schemes'],
+        'types' => array_filter($widget_settings['allowed_types']),
+        'schemes' => $widget_settings['allowed_schemes'],
+        'file_directory' => $field_settings['file_directory'],
+        'file_extensions' => $field_settings['file_extensions'],
+        'max_filesize' => $field_settings['max_filesize'],
+        'uri_scheme' => !empty($field_settings['uri_scheme']) ? $field_settings['uri_scheme'] : file_default_scheme(),
       ),
     ),
   );
@@ -261,6 +263,14 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
       '#type' => 'value',
       '#value' => 1,
     );
+  }
+
+  // Add image field specific validators.
+  if ($field['type'] == 'image') {
+    if ($field_settings['min_resolution'] || $field_settings['max_resolution']) {
+      $element['#media_options']['global']['min_resolution'] = $field_settings['min_resolution'];
+      $element['#media_options']['global']['max_resolution'] = $field_settings['max_resolution'];
+    }
   }
 
   return $element;
