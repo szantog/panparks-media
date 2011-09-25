@@ -1089,3 +1089,13 @@ function media_ctools_plugin_api($owner, $api) {
     return array('version' => $api_versions[$owner][$api]);
   }
 }
+
+/**
+ * Helper function to get a list of hidden stream wrappers.
+ * 
+ * This is used in several places to filter queries for media so that files in
+ * temporary:// don't show up.
+ */
+function media_get_hidden_stream_wrappers() {
+  return array_diff_key(file_get_stream_wrappers(STREAM_WRAPPERS_ALL), file_get_stream_wrappers(STREAM_WRAPPERS_VISIBLE));
+}

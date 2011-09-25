@@ -176,6 +176,10 @@ function media_browser_list() {
 
   $query->propertyCondition('status', FILE_STATUS_PERMANENT);
 
+  foreach (array_keys(media_get_hidden_stream_wrappers()) as $name) {
+    $query->propertyCondition('uri', $name . '%', 'NOT LIKE');
+  }
+
   $result = $query->execute();
   $files = file_load_multiple(array_keys($result['file']));
   foreach ($files as $file) {

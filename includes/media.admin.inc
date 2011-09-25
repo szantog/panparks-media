@@ -113,13 +113,17 @@ function media_admin_list() {
   $query = db_select('file_managed', 'f')->extend('PagerDefault')->extend('TableSort');
   $query->join('users', 'u', 'f.uid = u.uid');
 
-  $result = $query
+  $query
     ->fields('f')
     ->fields('u', array('name'))
     ->condition('f.status', FILE_STATUS_PERMANENT)
     ->limit($limit)
-    ->orderByHeader($header)
-    ->execute();
+    ->orderByHeader($header);
+
+  foreach (array_keys(media_get_hidden_stream_wrappers()) as $name) {
+    $query->condition('f.uri', $name . '%', 'NOT LIKE');
+  }
+  $result = $query->execute();
 
   $destination = drupal_get_destination();
   $files = array();
@@ -156,11 +160,15 @@ function media_admin_thumbnails() {
   //   with browser_pager_limit?
   $limit = variable_get('media_admin_limit', 50);
 
-
   $query = new EntityFieldQuery();
   $query->pager($limit);
   $query->entityCondition('entity_type', 'file');
   $query->propertyCondition('status', FILE_STATUS_PERMANENT);
+
+  foreach (array_keys(media_get_hidden_stream_wrappers()) as $name) {
+    $query->propertyCondition('uri', $name . '%', 'NOT LIKE');
+  }
+
   $result = $query->execute();
   $files = file_load_multiple(array_keys($result['file']));
 
