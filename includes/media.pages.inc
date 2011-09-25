@@ -147,7 +147,7 @@ function media_add_upload_submit($form, &$form_state) {
   // Prepare the file's subdirectory path.
   $directory = '';
   if (!empty($params['file_directory'])) {
-    $directory = $params['file_directory'] . '/';
+    $directory = token_replace($params['file_directory']) . '/';
 
     // If the directory isn't writable, or doesn't exist and can't be created,
     // the upload will fail.
