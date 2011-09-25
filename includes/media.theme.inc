@@ -181,7 +181,7 @@ function theme_media_admin_thumbnail($variables) {
 function theme_media_admin_thumbnail_operations($variables) {
   $destination = drupal_get_destination();
   $file = $variables['file'];
-  $output = l(t('edit'), 'media/' . $file->fid . '/edit', array('query' => $destination));
+  $output = l(t('edit'), 'file/' . $file->fid . '/edit', array('query' => $destination));
   return $output;
 }
 
@@ -244,7 +244,7 @@ function theme_media_browser_control_result_limit($variables) {
 function theme_media_link($variables) {
   $file = $variables['file'];
 
-  $url = 'media/' . $file->fid;
+  $url = 'file/' . $file->fid;
   $icon = theme('file_icon', array('file' => $file));
 
   // Set options as per anchor format described at
@@ -283,7 +283,7 @@ function theme_media_thumbnail($variables) {
 
   // Arguments for the thumbnail link
   $thumb = $element['#children'];
-  $target = 'media/' . $element['#file']->fid . '/edit';
+  $target = 'file/' . $element['#file']->fid . '/edit';
   $options = array('query' => $destination, 'html' => TRUE, 'attributes' => array('title' => t('Click to edit details')));
 
   // Element should be a field renderable array... This is a little wonky - admitted.
