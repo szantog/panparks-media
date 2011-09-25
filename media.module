@@ -196,14 +196,6 @@ function media_menu() {
     'file' => 'includes/media.pages.inc',
   );
 
-  $items['media/js'] = array(
-    'page callback' => 'media_preview_ajax',
-    'access callback' => 'media_access',
-    'access arguments' => array('view'),
-    'type' => MENU_CALLBACK,
-    'file' => 'includes/media.pages.inc',
-  );
-
   return $items;
 }
 
