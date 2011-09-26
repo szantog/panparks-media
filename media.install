@@ -70,12 +70,6 @@ function media_install() {
     $bundle_settings['extra_fields']['display']['file']['media_small'] = array('weight' => 0, 'visible' => FALSE);
     field_bundle_settings('file', $name, $bundle_settings);
   }
-
-  // Set permissions.
-  $roles = user_roles();
-  foreach ($roles as $rid => $role) {
-    user_role_grant_permissions($rid, array('view media'));
-  }
 }
 
 /**
@@ -313,13 +307,9 @@ function media_update_7007() {
 }
 
 /**
- * Give all users view media perm by default
+ * Intentionally left blank.
  */
 function media_update_7008() {
-  $roles = user_roles();
-  foreach ($roles as $rid => $role) {
-    user_role_grant_permissions($rid, array('view media'));
-  }
 }
 
 /**
@@ -599,5 +589,41 @@ function media_update_7019() {
 function media_update_7020() {
   if (variable_get('media__wysiwyg_allowed_types') == array('image', 'video')) {
     variable_del('media__wysiwyg_allowed_types');
+  }
+}
+
+/**
+ * Replace 'view media' perm from all users having the role with 'view file'.
+ */
+function media_update_7200() {
+  $perms = user_permission_get_modules();
+  if (!isset($perms['view file'])) {
+    throw new DrupalUpdateException('The File Entity module needs to be upgraded before continuing.');
+  }
+  else {
+    $roles = user_roles(FALSE, 'view media');
+    $permissions = array(
+      'view media' => FALSE,
+      'view file' => TRUE,
+    );
+    foreach ($roles as $rid => $role) {
+      user_role_change_permissions($rid, $permissions);
+    }
+    $roles = user_roles(FALSE, 'edit media');
+    $permissions = array(
+      'edit media' => FALSE,
+      'edit file' => TRUE,
+    );
+    foreach ($roles as $rid => $role) {
+      user_role_change_permissions($rid, $permissions);
+    }
+    $roles = user_roles(FALSE, 'administer media');
+    $permissions = array(
+      'administer media' => FALSE,
+      'administer files' => TRUE,
+    );
+    foreach ($roles as $rid => $role) {
+      user_role_change_permissions($rid, $permissions);
+    }
   }
 }
