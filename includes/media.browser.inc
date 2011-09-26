@@ -149,46 +149,58 @@ function media_browser_list() {
   $start = isset($params['start']) ? $params['start'] : 0;
   $limit = isset($params['limit']) ? $params['limit'] : media_variable_get('browser_pager_limit');
 
-  $query = new EntityFieldQuery();
-
+  $query = db_select('file_managed', 'f');
+  $query->fields('f', array('fid'));
   $query->range($start, $limit);
-  $query->entityCondition('entity_type', 'file');
-  $query->entityOrderBy('entity_id', 'DESC');
+  $query->orderBy('f.fid', 'DESC');
 
-  if ($types) {
-    $query->entityCondition('bundle', $types, 'IN');
+  // Add conditions based on file type *or* allowed extensions.
+  $condition = $query;
+  if (!empty($types) && !empty($params['file_extensions'])) {
+    $condition = db_or();
+  }
+  if (!empty($types)) {
+    $condition->condition('f.type', $types, 'IN');
+  }
+  if (!empty($params['file_extensions'])) {
+    $extensions = array_filter(explode(' ', $params['file_extensions']));
+    foreach ($extensions as $extension) {
+      $condition->condition('f.uri', '%' . db_like('.' . $extension), 'LIKE');
+    }
+  }
+  if ($condition instanceof DatabaseCondition) {
+    $query->condition($condition);
   }
 
   if ($url_include_patterns) {
-    $query->propertyCondition('uri', $v, 'CONTAINS');
+    $query->condition('f.uri', '%' . db_like($v) . '%', 'LIKE');
     // Insert stream related restrictions here.
   }
   if ($url_exclude_patterns) {
-    $query->propertyCondition('uri', "%$v%", 'NOT LIKE');
+    $query->condition('f.uri', '%' . db_like($v) . '%', 'NOT LIKE');
   }
 
   // @todo Implement granular editorial access: http://drupal.org/node/696970.
   //   In the meantime, protect information about private files from being
   //   discovered by unprivileged users. See also media_view_page().
   if (!user_access('administer media')) {
-    $query->propertyCondition('uri', 'private://%', 'NOT LIKE');
+    $query->condition('f.uri', db_like('private://') . '%', 'NOT LIKE');
   }
 
-  $query->propertyCondition('status', FILE_STATUS_PERMANENT);
+  $query->condition('f.status', FILE_STATUS_PERMANENT);
 
   foreach (array_keys(media_get_hidden_stream_wrappers()) as $name) {
-    $query->propertyCondition('uri', $name . '%', 'NOT LIKE');
+    $query->condition('f.uri', db_like($name . '://') . '%', 'NOT LIKE');
   }
 
-  $result = $query->execute();
-  $files = file_load_multiple(array_keys($result['file']));
+  $fids = $query->execute()->fetchCol();
+  $files = file_load_multiple($fids);
   foreach ($files as $file) {
     media_browser_build_media_item($file);
   }
 
   drupal_json_output(array('media' => array_values($files)));
   exit();
-
 }
 
 /**
@@ -219,20 +231,22 @@ function media_media_browser_plugin_view($plugin_name, $params) {
   module_load_include('inc', 'media', 'includes/media.admin');
   module_load_include('inc', 'media', 'includes/media.pages');
 
-  $types = isset($params['types']) ? $params['types'] : array();
+  $params += array(
+    'types' => array(),
+    'multiselect' => FALSE,
+  );
 
   // The multiselect parameter is a string.  So we check to see if it is set and
   // adjust the local variable accordingly.
-  $multiselect = FALSE;
-  if (isset($params['multiselect']) && $params['multiselect'] != 'false') {
-    $multiselect = TRUE;
+  if ($params['multiselect'] != 'false' && $params['multiselect'] !== FALSE) {
+    $params['multiselect'] = TRUE;
   }
 
   $redirect = array('media/browser', array('query' => array('render' => 'media-popup')));
   switch ($plugin_name) {
     case 'upload':
       $attached = array();
-      if ($multiselect && module_exists('plupload')) {
+      if ($params['multiselect'] && module_exists('plupload')) {
         $upload_form_id = 'media_add_upload_multiple';
         $attached['js'] = array($path . '/js/plugins/media.upload_multiple.js');
       }
@@ -262,11 +276,9 @@ function media_media_browser_plugin_view($plugin_name, $params) {
         '#settings' => array(
           'viewMode' => 'thumbnails',
           'getMediaUrl' => url('media/browser/list'),
-          'types' => $types,
-          'multiselect' => $multiselect,
         // We should probably change this to load dynamically when requested
         // via the JS file.
-        ),
+        ) + $params,
         '#markup' => '<div id="container"><div id="scrollbox"><ul id="media-browser-library-list" class="media-list-thumbnails"></ul><div id="status"></div></div></div>',
       );
     break;
