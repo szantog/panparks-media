@@ -43,6 +43,7 @@ function media_field_widget_info() {
       'settings' => array(
         'progress_indicator' => 'throbber',
         'allowed_types' => array('image'),
+        'browser_plugins' => array(),
         'allowed_schemes' => array('public', 'private'),
       ),
       'behaviors' => array(
@@ -227,6 +228,21 @@ function media_field_widget_settings_form($field, $instance) {
     '#description' => t('URI schemes include public:// and private:// which are the Drupal files directories, and may also refer to remote sites.'),
     '#weight' => 2,
   );
+
+  module_load_include('inc', 'media', 'includes/media.browser');
+  $plugins = module_invoke_all('media_browser_plugin_info');
+  drupal_alter('media_browser_plugins', $plugins);
+  $form['browser_plugins'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Enabled browser plugins'),
+    '#options' => array(),
+    '#default_value' => $settings['browser_plugins'],
+    '#description' => t('If no plugins are selected, they will all be available.'),
+  );
+  foreach ($plugins as $key => $plugin) {
+    $form['browser_plugins']['#options'][$key] = !empty($plugin['#title']) ? $plugin['#title'] : $key;
+  }
+
   return $form;
 }
 
@@ -268,6 +284,7 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     '#media_options' => array(
       'global' => array(
         'types' => array_filter($widget_settings['allowed_types']),
+        'enabledPlugins' => array_filter($instance['widget']['settings']['browser_plugins']),
         'schemes' => $widget_settings['allowed_schemes'],
         'file_directory' => isset($field_settings['file_directory']) ? $field_settings['file_directory'] : NULL,
         'file_extensions' => isset($field_settings['file_extensions']) ? $field_settings['file_extensions'] : media_variable_get('file_extensions'),

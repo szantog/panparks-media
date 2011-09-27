@@ -211,11 +211,13 @@ function media_media_browser_plugin_info() {
 
   // @TODO: Should we add a permission around this?
   $plugins['library'] = array(
+    '#title' => t('Library'),
     '#weight' => 10,
   );
 
   if (user_access('administer media') || user_access('edit media')) {
     $plugins['upload'] = array(
+      '#title' => t('Upload'),
       '#weight' => -10,
     );
   }
