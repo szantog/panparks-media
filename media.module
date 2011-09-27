@@ -106,18 +106,20 @@ function media_menu() {
 //    'weight' => -1,
 //  );
   // Administrative screens for managing media.
-  $items['admin/content/media'] = array(
-    'title' => 'Media',
+  $items['admin/content/file/thumbnails'] = array(
+    'title' => 'Thumbnails',
     'description' => 'Manage files used on your site.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('media_admin'),
+    'page arguments' => array('file_entity_admin_files'),
     'access arguments' => array('administer media'),
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
-    'file' => 'includes/media.admin.inc',
+    'file' => 'file_entity.admin.inc',
+    'file path' => drupal_get_path('module', 'file_entity'),
+    'weight' => -10,
   );
 
   // Used to import files from a local filesystem into Drupal.
-  $items['admin/content/media/import'] = array(
+  $items['admin/content/file/import'] = array(
     'title' => 'Import media',
     'description' => 'Import files into your media library.',
     'page callback' => 'drupal_get_form',
@@ -126,6 +128,8 @@ function media_menu() {
     'type' => MENU_LOCAL_ACTION,
     'file' => 'includes/media.admin.inc',
   );
+
+  $items['admin/content/file/thumbnails/import'] = $items['admin/content/file/import'];
 
   $items['media/browser'] = array(
     'title' => 'Media browser',
@@ -381,37 +385,6 @@ function media_element_info_alter(&$types) {
 }
 
 /**
- * Implements hook_media_display_types().
- *
- * This is used to display media in different ways on the admin section.
- * Perhaps should be merged in with the browser display.
- */
-function media_media_display_types() {
-  $path = drupal_get_path('module', 'media');
-  $display_types = array();
-
-  $display_types['list'] = array(
-    'title' => t('List'),
-    'description' => t('Display as a list.'),
-    'icon' => $path . '/images/display-list.png',
-    'icon_active' => $path . '/images/display-list-active.png',
-    'callback' => 'media_admin_list',
-    'file' => drupal_get_path('module', 'media') . '/includes/media.admin.inc',
-  );
-
-  $display_types['thumbnails'] = array(
-    'title' => t('Thumbnails'),
-    'description' => t('Display as thumbnails.'),
-    'icon' => $path . '/images/display-thumbnails.png',
-    'icon_active' => $path . '/images/display-thumbnails-active.png',
-    'callback' => 'media_admin_thumbnails',
-    'file' => drupal_get_path('module', 'media') . '/includes/media.admin.inc',
-  );
-
-  return $display_types;
-}
-
-/**
  * Implements hook_media_operations().
  */
 function media_media_operations() {
@@ -522,19 +495,6 @@ function media_file_download_access($field, $entity_type, $entity) {
 function media_type_page_title($type) {
   return t('@type media type settings', array('@type' => $type->label));
 }
-
-/**
- * Get all display types.
- */
-function media_display_types() {
-  $types = &drupal_static(__FUNCTION__);
-  if (!$types) {
-    $types = module_invoke_all('media_display_types');
-    drupal_alter('media_display_types', $types);
-  }
-  return $types;
-}
-
 
 /* ***************************************** */
 /* Callbacks                                 */
@@ -1037,6 +997,54 @@ function media_ctools_plugin_api($owner, $api) {
  */
 function media_get_hidden_stream_wrappers() {
   return array_diff_key(file_get_stream_wrappers(STREAM_WRAPPERS_ALL), file_get_stream_wrappers(STREAM_WRAPPERS_VISIBLE));
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * This alter enhances the default admin/content/file page, addding JS and CSS.
+ * It also makes modifications to the thumbnail view by replacing the existing
+ * checkboxes and table with thumbnails.
+ */
+function media_form_file_entity_admin_files_alter(&$form, $form_state) {
+  if (!empty($form_state['values']['operation'])) {
+    // The form is being rebuilt because an operation requiring confirmation
+    // We don't want to be messing with it in this case.
+    return;
+  }
+
+  // Add the "Add file" local action, and notify users if they have files
+  // selected and they try to switch between the "Thumbnail" and "List" local
+  // tasks.
+  $path = drupal_get_path('module', 'media');
+  require_once($path . '/includes/media.browser.inc');
+  $form['#attributes']['class'][] = 'file-entity-admin-files-form';
+  $form['#attached']['js'][] = $path . '/js/media.admin.js';
+  $form['#attached']['css'][] = $path . '/css/media.css';
+  media_attach_browser_js($form);
+
+  $menu_item = menu_get_item();
+  if ($menu_item['map'][3] == 'thumbnails') {
+    // By default, this form contains a table select element called "files". For
+    // the 'thumbnails' tab, Media generates a thumbnail for each file and
+    // replaces the tableselect with a grid of thumbnails.
+    $files = $form['#files'];
+    $form['files'] = array(
+      '#tree' => TRUE,
+      '#prefix' => '<div class="media-display-thumbnails media-clear clearfix"><ul class="media-list-thumbnails">',
+      '#suffix' => '</ul></div>',
+    );
+
+    foreach ($files as $file) {
+      $preview = media_get_thumbnail_preview($file, TRUE);
+      $form['files'][$file->fid] = array(
+        '#type' => 'checkbox',
+        '#title' => '',
+        '#prefix' => '<li>' . drupal_render($preview),
+        '#suffix' => '</li>',
+      );
+    }
+  }
 }
 
 /**
