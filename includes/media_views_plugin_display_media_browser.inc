@@ -15,4 +15,9 @@
  *
  * @ingroup views_display_plugins
  */
-class media_views_plugin_display_media_browser extends views_plugin_display {}
+class media_views_plugin_display_media_browser extends views_plugin_display {
+  function query() {
+    parent::query();
+    dpm($this);
+  }
+}

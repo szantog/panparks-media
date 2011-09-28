@@ -17,6 +17,14 @@ class media_views_plugin_style_media_browser extends views_plugin_style_list {
   var $files = array();
 
   /**
+   * Constructor to provide additional field to add.
+   */
+  function init(&$view, &$display, $options = NULL) {
+    parent::init($view, $display, $options);
+    $this->additional_fields['fid'] = 'fid';
+  }
+
+  /**
    * Set default options.
    */
   function option_definition() {
@@ -37,8 +45,9 @@ class media_views_plugin_style_media_browser extends views_plugin_style_list {
    * Add the base field (fid) to the query.
    */
   function query() {
+    dpm($this);
     $this->view->query->add_field($this->view->base_table, $this->view->base_field);
-    parent::query();
+    return parent::query();
   }
 
 }

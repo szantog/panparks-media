@@ -126,37 +126,6 @@ function media_schema() {
   return $schema;
 }
 
-
-/**
- * Implements hook_field_schema().
- */
-function media_field_schema($field) {
-  return array(
-    'columns' => array(
-      'fid' => array(
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => FALSE,
-      ),
-      'title' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => FALSE,
-      ),
-      'data' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'size' => 'big',
-        'serialize' => TRUE,
-        //'description' => 'Used for storing additional information.  Can be harnessed by widgets',
-      ),
-    ),
-    'indexes' => array(
-      'fid' => array('fid'),
-    ),
-  );
-}
-
 /**
  * Create the {media_list_type} table.
  */
@@ -626,4 +595,29 @@ function media_update_7200() {
       user_role_change_permissions($rid, $permissions);
     }
   }
+}
+
+/**
+ * Enable the new Media Field module if this site uses "media" fields. File fields are now preferred for storing media.
+ */
+function media_update_7201() {
+  $fields = field_info_fields();
+  foreach ($fields as $field) {
+    if ($field['type'] == 'media') {
+      // This update function may run even if Media is not enabled. Don't enable
+      // Media Field if its dependencies aren't already enabled.
+      module_enable(array('mediafield'), FALSE);
+
+      // Update entries in file_usage so that they are associated with Media
+      // Field rather than Media.
+      // @TODO This update function may conflict with http://drupal.org/node/1268116
+      db_update('file_usage')
+        ->condition('module', 'media')
+        ->fields(array('module' => 'mediafield'))
+        ->execute();
+
+      return t('The "Media" field type has been moved to the new "Media Field" module. This site uses media fields, so the Media Field module has been enabled.');
+    }
+  }
+  return t('The "Media" field type has been moved to the new "Media Field" module. File fields can be used to store media.');
 }
