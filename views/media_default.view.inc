@@ -70,6 +70,13 @@ $handler->display->display_options['sorts']['count']['field'] = 'count';
 $handler->display->display_options['sorts']['count']['group_type'] = 'sum';
 $handler->display->display_options['sorts']['count']['exposed'] = TRUE;
 $handler->display->display_options['sorts']['count']['expose']['label'] = 'Use count';
+/* Filter criterion: File: Status */
+$handler->display->display_options['filters']['status']['id'] = 'status';
+$handler->display->display_options['filters']['status']['table'] = 'file_managed';
+$handler->display->display_options['filters']['status']['field'] = 'status';
+$handler->display->display_options['filters']['status']['value'] = array(
+  1 => '1',
+);
 /* Filter criterion: File: Name */
 $handler->display->display_options['filters']['filename']['id'] = 'filename';
 $handler->display->display_options['filters']['filename']['table'] = 'file_managed';
