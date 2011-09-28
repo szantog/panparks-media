@@ -122,9 +122,8 @@ function media_field_widget_settings_form($field, $instance) {
     '#weight' => 2,
   );
 
-  module_load_include('inc', 'media', 'includes/media.browser');
-  $plugins = module_invoke_all('media_browser_plugin_info');
-  drupal_alter('media_browser_plugins', $plugins);
+  ctools_include('plugins');
+  $plugins = ctools_get_plugins('media', 'browser');
   $form['browser_plugins'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Enabled browser plugins'),
@@ -133,7 +132,7 @@ function media_field_widget_settings_form($field, $instance) {
     '#description' => t('If no plugins are selected, they will all be available.'),
   );
   foreach ($plugins as $key => $plugin) {
-    $form['browser_plugins']['#options'][$key] = !empty($plugin['#title']) ? $plugin['#title'] : $key;
+    $form['browser_plugins']['#options'][$key] = !empty($plugin['title']) ? $plugin['title'] : $key;
   }
 
   return $form;

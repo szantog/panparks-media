@@ -974,18 +974,40 @@ function media_flush_caches() {
 }
 
 /**
+ * Implements hook_ctools_plugin_type().
+ */
+function media_ctools_plugin_type() {
+  return array(
+    'browser' => array(
+      'version' => 1,
+      // Cache plugin information?
+      'cache' => TRUE,
+      // Which plugin info array keys contain classes?
+      'classes' => array('handler'),
+      // CTools will call hook_mymodule_myplugintype() to discover plugins.
+      'use hooks' => TRUE,
+      'hook' => 'media_browser_plugin_info',
+    ),
+  );
+}
+
+/**
  * Implements hook_ctools_plugin_api().
  *
  * Lets CTools know which plugin APIs are implemented by Media module.
  */
-function media_ctools_plugin_api($owner, $api) {
-  static $api_versions = array(
-    'file_entity' => array(
-      'file_default_displays' => 1,
-    ),
-  );
-  if (isset($api_versions[$owner][$api])) {
-    return array('version' => $api_versions[$owner][$api]);
+function media_ctools_plugin_api($module, $api) {
+  if ($module == 'file_entity' && $api == 'file_default_displays') {
+    return array(
+      'version' => 1,
+    );
+  }
+
+  if ($module == 'media' && $api == 'browser') {
+    return array(
+      'version' => 1,
+      'path' => drupal_get_path('module', 'media') . '/includes',
+    );
   }
 }
 
