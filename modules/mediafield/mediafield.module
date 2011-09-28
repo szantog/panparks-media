@@ -281,3 +281,13 @@ function mediafield_field_update_instance($instance, $prior_instance) {
     media_filter_invalidate_caches();
   }
 }
+
+/**
+ * Implements hook_views_api().
+ */
+function mediafield_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'media'),
+  );
+}
