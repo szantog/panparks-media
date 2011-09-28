@@ -1024,7 +1024,7 @@ function media_form_file_entity_admin_files_alter(&$form, $form_state) {
   media_attach_browser_js($form);
 
   $menu_item = menu_get_item();
-  if ($menu_item['map'][3] == 'thumbnails') {
+  if (isset($menu_item['map'][3]) && $menu_item['map'][3] == 'thumbnails') {
     // By default, this form contains a table select element called "files". For
     // the 'thumbnails' tab, Media generates a thumbnail for each file and
     // replaces the tableselect with a grid of thumbnails.
