@@ -49,7 +49,7 @@ function media_browser($selected = NULL) {
   }
 
   foreach ($plugins as $key => &$plugin) {
-    $plugin += module_invoke($plugin['#module'], 'media_browser_plugin_view', $key, $params);
+    $plugin += module_invoke($plugin['#module'], 'media_browser_plugin_view', $key, $plugin);
   }
 
   // Allow modules to change the tab names or whatever else they want to change
@@ -221,13 +221,33 @@ function media_media_browser_plugin_info() {
       '#weight' => -10,
     );
   }
+
+  // Get a list of views using the 'media_browser' display type and provide each
+  // as a media browser plugin.
+  foreach (views_get_all_views(TRUE) as $view) {
+    foreach ($view->display as $display) {
+      if ($display->display_plugin == 'media_browser') {
+        $title = $display->display_title;
+        if (!empty($display->display_options['title'])) {
+          $title = $display->display_options['title'];
+        }
+        $plugins["{$view->name}--{$display->id}"] = array(
+          '#title' => $title,
+          '#weight' => 11, // @TODO make this configurable.
+          '#views_view_name' => $view->name,
+          '#views_view_display_id' => $display->id,
+        );
+      }
+    }
+  }
+
   return $plugins;
 }
 
 /**
  * Implementaion of hook_media_browser_plugin_view().
  */
-function media_media_browser_plugin_view($plugin_name, $params) {
+function media_media_browser_plugin_view($plugin_name, $params = array()) {
   $path = drupal_get_path('module', 'media');
 
   module_load_include('inc', 'media', 'includes/media.admin');
@@ -283,6 +303,17 @@ function media_media_browser_plugin_view($plugin_name, $params) {
         ) + $params,
         '#markup' => '<div id="container"><div id="scrollbox"><ul id="media-browser-library-list" class="media-list-thumbnails"></ul><div id="status"></div></div></div>',
       );
+    break;
+    default:
+      // Is this coming from our implementation of views?
+      if (!empty($params['#views_view_name'])) {
+        if (($view = views_get_view($params['#views_view_name']))) {
+          return array(
+            '#markup' => $view->preview($params['#views_view_display_id']) . '<div class="form-actions form-wrapper"></div>',
+            '#title' => t('Views'),
+          );
+        }
+      }
     break;
   }
 

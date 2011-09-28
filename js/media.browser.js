@@ -55,12 +55,15 @@ Drupal.media.browser.validateButtons = function() {
   // "OK" button action to finalize the selection and remove the IFRAME.
   //
   // @todo An alternate, less hacky solution would be most welcome.
-  if (!($('.form-submit', this).length > 0)) {
-    $('<a class="button fake-ok">' + Drupal.t('Submit') + '</a>').appendTo(this).bind('click', Drupal.media.browser.submit);
-    if (!($('.fake-cancel', this).length > 0)) {
+  if (!$('.form-submit', this).length) {
+    if (!$('.fake-ok', this).length) {
+      $('<a class="button fake-ok">' + Drupal.t('Submit') + '</a>').appendTo(this).bind('click', Drupal.media.browser.submit);
+    }
+    if (!$('.fake-cancel', this).length) {
       $('<a class="button fake-cancel">' + Drupal.t('Cancel') + '</a>').appendTo(this).bind('click', Drupal.media.browser.submit);
     }
-  } else if (!($('.fake-cancel', this).length > 0)) {
+  }
+  else if (!($('.fake-cancel', this).length > 0)) {
     var parent = $('.form-actions', this);
     if (!parent.length) {
       parent = $('form > div', this);

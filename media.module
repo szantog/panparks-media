@@ -1053,6 +1053,47 @@ function media_form_file_entity_admin_files_alter(&$form, $form_state) {
 function media_views_api() {
   return array(
     'api' => 3,
-    'path' => drupal_get_path('module', 'media') . '/includes',
+    'path' => drupal_get_path('module', 'media'),
   );
+}
+
+/**
+ * Implementation of hook_views_default_views().
+ */
+function media_views_default_views() {
+  return media_load_all_exports('media', 'views', 'view.inc', 'view');
+}
+
+/**
+ * Fetches an array of exportables from files.
+ *
+ * @param $module
+ *   The module invoking this request. (Can be called by other modules.)
+ * @param $directory
+ *   The subdirectory in the custom module.
+ * @param $extension
+ *   The file extension.
+ * @param $name
+ *   The name of the variable found in each file. Defaults to the same as
+ *   $extension.
+ *
+ * @return
+ *   Array of $name objects.
+ */
+function media_load_all_exports($module, $directory, $extension, $name = NULL) {
+  if (!$name) {
+    $name = $extension;
+  }
+
+  $return = array();
+  // Find all the files in the directory with the correct extension.
+  $files = file_scan_directory(drupal_get_path('module', $module) . "/$directory", "/.$extension/");
+  foreach ($files as $path => $file) {
+    require $path;
+    if (isset($$name)) {
+      $return[$$name->name] = $$name;
+    }
+  }
+
+  return $return;
 }
