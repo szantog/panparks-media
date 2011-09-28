@@ -152,7 +152,7 @@ function media_browser_list() {
   $query = db_select('file_managed', 'f');
   $query->fields('f', array('fid'));
   $query->range($start, $limit);
-  $query->orderBy('f.fid', 'DESC');
+  $query->orderBy('f.timestamp', 'DESC');
 
   // Add conditions based on file type *or* allowed extensions.
   $condition = $query;
