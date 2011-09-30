@@ -84,7 +84,7 @@ function media_menu() {
     'description' => 'Configure the behavior and display of the media browser.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_admin_config_browser'),
-    'access arguments' => array('administer media'),
+    'access arguments' => array('administer files'),
     'file' => 'includes/media.admin.inc',
   );
 
@@ -148,7 +148,7 @@ function media_menu() {
     'description' => 'Make it easier to test media browser',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('media_browser_testbed'),
-    'access arguments' => array('administer media'),
+    'access arguments' => array('administer files'),
     'type' => MENU_CALLBACK,
     'file' => 'includes/media.browser.inc',
   );
