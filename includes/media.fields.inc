@@ -145,7 +145,7 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
   $field_settings = $instance['settings'];
   $widget_settings = $instance['widget']['settings'];
 
-  $permission = user_access('edit media');
+  $permission = user_access('edit file');
   if (!$permission) {
     // @todo: show the default file upload field.
     return;

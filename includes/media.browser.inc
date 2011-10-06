@@ -209,7 +209,7 @@ function media_browser_list() {
   // @todo Implement granular editorial access: http://drupal.org/node/696970.
   //   In the meantime, protect information about private files from being
   //   discovered by unprivileged users. See also media_view_page().
-  if (!user_access('administer media')) {
+  if (!user_access('administer files')) {
     $query->condition('f.uri', db_like('private://') . '%', 'NOT LIKE');
   }
 

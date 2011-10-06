@@ -111,7 +111,7 @@ function media_menu() {
     'description' => 'Manage files used on your site.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('file_entity_admin_files'),
-    'access arguments' => array('administer media'),
+    'access arguments' => array('administer files'),
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
     'file' => 'file_entity.admin.inc',
     'file path' => drupal_get_path('module', 'file_entity'),
