@@ -280,5 +280,10 @@ function theme_media_formatter_large_icon($variables) {
   $icon_dir = media_variable_get('icon_base_directory') . '/' . media_variable_get('icon_set');
   $icon = file_icon_path((object)$file, $icon_dir);
   $variables['path'] = $icon;
+  // theme_image() requires the 'alt' attribute passed as its own variable.
+  // @see http://drupal.org/node/999338
+  if (!isset($variables['alt']) && isset($variables['attributes']['alt'])) {
+    $variables['alt'] = $variables['attributes']['alt'];
+  }
   return theme('image', $variables);
 }
