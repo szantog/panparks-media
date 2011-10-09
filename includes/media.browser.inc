@@ -111,7 +111,6 @@ function media_browser($selected = NULL) {
   $tabs = array(); // List of tabs to render.
 
   $settings = array('media' => array('browser' => array()));
-  drupal_add_js($settings, 'setting');
   $browser_settings =& $settings['media']['browser'];
 
   //@todo: replace with Tabs module if it gets upgraded.
@@ -134,6 +133,8 @@ EOS;
     <!-- End #media-tab-$key -->
 EOS;
   }
+  
+  drupal_add_js($settings, 'setting');
 
   $output['tabset'] = array(
     '#prefix' => '<div id="media-browser-tabset">',
