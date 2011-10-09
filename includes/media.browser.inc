@@ -74,6 +74,33 @@ function media_browser($selected = NULL) {
         );
       }
     }
+
+    // We need to get a submit and cancel button on each tab. If the plugin
+    // is not returning a form element we need to add a submit button.
+    // This is a fairly broad assumption.
+    if (empty($plugin_output[$key]['#form']) && ! empty($plugin_output[$key]['#markup'])) {
+      $plugin_output[$key]['#markup'] .= l(t('Submit'), '', array(
+        'attributes' => array('class' => array('button', 'fake-submit', $key))
+      ));
+      $plugin_output[$key]['#markup'] .= l(t('Cancel'), '', array(
+      'attributes' => array('class' => array('button', 'fake-cancel', $key))
+      ));
+    }
+
+    // I'm not sure if it is ever the case that a plugin form will ever have
+    // the correct cancel button so we add it here. Put it inline with the
+    // current submit button. This is a fairly broad assumption.
+    if (! empty($plugin_output[$key]['form'])) {
+      $button = l(t('Cancel'), '', array('attributes' => array('class' => array('button', 'fake-cancel', $key))));
+      if (! empty($plugin_output[$key]['form'][0]['submit']['#suffix'])) {
+        $plugin_output[$key]['form'][0]['submit']['#suffix'] .= $button;
+      }
+      else {
+        $plugin_output[$key]['form'][0]['submit']['#suffix'] = $button;
+      }
+
+    }
+
   }
 
   // Allow modules to change the tab names or whatever else they want to change
@@ -84,6 +111,7 @@ function media_browser($selected = NULL) {
   $tabs = array(); // List of tabs to render.
 
   $settings = array('media' => array('browser' => array()));
+  drupal_add_js($settings, 'setting');
   $browser_settings =& $settings['media']['browser'];
 
   //@todo: replace with Tabs module if it gets upgraded.
@@ -107,14 +135,12 @@ EOS;
 EOS;
   }
 
-  drupal_add_js($settings, 'setting');
-
   $output['tabset'] = array(
     '#prefix' => '<div id="media-browser-tabset">',
     '#suffix' => '</div>',
   );
   $output['tabset']['list'] = array(
-    '#markup' => '<ul><li>' . implode('</li><li>', $tabs) . '</li></ul>'
+    '#markup' => theme('item_list', array('items' => $tabs)),
   );
 
   $output['tabset']['plugins'] = $plugin_output;

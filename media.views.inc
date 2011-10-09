@@ -44,6 +44,7 @@ function media_views_plugins() {
  * Display the view as a media browser.
  */
 function template_preprocess_media_views_view_media_browser(&$vars) {
+  module_load_include('inc', 'media', 'includes/media.browser');
   // Load file objects for each View result.
   $fids = array();
   foreach ($vars['rows'] as $index => $row) {
@@ -54,13 +55,21 @@ function template_preprocess_media_views_view_media_browser(&$vars) {
   // Render the preview for each file.
   foreach ($vars['rows'] as $index => $row) {
     $file = $files[$row->fid];
-    $preview = media_get_thumbnail_preview($file);
-    $preview = drupal_render($preview);
-    $vars['rows'][$index]->preview = $preview;
-    $vars['rows'][$index]->file = $file;
-    // @todo Remove this hacky way of 'linking' each item to select it in the browser.
-    $vars['rows'][$index]->preview = l($preview, 'media/browser', array('html' => TRUE, 'query' => array('render' => 'media-popup', 'fid' => $row->fid)));
+    // Add url/preview to the file object
+    media_browser_build_media_item($file);
+    $vars['rows'][$index] = $file;
+    $vars['rows'][$index]->preview = l($file->preview, 'media/browser', array(
+      'html' => TRUE,
+      'attributes' => array(
+        'data-fid' => $row->fid,
+      ),
+      'query' => array('render' => 'media-popup', 'fid' => $row->fid))
+    );
   }
+
+  // Add the files to JS so that they are accessible inside the browser
+  drupal_add_js(array('media' => array('files' => $files)), 'setting');
+
 
   // Add classes and wrappers from the style plugin.
   $handler  = $vars['view']->style_plugin;
@@ -73,24 +82,19 @@ function template_preprocess_media_views_view_media_browser(&$vars) {
 
   $vars['class'] = implode(' ', $class);
   $vars['wrapper_class'] = implode(' ', $wrapper_class);
-  $vars['wrapper_prefix'] = '<div id="container">';
+  $vars['wrapper_prefix'] = '<div id="container" class="' . implode(' ', $wrapper_class) . '">';
   $vars['wrapper_suffix'] = '</div>';
-  $vars['list_type_prefix'] = '<' . $handler->options['type'] . ' id="media-browser-library-list">';
+  $vars['list_type_prefix'] = '<' . $handler->options['type'] . ' id="media-browser-library-list" class="' . implode(' ', $class) . '">';
   $vars['list_type_suffix'] = '</' . $handler->options['type'] . '>';
 
-  if ($vars['wrapper_class']) {
-    $vars['wrapper_prefix'] = '<div id="container" class="' . $vars['wrapper_class'] . '">';
-  }
-
-  if ($vars['class']) {
-    $vars['list_type_prefix'] = '<' . $handler->options['type'] . ' id="media-browser-library-list" class="' . $vars['class'] . '">';
-  }
-
-  // Run the prepared theming variables through a standard Views preprocess
-  // function.
+  // Run theming variables through a standard Views preprocess function.
   template_preprocess_views_view_unformatted($vars);
 
   // Add media browser javascript and CSS.
+  drupal_add_js(drupal_get_path('module', 'media') . '/js/plugins/media.views.js');
+  // We need to see if we can depricate this
   drupal_add_js(drupal_get_path('module', 'media') . '/js/plugins/media.library.js');
+  // We should abstract this into a standard css file so all implementers have
+  // it by default
   drupal_add_css(drupal_get_path('module', 'media') . '/js/plugins/media.library.css');
 }
