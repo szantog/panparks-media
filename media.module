@@ -416,8 +416,9 @@ function media_forms($form_id, $args) {
   // So we name all the forms media_edit_N where the first requested form is
   // media_edit_0, 2nd is media_edit_1, etc.
   if ($form_id != 'media_edit' && (strpos($form_id, 'media_edit') === 0)) {
+    module_load_include('inc', 'file_entity', 'file_entity.pages');
     $forms[$form_id] = array(
-      'callback' => 'media_edit',
+      'callback' => 'file_entity_edit',
     );
   }
   return $forms;
