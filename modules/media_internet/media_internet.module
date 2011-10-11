@@ -18,7 +18,11 @@ function media_internet_media_browser_plugin_info() {
   $plugins = array();
   $plugins['media_internet'] = array(
     'title' => t('Web'),
-    'handler' => 'MediaBrowserInternet',
+    'handler' => array(
+      'path' => drupal_get_path('module', 'media_internet'),
+      'file' => 'media_internet.module',
+      'class' => 'MediaBrowserInternet',
+    ),
     'access callback' => 'media_internet_access',
   );
   return $plugins;

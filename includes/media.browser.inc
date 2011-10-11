@@ -133,7 +133,7 @@ EOS;
     <!-- End #media-tab-$key -->
 EOS;
   }
-  
+
   drupal_add_js($settings, 'setting');
 
   $output['tabset'] = array(
@@ -397,54 +397,6 @@ function media_browser_build_media_item($file) {
   $preview = media_get_thumbnail_preview($file);
   $file->preview = drupal_render($preview);
   $file->url = file_create_url($file->uri);
-}
-
-/**
- * Implements hook_media_browser_plugin_info().
- */
-function media_media_browser_plugin_info() {
-  $plugins = array();
-
-  $plugins['upload'] = array(
-    'title' => t('Upload'),
-    'weight' => -10,
-    'handler' => 'MediaBrowserUpload',
-    // @todo Replace with appropriate file access function when that gets
-    //   committed to File Entity project.
-    'access callback' => 'media_access',
-    'access arguments' => array('edit'),
-  );
-
-  $plugins['library'] = array(
-    'title' => t('Library'),
-    'weight' => 10,
-    'handler' => 'MediaBrowserLibrary',
-    // @todo Replace with appropriate file access function when that gets
-    //   committed to File Entity project.
-    'access callback' => 'media_access',
-    'access arguments' => array('view'),
-  );
-
-  // Add a plugin for each View display using the 'media_browser' display type.
-  foreach (views_get_enabled_views() as $view) {
-    foreach ($view->display as $display) {
-      if ($display->display_plugin == 'media_browser') {
-        $title = $display->display_title;
-        if (!empty($display->display_options['title'])) {
-          $title = $display->display_options['title'];
-        }
-        $plugins["{$view->name}--{$display->id}"] = array(
-          'title' => $title,
-          'weight' => 11, // @TODO make this configurable.
-          'handler' => 'MediaBrowserView',
-          'view_name' => $view->name,
-          'view_display_id' => $display->id,
-        );
-      }
-    }
-  }
-
-  return $plugins;
 }
 
 /**
