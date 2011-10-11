@@ -1013,6 +1013,66 @@ function media_ctools_plugin_api($module, $api) {
 }
 
 /**
+ * Implements hook_media_browser_plugin_info().
+ */
+function media_media_browser_plugin_info() {
+  $plugins = array();
+
+  $plugins['upload'] = array(
+    'title' => t('Upload'),
+    'weight' => -10,
+    'handler' => array(
+      'path' => drupal_get_path('module', 'media') . '/includes',
+      'file' => 'MediaBrowserUpload.inc',
+      'class' => 'MediaBrowserUpload',
+    ),
+    // @todo Replace with appropriate file access function when that gets
+    //   committed to File Entity project.
+    'access callback' => 'media_access',
+    'access arguments' => array('edit'),
+  );
+
+  $plugins['library'] = array(
+    'title' => t('Library'),
+    'weight' => 10,
+    'handler' => array(
+      'path' => drupal_get_path('module', 'media') . '/includes',
+      'file' => 'MediaBrowserLibrary.inc',
+      'class' => 'MediaBrowserLibrary',
+    ),
+    // @todo Replace with appropriate file access function when that gets
+    //   committed to File Entity project.
+    'access callback' => 'media_access',
+    'access arguments' => array('view'),
+  );
+
+  // Add a plugin for each View display using the 'media_browser' display type.
+  foreach (views_get_enabled_views() as $view) {
+    foreach ($view->display as $display) {
+      if ($display->display_plugin == 'media_browser') {
+        $title = $display->display_title;
+        if (!empty($display->display_options['title'])) {
+          $title = $display->display_options['title'];
+        }
+        $plugins["{$view->name}--{$display->id}"] = array(
+          'title' => $title,
+          'weight' => 11, // @TODO make this configurable.
+          'handler' => array(
+            'path' => drupal_get_path('module', 'media') . '/includes',
+            'file' => 'MediaBrowserView.inc',
+            'class' => 'MediaBrowserView',
+          ),
+          'view_name' => $view->name,
+          'view_display_id' => $display->id,
+        );
+      }
+    }
+  }
+
+  return $plugins;
+}
+
+/**
  * Helper function to get a list of hidden stream wrappers.
  *
  * This is used in several places to filter queries for media so that files in
