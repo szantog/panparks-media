@@ -19,8 +19,8 @@ function media_internet_media_browser_plugin_info() {
   $plugins['media_internet'] = array(
     'title' => t('Web'),
     'handler' => array(
-      'path' => drupal_get_path('module', 'media_internet'),
-      'file' => 'media_internet.module',
+      'path' => drupal_get_path('module', 'media_internet') . '/includes',
+      'file' => 'MediaBrowserInternet.inc',
       'class' => 'MediaBrowserInternet',
     ),
     'access callback' => 'media_internet_access',
@@ -33,21 +33,6 @@ function media_internet_media_browser_plugin_info() {
  */
 function media_internet_access() {
   return user_access('administer media') || user_access('add media from remote sources');
-}
-
-class MediaBrowserInternet extends MediaBrowserPlugin {
-
-  function view() {
-    // @todo: implement the multiselect argument here.
-    $from_web_form = drupal_get_form('media_internet_add',  $this->params['types'], $this->params['multiselect']);
-    return array(
-      'form' => array($from_web_form),
-      '#attached' => array(
-        //'js' => array($path . '/js/plugins/media.fromurl.js'),
-      ),
-    );
-  }
-
 }
 
 /**
