@@ -90,17 +90,15 @@ function media_browser($selected = NULL) {
     // I'm not sure if it is ever the case that a plugin form will ever have
     // the correct cancel button so we add it here. Put it inline with the
     // current submit button. This is a fairly broad assumption.
-    if (! empty($plugin_output[$key]['form'])) {
-      $button = l(t('Cancel'), '', array('attributes' => array('class' => array('button', 'fake-cancel', $key))));
-      if (! empty($plugin_output[$key]['form'][0]['submit']['#suffix'])) {
-        $plugin_output[$key]['form'][0]['submit']['#suffix'] .= $button;
-      }
-      else {
-        $plugin_output[$key]['form'][0]['submit']['#suffix'] = $button;
-      }
-
+    if (!empty($plugin_output[$key]['form']['actions']) && !isset($plugin_output[$key]['form']['actions']['cancel'])) {
+      $plugin_output[$key]['form']['actions']['cancel'] = array(
+        '#type' => 'link',
+        '#title' => t('Cancel'),
+        '#href' => '',
+        '#attributes' => array('class' => array('button', 'fake-cancel', $key)),
+        '#weight' => 100,
+      );
     }
-
   }
 
   // Allow modules to change the tab names or whatever else they want to change

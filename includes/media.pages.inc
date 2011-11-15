@@ -96,7 +96,8 @@ function media_add_upload($form, &$form_state, $params = array()) {
     '#upload_validators' => $validators,
   );
 
-  $form['submit'] = array(
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
   );
