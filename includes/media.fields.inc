@@ -145,12 +145,6 @@ function media_field_widget_form(&$form, &$form_state, $field, $instance, $langc
   $field_settings = $instance['settings'];
   $widget_settings = $instance['widget']['settings'];
 
-  $permission = user_access('edit file');
-  if (!$permission) {
-    // @todo: show the default file upload field.
-    return;
-  }
-
   // @todo The Field API supports automatic serialization / unserialization, so
   //   this should no longer be needed. After verifying with a module that uses
   //   the 'data' column, remove this.
