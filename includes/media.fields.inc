@@ -55,18 +55,16 @@ function media_field_formatter_info() {
  * @see media_field_formatter_info()
  */
 function media_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-  $element = array();
-
   if ($display['type'] == 'media_large_icon') {
+    $element = array();
     foreach ($items as $delta => $item) {
       $element[$delta] = array(
         '#theme' => 'media_formatter_large_icon',
         '#file' => $item,
       );
     }
+    return $element;
   }
-
-  return $element;
 }
 
 /**
